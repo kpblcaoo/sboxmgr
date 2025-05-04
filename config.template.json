@@ -16,35 +16,62 @@
     }
   ],
   "outbounds": [
-    $outbound_json,
+    {
+      "type": "url-test",
+      "tag": "auto-selector",
+      "outbounds": [
+        $outbound_json
+      ],
+      "url": "http://www.google.com/generate_204",
+      "interval": "30s",
+      "health_check": {
+        "enable": true,
+        "timeout": "5s",
+        "interval": "30s"
+      }
+    },
     {
       "type": "direct",
       "tag": "direct"
     }
   ],
   "route": {
-    "rules": [{
-      "rule_set": "geoip-ru",
-      "outbound": "direct"
-    }, {
-      "domain_keyword": [
-        "vkontakte", "yandex", "tinkoff", "gosuslugi", "sberbank"
-      ],
-      "outbound": "direct"
-    }, {
-      "domain_suffix": [
-        ".ru", ".рф", "vk.com", "sberbank.ru", "gosuslugi.ru"
-      ],
-      "outbound": "direct"
-    }],
-    "rule_set": [{
-      "tag": "geoip-ru",
-      "type": "remote",
-      "format": "binary",
-      "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ru.srs",
-      "download_detour": "direct"
-    }],
-    "final": "proxy-out"
+    "rules": [
+      {
+        "rule_set": "geoip-ru",
+        "outbound": "direct"
+      },
+      {
+        "domain_keyword": [
+          "vkontakte",
+          "yandex",
+          "tinkoff",
+          "gosuslugi",
+          "sberbank"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "domain_suffix": [
+          ".ru",
+          ".рф",
+          "vk.com",
+          "sberbank.ru",
+          "gosuslugi.ru"
+        ],
+        "outbound": "direct"
+      }
+    ],
+    "rule_set": [
+      {
+        "tag": "geoip-ru",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ru.srs",
+        "download_detour": "direct"
+      }
+    ],
+    "final": "auto-selector"
   },
   "experimental": {
     "cache_file": { "enabled": true }

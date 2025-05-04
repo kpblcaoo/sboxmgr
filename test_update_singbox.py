@@ -2,7 +2,7 @@ import pytest
 import subprocess
 import os
 import json
-from update-singbox import fetch_json, validate_server, generate_config
+from update_singbox import fetch_json, validate_server, generate_config
 
 # Mock data for subscription
 MOCK_SERVERS = [
@@ -35,10 +35,10 @@ def mock_config_file(tmp_path):
 
 def test_fetch_json(mocker):
     """Test fetching JSON data from a URL."""
-    mocker.patch("update-singbox.urlopen")
+    mocker.patch("update_singbox.urlopen")
     mock_response = mocker.Mock()
     mock_response.read.return_value = json.dumps(MOCK_SERVERS).encode()
-    update-singbox.urlopen.return_value = mock_response
+    update_singbox.urlopen.return_value = mock_response
 
     data = fetch_json("https://example.com/subscription")
     assert len(data) == 2
