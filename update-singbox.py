@@ -7,9 +7,9 @@
 VLESS, Shadowsocks, VMess, Trojan, TUIC, Hysteria2.
 
 Использование:
-    python3 update_singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
-    Пример: python3 update_singbox.py -u https://example.com/config -r "Server1"
-    Пример: python3 update_singbox.py -u https://example.com/config -i 2 -d
+    python3 update-singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
+    Пример: python3 update-singbox.py -u https://example.com/config -r "Server1"
+    Пример: python3 update-singbox.py -u https://example.com/config -i 2 -d
 
 Переменные окружения:
     SINGBOX_LOG_FILE: Путь к файлу логов (по умолчанию: /var/log/update-singbox.log)
@@ -30,9 +30,9 @@ sing-box service. It supports protocols like VLESS, Shadowsocks, VMess, Trojan,
 TUIC, and Hysteria2.
 
 Usage:
-    python3 update_singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
-    Example: python3 update_singbox.py -u https://example.com/config -r "Server1"
-    Example: python3 update_singbox.py -u https://example.com/config -i 2 -d
+    python3 update-singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
+    Example: python3 update-singbox.py -u https://example.com/config -r "Server1"
+    Example: python3 update-singbox.py -u https://example.com/config -i 2 -d
 
 Environment Variables:
     SINGBOX_LOG_FILE: Path to log file (default: /var/log/update-singbox.log)
