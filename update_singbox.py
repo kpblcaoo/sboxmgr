@@ -62,7 +62,6 @@ if sys.version_info < (3, 10):
     sys.exit(1)
 
 # Configuration with environment variable fallbacks
-# Пути конфигурации с использованием переменных окружения
 LOG_FILE = os.getenv("SINGBOX_LOG_FILE", "/var/log/update-singbox.log")
 CONFIG_FILE = os.getenv("SINGBOX_CONFIG_FILE", "/etc/sing-box/config.json")
 BACKUP_FILE = os.getenv("SINGBOX_BACKUP_FILE", "/etc/sing-box/config.json.bak")
@@ -116,7 +115,7 @@ def fetch_json(url):
     try:
         req = Request(url, headers={"User-Agent": "ktor-client"})
         with urlopen(req) as response:
-            return json.loads(response.read().decode()) 
+            return json.loads(response.read().decode())
     except URLError as e:
         handle_error(f"Failed to fetch configuration from {url}: {e}")
     except json.JSONDecodeError:
