@@ -110,18 +110,23 @@ def rotate_logs():
         os.rename(LOG_FILE, f"{LOG_FILE}.1")
         open(LOG_FILE, "a").close()  # Create empty log file
 
+import requests
+import json
+
 def fetch_json(url, proxy_url=None):
-    """Fetch JSON from URL."""
+    """Fetch JSON from URL with optional proxy."""
     try:
-        # Установить прокси, если он передан
-        if proxy_url:
-            proxy_handler = ProxyHandler({"http": proxy_url, "https": proxy_url})
-            opener = build_opener(proxy_handler)
-            install_opener(opener)        
-        req = Request(url, headers={"User-Agent": "ktor-client"})
-        with urlopen(req) as response:
-            return json.loads(response.read().decode())
-    except URLError as e:
+        # Настройка прокси, если указано
+        proxies = {
+            "http": proxy_url,
+            "https": proxy_url,
+        } if proxy_url else None
+
+        # Выполняем запрос
+        response = requests.get(url, headers={"User-Agent": "ktor-client"}, proxies=proxies)
+        response.raise_for_status()  # Проверка на ошибки HTTP
+        return response.json()
+    except requests.RequestException as e:
         handle_error(f"Failed to fetch configuration from {url}: {e}")
     except json.JSONDecodeError:
         handle_error("Received invalid JSON from URL")
