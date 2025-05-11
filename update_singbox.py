@@ -7,12 +7,12 @@
 VLESS, Shadowsocks, VMess, Trojan, TUIC, Hysteria2.
 
 Использование:
-    python3 update-singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
-    Пример: python3 update-singbox.py -u https://example.com/config -r "Server1"
-    Пример: python3 update-singbox.py -u https://example.com/config -i 2 -d
+    python3 update_singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
+    Пример: python3 update_singbox.py -u https://example.com/config -r "Server1"
+    Пример: python3 update_singbox.py -u https://example.com/config -i 2 -d
 
 Переменные окружения:
-    SINGBOX_LOG_FILE: Путь к файлу логов (по умолчанию: /var/log/update-singbox.log)
+    SINGBOX_LOG_FILE: Путь к файлу логов (по умолчанию: /var/log/update_singbox.log)
     SINGBOX_CONFIG_FILE: Путь к файлу конфигурации (по умолчанию: /etc/sing-box/config.json)
     SINGBOX_BACKUP_FILE: Путь к бэкапу конфигурации (по умолчанию: /etc/sing-box/config.json.bak)
     SINGBOX_TEMPLATE_FILE: Путь к шаблону конфигурации (по умолчанию: ./config.template.json)
@@ -30,12 +30,12 @@ sing-box service. It supports protocols like VLESS, Shadowsocks, VMess, Trojan,
 TUIC, and Hysteria2.
 
 Usage:
-    python3 update-singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
-    Example: python3 update-singbox.py -u https://example.com/config -r "Server1"
-    Example: python3 update-singbox.py -u https://example.com/config -i 2 -d
+    python3 update_singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
+    Example: python3 update_singbox.py -u https://example.com/config -r "Server1"
+    Example: python3 update_singbox.py -u https://example.com/config -i 2 -d
 
 Environment Variables:
-    SINGBOX_LOG_FILE: Path to log file (default: /var/log/update-singbox.log)
+    SINGBOX_LOG_FILE: Path to log file (default: /var/log/update_singbox.log)
     SINGBOX_CONFIG_FILE: Path to config file (default: /etc/sing-box/config.json)
     SINGBOX_BACKUP_FILE: Path to backup file (default: /etc/sing-box/config.json.bak)
     SINGBOX_TEMPLATE_FILE: Path to template file (default: ./config.template.json)
@@ -62,7 +62,7 @@ if sys.version_info < (3, 10):
     sys.exit(1)
 
 # Configuration with environment variable fallbacks
-LOG_FILE = os.getenv("SINGBOX_LOG_FILE", "/var/log/update-singbox.log")
+LOG_FILE = os.getenv("SINGBOX_LOG_FILE", "/var/log/update_singbox.log")
 CONFIG_FILE = os.getenv("SINGBOX_CONFIG_FILE", "/etc/sing-box/config.json")
 BACKUP_FILE = os.getenv("SINGBOX_BACKUP_FILE", "/etc/sing-box/config.json.bak")
 TEMPLATE_FILE = os.getenv("SINGBOX_TEMPLATE_FILE", "./config.template.json")
