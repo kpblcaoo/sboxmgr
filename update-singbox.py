@@ -53,7 +53,7 @@ import shutil
 import subprocess
 import sys
 import platform
-from urllib.request import Request, urlopen
+from urllib.request import Request, urlopen, ProxyHandler, build_opener, install_opener
 from urllib.error import URLError
 
 # Check Python version for match statement compatibility
@@ -113,6 +113,11 @@ def rotate_logs():
 def fetch_json(url):
     """Fetch JSON from URL."""
     try:
+        # Установить прокси, если он передан
+        if proxy_url:
+            proxy_handler = ProxyHandler({"http": proxy_url, "https": proxy_url})
+            opener = build_opener(proxy_handler)
+            install_opener(opener)        
         req = Request(url, headers={"User-Agent": "ktor-client"})
         with urlopen(req) as response:
             return json.loads(response.read().decode())
@@ -348,12 +353,13 @@ def main():
     parser.add_argument("-r", "--remarks", help="Select server by remarks")
     parser.add_argument("-i", "--index", type=int, default=0, help="Select server by index (default: 0)")
     parser.add_argument("-d", "--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--proxy", help="Proxy URL (e.g., socks5://127.0.0.1:1080 or https://proxy.example.com)")
     args = parser.parse_args()
 
     setup_logging(args.debug)
     logging.info("=== Starting sing-box configuration update ===")
 
-    json_data = fetch_json(args.url)
+    json_data = fetch_json(args.url, proxy_url=args.proxy)
     config = select_config(json_data, args.remarks, args.index)
     outbound = validate_protocol(config)
     generate_config(outbound)
