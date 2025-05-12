@@ -76,10 +76,17 @@ def handle_error(message, exit_code=1):
     logging.error(f"Error: {message}")
     sys.exit(exit_code)
 
-def setup_logging(debug):
+def setup_logging(debug_level):
     """Configure logging with file and syslog handlers."""
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG if debug else logging.INFO)
+    
+    # Определяем уровень логирования в зависимости от debug_level
+    if debug_level == 2:
+        logger.setLevel(logging.DEBUG)  # Максимальная детализация
+    elif debug_level == 1:
+        logger.setLevel(logging.INFO)   # Средняя детализация
+    else:
+        logger.setLevel(logging.WARNING)  # Минимальная детализация
 
     # File handler
     file_handler = logging.FileHandler(LOG_FILE)
@@ -364,19 +371,42 @@ def main():
     parser.add_argument("-u", "--url", required=True, help="URL for proxy configuration")
     parser.add_argument("-r", "--remarks", help="Select server by remarks")
     parser.add_argument("-i", "--index", type=int, default=0, help="Select server by index (default: 0)")
-    parser.add_argument("-d", "--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("-d", "--debug", type=int, choices=[0, 1, 2], default=0,
+                        help="Set debug level: 0 for minimal, 1 for detailed, 2 for verbose")
     parser.add_argument("--proxy", help="Proxy URL (e.g., socks5://127.0.0.1:1080 or https://proxy.example.com)")
     args = parser.parse_args()
 
     setup_logging(args.debug)
     logging.info("=== Starting sing-box configuration update ===")
 
+    # Fetching configuration
     json_data = fetch_json(args.url, proxy_url=args.proxy)
+    if args.debug >= 1:
+        logging.info(f"Fetched server list from: {args.url}")
+    if args.debug >= 2:
+        logging.debug(f"Fetched configuration: {json.dumps(json_data, indent=2)}")
+
+    # Selecting configuration
     config = select_config(json_data, args.remarks, args.index)
+    if args.debug >= 1:
+        logging.info(f"Selected configuration by remarks: {args.remarks} or index: {args.index}")
+    if args.debug >= 2:
+        logging.debug(f"Selected configuration details: {json.dumps(config, indent=2)}")
+
+    # Validate and generate configuration
     outbound = validate_protocol(config)
     generate_config(outbound)
-    manage_service()
-    logging.info("Update completed")
+    if args.debug >= 1:
+        logging.info("Generated configuration file successfully.")
+    if args.debug >= 2:
+        logging.debug(f"Generated configuration details: {json.dumps(outbound, indent=2)}")
 
+    # Manage service
+    manage_service()
+    if args.debug >= 1:
+        logging.info("Service restart completed.")
+
+    logging.info("=== Update completed successfully ===")
+    
 if __name__ == "__main__":
     main()
