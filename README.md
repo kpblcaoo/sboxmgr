@@ -36,7 +36,7 @@ cd update-singbox
 ```bash
 sudo apt update
 sudo apt install python3 python3-pip
-pip3 install requests[socks]
+pip install -r requirements.txt
 ```
 
 ### Копирование шаблона конфигурации (опционально)
@@ -244,7 +244,7 @@ cd update-singbox
 ```bash
 sudo apt update
 sudo apt install python3 python3-pip
-pip3 install requests[socks]
+pip install -r requirements.txt
 ```
 
 ### Copy the configuration template (optional)
