@@ -318,26 +318,33 @@ def generate_config(outbound):
     if not os.path.exists(TEMPLATE_FILE):
         handle_error(f"Template file not found: {TEMPLATE_FILE}")
 
-    if os.path.exists(CONFIG_FILE):
-        os.rename(CONFIG_FILE, BACKUP_FILE)
-        logging.info(f"Created backup: {BACKUP_FILE}")
+    # Использование временного файла
+    temp_config_file = f"{CONFIG_FILE}.tmp"
 
     with open(TEMPLATE_FILE) as f:
         template = f.read()
 
-    # Replace $outbound_json with JSON string
+    # Замена $outbound_json в шаблоне
     config = template.replace("$outbound_json", json.dumps(outbound, indent=2))
 
-    with open(CONFIG_FILE, "w") as f:
+    with open(temp_config_file, "w") as f:
         f.write(config)
-    logging.info(f"Configuration updated for {outbound['type']}")
+    logging.info(f"Temporary configuration written to {temp_config_file}")
 
-    # Validate configuration with sing-box
+    # Проверка конфигурации с помощью sing-box
     try:
-        subprocess.run(["sing-box", "check", "-c", CONFIG_FILE], check=True)
-        logging.info("Configuration validated successfully")
+        subprocess.run(["sing-box", "check", "-c", temp_config_file], check=True)
+        logging.info("Temporary configuration validated successfully")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        handle_error("Generated configuration is invalid or sing-box not found")
+        handle_error("Temporary configuration is invalid or sing-box not found")
+
+    # Если проверка успешна, делаем резервное копирование и заменяем основной файл
+    if os.path.exists(CONFIG_FILE):
+        os.rename(CONFIG_FILE, BACKUP_FILE)
+        logging.info(f"Created backup: {BACKUP_FILE}")
+
+    os.rename(temp_config_file, CONFIG_FILE)
+    logging.info(f"Configuration updated for {outbound['type']}")
 
 def manage_service():
     """Restart or start sing-box service."""
