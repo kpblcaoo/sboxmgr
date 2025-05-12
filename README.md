@@ -12,8 +12,8 @@
 - Логирование обновлений в `/var/log/update-singbox.log` с ротацией при достижении 1 МБ.
 - Создание резервных копий конфигурации перед обновлением.
 - Интеграция с `cron` для автоматических обновлений.
-- **Поддержка прокси** для загрузки конфигураций через опцию `--proxy`.
-
+- Поддержка прокси для загрузки конфигураций через опцию `--proxy`.
+- Уровни детализации логов через опцию `--debug`.
 ---
 
 ## 🚀 Установка
@@ -69,7 +69,7 @@ chmod +x update-singbox.py
 | `-u <URL>`     | URL конфигурации прокси (**обязательно**)            |
 | `-r <remarks>` | Выбор сервера по имени (remarks). По умолчанию используется индекс |
 | `-i <index>`   | Выбор сервера по индексу (по умолчанию: `0`)         |
-| `-d`           | Включение режима отладки для подробного логирования  |
+| `-d <level>`   | Уровень детализации логов (0 - минимальный, 1 - инфо, 2 - отладка)  |
 | `--proxy <URL>`| Прокси для загрузки конфигураций (например, `socks5://127.0.0.1:1080`) |
 
 ---
@@ -91,7 +91,7 @@ chmod +x update-singbox.py
 ### Включение режима отладки
 
 ```bash
-./update-singbox.py -u https://example.com/proxy-config.json -d
+./update-singbox.py -u https://example.com/proxy-config.json -d 2
 ```
 
 ### Использование прокси для загрузки конфигурации
@@ -221,7 +221,7 @@ A Python script for automating configuration updates for [sing-box](https://sing
 - Creates configuration backups before updates.
 - Integrates with `cron` for scheduled updates.
 - **Supports proxy usage** for fetching configurations via `--proxy` option.
-
+- Log detalisation levels via `--debug`.
 ---
 
 ## 🚀 Installation
@@ -277,7 +277,7 @@ Run the script with a URL providing proxy server configurations:
 | `-u <URL>`     | URL for proxy configuration (**required**)   |
 | `-r <remarks>` | Select server by remarks (name). Defaults to index if not specified |
 | `-i <index>`   | Select server by index (default: `0`)        |
-| `-d`           | Enable debug mode for detailed logging       |
+| `-d <level>`   | Logging verbosity level (0 - warning, 1 - info, 2 - debug)       |
 | `--proxy <URL>`| Proxy for fetching configurations (e.g., `socks5://127.0.0.1:1080`) |
 
 ---
@@ -299,7 +299,7 @@ Run the script with a URL providing proxy server configurations:
 ### Enable debug mode
 
 ```bash
-./update-singbox.py -u https://example.com/proxy-config.json -d
+./update-singbox.py -u https://example.com/proxy-config.json -d 2
 ```
 
 ### Use a proxy for fetching configurations
