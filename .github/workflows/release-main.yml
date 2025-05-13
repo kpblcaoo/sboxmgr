@@ -39,3 +39,14 @@ jobs:
             See the changelog for details.
           draft: false
           prerelease: false
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: "v1.0.0"
+          release_name: "Release v1.0.0"
+          body: "Automated release from CI/CD pipeline."
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

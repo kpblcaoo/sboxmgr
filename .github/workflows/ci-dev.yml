@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - dev
+  workflow_run:
+    workflows: ["CI for Dev"]
+    types:
+      - completed
 
 jobs:
   test:
@@ -47,3 +51,36 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  merge-to-main:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Remove non-production files
+        run: |
+          rm -rf tests
+          rm -rf __pycache__
+          rm -rf modules/__pycache__
+          rm -f pytest.ini
+          rm -f backup.json
+          rm -f config.template.json
+          rm -f template.json
+
+      - name: Move README.md back to root
+        run: mv docs/README.md ./
+
+      - name: Merge dev into main
+        run: |
+          git fetch origin
+          git checkout main
+          git merge origin/dev --no-ff -m "Merge dev into main after successful CI"
+          git push origin main
