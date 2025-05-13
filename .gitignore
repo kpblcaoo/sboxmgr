@@ -5,4 +5,5 @@ venv/
 .venv/
 .vscode/
 *.log
-tests/
+# Removed exclusion of tests directory for dev branch
+tests/ # Commented out to include tests in dev branch

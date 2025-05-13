@@ -14,17 +14,17 @@
 
 ### Изменено:
 - Улучшена структура проекта для поддержки тестирования и CI/CD.
-
----
-
-## [1.0.0] - 2025-05-13
-### Added
-- Unit tests for key modules: `config_fetch`, `config_generate`, `protocol_validation`, `service_manage`.
-- CI/CD workflows for `dev` branch.
-- Mocking in tests to avoid external dependencies.
-
-### Changed
-- Improved development and release process documentation.
+- Перемещены модули в папку `modules/`:
+  - `config_fetch.py`
+  - `config_generate.py`
+  - `protocol_validation.py`
+  - `service_manage.py`
+- Перемещена документация в папку `docs/`:
+  - `README.md`
+  - `CHANGELOG.md`
+  - `DEVELOPMENT.md`
+  - `TESTING.md`
+- Тестовые файлы теперь используют `tests/config.json` вместо корневого `config.json`.
 
 ---
 

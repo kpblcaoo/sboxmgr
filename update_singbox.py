@@ -51,10 +51,10 @@ import os
 import sys
 
 from logging_setup import setup_logging
-from config_fetch import fetch_json, select_config
-from protocol_validation import validate_protocol
-from config_generate import generate_config
-from service_manage import manage_service
+from modules.config_fetch import fetch_json, select_config
+from modules.protocol_validation import validate_protocol
+from modules.config_generate import generate_config
+from modules.service_manage import manage_service
 
 # Configuration with environment variable fallbacks
 LOG_FILE = os.getenv("SINGBOX_LOG_FILE", "/var/log/update_singbox.log")
