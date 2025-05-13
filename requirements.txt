@@ -1,2 +1,2 @@
+# Production dependencies
 requests[socks]>=2.25.1
-# Removed test dependencies for main branch
