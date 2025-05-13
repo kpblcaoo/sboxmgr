@@ -77,5 +77,5 @@ jobs:
       - name: Merge clean branch into main
         run: |
           git checkout main
-          git merge temp-merge-branch --no-ff -m "Merge dev into main after successful CI"
+          git merge temp-merge-branch --no-ff --allow-unrelated-histories -m "Merge dev into main after successful CI"
           git push origin main
