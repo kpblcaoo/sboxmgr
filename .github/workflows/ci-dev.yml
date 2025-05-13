@@ -57,6 +57,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Fetch main branch
+        run: |
+          git fetch origin main:main
+
       - name: Prepare for merge by creating a clean branch
         run: |
           git checkout -b temp-merge-branch
