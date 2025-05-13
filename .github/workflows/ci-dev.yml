@@ -74,8 +74,8 @@ jobs:
           git add .
           git commit -m "Prepare clean branch for merging into main" || echo "No changes to commit"
 
-      - name: Merge clean branch into main
+      - name: Resolve conflicts by taking dev version
         run: |
           git checkout main
-          git merge temp-merge-branch --no-ff --allow-unrelated-histories -m "Merge dev into main after successful CI"
+          git merge temp-merge-branch --no-ff --allow-unrelated-histories -X theirs -m "Merge dev into main after successful CI"
           git push origin main
