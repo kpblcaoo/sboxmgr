@@ -73,8 +73,9 @@ jobs:
           rm -f template.json
 
       - name: Merge dev into main
+        if: ${{ success() }}
         run: |
           git fetch origin
           git checkout main
-          git merge origin/dev --no-ff --allow-unrelated-histories -m "Merge dev into main after successful CI"
+          git merge origin/dev --no-ff --allow-unrelated-histories -X theirs -m "Merge dev into main after successful CI"
           git push origin main

@@ -13,11 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Remove dev files
+      - name: Remove dev dependencies
         run: |
+          rm -f dev-requirements.txt
           rm -rf tests
-          rm -rf .github
-          rm -rf *.yml
+          rm -rf __pycache__
+          rm -rf modules/__pycache__
 
       - name: Generate changelog
         run: |
