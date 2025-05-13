@@ -57,23 +57,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Configure Git
+      - name: Fetch main branch
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git fetch origin main:main
 
-      - name: Remove non-production files before merge
+      - name: Prepare for merge by creating a clean branch
         run: |
+          git checkout -b temp-merge-branch
           rm -rf tests
           rm -rf .github/workflows
           rm -f dev-requirements.txt
           rm -rf __pycache__
           rm -rf modules/__pycache__
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Prepare clean branch for merging into main" || echo "No changes to commit"
 
-      - name: Merge dev into main
-        if: ${{ success() }}
+      - name: Merge clean branch into main
         run: |
-          git fetch origin
           git checkout main
-          git merge origin/dev --no-ff --allow-unrelated-histories -X theirs -m "Merge dev into main after successful CI"
+          git merge temp-merge-branch --no-ff -m "Merge dev into main after successful CI"
           git push origin main
