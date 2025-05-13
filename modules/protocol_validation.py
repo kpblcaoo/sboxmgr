@@ -2,76 +2,79 @@ from logging import error, warning
 
 def validate_protocol(config, supported_protocols):
     """Validate protocol and extract parameters."""
-    protocol = config.get("protocol")
+    protocol = config.get("type")
     if protocol not in supported_protocols:
         error(f"Unsupported protocol: {protocol}")
         raise ValueError(f"Unsupported protocol: {protocol}")
 
-    outbound = {"type": protocol, "tag": "proxy-out"}
+    outbound = {"type": protocol, "tag": config.get("tag", "proxy-out")}
 
     match protocol:
         case "vless":
-            vnext = config.get("settings", {}).get("vnext", [{}])[0]
-            users = vnext.get("users", [{}])[0]
             params = {
-                "server": vnext.get("address"),
-                "server_port": vnext.get("port"),
-                "uuid": users.get("id"),
+                "server": config.get("server"),
+                "server_port": config.get("server_port"),
+                "uuid": config.get("uuid"),
             }
-            if users.get("flow"):
-                params["flow"] = users.get("flow")
+            if config.get("flow"):
+                params["flow"] = config.get("flow")
+            if config.get("tls"):
+                params["tls"] = config.get("tls")
             outbound.update(params)
             required_keys = ["server", "server_port", "uuid"]
         case "shadowsocks":
-            server = config.get("settings", {}).get("servers", [{}])[0]
             params = {
-                "server": server.get("address"),
-                "server_port": server.get("port"),
-                "method": server.get("method"),
-                "password": server.get("password"),
+                "server": config.get("server"),
+                "server_port": config.get("server_port"),
+                "method": config.get("method"),
+                "password": config.get("password"),
             }
-            if server.get("plugin"):
-                params["plugin"] = server.get("plugin")
-            if server.get("plugin_opts"):
-                params["plugin_opts"] = server.get("plugin_opts")
+            if config.get("network"):
+                params["network"] = config.get("network")
             outbound.update(params)
             required_keys = ["server", "server_port", "method", "password"]
         case "vmess":
-            vnext = config.get("settings", {}).get("vnext", [{}])[0]
-            users = vnext.get("users", [{}])[0]
-            outbound.update({
-                "server": vnext.get("address"),
-                "server_port": vnext.get("port"),
-                "uuid": users.get("id"),
-                "security": users.get("security", "auto"),
-            })
+            params = {
+                "server": config.get("server"),
+                "server_port": config.get("server_port"),
+                "uuid": config.get("uuid"),
+                "security": config.get("security", "auto"),
+            }
+            if config.get("tls"):
+                params["tls"] = config.get("tls")
+            outbound.update(params)
             required_keys = ["server", "server_port", "uuid"]
         case "trojan":
-            server = config.get("settings", {}).get("servers", [{}])[0]
-            outbound.update({
-                "server": server.get("address"),
-                "server_port": server.get("port"),
-                "password": server.get("password"),
-            })
+            params = {
+                "server": config.get("server"),
+                "server_port": config.get("server_port"),
+                "password": config.get("password"),
+            }
+            if config.get("tls"):
+                params["tls"] = config.get("tls")
+            outbound.update(params)
             required_keys = ["server", "server_port", "password"]
         case "tuic":
-            server = config.get("settings", {}).get("servers", [{}])[0]
             params = {
-                "server": server.get("address"),
-                "server_port": server.get("port"),
-                "uuid": server.get("uuid"),
+                "server": config.get("server"),
+                "server_port": config.get("server_port"),
+                "uuid": config.get("uuid"),
             }
-            if server.get("password"):
-                params["password"] = server.get("password")
+            if config.get("password"):
+                params["password"] = config.get("password")
+            if config.get("tls"):
+                params["tls"] = config.get("tls")
             outbound.update(params)
             required_keys = ["server", "server_port", "uuid"]
         case "hysteria2":
-            server = config.get("settings", {}).get("servers", [{}])[0]
-            outbound.update({
-                "server": server.get("address"),
-                "server_port": server.get("port"),
-                "password": server.get("password"),
-            })
+            params = {
+                "server": config.get("server"),
+                "server_port": config.get("server_port"),
+                "password": config.get("password"),
+            }
+            if config.get("tls"):
+                params["tls"] = config.get("tls")
+            outbound.update(params)
             required_keys = ["server", "server_port", "password"]
         case _:
             error(f"No handler defined for protocol: {protocol}")
