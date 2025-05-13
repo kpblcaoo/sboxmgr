@@ -1,6 +1,33 @@
 # Changelog
 
 
+## [v1.0.0] - 2025-05-13
+
+### Добавлено:
+- Автоматическое тестирование с использованием `pytest`.
+- Настроен CI/CD процесс с помощью GitHub Actions:
+  - Workflow для тестирования в ветке `dev`.
+  - Workflow для релиза в ветке `main`.
+- Документация:
+  - `DEVELOPMENT.md` с описанием процесса разработки.
+  - `TESTING.md` с инструкцией по запуску тестов.
+
+### Изменено:
+- Улучшена структура проекта для поддержки тестирования и CI/CD.
+
+---
+
+## [1.0.0] - 2025-05-13
+### Added
+- Unit tests for key modules: `config_fetch`, `config_generate`, `protocol_validation`, `service_manage`.
+- CI/CD workflows for `dev` branch.
+- Mocking in tests to avoid external dependencies.
+
+### Changed
+- Improved development and release process documentation.
+
+---
+
 ## [v0.3.0] - 2025-05-13
 
 ### Изменено:
