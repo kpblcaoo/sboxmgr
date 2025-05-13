@@ -7,10 +7,6 @@ on:
   pull_request:
     branches:
       - dev
-  workflow_run:
-    workflows: ["CI for Dev"]
-    types:
-      - completed
 
 jobs:
   test:
@@ -53,7 +49,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   merge-to-main:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -74,9 +70,6 @@ jobs:
           rm -f backup.json
           rm -f config.template.json
           rm -f template.json
-
-      - name: Move README.md back to root
-        run: mv docs/README.md ./
 
       - name: Merge dev into main
         run: |
