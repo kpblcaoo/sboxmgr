@@ -30,6 +30,11 @@ jobs:
         run: |
           python -m pip install pytest pytest-cov
 
+      - name: Debug workspace
+        run: |
+          echo "Workspace structure:" && ls -R
+          echo "Installed packages:" && pip list
+
       - name: Run tests
         run: |
           pytest --cov=.
