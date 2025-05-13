@@ -1,3 +1,2 @@
 requests[socks]>=2.25.1
-pytest
-pytest-cov
+# Removed test dependencies for main branch
