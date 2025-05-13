@@ -10,7 +10,7 @@ def fetch_json(url, proxy_url=None):
             "https": proxy_url,
         } if proxy_url else None
 
-        response = requests.get(url, headers={"User-Agent": "ktor-client"}, proxies=proxies)
+        response = requests.get(url, headers={"User-Agent": "SFI"}, proxies=proxies)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -22,14 +22,25 @@ def fetch_json(url, proxy_url=None):
 
 def select_config(json_data, remarks, index):
     """Select proxy configuration by remarks or index."""
-    if not json_data:
+    # If json_data is a full sing-box config, extract outbounds
+    if isinstance(json_data, dict) and "outbounds" in json_data:
+        outbounds = [
+            outbound for outbound in json_data["outbounds"]
+            if outbound.get("type") in {"vless", "shadowsocks", "vmess", "trojan", "tuic", "hysteria2"}
+        ]
+    else:
+        outbounds = json_data
+
+    if not outbounds:
         raise ValueError("Received empty configuration")
+
     if remarks:
-        for item in json_data:
-            if item.get("remarks") == remarks:
-                return item.get("outbounds", [{}])[0]
+        for item in outbounds:
+            if item.get("tag") == remarks:
+                return item
         raise ValueError(f"No configuration found with remarks: {remarks}")
+
     try:
-        return json_data[index].get("outbounds", [{}])[0]
+        return outbounds[index]
     except (IndexError, TypeError):
         raise ValueError(f"No configuration found at index: {index}")

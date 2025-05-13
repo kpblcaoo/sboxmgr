@@ -1,5 +1,22 @@
 # Changelog
 
+## [v1.1.0] - 2025-05-14
+
+### Added:
+- Automatic server selection using `urltest` for latency-based routing.
+- Rule actions in `route` section for DNS (`dns-out`) and private IP routing, replacing deprecated `block` and `dns` outbounds.
+
+### Changed:
+- Removed deprecated `block` and `dns` outbounds per `sing-box` 1.11.0 migration guide.
+- Updated `config.template.json` to remove unsupported `default` field in `urltest` outbound.
+- Fixed tests in `test_protocol_validation.py` and `test_config_generate.py` to align with current implementation.
+- Updated `README.md` to reflect `urltest` usage and `sing-box` version requirements.
+
+### Fixed:
+- Resolved `ValueError: Unsupported protocol: None` in `test_protocol_validation.py` by using correct `type` field.
+- Fixed `json.decoder.JSONDecodeError` in `test_config_generate.py` by using valid JSON template and proper mocking.
+
+---
 
 ## [v1.0.0] - 2025-05-13
 
