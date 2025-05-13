@@ -334,6 +334,14 @@ def generate_config(outbound):
     # Замена $outbound_json в шаблоне
     config = template.replace("$outbound_json", json.dumps(outbound, indent=2))
 
+    # Сравнение с текущим конфигом
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as current_config_file:
+            current_config = current_config_file.read()
+            if current_config.strip() == config.strip():
+                logging.info("Configuration has not changed. Skipping update.")
+                return False  # No changes, skip further actions
+
     with open(temp_config_file, "w") as f:
         f.write(config)
     logging.info(f"Temporary configuration written to {temp_config_file}")
@@ -352,6 +360,7 @@ def generate_config(outbound):
 
     os.rename(temp_config_file, CONFIG_FILE)
     logging.info(f"Configuration updated for {outbound['type']}")
+    return True  # Changes were made
 
 def manage_service():
     """Restart or start sing-box service."""
@@ -395,16 +404,13 @@ def main():
 
     # Validate and generate configuration
     outbound = validate_protocol(config)
-    generate_config(outbound)
-    if args.debug >= 1:
-        logging.info("Generated configuration file successfully.")
-    if args.debug >= 2:
-        logging.debug(f"Generated configuration details: {json.dumps(outbound, indent=2)}")
+    changes_made = generate_config(outbound)
 
-    # Manage service
-    manage_service()
-    if args.debug >= 1:
-        logging.info("Service restart completed.")
+    if changes_made:
+        # Manage service only if changes were made
+        manage_service()
+        if args.debug >= 1:
+            logging.info("Service restart completed.")
 
     logging.info("=== Update completed successfully ===")
     
