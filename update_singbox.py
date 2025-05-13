@@ -1,33 +1,12 @@
 #!/usr/bin/env python3
 """
-Скрипт для обновления конфигурации sing-box из удалённого JSON.
-
-Скрипт загружает конфигурацию прокси с указанного URL, проверяет выбранный протокол,
-создаёт файл конфигурации sing-box и управляет сервисом sing-box. Поддерживает протоколы:
-VLESS, Shadowsocks, VMess, Trojan, TUIC, Hysteria2.
-
-Использование:
-    python3 update_singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
-    Пример: python3 update_singbox.py -u https://example.com/config -r "Server1"
-    Пример: python3 update_singbox.py -u https://example.com/config -i 2 -d
-
-Переменные окружения:
-    SINGBOX_LOG_FILE: Путь к файлу логов (по умолчанию: /var/log/update_singbox.log)
-    SINGBOX_CONFIG_FILE: Путь к файлу конфигурации (по умолчанию: /etc/sing-box/config.json)
-    SINGBOX_BACKUP_FILE: Путь к бэкапу конфигурации (по умолчанию: /etc/sing-box/config.json.bak)
-    SINGBOX_TEMPLATE_FILE: Путь к шаблону конфигурации (по умолчанию: ./config.template.json)
-    SINGBOX_MAX_LOG_SIZE: Макс. размер лога в байтах (по умолчанию: 1048576)
-
-Требования:
-    Python 3.10 или новее (для конструкции match).
-
-
 Update sing-box configuration from a remote JSON source.
 
 This script fetches proxy configurations from a specified URL, validates the
 selected protocol, generates a sing-box configuration file, and manages the
 sing-box service. It supports protocols like VLESS, Shadowsocks, VMess, Trojan,
-TUIC, and Hysteria2.
+TUIC, and Hysteria2. By default, it enables auto-selection of servers using urltest.
+If a specific server is selected by remarks or index, only that server is included.
 
 Usage:
     python3 update_singbox.py -u <URL> [-r <remarks> | -i <index>] [-d]
@@ -69,7 +48,7 @@ def main():
     parser = argparse.ArgumentParser(description="Update sing-box configuration")
     parser.add_argument("-u", "--url", required=True, help="URL for proxy configuration")
     parser.add_argument("-r", "--remarks", help="Select server by remarks")
-    parser.add_argument("-i", "--index", type=int, default=0, help="Select server by index (default: 0)")
+    parser.add_argument("-i", "--index", type=int, default=None, help="Select server by index")
     parser.add_argument("-d", "--debug", type=int, choices=[0, 1, 2], default=0,
                         help="Set debug level: 0 for minimal, 1 for detailed, 2 for verbose")
     parser.add_argument("--proxy", help="Proxy URL (e.g., socks5://127.0.0.1:1080 or https://proxy.example.com)")
@@ -85,16 +64,49 @@ def main():
     if args.debug >= 2:
         logging.debug(f"Fetched configuration: {json.dumps(json_data, indent=2)}")
 
-    # Selecting configuration
-    config = select_config(json_data, args.remarks, args.index)
-    if args.debug >= 1:
-        logging.info(f"Selected configuration by remarks: {args.remarks} or index: {args.index}")
-    if args.debug >= 2:
-        logging.debug(f"Selected configuration details: {json.dumps(config, indent=2)}")
+    # Prepare outbounds based on selection
+    if args.remarks or args.index is not None:
+        # Single server selection
+        config = select_config(json_data, args.remarks, args.index if args.index is not None else 0)
+        outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
+        outbounds = [outbound]
+        if args.debug >= 1:
+            logging.info(f"Selected configuration by remarks: {args.remarks} or index: {args.index}")
+        if args.debug >= 2:
+            logging.debug(f"Selected configuration details: {json.dumps(config, indent=2)}")
+    else:
+        # Auto-selection: process all servers
+        outbounds = []
+        if isinstance(json_data, dict) and "outbounds" in json_data:
+            configs = [
+                outbound for outbound in json_data["outbounds"]
+                if outbound.get("type") in SUPPORTED_PROTOCOLS
+            ]
+        else:
+            configs = json_data
 
-    # Validate and generate configuration
-    outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
-    changes_made = generate_config(outbound, TEMPLATE_FILE, CONFIG_FILE, BACKUP_FILE)
+        for idx, config in enumerate(configs):
+            try:
+                outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
+                # Use original tag if available, else generate proxy-a, proxy-b, etc.
+                if not outbound["tag"].startswith("proxy-"):
+                    outbounds.append(outbound)
+                else:
+                    outbound["tag"] = f"proxy-{chr(97 + idx)}"
+                    outbounds.append(outbound)
+            except ValueError as e:
+                logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
+
+        if not outbounds:
+            logging.warning("No valid configurations found for auto-selection, using direct")
+            outbounds = []  # Empty outbounds will use direct via route.final
+        if args.debug >= 1:
+            logging.info(f"Prepared {len(outbounds)} servers for auto-selection")
+        if args.debug >= 2:
+            logging.debug(f"Outbounds for auto-selection: {json.dumps(outbounds, indent=2)}")
+
+    # Generate configuration
+    changes_made = generate_config(outbounds, TEMPLATE_FILE, CONFIG_FILE, BACKUP_FILE)
 
     if changes_made:
         # Manage service only if changes were made
