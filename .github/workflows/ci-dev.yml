@@ -62,15 +62,13 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-      - name: Remove non-production files
+      - name: Remove non-production files before merge
         run: |
           rm -rf tests
+          rm -rf .github/workflows
+          rm -f dev-requirements.txt
           rm -rf __pycache__
           rm -rf modules/__pycache__
-          rm -f pytest.ini
-          rm -f backup.json
-          rm -f config.template.json
-          rm -f template.json
 
       - name: Merge dev into main
         if: ${{ success() }}
