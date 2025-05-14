@@ -34,6 +34,7 @@ from modules.config_fetch import fetch_json, select_config
 from modules.protocol_validation import validate_protocol
 from modules.config_generate import generate_config
 from modules.service_manage import manage_service
+from modules.server_management import list_servers, load_exclusions, apply_exclusions, exclude_servers, view_exclusions, clear_exclusions
 
 # Configuration with environment variable fallbacks
 LOG_FILE = os.getenv("SINGBOX_LOG_FILE", "/var/log/update_singbox.log")
@@ -46,12 +47,15 @@ SUPPORTED_PROTOCOLS = {"vless", "shadowsocks", "vmess", "trojan", "tuic", "hyste
 def main():
     """Main function to update sing-box configuration."""
     parser = argparse.ArgumentParser(description="Update sing-box configuration")
-    parser.add_argument("-u", "--url", required=True, help="URL for proxy configuration")
+    parser.add_argument("-u", "--url", help="URL for proxy configuration")
     parser.add_argument("-r", "--remarks", help="Select server by remarks")
     parser.add_argument("-i", "--index", type=int, default=None, help="Select server by index")
     parser.add_argument("-d", "--debug", type=int, choices=[0, 1, 2], default=0,
                         help="Set debug level: 0 for minimal, 1 for detailed, 2 for verbose")
     parser.add_argument("--proxy", help="Proxy URL (e.g., socks5://127.0.0.1:1080 or https://proxy.example.com)")
+    parser.add_argument("-l", "--list-servers", action="store_true", help="List all servers with indices")
+    parser.add_argument("-e", "--exclude", nargs='*', help="Exclude servers by index or name")
+    parser.add_argument("--clear-exclusions", action="store_true", help="Clear all current exclusions")
     args = parser.parse_args()
 
     setup_logging(args.debug, LOG_FILE, MAX_LOG_SIZE)
@@ -63,6 +67,28 @@ def main():
         logging.info(f"Fetched server list from: {args.url}")
     if args.debug >= 2:
         logging.debug(f"Fetched configuration: {json.dumps(json_data, indent=2)}")
+
+    # List servers if requested
+    if args.list_servers:
+        list_servers(json_data)
+        return
+
+    # Exclude servers if requested
+    if args.exclude is not None:
+        if len(args.exclude) == 0:
+            view_exclusions(args.debug)
+        else:
+            exclude_servers(json_data, args.exclude, args.debug)
+        return
+
+    # Clear exclusions if requested
+    if args.clear_exclusions:
+        clear_exclusions()
+        return
+
+    # Load exclusions
+    exclusions = load_exclusions()
+    excluded_ids = {exclusion["id"] for exclusion in exclusions["exclusions"]}
 
     # Prepare outbounds based on selection
     if args.remarks or args.index is not None:
@@ -76,7 +102,6 @@ def main():
             logging.debug(f"Selected configuration details: {json.dumps(config, indent=2)}")
     else:
         # Auto-selection: process all servers
-        outbounds = []
         if isinstance(json_data, dict) and "outbounds" in json_data:
             configs = [
                 outbound for outbound in json_data["outbounds"]
@@ -85,6 +110,10 @@ def main():
         else:
             configs = json_data
 
+        # Apply exclusions
+        configs = apply_exclusions(configs, excluded_ids, args.debug)
+
+        outbounds = []
         for idx, config in enumerate(configs):
             try:
                 outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
