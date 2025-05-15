@@ -1,5 +1,24 @@
 # Changelog
 
+## [v1.2.0] - 2025-05-15
+
+### Added:
+- Server exclusion and management features.
+- Option to list servers with indices and details using `-l`.
+- Ability to exclude servers by index or name with `-e`.
+- Persistent storage for exclusions in `exclusions.json`.
+- Option to view current exclusions.
+- Option to clear all current exclusions with `--clear-exclusions`.
+
+### Changed:
+- Updated `list_servers` function to filter out inbounds and only list outbounds.
+- Ensured configuration generation is triggered after server exclusions.
+
+### Fixed:
+- Corrected the display of server names and ports in the server listing.
+
+---
+
 ## [v1.1.0] - 2025-05-14
 
 ### Added:
