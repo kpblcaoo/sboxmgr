@@ -17,6 +17,15 @@
 ### Fixed:
 - Corrected the display of server names and ports in the server listing.
 
+### Known Issues:
+ - -e and -l options produce no output unless verbosity is set (-d 1 or higher).
+ - -e without an index should work even without -u <url>, but currently doesn't.
+ - Server tags are not included in the exclusions list.
+ - Server ports still display as N/A in some cases.
+ - Non-supported outbound types appear in the server list.
+ - Server index numbers do not start at 0 and may not match the -i index used for exclusion.
+
+
 ---
 
 ## [v1.1.0] - 2025-05-14
