@@ -87,9 +87,7 @@ def main():
             view_exclusions(args.debug)
         else:
             if json_data:
-                # Ensure indices match the displayed list
-                list_servers(json_data, SUPPORTED_PROTOCOLS, args.debug)
-                exclude_servers(json_data, args.exclude, args.debug)
+                exclude_servers(json_data, args.exclude, SUPPORTED_PROTOCOLS, args.debug)
                 generate_config_after_exclusion(json_data, args.debug)
             else:
                 print("Error: URL is required to exclude servers.")
