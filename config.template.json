@@ -64,6 +64,10 @@
                   "gosuslugi.ru"
               ],
               "outbound": "direct"
+          },
+          {
+            "ip_cidr": "$excluded_servers", 
+            "outbound": "direct"
           }
       ],
       "rule_set": [
