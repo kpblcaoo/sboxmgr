@@ -79,6 +79,8 @@ def main():
             view_exclusions(args.debug)
         else:
             exclude_servers(json_data, args.exclude, args.debug)
+            # Trigger configuration generation after exclusions
+            generate_config_after_exclusion(json_data, args.debug)
         return
 
     # Clear exclusions if requested
@@ -144,6 +146,53 @@ def main():
             logging.info("Service restart completed.")
 
     logging.info("=== Update completed successfully ===")
+
+def generate_config_after_exclusion(json_data, debug_level):
+    """Generate configuration after applying exclusions."""
+    exclusions = load_exclusions()
+    excluded_ids = {exclusion["id"] for exclusion in exclusions["exclusions"]}
+
+    # Prepare outbounds based on selection
+    if isinstance(json_data, dict) and "outbounds" in json_data:
+        configs = [
+            outbound for outbound in json_data["outbounds"]
+            if outbound.get("type") in SUPPORTED_PROTOCOLS
+        ]
+    else:
+        configs = json_data
+
+    # Apply exclusions
+    configs = apply_exclusions(configs, excluded_ids, debug_level)
+
+    outbounds = []
+    for idx, config in enumerate(configs):
+        try:
+            outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
+            # Use original tag if available, else generate proxy-a, proxy-b, etc.
+            if not outbound["tag"].startswith("proxy-"):
+                outbounds.append(outbound)
+            else:
+                outbound["tag"] = f"proxy-{chr(97 + idx)}"
+                outbounds.append(outbound)
+        except ValueError as e:
+            logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
+
+    if not outbounds:
+        logging.warning("No valid configurations found for auto-selection, using direct")
+        outbounds = []  # Empty outbounds will use direct via route.final
+    if debug_level >= 1:
+        logging.info(f"Prepared {len(outbounds)} servers for auto-selection")
+    if debug_level >= 2:
+        logging.debug(f"Outbounds for auto-selection: {json.dumps(outbounds, indent=2)}")
+
+    # Generate configuration
+    changes_made = generate_config(outbounds, TEMPLATE_FILE, CONFIG_FILE, BACKUP_FILE)
+
+    if changes_made:
+        # Manage service only if changes were made
+        manage_service()
+        if debug_level >= 1:
+            logging.info("Service restart completed.")
 
 if __name__ == "__main__":
     main()

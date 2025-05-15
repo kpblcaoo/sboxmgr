@@ -9,7 +9,7 @@ import datetime
 EXCLUSION_FILE = os.getenv("SINGBOX_EXCLUSION_FILE", "./exclusions.json")
 
 def list_servers(json_data):
-    """List all servers with indices and details."""
+    """List all outbounds with indices and details."""
     if isinstance(json_data, dict) and "outbounds" in json_data:
         servers = json_data["outbounds"]
     else:
@@ -18,6 +18,9 @@ def list_servers(json_data):
     print("Index | Name | Protocol | Port")
     print("--------------------------------")
     for idx, server in enumerate(servers):
+        # Only list outbounds, not inbounds
+        if server.get("type") in {"direct", "block", "dns"}:
+            continue
         # Extract the name from the 'tag' field if available
         name = server.get("tag", "N/A")
         protocol = server.get("type", "N/A")
