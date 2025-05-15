@@ -7,26 +7,31 @@ import shutil
 import datetime
 
 EXCLUSION_FILE = os.getenv("SINGBOX_EXCLUSION_FILE", "./exclusions.json")
+SUPPORTED_PROTOCOLS = ["direct", "block", "dns"]
 
-def list_servers(json_data):
+def list_servers(json_data, debug_level=0):
     """List all outbounds with indices and details."""
     if isinstance(json_data, dict) and "outbounds" in json_data:
         servers = json_data["outbounds"]
     else:
         servers = json_data
 
-    print("Index | Name | Protocol | Port")
-    print("--------------------------------")
-    for idx, server in enumerate(servers):
-        # Only list outbounds, not inbounds
-        if server.get("type") in {"direct", "block", "dns"}:
+    if debug_level >= 0:
+        print("Index | Name | Protocol | Port")
+        print("--------------------------------")
+    index = 0
+    for server in servers:
+        # Only list supported outbounds
+        if server.get("type") not in SUPPORTED_PROTOCOLS:
             continue
         # Extract the name from the 'tag' field if available
         name = server.get("tag", "N/A")
         protocol = server.get("type", "N/A")
         # Extract the port from the server configuration
-        port = server.get("port", "N/A")
-        print(f"{idx} | {name} | {protocol} | {port}")
+        port = server.get("server_port", "N/A")
+        if debug_level >= 0:
+            print(f"{index} | {name} | {protocol} | {port}")
+        index += 1
 
 def generate_server_id(server):
     """Generate a unique ID for a server based on name, protocol, and port."""
@@ -67,7 +72,7 @@ def apply_exclusions(configs, excluded_ids, debug_level):
         valid_configs.append(config)
     return valid_configs
 
-def exclude_servers(json_data, exclude_list, debug_level):
+def exclude_servers(json_data, exclude_list, debug_level=0):
     """Exclude servers by index or name, supporting wildcards."""
     exclusions = load_exclusions()
     servers = json_data.get("outbounds", json_data)
@@ -80,17 +85,17 @@ def exclude_servers(json_data, exclude_list, debug_level):
             if 0 <= index < len(servers):
                 server = servers[index]
                 server_id = generate_server_id(server)
-                new_exclusions.append({"id": server_id, "name": server.get("name", "N/A")})
-                if debug_level >= 1:
-                    print(f"Excluding server by index {index}: {server.get('name', 'N/A')}")
+                new_exclusions.append({"id": server_id, "name": server.get("tag", "N/A")})
+                if debug_level >= 0:
+                    print(f"Excluding server by index {index}: {server.get('tag', 'N/A')}")
         else:
             # Exclude by name with wildcard support
             for server in servers:
-                if fnmatch.fnmatch(server.get("name", ""), item):
+                if fnmatch.fnmatch(server.get("tag", ""), item):
                     server_id = generate_server_id(server)
-                    new_exclusions.append({"id": server_id, "name": server.get("name", "N/A")})
-                    if debug_level >= 1:
-                        print(f"Excluding server by name {server.get('name', 'N/A')}")
+                    new_exclusions.append({"id": server_id, "name": server.get("tag", "N/A")})
+                    if debug_level >= 0:
+                        print(f"Excluding server by name {server.get('tag', 'N/A')}")
 
     # Update exclusions
     exclusions["exclusions"].extend(new_exclusions)
