@@ -58,19 +58,28 @@ def main():
     parser.add_argument("--clear-exclusions", action="store_true", help="Clear all current exclusions")
     args = parser.parse_args()
 
+    # Initialize logging
     setup_logging(args.debug, LOG_FILE, MAX_LOG_SIZE)
     logging.info("=== Starting sing-box configuration update ===")
 
+    if args.list_servers or args.exclude is not None:
+        if not args.url and args.exclude is not None and len(args.exclude) > 0:
+            print("Error: URL is required for excluding servers.")
+            return
+
     # Fetching configuration
-    json_data = fetch_json(args.url, proxy_url=args.proxy)
-    if args.debug >= 1:
+    json_data = fetch_json(args.url, proxy_url=args.proxy) if args.url else None
+    if args.debug >= 1 and json_data:
         logging.info(f"Fetched server list from: {args.url}")
-    if args.debug >= 2:
+    if args.debug >= 2 and json_data:
         logging.debug(f"Fetched configuration: {json.dumps(json_data, indent=2)}")
 
     # List servers if requested
     if args.list_servers:
-        list_servers(json_data)
+        if json_data:
+            list_servers(json_data, SUPPORTED_PROTOCOLS, args.debug)
+        else:
+            print("Error: URL is required to list servers.")
         return
 
     # Exclude servers if requested
@@ -78,9 +87,11 @@ def main():
         if len(args.exclude) == 0:
             view_exclusions(args.debug)
         else:
-            exclude_servers(json_data, args.exclude, args.debug)
-            # Trigger configuration generation after exclusions
-            generate_config_after_exclusion(json_data, args.debug)
+            if json_data:
+                exclude_servers(json_data, args.exclude, SUPPORTED_PROTOCOLS, args.debug)
+                generate_config_after_exclusion(json_data, args.debug)
+            else:
+                print("Error: URL is required to exclude servers.")
         return
 
     # Clear exclusions if requested
@@ -94,6 +105,9 @@ def main():
 
     # Prepare outbounds based on selection
     if args.remarks or args.index is not None:
+        if not json_data:
+            print("Error: URL is required to select server by remarks or index.")
+            return
         # Single server selection
         config = select_config(json_data, args.remarks, args.index if args.index is not None else 0)
         outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
@@ -103,6 +117,9 @@ def main():
         if args.debug >= 2:
             logging.debug(f"Selected configuration details: {json.dumps(config, indent=2)}")
     else:
+        if not json_data:
+            print("Error: URL is required for auto-selection.")
+            return
         # Auto-selection: process all servers
         if isinstance(json_data, dict) and "outbounds" in json_data:
             configs = [
@@ -168,12 +185,10 @@ def generate_config_after_exclusion(json_data, debug_level):
     for idx, config in enumerate(configs):
         try:
             outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
-            # Use original tag if available, else generate proxy-a, proxy-b, etc.
-            if not outbound["tag"].startswith("proxy-"):
-                outbounds.append(outbound)
-            else:
+            # Ensure each outbound has a unique tag
+            if not outbound.get("tag"):
                 outbound["tag"] = f"proxy-{chr(97 + idx)}"
-                outbounds.append(outbound)
+            outbounds.append(outbound)
         except ValueError as e:
             logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
 

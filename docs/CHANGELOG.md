@@ -1,4 +1,16 @@
 # Changelog
+## [v1.2.1] - 2025-05-16
+
+### Fixed:
+- Improved output for `-e` and `-l` options to work without verbosity.
+- Allowed `-e` to function without `-u` when viewing exclusions.
+- Handled missing `-u` option gracefully to prevent exceptions.
+- Included server tags in the exclusions list.
+- Corrected display of server ports in the server listing.
+- Filtered out non-supported outbound types from the server list.
+- Ensured server index numbers start at 0 and match the `-i` index.
+
+---
 
 ## [v1.2.0] - 2025-05-15
 
