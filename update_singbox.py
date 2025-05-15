@@ -76,7 +76,7 @@ def main():
     # List servers if requested
     if args.list_servers:
         if json_data:
-            list_servers(json_data, args.debug)
+            list_servers(json_data, SUPPORTED_PROTOCOLS, args.debug)
         else:
             print("Error: URL is required to list servers.")
         return

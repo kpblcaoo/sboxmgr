@@ -7,9 +7,8 @@ import shutil
 import datetime
 
 EXCLUSION_FILE = os.getenv("SINGBOX_EXCLUSION_FILE", "./exclusions.json")
-SUPPORTED_PROTOCOLS = ["direct", "block", "dns"]
 
-def list_servers(json_data, debug_level=0):
+def list_servers(json_data, supported_protocols, debug_level=0):
     """List all supported outbounds with indices and details."""
     if isinstance(json_data, dict) and "outbounds" in json_data:
         servers = json_data["outbounds"]
@@ -22,7 +21,7 @@ def list_servers(json_data, debug_level=0):
     index = 0
     for server in servers:
         # Only list supported outbounds
-        if server.get("type") not in SUPPORTED_PROTOCOLS:
+        if server.get("type") not in supported_protocols:
             continue
         # Extract the name from the 'tag' field if available
         name = server.get("tag", "N/A")
