@@ -112,6 +112,7 @@ def main():
         config = select_config(json_data, args.remarks, args.index if args.index is not None else 0)
         outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
         outbounds = [outbound]
+        excluded_ips = [outbound["server"]] if "server" in outbound else []
         if args.debug >= 1:
             logging.info(f"Selected configuration by remarks: {args.remarks} or index: {args.index}")
         if args.debug >= 2:
@@ -133,15 +134,18 @@ def main():
         configs = apply_exclusions(configs, excluded_ids, args.debug)
 
         outbounds = []
+        excluded_ips = []
         for idx, config in enumerate(configs):
             try:
                 outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
-                # Use original tag if available, else generate proxy-a, proxy-b, etc.
                 if not outbound["tag"].startswith("proxy-"):
                     outbounds.append(outbound)
                 else:
                     outbound["tag"] = f"proxy-{chr(97 + idx)}"
                     outbounds.append(outbound)
+                # Add server IP to exclusion list
+                if "server" in outbound:
+                    excluded_ips.append(outbound["server"])
             except ValueError as e:
                 logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
 
@@ -150,10 +154,11 @@ def main():
             outbounds = []  # Empty outbounds will use direct via route.final
         if args.debug >= 1:
             logging.info(f"Prepared {len(outbounds)} servers for auto-selection")
+        if args.debug >= 2:
             logging.debug(f"Outbounds for auto-selection: {json.dumps(outbounds, indent=2)}")
 
     # Generate configuration
-    changes_made = generate_config(outbounds, TEMPLATE_FILE, CONFIG_FILE, BACKUP_FILE)
+    changes_made = generate_config(outbounds, TEMPLATE_FILE, CONFIG_FILE, BACKUP_FILE, excluded_ips)
 
     if changes_made:
         # Manage service only if changes were made
