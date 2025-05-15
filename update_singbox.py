@@ -184,18 +184,18 @@ def generate_config_after_exclusion(json_data, debug_level):
     outbounds = []
     excluded_ips = []
     for idx, config in enumerate(configs):
-    try:
-        outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
+        try:
+            outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
 
-        # Ensure each outbound has a unique tag
-        if not outbound.get("tag") or outbound["tag"].startswith("proxy-"):
-            outbound["tag"] = f"proxy-{chr(97 + idx)}"
+            # Ensure each outbound has a unique tag
+            if not outbound.get("tag") or outbound["tag"].startswith("proxy-"):
+                outbound["tag"] = f"proxy-{chr(97 + idx)}"
 
-        outbounds.append(outbound)
+            outbounds.append(outbound)
 
-        # Add server IP to exclusion list
-        if "server" in outbound:
-            excluded_ips.append(outbound["server"])
+            # Add server IP to exclusion list
+            if "server" in outbound:
+                excluded_ips.append(outbound["server"])
         except ValueError as e:
             logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
 
