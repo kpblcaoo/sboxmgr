@@ -10,7 +10,7 @@ EXCLUSION_FILE = os.getenv("SINGBOX_EXCLUSION_FILE", "./exclusions.json")
 SUPPORTED_PROTOCOLS = ["direct", "block", "dns"]
 
 def list_servers(json_data, debug_level=0):
-    """List all outbounds with indices and details."""
+    """List all supported outbounds with indices and details."""
     if isinstance(json_data, dict) and "outbounds" in json_data:
         servers = json_data["outbounds"]
     else:
@@ -101,13 +101,12 @@ def exclude_servers(json_data, exclude_list, debug_level=0):
     exclusions["exclusions"].extend(new_exclusions)
     save_exclusions(exclusions)
 
-def view_exclusions(debug_level):
+def view_exclusions(debug_level=0):
     """View current exclusions."""
     exclusions = load_exclusions()
-    if debug_level >= 1:
-        print("Current Exclusions:")
-        for exclusion in exclusions["exclusions"]:
-            print(f"ID: {exclusion['id']}, Name: {exclusion['name']}, Reason: {exclusion.get('reason', 'N/A')}")
+    print("Current Exclusions:")
+    for exclusion in exclusions["exclusions"]:
+        print(f"ID: {exclusion['id']}, Name: {exclusion['name']}, Reason: {exclusion.get('reason', 'N/A')}")
     if debug_level >= 2:
         print(json.dumps(exclusions, indent=2))
 
