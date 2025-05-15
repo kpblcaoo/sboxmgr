@@ -18,7 +18,8 @@ def list_servers(json_data):
     print("Index | Name | Protocol | Port")
     print("--------------------------------")
     for idx, server in enumerate(servers):
-        name = server.get("name", "N/A")
+        # Extract the name from the 'tag' field if available
+        name = server.get("tag", "N/A")
         protocol = server.get("type", "N/A")
         port = server.get("port", "N/A")
         print(f"{idx} | {name} | {protocol} | {port}")
