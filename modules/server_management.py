@@ -33,8 +33,8 @@ def list_servers(json_data, supported_protocols, debug_level=0):
         index += 1
 
 def generate_server_id(server):
-    """Generate a unique ID for a server based on name, protocol, and port."""
-    identifier = f"{server.get('name', '')}{server.get('type', '')}{server.get('port', '')}"
+    """Generate a unique ID for a server based on tag, protocol, and port."""
+    identifier = f"{server.get('tag', '')}{server.get('type', '')}{server.get('server_port', '')}"
     return hashlib.sha256(identifier.encode()).hexdigest()
 
 def handle_temp_file(content, target_path, validate_fn):

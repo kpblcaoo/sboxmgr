@@ -87,6 +87,8 @@ def main():
             view_exclusions(args.debug)
         else:
             if json_data:
+                # Ensure indices match the displayed list
+                list_servers(json_data, SUPPORTED_PROTOCOLS, args.debug)
                 exclude_servers(json_data, args.exclude, args.debug)
                 generate_config_after_exclusion(json_data, args.debug)
             else:
@@ -184,12 +186,10 @@ def generate_config_after_exclusion(json_data, debug_level):
     for idx, config in enumerate(configs):
         try:
             outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
-            # Use original tag if available, else generate proxy-a, proxy-b, etc.
-            if not outbound["tag"].startswith("proxy-"):
-                outbounds.append(outbound)
-            else:
+            # Ensure each outbound has a unique tag
+            if not outbound.get("tag"):
                 outbound["tag"] = f"proxy-{chr(97 + idx)}"
-                outbounds.append(outbound)
+            outbounds.append(outbound)
         except ValueError as e:
             logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
 
