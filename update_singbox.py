@@ -186,12 +186,12 @@ def generate_config_after_exclusion(json_data, debug_level):
     for idx, config in enumerate(configs):
         try:
             outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
-
             # Ensure each outbound has a unique tag
-            if not outbound.get("tag") or outbound["tag"].startswith("proxy-"):
+            if not outbound["tag"].startswith("proxy-"):
+                outbounds.append(outbound)
+            else:
                 outbound["tag"] = f"proxy-{chr(97 + idx)}"
-
-            outbounds.append(outbound)
+                outbounds.append(outbound)
 
             # Add server IP to exclusion list
             if "server" in outbound:
@@ -204,18 +204,21 @@ def generate_config_after_exclusion(json_data, debug_level):
         outbounds = []  # Empty outbounds will use direct via route.final
     if debug_level >= 1:
         logging.info(f"Prepared {len(outbounds)} servers for auto-selection")
-    if debug_level >= 2:
-        logging.debug(f"Outbounds for auto-selection: {json.dumps(outbounds, indent=2)}")
+        logging.info(f"Excluded IPs: {excluded_ips}")
 
     # Load the template and replace the placeholder with excluded IPs
     with open(TEMPLATE_FILE, 'r') as template_file:
         template = json.load(template_file)
     
-    # Replace the placeholder with the actual excluded IPs
-    for rule in template["route"]["rules"]:
-        if rule.get("ip_cidr") == "$excluded_servers":
-            rule["ip_cidr"] = excluded_ips
-            rule["outbound"] = "direct"  # Ensure these IPs are routed directly
+    # Ensure the excluded_ips list is not empty
+    if excluded_ips:
+        # Replace the placeholder with the actual excluded IPs
+        for rule in template["route"]["rules"]:
+            if rule.get("ip_cidr") == "$excluded_servers":
+                rule["ip_cidr"] = excluded_ips
+                rule["outbound"] = "direct"  # Ensure these IPs are routed directly
+    else:
+        logging.warning("No IPs to exclude; skipping placeholder replacement.")
 
     # Generate configuration
     changes_made = generate_config(outbounds, template, CONFIG_FILE, BACKUP_FILE)
