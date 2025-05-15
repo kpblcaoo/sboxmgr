@@ -58,6 +58,7 @@ def main():
     parser.add_argument("--clear-exclusions", action="store_true", help="Clear all current exclusions")
     args = parser.parse_args()
 
+    # Initialize logging
     setup_logging(args.debug, LOG_FILE, MAX_LOG_SIZE)
     logging.info("=== Starting sing-box configuration update ===")
 
