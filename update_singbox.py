@@ -150,7 +150,6 @@ def main():
             outbounds = []  # Empty outbounds will use direct via route.final
         if args.debug >= 1:
             logging.info(f"Prepared {len(outbounds)} servers for auto-selection")
-        if args.debug >= 2:
             logging.debug(f"Outbounds for auto-selection: {json.dumps(outbounds, indent=2)}")
 
     # Generate configuration
@@ -204,27 +203,8 @@ def generate_config_after_exclusion(json_data, debug_level):
         logging.info(f"Prepared {len(outbounds)} servers for auto-selection")
         logging.info(f"Excluded IPs: {excluded_ips}")
 
-    # Load the template and replace the placeholder with excluded IPs
-    with open(TEMPLATE_FILE, 'r') as template_file:
-        template = json.load(template_file)
-    
-    # Ensure the excluded_ips list is not empty
-    if excluded_ips:
-        # Replace the placeholder with the actual excluded IPs
-        for rule in template["route"]["rules"]:
-            if rule.get("ip_cidr") == "$excluded_servers":
-                rule["ip_cidr"] = excluded_ips
-                rule["outbound"] = "direct"  # Ensure these IPs are routed directly
-    else:
-        logging.warning("No IPs to exclude; skipping placeholder replacement.")
-
-    # Generate configuration
-    changes_made = generate_config(outbounds, template, CONFIG_FILE, BACKUP_FILE)
-
-    if changes_made:
-        manage_service()
-        if debug_level >= 1:
-            logging.info("Service restart completed.")
+    # Pass excluded IPs to generate_config
+    generate_config(outbounds, TEMPLATE_FILE, CONFIG_FILE, BACKUP_FILE, excluded_ips)
 
 if __name__ == "__main__":
     main()

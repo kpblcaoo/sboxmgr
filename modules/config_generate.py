@@ -3,7 +3,7 @@ import json
 import subprocess
 from logging import info, error
 
-def generate_config(outbounds, template_file, config_file, backup_file):
+def generate_config(outbounds, template_file, config_file, backup_file, excluded_ips):
     """Generate sing-box configuration from template."""
     if not os.path.exists(template_file):
         error(f"Template file not found: {template_file}")
@@ -33,6 +33,10 @@ def generate_config(outbounds, template_file, config_file, backup_file):
         outbounds +
         template["outbounds"][urltest_idx + 1:]
     )
+
+    # Replace $excluded_servers with actual IPs
+    if "$excluded_servers" in template:
+        template["$excluded_servers"] = excluded_ips
 
     # Write the temporary configuration
     config = json.dumps(template, indent=2)
