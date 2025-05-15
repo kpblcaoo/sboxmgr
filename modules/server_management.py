@@ -71,25 +71,31 @@ def apply_exclusions(configs, excluded_ids, debug_level):
         valid_configs.append(config)
     return valid_configs
 
-def exclude_servers(json_data, exclude_list, debug_level=0):
+def exclude_servers(json_data, exclude_list, supported_protocols, debug_level=0):
     """Exclude servers by index or name, supporting wildcards."""
     exclusions = load_exclusions()
     servers = json_data.get("outbounds", json_data)
     new_exclusions = []
 
+    # Create a list of supported servers with their indices
+    supported_servers = [
+        (idx, server) for idx, server in enumerate(servers)
+        if server.get("type") in supported_protocols
+    ]
+
     for item in exclude_list:
         if item.isdigit():
             # Exclude by index
             index = int(item)
-            if 0 <= index < len(servers):
-                server = servers[index]
+            if 0 <= index < len(supported_servers):
+                _, server = supported_servers[index]
                 server_id = generate_server_id(server)
                 new_exclusions.append({"id": server_id, "name": server.get("tag", "N/A")})
                 if debug_level >= 0:
                     print(f"Excluding server by index {index}: {server.get('tag', 'N/A')}")
         else:
             # Exclude by name with wildcard support
-            for server in servers:
+            for _, server in supported_servers:
                 if fnmatch.fnmatch(server.get("tag", ""), item):
                     server_id = generate_server_id(server)
                     new_exclusions.append({"id": server_id, "name": server.get("tag", "N/A")})
