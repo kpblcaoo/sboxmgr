@@ -21,6 +21,7 @@ def list_servers(json_data):
         # Extract the name from the 'tag' field if available
         name = server.get("tag", "N/A")
         protocol = server.get("type", "N/A")
+        # Extract the port from the server configuration
         port = server.get("port", "N/A")
         print(f"{idx} | {name} | {protocol} | {port}")
 
