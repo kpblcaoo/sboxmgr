@@ -165,15 +165,18 @@ def generate_config_after_exclusion(json_data, debug_level):
     configs = apply_exclusions(configs, excluded_ids, debug_level)
 
     outbounds = []
+    excluded_ips = []
     for idx, config in enumerate(configs):
         try:
             outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
-            # Use original tag if available, else generate proxy-a, proxy-b, etc.
             if not outbound["tag"].startswith("proxy-"):
                 outbounds.append(outbound)
             else:
                 outbound["tag"] = f"proxy-{chr(97 + idx)}"
                 outbounds.append(outbound)
+            # Add server IP to exclusion list
+            if "server" in outbound:
+                excluded_ips.append(outbound["server"])
         except ValueError as e:
             logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
 
@@ -185,11 +188,20 @@ def generate_config_after_exclusion(json_data, debug_level):
     if debug_level >= 2:
         logging.debug(f"Outbounds for auto-selection: {json.dumps(outbounds, indent=2)}")
 
+    # Load the template and replace the placeholder with excluded IPs
+    with open(TEMPLATE_FILE, 'r') as template_file:
+        template = json.load(template_file)
+    
+    # Replace the placeholder with the actual excluded IPs
+    for rule in template["route"]["rules"]:
+        if rule.get("ip_cidr") == "$excluded_servers":
+            rule["ip_cidr"] = excluded_ips
+            rule["outbound"] = "direct"  # Ensure these IPs are routed directly
+
     # Generate configuration
-    changes_made = generate_config(outbounds, TEMPLATE_FILE, CONFIG_FILE, BACKUP_FILE)
+    changes_made = generate_config(outbounds, template, CONFIG_FILE, BACKUP_FILE)
 
     if changes_made:
-        # Manage service only if changes were made
         manage_service()
         if debug_level >= 1:
             logging.info("Service restart completed.")
