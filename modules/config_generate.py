@@ -34,9 +34,16 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
         template["outbounds"][urltest_idx + 1:]
     )
 
-    # Replace $excluded_servers with actual IPs
-    if "$excluded_servers" in template:
-        template["$excluded_servers"] = excluded_ips
+    # Ensure excluded_ips are in CIDR format
+    excluded_ips_cidr = [f"{ip}/32" for ip in excluded_ips]
+
+    # Debug log for excluded_ips
+    info(f"Excluded IPs: {excluded_ips_cidr}")
+
+    # Replace $excluded_servers with actual IPs in CIDR format
+    for rule in template["route"]["rules"]:
+        if rule.get("ip_cidr") == "$excluded_servers":
+            rule["ip_cidr"] = excluded_ips_cidr
 
     # Write the temporary configuration
     config = json.dumps(template, indent=2)
