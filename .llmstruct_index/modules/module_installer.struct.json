@@ -1,0 +1,31 @@
+{
+  "module_id": "modules.module_installer",
+  "path": "modules/module_installer.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "install_dependencies",
+      "docstring": "",
+      "line_range": [
+        6,
+        11
+      ],
+      "parameters": [],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "install_dependencies": [
+      "subprocess.run",
+      "print"
+    ]
+  },
+  "dependencies": [
+    "subprocess",
+    "sys"
+  ],
+  "hash": "85f0a2ced8f559a0da8d521a551fd94c629660b89b8398f51bda616c2cf0b0bd",
+  "artifact_id": "8e791c9d-8d8a-4f1f-b469-7e616925c9f4"
+}

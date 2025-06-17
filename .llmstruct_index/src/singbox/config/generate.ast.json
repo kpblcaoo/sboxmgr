@@ -1,0 +1,26 @@
+{
+  "module": "src/singbox/config/generate.py",
+  "functions": [
+    {
+      "name": "generate_config",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    },
+    {
+      "name": "generate_temp_config",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    },
+    {
+      "name": "validate_config_file",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    }
+  ]
+}

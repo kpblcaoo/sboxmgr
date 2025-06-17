@@ -1,0 +1,12 @@
+{
+  "module": "modules/service_manage.py",
+  "functions": [
+    {
+      "name": "manage_service",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    }
+  ]
+}

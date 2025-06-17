@@ -1,0 +1,98 @@
+{
+  "module_id": "modules.config_generate",
+  "path": "modules/config_generate.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "generate_config",
+      "docstring": "Generate sing-box configuration from template.",
+      "line_range": [
+        6,
+        74
+      ],
+      "parameters": [
+        "outbounds",
+        "template_file",
+        "config_file",
+        "backup_file",
+        "excluded_ips"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "generate_temp_config",
+      "docstring": "Генерирует json-строку конфига для dry-run без записи в файл.",
+      "line_range": [
+        76,
+        101
+      ],
+      "parameters": [
+        "outbounds",
+        "template_file",
+        "excluded_ips"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "validate_config_file",
+      "docstring": "Валидирует конфиг-файл через sing-box check. Возвращает (bool, вывод).",
+      "line_range": [
+        103,
+        107
+      ],
+      "parameters": [
+        "config_path"
+      ],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "generate_config": [
+      "next",
+      "f.write",
+      "outbound.get",
+      "error",
+      "FileNotFoundError",
+      "rule.get",
+      "enumerate",
+      "open",
+      "config.strip",
+      "subprocess.run",
+      "os.rename",
+      "current_config_file.read",
+      "json.dumps",
+      "o.get",
+      "current_config.strip",
+      "json.load",
+      "info",
+      "len"
+    ],
+    "generate_temp_config": [
+      "next",
+      "outbound.get",
+      "error",
+      "FileNotFoundError",
+      "rule.get",
+      "enumerate",
+      "open",
+      "o.get",
+      "json.load",
+      "json.dumps"
+    ],
+    "validate_config_file": [
+      "subprocess.run"
+    ]
+  },
+  "dependencies": [
+    "error",
+    "info",
+    "json",
+    "logging",
+    "os",
+    "subprocess"
+  ],
+  "hash": "3b67ac25c1d990aa6d9fd5f64b228315c5ff1ea4cfc3887afbade5df3aa18990",
+  "artifact_id": "804b414f-5416-41fa-ad44-40c887660791"
+}

@@ -1,0 +1,138 @@
+{
+  "module_id": "src.singbox.server.exclusions",
+  "path": "src/singbox/server/exclusions.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "load_exclusions",
+      "docstring": "Load exclusions from the exclusion file.",
+      "line_range": [
+        6,
+        12
+      ],
+      "parameters": [],
+      "decorators": []
+    },
+    {
+      "name": "save_exclusions",
+      "docstring": "Save exclusions to the exclusion file.",
+      "line_range": [
+        14,
+        19
+      ],
+      "parameters": [
+        "exclusions"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "exclude_servers",
+      "docstring": "Exclude servers by index or name, supporting wildcards.",
+      "line_range": [
+        21,
+        47
+      ],
+      "parameters": [
+        "json_data",
+        "exclude_list",
+        "supported_protocols",
+        "debug_level"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "remove_exclusions",
+      "docstring": "Remove exclusions by index or name.",
+      "line_range": [
+        49,
+        68
+      ],
+      "parameters": [
+        "exclude_list",
+        "json_data",
+        "supported_protocols",
+        "debug_level"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "view_exclusions",
+      "docstring": "View current exclusions.",
+      "line_range": [
+        70,
+        77
+      ],
+      "parameters": [
+        "debug_level"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "clear_exclusions",
+      "docstring": "Clear all current exclusions.",
+      "line_range": [
+        79,
+        86
+      ],
+      "parameters": [],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "load_exclusions": [
+      "open",
+      "os.getenv",
+      "json.load"
+    ],
+    "save_exclusions": [
+      "open",
+      "os.getenv",
+      "json.dump"
+    ],
+    "exclude_servers": [
+      "enumerate",
+      "new_exclusions.append",
+      "json_data.get",
+      "server.get",
+      "save_exclusions",
+      "int",
+      "print",
+      "fnmatch.fnmatch",
+      "len",
+      "item.isdigit",
+      "load_exclusions"
+    ],
+    "remove_exclusions": [
+      "enumerate",
+      "json_data.get",
+      "server.get",
+      "save_exclusions",
+      "int",
+      "print",
+      "len",
+      "item.startswith",
+      "load_exclusions"
+    ],
+    "view_exclusions": [
+      "print",
+      "json.dumps",
+      "load_exclusions",
+      "exclusion.get"
+    ],
+    "clear_exclusions": [
+      "os.getenv",
+      "os.remove",
+      "print"
+    ]
+  },
+  "dependencies": [
+    "datetime",
+    "fnmatch",
+    "json",
+    "os"
+  ],
+  "hash": "0a5085a37b6aac213997b35dbdba2d71929565d53607f14beee0614e4f1d2176",
+  "artifact_id": "a348b983-ae61-428a-a416-362ac86b7803"
+}

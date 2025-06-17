@@ -1,0 +1,33 @@
+{
+  "module_id": "src.singbox.utils.id",
+  "path": "src/singbox/utils/id.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "generate_server_id",
+      "docstring": "Generate a unique ID for a server based on tag, protocol, and port.",
+      "line_range": [
+        3,
+        6
+      ],
+      "parameters": [
+        "server"
+      ],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "generate_server_id": [
+      "hashlib.sha256",
+      "server.get",
+      "identifier.encode"
+    ]
+  },
+  "dependencies": [
+    "hashlib"
+  ],
+  "hash": "9c7f1c2da7bd5c2592c8ec2ad41cc8b326a5d5a3b5a747d95148e75fcedb11c6",
+  "artifact_id": "96510be4-4378-402a-a7c5-6a01281c0630"
+}

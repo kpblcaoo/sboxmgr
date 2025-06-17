@@ -1,0 +1,19 @@
+{
+  "module": "src/logging/setup.py",
+  "functions": [
+    {
+      "name": "setup_logging",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    },
+    {
+      "name": "rotate_logs",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    }
+  ]
+}

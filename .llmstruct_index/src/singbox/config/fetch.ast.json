@@ -1,0 +1,19 @@
+{
+  "module": "src/singbox/config/fetch.py",
+  "functions": [
+    {
+      "name": "fetch_json",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    },
+    {
+      "name": "select_config",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    }
+  ]
+}

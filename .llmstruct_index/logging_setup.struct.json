@@ -1,0 +1,61 @@
+{
+  "module_id": "logging_setup",
+  "path": "logging_setup.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "setup_logging",
+      "docstring": "Configure logging with file and syslog handlers.",
+      "line_range": [
+        5,
+        27
+      ],
+      "parameters": [
+        "debug_level",
+        "log_file",
+        "max_log_size"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "rotate_logs",
+      "docstring": "Rotate log file if it exceeds max_log_size.",
+      "line_range": [
+        29,
+        41
+      ],
+      "parameters": [
+        "log_file",
+        "max_log_size"
+      ],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "setup_logging": [
+      "syslog_handler.setFormatter",
+      "rotate_logs",
+      "logging.warning",
+      "logger.addHandler",
+      "file_handler.setFormatter",
+      "logging.FileHandler",
+      "logging.Formatter",
+      "logger.setLevel",
+      "logging.getLogger"
+    ],
+    "rotate_logs": [
+      "os.rename",
+      "open",
+      "range"
+    ]
+  },
+  "dependencies": [
+    "logging",
+    "logging.handlers",
+    "os"
+  ],
+  "hash": "8e9da24732a22dc62cbdc7f05b51625a8831cdf455cbad682751a260fd42f5fe",
+  "artifact_id": "accb2afa-9090-463a-90f4-1fe8feebc22c"
+}

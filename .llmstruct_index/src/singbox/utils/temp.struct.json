@@ -1,0 +1,42 @@
+{
+  "module_id": "src.singbox.utils.temp",
+  "path": "src/singbox/utils/temp.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "handle_temp_file",
+      "docstring": "Handle temporary file creation and validation.",
+      "line_range": [
+        6,
+        14
+      ],
+      "parameters": [
+        "content",
+        "target_path",
+        "validate_fn"
+      ],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "handle_temp_file": [
+      "tempfile.gettempdir",
+      "json.dumps",
+      "shutil.move",
+      "open",
+      "ValueError",
+      "validate_fn",
+      "f.write"
+    ]
+  },
+  "dependencies": [
+    "json",
+    "os",
+    "shutil",
+    "tempfile"
+  ],
+  "hash": "cb468d75c1a205575235528acf8c920d9aedea654e47f73ce854ddaddd0bd3a3",
+  "artifact_id": "b4f9b689-dd9f-4feb-b93d-5af19be87bea"
+}

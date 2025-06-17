@@ -1,0 +1,12 @@
+{
+  "module_id": "modules.__init__",
+  "path": "modules/__init__.py",
+  "category": "cli",
+  "module_doc": "",
+  "functions": [],
+  "classes": [],
+  "callgraph": {},
+  "dependencies": [],
+  "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifact_id": "d5683bb3-c037-4b6c-a6f7-253d6be4d3a3"
+}

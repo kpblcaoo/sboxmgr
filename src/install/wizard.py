@@ -1,3 +1,8 @@
+"""
+Installation Wizard for Update Singbox
+
+Dev-mode: set WIZARD_DEV=1 to prevent any real changes to the system (no file writes, no systemd, no chmod, only logging actions).
+"""
 import subprocess
 import os
 import sys
@@ -9,7 +14,7 @@ import logging
 import hashlib
 import importlib.metadata
 from inquirer.render.console import ConsoleRender
-from modules.server_management import load_exclusions, view_exclusions
+from singbox.server.exclusions import load_exclusions, view_exclusions
 
 # Configure basic logging for debugging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -91,7 +96,7 @@ def copy_files_to_installation_path(source_files, destination_path):
         source_hash = get_file_hash(file)
         dest_hash = get_file_hash(destination_file)
         if source_hash != dest_hash:
-            shutil.copy(file, destination_file)
+            safe_copy(file, destination_file)
             print(f"Copied {file} to {destination_file} (updated or new)")
         else:
             print(f"File {destination_file} is unchanged, skipping copy.")
@@ -99,7 +104,7 @@ def copy_files_to_installation_path(source_files, destination_path):
     modules_source = "modules"
     modules_destination = os.path.join(destination_path, "modules")
     if not os.path.exists(modules_destination):
-        shutil.copytree(modules_source, modules_destination)
+        safe_copytree(modules_source, modules_destination)
         print(f"Copied {modules_source} to {modules_destination}")
     else:
         # Recursively compare and update module files
@@ -113,7 +118,7 @@ def copy_files_to_installation_path(source_files, destination_path):
                 src_hash = get_file_hash(src_file)
                 dest_hash = get_file_hash(dest_file)
                 if src_hash != dest_hash:
-                    shutil.copy(src_file, dest_file)
+                    safe_copy(src_file, dest_file)
                     print(f"Copied {src_file} to {dest_file} (updated or new)")
                 else:
                     print(f"File {dest_file} is unchanged, skipping copy.")
@@ -186,7 +191,7 @@ def validate_url(url):
 
 def ensure_install_path(path):
     if not os.path.exists(path):
-        os.makedirs(path)
+        safe_makedirs(path)
         print(f"Created installation path: {path}")
     else:
         print(f"Installation path already exists: {path}")
@@ -212,8 +217,7 @@ RemainAfterExit=no
 [Install]
 WantedBy=multi-user.target
 """
-    with open(service_path, "w") as service_file:
-        service_file.write(service_content)
+    safe_write(service_path, service_content)
     print(f"Systemd service created or updated at {service_path}")
     timer_content = f"""
 [Unit]
@@ -227,14 +231,13 @@ Unit=update_singbox.service
 [Install]
 WantedBy=timers.target
 """
-    with open(timer_path, "w") as timer_file:
-        timer_file.write(timer_content)
+    safe_write(timer_path, timer_content)
     print(f"Systemd timer created or updated at {timer_path}")
     # Reload systemd and reset failed state
-    subprocess.run(["systemctl", "daemon-reload"], check=True)
-    subprocess.run(["systemctl", "reset-failed", "update_singbox.service"], check=True)
-    subprocess.run(["systemctl", "enable", "update_singbox.timer"], check=True)
-    subprocess.run(["systemctl", "start", "update_singbox.timer"], check=True)
+    safe_run(["systemctl", "daemon-reload"], check=True)
+    safe_run(["systemctl", "reset-failed", "update_singbox.service"], check=True)
+    safe_run(["systemctl", "enable", "update_singbox.timer"], check=True)
+    safe_run(["systemctl", "start", "update_singbox.timer"], check=True)
     print("Systemd timer enabled and started.")
 
 def run_installation_wizard():
@@ -310,7 +313,7 @@ def run_installation_wizard():
             # Run update_singbox.py with selected indices
             cmd = ["sudo", "-E", "./update_singbox.py", "-u", install_link, "-i", ",".join(map(str, selected_indices))]
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                result = safe_run(cmd, capture_output=True, text=True, check=True)
                 print(f"Configuration applied successfully at /etc/sing-box/config.json")
                 print("Sing-box service restarted.")
                 logging.info(f"Get Config: Applied configuration with indices {selected_indices}")
@@ -360,7 +363,7 @@ def run_installation_wizard():
             copy_files_to_installation_path(["update_singbox.py", "config.template.json", "logging_setup.py"], install_path)
             venv_path = create_virtualenv(install_path)
             activate_virtualenv(venv_path)
-            subprocess.run([os.path.join(venv_path, "bin", "pip"), "install", "-r", "requirements.txt"], check=True)
+            safe_run([os.path.join(venv_path, "bin", "pip"), "install", "-r", "requirements.txt"], check=True)
             setup_systemd_service(install_path, timer_frequency, debug_level, install_link)
             print("Installation completed.")
 
@@ -396,7 +399,7 @@ def run_installation_wizard():
                     continue
                 exclude_args = server_answers["servers"] if exclusion_answers["exclusion_action"] == "Add Exclusions" else [f"-{s}" for s in server_answers["servers"]]
                 try:
-                    subprocess.run(["sudo", "-E", "./update_singbox.py", "-u", url_answers["install_link"], "-e"] + exclude_args, check=True)
+                    safe_run(["sudo", "-E", "./update_singbox.py", "-u", url_answers["install_link"], "-e"] + exclude_args, check=True)
                     print("Exclusions updated successfully.")
                 except subprocess.CalledProcessError as e:
                     logging.error(f"Failed to manage exclusions: {e.stderr}")

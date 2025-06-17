@@ -1,0 +1,38 @@
+{
+  "module_id": "src.singbox.config.protocol",
+  "path": "src/singbox/config/protocol.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "validate_protocol",
+      "docstring": "Validate protocol and extract parameters.",
+      "line_range": [
+        3,
+        88
+      ],
+      "parameters": [
+        "config",
+        "supported_protocols"
+      ],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "validate_protocol": [
+      "outbound.update",
+      "error",
+      "config.get",
+      "ValueError",
+      "outbound.get"
+    ]
+  },
+  "dependencies": [
+    "error",
+    "logging",
+    "warning"
+  ],
+  "hash": "e09902feb50c53274e545ea215dc1e76a29dffba56756398efb849569a6886a8",
+  "artifact_id": "030c6fa0-5053-4738-b5b6-a4c08f6b0d67"
+}

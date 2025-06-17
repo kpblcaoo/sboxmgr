@@ -1,0 +1,50 @@
+{
+  "module_id": "src.singbox.server.state",
+  "path": "src/singbox/server/state.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "load_selected_config",
+      "docstring": "Load selected configuration from file.",
+      "line_range": [
+        5,
+        11
+      ],
+      "parameters": [],
+      "decorators": []
+    },
+    {
+      "name": "save_selected_config",
+      "docstring": "Save selected configuration to file.",
+      "line_range": [
+        13,
+        18
+      ],
+      "parameters": [
+        "selected"
+      ],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "load_selected_config": [
+      "open",
+      "os.getenv",
+      "json.load"
+    ],
+    "save_selected_config": [
+      "open",
+      "os.getenv",
+      "json.dump"
+    ]
+  },
+  "dependencies": [
+    "datetime",
+    "json",
+    "os"
+  ],
+  "hash": "3c05410db1a7b992040ea50c1f185845719a6ef5c66a9eec208aa332fc5a7ad5",
+  "artifact_id": "1aeafe80-0aec-450d-a7f9-fc452da73386"
+}

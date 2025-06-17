@@ -1,0 +1,12 @@
+{
+  "module": "modules/protocol_validation.py",
+  "functions": [
+    {
+      "name": "validate_protocol",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    }
+  ]
+}

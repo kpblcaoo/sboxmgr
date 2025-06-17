@@ -26,17 +26,21 @@ Environment Variables:
     SINGBOX_PROXY: Proxy URL (e.g., socks5://127.0.0.1:1080 or https://proxy.example.com)
 """
 import argparse
-import json
 import logging
 import os
 import sys
+import json
 
-from logging_setup import setup_logging
-from modules.config_fetch import fetch_json, select_config
-from modules.protocol_validation import validate_protocol
-from modules.config_generate import generate_config
-from modules.service_manage import manage_service
-from modules.server_management import list_servers, load_exclusions, apply_exclusions, exclude_servers, remove_exclusions, view_exclusions, clear_exclusions, load_selected_config, save_selected_config, generate_server_id
+from logsetup.setup import setup_logging
+from singbox.config.fetch import fetch_json, select_config
+from singbox.config.protocol import validate_protocol
+from singbox.config.generate import generate_config, generate_temp_config, validate_config_file
+from singbox.service.manage import manage_service
+from singbox.server.selection import list_servers
+from singbox.server.management import apply_exclusions
+from singbox.server.exclusions import load_exclusions, exclude_servers, remove_exclusions, view_exclusions, clear_exclusions
+from singbox.server.state import load_selected_config, save_selected_config
+from singbox.utils.id import generate_server_id
 
 # Configuration with environment variable fallbacks
 LOG_FILE = os.getenv("SINGBOX_LOG_FILE", "/var/log/update_singbox.log")
@@ -244,8 +248,7 @@ def main():
                     logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
         # --- Конец подготовки outbounds и excluded_ips ---
         # Генерируем временный файл
-        import json
-        from modules.config_generate import generate_temp_config, validate_config_file
+        from singbox.config.generate import generate_temp_config, validate_config_file
         with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
             temp_path = tmp.name
             config_content = generate_temp_config(outbounds, TEMPLATE_FILE, excluded_ips)

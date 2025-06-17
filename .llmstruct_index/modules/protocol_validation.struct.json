@@ -1,0 +1,38 @@
+{
+  "module_id": "modules.protocol_validation",
+  "path": "modules/protocol_validation.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "validate_protocol",
+      "docstring": "Validate protocol and extract parameters.",
+      "line_range": [
+        3,
+        88
+      ],
+      "parameters": [
+        "config",
+        "supported_protocols"
+      ],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "validate_protocol": [
+      "outbound.update",
+      "outbound.get",
+      "error",
+      "config.get",
+      "ValueError"
+    ]
+  },
+  "dependencies": [
+    "error",
+    "logging",
+    "warning"
+  ],
+  "hash": "e09902feb50c53274e545ea215dc1e76a29dffba56756398efb849569a6886a8",
+  "artifact_id": "5bf69e77-821b-4310-810e-da6684f27a11"
+}

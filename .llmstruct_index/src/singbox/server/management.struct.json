@@ -1,0 +1,234 @@
+{
+  "module_id": "src.singbox.server.management",
+  "path": "src/singbox/server/management.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "list_servers",
+      "docstring": "List all supported outbounds with indices and details.",
+      "line_range": [
+        15,
+        34
+      ],
+      "parameters": [
+        "json_data",
+        "supported_protocols",
+        "debug_level"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "handle_temp_file",
+      "docstring": "Handle temporary file creation and validation.",
+      "line_range": [
+        36,
+        44
+      ],
+      "parameters": [
+        "content",
+        "target_path",
+        "validate_fn"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "load_exclusions",
+      "docstring": "Load exclusions from the exclusion file.",
+      "line_range": [
+        46,
+        51
+      ],
+      "parameters": [],
+      "decorators": []
+    },
+    {
+      "name": "save_exclusions",
+      "docstring": "Save exclusions to the exclusion file.",
+      "line_range": [
+        53,
+        56
+      ],
+      "parameters": [
+        "exclusions"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "load_selected_config",
+      "docstring": "Load selected configuration from file.",
+      "line_range": [
+        58,
+        63
+      ],
+      "parameters": [],
+      "decorators": []
+    },
+    {
+      "name": "save_selected_config",
+      "docstring": "Save selected configuration to file.",
+      "line_range": [
+        65,
+        68
+      ],
+      "parameters": [
+        "selected"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "apply_exclusions",
+      "docstring": "Apply exclusions to the list of server configurations.",
+      "line_range": [
+        70,
+        80
+      ],
+      "parameters": [
+        "configs",
+        "excluded_ids",
+        "debug_level"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "exclude_servers",
+      "docstring": "Exclude servers by index or name, supporting wildcards.",
+      "line_range": [
+        82,
+        111
+      ],
+      "parameters": [
+        "json_data",
+        "exclude_list",
+        "supported_protocols",
+        "debug_level"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "remove_exclusions",
+      "docstring": "Remove exclusions by index or name.",
+      "line_range": [
+        113,
+        134
+      ],
+      "parameters": [
+        "exclude_list",
+        "json_data",
+        "supported_protocols",
+        "debug_level"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "view_exclusions",
+      "docstring": "View current exclusions.",
+      "line_range": [
+        136,
+        143
+      ],
+      "parameters": [
+        "debug_level"
+      ],
+      "decorators": []
+    },
+    {
+      "name": "clear_exclusions",
+      "docstring": "Clear all current exclusions.",
+      "line_range": [
+        145,
+        151
+      ],
+      "parameters": [],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "list_servers": [
+      "server.get",
+      "isinstance",
+      "print"
+    ],
+    "handle_temp_file": [
+      "tempfile.gettempdir",
+      "json.dumps",
+      "shutil.move",
+      "open",
+      "ValueError",
+      "validate_fn",
+      "f.write"
+    ],
+    "load_exclusions": [
+      "open",
+      "json.load"
+    ],
+    "save_exclusions": [
+      "handle_temp_file"
+    ],
+    "load_selected_config": [
+      "open",
+      "json.load"
+    ],
+    "save_selected_config": [
+      "handle_temp_file"
+    ],
+    "apply_exclusions": [
+      "enumerate",
+      "config.get",
+      "valid_configs.append",
+      "print",
+      "generate_server_id"
+    ],
+    "exclude_servers": [
+      "enumerate",
+      "generate_server_id",
+      "new_exclusions.append",
+      "json_data.get",
+      "server.get",
+      "save_exclusions",
+      "int",
+      "print",
+      "fnmatch.fnmatch",
+      "len",
+      "item.isdigit",
+      "load_exclusions"
+    ],
+    "remove_exclusions": [
+      "enumerate",
+      "json_data.get",
+      "server.get",
+      "save_exclusions",
+      "int",
+      "print",
+      "len",
+      "generate_server_id",
+      "item.startswith",
+      "load_exclusions"
+    ],
+    "view_exclusions": [
+      "print",
+      "json.dumps",
+      "load_exclusions",
+      "exclusion.get"
+    ],
+    "clear_exclusions": [
+      "print",
+      "os.remove"
+    ]
+  },
+  "dependencies": [
+    "datetime",
+    "fnmatch",
+    "generate_server_id",
+    "hashlib",
+    "json",
+    "os",
+    "shutil",
+    "singbox.utils.id",
+    "sys",
+    "tempfile"
+  ],
+  "hash": "35f6388402af7f5424969567dc4da8f749008bec48c50f1671a1f00731f68a08",
+  "artifact_id": "5cbd4dd5-8c31-4776-a237-b9196bd3ffcf"
+}

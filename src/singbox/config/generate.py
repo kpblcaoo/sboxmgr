@@ -61,7 +61,10 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
     try:
         subprocess.run(["sing-box", "check", "-c", temp_config_file], check=True)
         info("Temporary configuration validated successfully")
-    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+    except FileNotFoundError:
+        error("sing-box executable not found. Please install sing-box and ensure it is in your PATH.")
+        return False
+    except subprocess.CalledProcessError as e:
         error(f"Temporary configuration is invalid or sing-box not found: {e}")
         raise
 
@@ -103,5 +106,8 @@ def generate_temp_config(outbounds, template_file, excluded_ips):
 def validate_config_file(config_path):
     """Валидирует конфиг-файл через sing-box check. Возвращает (bool, вывод)."""
     import subprocess
-    result = subprocess.run(["sing-box", "check", "-c", config_path], capture_output=True, text=True)
-    return result.returncode == 0, result.stdout + result.stderr
+    try:
+        result = subprocess.run(["sing-box", "check", "-c", config_path], capture_output=True, text=True)
+        return result.returncode == 0, result.stdout + result.stderr
+    except FileNotFoundError:
+        return False, "sing-box executable not found. Please install sing-box and ensure it is in your PATH."

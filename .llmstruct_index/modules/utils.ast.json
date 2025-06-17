@@ -1,0 +1,12 @@
+{
+  "module": "modules/utils.py",
+  "functions": [
+    {
+      "name": "handle_temp_file",
+      "ast_hash": null,
+      "source": null,
+      "start_line": null,
+      "end_line": null
+    }
+  ]
+}

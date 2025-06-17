@@ -1,0 +1,12 @@
+{
+  "module_id": "src.singbox.modules.__init__",
+  "path": "src/singbox/modules/__init__.py",
+  "category": "cli",
+  "module_doc": "",
+  "functions": [],
+  "classes": [],
+  "callgraph": {},
+  "dependencies": [],
+  "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifact_id": "928e2786-9d94-4c6f-8c79-6479fa65e4e6"
+}

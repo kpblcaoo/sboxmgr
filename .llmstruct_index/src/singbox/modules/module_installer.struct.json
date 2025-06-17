@@ -1,0 +1,31 @@
+{
+  "module_id": "src.singbox.modules.module_installer",
+  "path": "src/singbox/modules/module_installer.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "install_dependencies",
+      "docstring": "",
+      "line_range": [
+        6,
+        11
+      ],
+      "parameters": [],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "install_dependencies": [
+      "subprocess.run",
+      "print"
+    ]
+  },
+  "dependencies": [
+    "subprocess",
+    "sys"
+  ],
+  "hash": "85f0a2ced8f559a0da8d521a551fd94c629660b89b8398f51bda616c2cf0b0bd",
+  "artifact_id": "dedc7e8d-d02f-47f8-a0e6-f4a6120d64e5"
+}

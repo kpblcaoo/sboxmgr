@@ -1,0 +1,45 @@
+{
+  "module_id": "modules.utils",
+  "path": "modules/utils.py",
+  "category": "core",
+  "module_doc": "",
+  "functions": [
+    {
+      "name": "handle_temp_file",
+      "docstring": "Write content to a temporary file, validate, and move to target path.",
+      "line_range": [
+        7,
+        20
+      ],
+      "parameters": [
+        "content",
+        "target_path",
+        "validate_fn"
+      ],
+      "decorators": []
+    }
+  ],
+  "classes": [],
+  "callgraph": {
+    "handle_temp_file": [
+      "tempfile.gettempdir",
+      "f.write",
+      "error",
+      "validate_fn",
+      "open",
+      "shutil.move",
+      "ValueError",
+      "json.dumps"
+    ]
+  },
+  "dependencies": [
+    "error",
+    "json",
+    "logging",
+    "os",
+    "shutil",
+    "tempfile"
+  ],
+  "hash": "8f415c612ff475b6360500db31b6c41c5cd481824d255df51d2b08223d5a211d",
+  "artifact_id": "e581cde6-9c6e-4a99-9e28-7607a9e973f6"
+}
