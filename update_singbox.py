@@ -61,6 +61,7 @@ def main():
     parser.add_argument("-l", "--list-servers", action="store_true", help="List all servers with indices")
     parser.add_argument("-e", "--exclude", nargs='?', const='', help="Exclude servers by index or name")
     parser.add_argument("--clear-exclusions", action="store_true", help="Clear all current exclusions")
+    parser.add_argument("--dry-run", action="store_true", help="Тестировать генерацию конфига без изменений")
     args = parser.parse_args()
 
     url = args.url or os.getenv("SINGBOX_URL")
@@ -184,6 +185,79 @@ def main():
         if debug_level >= 1:
             logging.info(f"Prepared {len(outbounds)} servers for auto-selection")
             logging.info(f"Excluded IPs: {excluded_ips}")
+
+    if args.dry_run:
+        import tempfile
+        import subprocess
+        logging.info("Режим dry-run: создаём временный конфиг и валидируем его")
+        # Подготовка outbounds и excluded_ips как в основной логике
+        # --- Копируем логику выбора outbounds и excluded_ips ---
+        exclusions = load_exclusions()
+        excluded_ids = {exclusion["id"] for exclusion in exclusions["exclusions"]}
+        selected_indices = []
+        if args.index is not None:
+            selected_indices = args.index
+        else:
+            saved_config = load_selected_config()
+            selected_indices = [int(item["index"]) for item in saved_config["selected"] if "index" in item]
+        outbounds = []
+        excluded_ips = []
+        if args.remarks or selected_indices:
+            if isinstance(selected_indices, list) and len(selected_indices) > 1:
+                for idx in selected_indices:
+                    config = select_config(json_data, args.remarks, idx)
+                    outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
+                    outbounds.append(outbound)
+                    if "server" in outbound:
+                        if outbound["server"] in excluded_ids:
+                            logging.warning(f"Server {outbound['server']} at index {idx} is in the exclusion list.")
+                        excluded_ips.append(outbound["server"])
+            else:
+                idx = selected_indices[0] if selected_indices else None
+                config = select_config(json_data, args.remarks, idx)
+                outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
+                outbounds = [outbound]
+                if "server" in outbound:
+                    if outbound["server"] in excluded_ids:
+                        logging.warning(f"Server {outbound['server']} at index {idx} is in the exclusion list.")
+                    excluded_ips.append(outbound["server"])
+        else:
+            if isinstance(json_data, dict) and "outbounds" in json_data:
+                configs = [
+                    outbound for outbound in json_data["outbounds"]
+                    if outbound.get("type") in SUPPORTED_PROTOCOLS
+                ]
+            else:
+                configs = json_data
+            configs = apply_exclusions(configs, excluded_ids, debug_level)
+            for idx, config in enumerate(configs):
+                try:
+                    outbound = validate_protocol(config, SUPPORTED_PROTOCOLS)
+                    if not outbound["tag"].startswith("proxy-"):
+                        outbounds.append(outbound)
+                    else:
+                        outbound["tag"] = f"proxy-{chr(97 + idx)}"
+                        outbounds.append(outbound)
+                    if "server" in outbound:
+                        excluded_ips.append(outbound["server"])
+                except ValueError as e:
+                    logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
+        # --- Конец подготовки outbounds и excluded_ips ---
+        # Генерируем временный файл
+        import json
+        from modules.config_generate import generate_temp_config, validate_config_file
+        with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
+            temp_path = tmp.name
+            config_content = generate_temp_config(outbounds, TEMPLATE_FILE, excluded_ips)
+            tmp.write(config_content)
+        valid, output = validate_config_file(temp_path)
+        if valid:
+            logging.info("Конфиг валиден. Проверка прошла успешно.")
+        else:
+            logging.error(f"Конфиг невалиден:\n{output}")
+        os.unlink(temp_path)
+        logging.info("Временный файл удалён. Основной конфиг не изменён, сервис не перезапущен.")
+        return
 
     changes_made = generate_config(outbounds, TEMPLATE_FILE, CONFIG_FILE, BACKUP_FILE, excluded_ips)
 
