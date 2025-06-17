@@ -1,3 +1,2 @@
 # Production dependencies
-python-inquirer==1.0.3
-requests>=2.28.0
+requests[socks]>=2.25.1
