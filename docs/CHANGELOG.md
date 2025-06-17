@@ -1,4 +1,23 @@
 # Changelog
+
+## [v1.3.0] - 2025-05-16
+
+### Added:
+- Installer script (`install_update_singbox.sh`) to install the script to `/usr/local/bin/`, set up a systemd service, and configure a timer.
+- Dynamic exclusion of servers from routing rules by IP using `ip_cidr` in the configuration template.
+
+### Changed:
+- Updated `config.template.json` to include a placeholder for `$excluded_servers` in the `ip_cidr` field.
+- Enhanced script logic to replace the placeholder with actual IPs to be routed directly.
+
+### Fixed:
+- Ensured that specified IPs are routed directly, bypassing the proxy.
+
+### Closed Issues:
+- Issue #2: Implemented installer and enhanced exclusion logic.
+
+---
+
 ## [v1.2.1] - 2025-05-16
 
 ### Fixed:
