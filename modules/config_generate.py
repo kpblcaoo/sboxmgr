@@ -81,14 +81,15 @@ def generate_temp_config(outbounds, template_file, excluded_ips):
     with open(template_file) as f:
         template = json.load(f)
     outbound_tags = [outbound["tag"] for outbound in outbounds] if outbounds else []
+    # Проверка наличия urltest с tag 'auto'
+    urltest_idx = next((i for i, o in enumerate(template["outbounds"]) if o.get("tag") == "auto"), None)
+    if urltest_idx is None:
+        error("No outbound with tag 'auto' found in template. Please check your config.template.json.")
+        raise ValueError("No outbound with tag 'auto' found in template. Please check your config.template.json.")
     for outbound in template["outbounds"]:
         if outbound.get("type") == "urltest" and outbound.get("tag") == "auto":
             outbound["outbounds"] = outbound_tags
             break
-    urltest_idx = next(
-        (i for i, o in enumerate(template["outbounds"]) if o.get("tag") == "auto"),
-        0
-    )
     template["outbounds"] = (
         template["outbounds"][:urltest_idx + 1] +
         outbounds +
