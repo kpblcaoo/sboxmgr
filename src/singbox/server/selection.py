@@ -24,6 +24,6 @@ def list_servers(json_data, supported_protocols, debug_level=0):
         port = server.get("server_port", "N/A")
         server_id = generate_server_id(server)
         if server_id in excluded_ids:
-            name += " (excluded)"
+            name += " [excluded]"
         if debug_level >= 0:
             print(f"{index} | {name} | {protocol} | {port}") 

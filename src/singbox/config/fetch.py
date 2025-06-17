@@ -1,6 +1,8 @@
 import requests
 import json
 from logging import error
+from singbox.server.exclusions import load_exclusions
+from singbox.utils.id import generate_server_id
 
 def fetch_json(url, proxy_url=None):
     """Fetch JSON from URL with optional proxy."""
@@ -42,13 +44,21 @@ def select_config(json_data, remarks, index):
     if not outbounds:
         raise ValueError("Received empty configuration")
 
+    exclusions = load_exclusions()
+    excluded_ids = {ex["id"] for ex in exclusions["exclusions"]}
+
     if remarks:
         for item in outbounds:
             if item.get("tag") == remarks:
+                if generate_server_id(item) in excluded_ids:
+                    raise ValueError(f"Сервер с remarks '{remarks}' находится в списке исключённых (excluded). Выберите другой.")
                 return item
         raise ValueError(f"No configuration found with remarks: {remarks}")
 
     try:
-        return outbounds[index]
+        selected = outbounds[index]
+        if generate_server_id(selected) in excluded_ids:
+            raise ValueError(f"Сервер с индексом {index} находится в списке исключённых (excluded). Выберите другой.")
+        return selected
     except (IndexError, TypeError):
         raise ValueError(f"No configuration found at index: {index}")

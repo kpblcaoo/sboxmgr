@@ -2,13 +2,20 @@ import json
 import os
 import datetime
 import fnmatch
+import logging
+from singbox.utils.id import generate_server_id
 
 def load_exclusions():
     """Load exclusions from the exclusion file."""
     EXCLUSION_FILE = os.getenv("SINGBOX_EXCLUSION_FILE", "./exclusions.json")
     if os.path.exists(EXCLUSION_FILE):
-        with open(EXCLUSION_FILE, 'r') as f:
-            return json.load(f)
+        try:
+            with open(EXCLUSION_FILE, 'r') as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            logging.error(f"Файл {EXCLUSION_FILE} повреждён или невалиден. Игнорируем содержимое и продолжаем с пустым списком исключений.")
+            print(f"[Ошибка] exclusions.json повреждён или невалиден. Сброшен до пустого состояния.")
+            return {"last_modified": "", "exclusions": []}
     return {"last_modified": "", "exclusions": []}
 
 def save_exclusions(exclusions):
@@ -27,22 +34,35 @@ def exclude_servers(json_data, exclude_list, supported_protocols, debug_level=0)
         (idx, server) for idx, server in enumerate(servers)
         if server.get("type") in supported_protocols
     ]
+    existing_ids = {ex["id"] for ex in exclusions["exclusions"]}
     for item in exclude_list:
         if item.isdigit():
             index = int(item)
             if 0 <= index < len(supported_servers):
                 _, server = supported_servers[index]
-                server_id = server.get('id', None) or f"{server.get('tag', '')}{server.get('type', '')}{server.get('server_port', '')}"
-                new_exclusions.append({"id": server_id, "name": server.get("tag", "N/A")})
-                if debug_level >= 0:
-                    print(f"Excluding server by index {index}: {server.get('tag', 'N/A')}")
+                server_id = generate_server_id(server)
+                name = f"{server.get('tag', 'N/A')} ({server.get('type', 'N/A')}:{server.get('server_port', 'N/A')})"
+                if server_id not in existing_ids:
+                    new_exclusions.append({"id": server_id, "name": name})
+                    existing_ids.add(server_id)
+                    if debug_level >= 0:
+                        print(f"Excluding server by index {index}: {name}")
+                else:
+                    if debug_level >= 0:
+                        print(f"[Info] Server already excluded: {name}")
         else:
             for _, server in supported_servers:
                 if fnmatch.fnmatch(server.get("tag", ""), item):
-                    server_id = server.get('id', None) or f"{server.get('tag', '')}{server.get('type', '')}{server.get('server_port', '')}"
-                    new_exclusions.append({"id": server_id, "name": server.get("tag", "N/A")})
-                    if debug_level >= 0:
-                        print(f"Excluding server by name {server.get('tag', 'N/A')}")
+                    server_id = generate_server_id(server)
+                    name = f"{server.get('tag', 'N/A')} ({server.get('type', 'N/A')}:{server.get('server_port', 'N/A')})"
+                    if server_id not in existing_ids:
+                        new_exclusions.append({"id": server_id, "name": name})
+                        existing_ids.add(server_id)
+                        if debug_level >= 0:
+                            print(f"Excluding server by name {name}")
+                    else:
+                        if debug_level >= 0:
+                            print(f"[Info] Server already excluded: {name}")
     exclusions["exclusions"].extend(new_exclusions)
     save_exclusions(exclusions)
 
@@ -80,7 +100,10 @@ def clear_exclusions():
     """Clear all current exclusions."""
     EXCLUSION_FILE = os.getenv("SINGBOX_EXCLUSION_FILE", "./exclusions.json")
     if os.path.exists(EXCLUSION_FILE):
-        os.remove(EXCLUSION_FILE)
-        print("Exclusions cleared.")
+        try:
+            os.remove(EXCLUSION_FILE)
+            print("Exclusions cleared.")
+        except Exception as e:
+            print(f"[Ошибка] Не удалось удалить exclusions.json: {e}")
     else:
         print("No exclusions to clear.") 

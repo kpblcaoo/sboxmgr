@@ -7,3 +7,28 @@ venv/
 *.log
 # Removed exclusion of tests directory for dev branch
 tests/ # Commented out to include tests in dev branch
+
+# LLMStruct/struct index
+.llmstruct_data/
+struct.json
+
+# plans (project logs, drafts)
+plans/
+
+# pytest/coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# editor/IDE
+*.swp
+*.swo
+*.bak
+
+# Jupyter/VSCode
+.ipynb_checkpoints/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
