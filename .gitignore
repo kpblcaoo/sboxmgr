@@ -11,6 +11,8 @@ tests/ # Commented out to include tests in dev branch
 # LLMStruct/struct index
 .llmstruct_data/
 struct.json
+docs/struct.json
+backup.json
 
 # plans (project logs, drafts)
 plans/
