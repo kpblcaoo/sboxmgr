@@ -7,32 +7,24 @@ from singbox.utils.id import generate_server_id
 def fetch_json(url, proxy_url=None):
     """Fetch JSON from URL with optional proxy."""
     try:
-        proxies = {"http": proxy_url, "https": proxy_url} if proxy_url else None
-        response = requests.get(url, headers={"User-Agent": "SFI"}, proxies=proxies, timeout=10)
+        proxies = {
+            "http": proxy_url,
+            "https": proxy_url,
+        } if proxy_url else None
+
+        response = requests.get(url, headers={"User-Agent": "SFI"}, proxies=proxies)
         response.raise_for_status()
-        json_data = response.json()
-        if not json_data:
-            error("Received empty JSON from URL")
-            return None
-        return json_data
-    except requests.Timeout:
-        error(f"Timeout fetching configuration from {url}")
-        return None
-    except requests.HTTPError as e:
-        error(f"HTTP error fetching configuration from {url}: {e}")
-        return None
-    except requests.ConnectionError as e:
-        error(f"Connection error fetching configuration from {url}: {e}")
-        return None
-    except json.JSONDecodeError as e:
-        error(f"Invalid JSON received from {url}: {e}")
-        return None
-    except Exception as e:
-        error(f"Unexpected error fetching configuration from {url}: {e}")
-        return None
+        return response.json()
+    except requests.RequestException as e:
+        error(f"Failed to fetch configuration from {url}: {e}")
+        raise
+    except json.JSONDecodeError:
+        error("Received invalid JSON from URL")
+        raise
 
 def select_config(json_data, remarks, index):
     """Select proxy configuration by remarks or index."""
+    # If json_data is a full sing-box config, extract outbounds
     if isinstance(json_data, dict) and "outbounds" in json_data:
         outbounds = [
             outbound for outbound in json_data["outbounds"]
