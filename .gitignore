@@ -37,3 +37,4 @@ Thumbs.db
 struct.json
 exclusions.json
 selected_config.json
+backup.json

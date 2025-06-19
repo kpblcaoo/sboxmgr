@@ -1,18 +1,20 @@
 import json
-import os
-import datetime
+import logging
+from sboxmgr.utils.env import get_selected_config_file
+from sboxmgr.utils.file import atomic_write_json, file_exists, read_json
 
 def load_selected_config():
     """Load selected configuration from file."""
-    SELECTED_CONFIG_FILE = os.getenv("SBOXMGR_SELECTED_CONFIG_FILE", "./selected_config.json")
-    if os.path.exists(SELECTED_CONFIG_FILE):
-        with open(SELECTED_CONFIG_FILE, 'r') as f:
-            return json.load(f)
-    return {"last_modified": "", "selected": []}
+    SELECTED_CONFIG_FILE = get_selected_config_file()
+    if file_exists(SELECTED_CONFIG_FILE):
+        try:
+            return read_json(SELECTED_CONFIG_FILE)
+        except json.JSONDecodeError:
+            logging.error(f"Файл {SELECTED_CONFIG_FILE} повреждён или невалиден. Сброшен до пустого состояния.")
+            return {"selected": []}
+    return {"selected": []}
 
 def save_selected_config(selected):
     """Save selected configuration to file."""
-    SELECTED_CONFIG_FILE = os.getenv("SBOXMGR_SELECTED_CONFIG_FILE", "./selected_config.json")
-    selected["last_modified"] = datetime.datetime.utcnow().isoformat() + "Z"
-    with open(SELECTED_CONFIG_FILE, 'w') as f:
-        json.dump(selected, f, indent=2) 
+    SELECTED_CONFIG_FILE = get_selected_config_file()
+    atomic_write_json(selected, SELECTED_CONFIG_FILE) 

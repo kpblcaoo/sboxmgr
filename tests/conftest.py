@@ -18,7 +18,7 @@ def run_cli(args, env=None, cwd=None):
     env["SBOXMGR_EXCLUSION_FILE"] = str(Path(cwd) / "exclusions.json")
     env["SBOXMGR_SELECTED_CONFIG_FILE"] = str(Path(cwd) / "selected_config.json")
     result = subprocess.run(
-        [sys.executable, "src/main.py"] + args,
+        [sys.executable, "src/sboxmgr/cli/main.py"] + args,
         capture_output=True, text=True, env=env, cwd=PROJECT_ROOT
     )
     return result

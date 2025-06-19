@@ -1,28 +1,30 @@
 import json
+import os
 import datetime
 import fnmatch
 import logging
 from sboxmgr.utils.id import generate_server_id
-from sboxmgr.utils.env import get_exclusion_file
-from sboxmgr.utils.file import atomic_write_json, atomic_remove, file_exists, read_json
 
 def load_exclusions(dry_run=False):
     """Load exclusions from the exclusion file."""
-    EXCLUSION_FILE = get_exclusion_file()
-    if file_exists(EXCLUSION_FILE):
+    EXCLUSION_FILE = os.getenv("SBOXMGR_EXCLUSION_FILE", "./exclusions.json")
+    if os.path.exists(EXCLUSION_FILE):
         try:
-            return read_json(EXCLUSION_FILE)
+            with open(EXCLUSION_FILE, 'r') as f:
+                return json.load(f)
         except json.JSONDecodeError:
             if not dry_run:
                 logging.error(f"Файл {EXCLUSION_FILE} повреждён или невалиден. Игнорируем содержимое и продолжаем с пустым списком исключений.")
+                print(f"[Ошибка] exclusions.json повреждён или невалиден. Сброшен до пустого состояния.")
             return {"last_modified": "", "exclusions": []}
     return {"last_modified": "", "exclusions": []}
 
 def save_exclusions(exclusions):
     """Save exclusions to the exclusion file."""
-    EXCLUSION_FILE = get_exclusion_file()
+    EXCLUSION_FILE = os.getenv("SBOXMGR_EXCLUSION_FILE", "./exclusions.json")
     exclusions["last_modified"] = datetime.datetime.now(datetime.UTC).isoformat().replace("+00:00", "Z")
-    atomic_write_json(exclusions, EXCLUSION_FILE)
+    with open(EXCLUSION_FILE, 'w') as f:
+        json.dump(exclusions, f, indent=2)
 
 def exclude_servers(json_data, exclude_list, supported_protocols, debug_level=0):
     """Exclude servers by index or name, supporting wildcards."""
@@ -45,10 +47,10 @@ def exclude_servers(json_data, exclude_list, supported_protocols, debug_level=0)
                     new_exclusions.append({"id": server_id, "name": name})
                     existing_ids.add(server_id)
                     if debug_level >= 0:
-                        logging.info(f"Excluding server by index {index}: {name}")
+                        print(f"Excluding server by index {index}: {name}")
                 else:
                     if debug_level >= 0:
-                        logging.info(f"[Info] Server already excluded: {name}")
+                        print(f"[Info] Server already excluded: {name}")
         else:
             for _, server in supported_servers:
                 if fnmatch.fnmatch(server.get("tag", ""), item):
@@ -58,10 +60,10 @@ def exclude_servers(json_data, exclude_list, supported_protocols, debug_level=0)
                         new_exclusions.append({"id": server_id, "name": name})
                         existing_ids.add(server_id)
                         if debug_level >= 0:
-                            logging.info(f"Excluding server by name {name}")
+                            print(f"Excluding server by name {name}")
                     else:
                         if debug_level >= 0:
-                            logging.info(f"[Info] Server already excluded: {name}")
+                            print(f"[Info] Server already excluded: {name}")
     exclusions["exclusions"].extend(new_exclusions)
     save_exclusions(exclusions)
 
@@ -82,27 +84,27 @@ def remove_exclusions(exclude_list, json_data, supported_protocols, debug_level=
                 server_id = server.get('id', None) or f"{server.get('tag', '')}{server.get('type', '')}{server.get('server_port', '')}"
                 new_exclusions = [ex for ex in new_exclusions if ex["id"] != server_id]
                 if debug_level >= 0:
-                    logging.info(f"Removed exclusion for server at index {index}: {server.get('tag', 'N/A')}")
+                    print(f"Removed exclusion for server at index {index}: {server.get('tag', 'N/A')}")
     exclusions["exclusions"] = new_exclusions
     save_exclusions(exclusions)
 
 def view_exclusions(debug_level=0):
     """View current exclusions."""
     exclusions = load_exclusions(dry_run=False)
-    logging.info("Current Exclusions:")
+    print("Current Exclusions:")
     for exclusion in exclusions["exclusions"]:
-        logging.info(f"ID: {exclusion['id']}, Name: {exclusion['name']}, Reason: {exclusion.get('reason', 'N/A')}")
+        print(f"ID: {exclusion['id']}, Name: {exclusion['name']}, Reason: {exclusion.get('reason', 'N/A')}")
     if debug_level >= 2:
-        logging.debug(json.dumps(exclusions, indent=2))
+        print(json.dumps(exclusions, indent=2))
 
 def clear_exclusions():
     """Clear all current exclusions."""
-    EXCLUSION_FILE = get_exclusion_file()
-    if file_exists(EXCLUSION_FILE):
+    EXCLUSION_FILE = os.getenv("SBOXMGR_EXCLUSION_FILE", "./exclusions.json")
+    if os.path.exists(EXCLUSION_FILE):
         try:
-            atomic_remove(EXCLUSION_FILE)
-            logging.info("Exclusions cleared.")
+            os.remove(EXCLUSION_FILE)
+            print("Exclusions cleared.")
         except Exception as e:
-            logging.error(f"[Ошибка] Не удалось удалить exclusions.json: {e}")
+            print(f"[Ошибка] Не удалось удалить exclusions.json: {e}")
     else:
-        logging.info("No exclusions to clear.") 
+        print("No exclusions to clear.") 

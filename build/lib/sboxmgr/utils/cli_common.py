@@ -61,12 +61,12 @@ def prepare_selection(json_data, indices, remarks, supported_protocols, exclusio
                 if debug_level >= 2:
                     import logging
                     logging.debug(f"Selected configuration details: {config}")
-        except Exception as e:
-            logging.error(f"[Ошибка] {e}")
+        except ValueError as e:
+            print(f"[Ошибка] {e}")
             return [], [], []
     else:
         if not json_data:
-            logging.error("Error: URL is required for auto-selection.")
+            print("Error: URL is required for auto-selection.")
             return [], [], []
         if isinstance(json_data, dict) and "outbounds" in json_data:
             configs = [

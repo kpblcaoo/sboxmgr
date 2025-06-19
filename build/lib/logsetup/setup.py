@@ -1,17 +1,9 @@
 import logging
 import logging.handlers
 import os
-from sboxmgr.utils.env import get_log_file, get_max_log_size, get_debug_level
 
-def setup_logging(debug_level=None, log_file=None, max_log_size=None):
+def setup_logging(debug_level, log_file, max_log_size):
     """Configure logging with file and syslog handlers."""
-    if debug_level is None:
-        debug_level = get_debug_level()
-    if log_file is None:
-        log_file = get_log_file()
-    if max_log_size is None:
-        max_log_size = get_max_log_size()
-
     logger = logging.getLogger()
 
     if debug_level == 2:

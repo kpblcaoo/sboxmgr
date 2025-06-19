@@ -15,10 +15,10 @@ def prepare_selection(json_data, indices, remarks, supported_protocols, exclusio
     Унифицированная логика выбора серверов по индексу/remarks с учётом exclusions.
     Возвращает (outbounds, excluded_ips, selected_servers).
     """
-    from sboxmgr.config.fetch import select_config
-    from sboxmgr.config.protocol import validate_protocol
-    from sboxmgr.utils.id import generate_server_id
-    from sboxmgr.server.management import apply_exclusions
+    from singbox.config.fetch import select_config
+    from singbox.config.protocol import validate_protocol
+    from singbox.utils.id import generate_server_id
+    from singbox.server.management import apply_exclusions
 
     excluded_ids = {ex["id"] for ex in exclusions.get("exclusions", [])}
     outbounds = []
@@ -61,12 +61,12 @@ def prepare_selection(json_data, indices, remarks, supported_protocols, exclusio
                 if debug_level >= 2:
                     import logging
                     logging.debug(f"Selected configuration details: {config}")
-        except Exception as e:
-            logging.error(f"[Ошибка] {e}")
+        except ValueError as e:
+            print(f"[Ошибка] {e}")
             return [], [], []
     else:
         if not json_data:
-            logging.error("Error: URL is required for auto-selection.")
+            print("Error: URL is required for auto-selection.")
             return [], [], []
         if isinstance(json_data, dict) and "outbounds" in json_data:
             configs = [

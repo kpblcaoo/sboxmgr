@@ -1,6 +1,5 @@
 from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.utils.id import generate_server_id
-import logging
 
 def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
     """
@@ -15,8 +14,8 @@ def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
         servers = json_data
 
     if debug_level >= 0:
-        logging.info("Index | Name | Protocol | Port")
-        logging.info("--------------------------------")
+        print("Index | Name | Protocol | Port")
+        print("--------------------------------")
     for index, server in enumerate(servers):
         if server.get("type") not in supported_protocols:
             continue
@@ -27,4 +26,4 @@ def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
         if server_id in excluded_ids:
             name += " [excluded]"
         if debug_level >= 0:
-            logging.info(f"{index} | {name} | {protocol} | {port}") 
+            print(f"{index} | {name} | {protocol} | {port}") 

@@ -2,36 +2,48 @@ import os
 import json
 from conftest import run_cli
 from dotenv import load_dotenv
+import pytest
 
 load_dotenv()
 
-def test_exclude_and_idempotent():
+@pytest.mark.usefixtures("cleanup_files")
+def test_exclude_and_idempotent(tmp_path):
     # 1. Добавить exclusions
-    result1 = run_cli(["--exclude", "1", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--dry-run"])
+    result1 = run_cli(["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "1"], cwd=tmp_path)
     # 2. Повторить добавление
-    result2 = run_cli(["--exclude", "1", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--dry-run"])
+    result2 = run_cli(["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "1"], cwd=tmp_path)
     # 3. Проверить exclusions.json
-    with open("exclusions.json") as f:
+    exclusions_path = tmp_path / "exclusions.json"
+    assert exclusions_path.exists()
+    with open(exclusions_path) as f:
         data = json.load(f)
     assert len(data["exclusions"]) == 1
-    assert "already excluded" in result2.stdout
+    assert "already excluded" in (result2.stdout or "")
 
-def test_clear_exclusions():
-    run_cli(["--exclude", "1", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--dry-run"])
-    assert os.path.exists("exclusions.json")
-    run_cli(["--clear-exclusions"])
-    assert not os.path.exists("exclusions.json")
+@pytest.mark.usefixtures("cleanup_files")
+def test_clear_exclusions(tmp_path):
+    run_cli(["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "1"], cwd=tmp_path)
+    exclusions_path = tmp_path / "exclusions.json"
+    assert exclusions_path.exists()
+    run_cli(["clear-exclusions", "--yes"], cwd=tmp_path)
+    if exclusions_path.exists():
+        print("exclusions.json after clear:")
+        print(exclusions_path.read_text())
+    assert not exclusions_path.exists()
 
-def test_broken_exclusions_json():
-    with open("exclusions.json", "w") as f:
+@pytest.mark.usefixtures("cleanup_files")
+def test_broken_exclusions_json(tmp_path):
+    exclusions_path = tmp_path / "exclusions.json"
+    with open(exclusions_path, "w") as f:
         f.write("{broken json")
-    result = run_cli(["--exclude", "2", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--dry-run"])
-    assert "повреждён" in result.stdout or "поврежден" in result.stdout
-    with open("exclusions.json") as f:
+    result = run_cli(["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "2"], cwd=tmp_path)
+    assert "повреждён" in (result.stdout or "") or "поврежден" in (result.stdout or "")
+    with open(exclusions_path) as f:
         data = json.load(f)
     assert len(data["exclusions"]) == 1
 
-def test_view_exclusions():
-    run_cli(["--exclude", "1", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--dry-run"])
-    result = run_cli(["--exclude", "", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--dry-run"])
-    assert "Current Exclusions" in result.stdout 
+@pytest.mark.usefixtures("cleanup_files")
+def test_view_exclusions(tmp_path):
+    run_cli(["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "1"], cwd=tmp_path)
+    result = run_cli(["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--view"], cwd=tmp_path)
+    assert "Current Exclusions" in (result.stdout or "") 

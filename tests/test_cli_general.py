@@ -2,16 +2,24 @@ import os
 from dotenv import load_dotenv
 from conftest import run_cli
 import json
+import pytest
 
 load_dotenv()
 
-def test_dry_run_no_selected_config():
-    run_cli(["--index", "1", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--dry-run"])
-    assert not os.path.exists("selected_config.json")
+@pytest.mark.usefixtures("cleanup_files")
+def test_dry_run_no_selected_config(tmp_path):
+    run_cli(["run", "--index", "1", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--dry-run"], cwd=tmp_path)
+    assert not (tmp_path / "selected_config.json").exists()
 
-def test_normal_run_creates_selected_config():
-    run_cli(["--index", "1", "-u", os.getenv("TEST_URL", "https://example.com/sub-link")])
-    assert os.path.exists("selected_config.json")
-    with open("selected_config.json") as f:
+@pytest.mark.usefixtures("cleanup_files")
+def test_normal_run_creates_selected_config(tmp_path):
+    result = run_cli(["run", "--index", "1", "-u", os.getenv("TEST_URL", "https://example.com/sub-link")], cwd=tmp_path)
+    config_path = tmp_path / "selected_config.json"
+    if not config_path.exists():
+        print("STDOUT:", result.stdout)
+        print("STDERR:", result.stderr)
+        print("Return code:", result.returncode)
+    assert config_path.exists()
+    with open(config_path) as f:
         data = json.load(f)
     assert "selected" in data 

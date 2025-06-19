@@ -1,6 +1,7 @@
 import typer
 import os
 import sys
+import logging
 from dotenv import load_dotenv
 from sboxmgr.config.fetch import fetch_json
 from sboxmgr.utils.cli_common import prepare_selection
@@ -9,16 +10,8 @@ from sboxmgr.service.manage import manage_service
 from sboxmgr.server.exclusions import load_exclusions, exclude_servers, remove_exclusions, view_exclusions
 from sboxmgr.server.state import load_selected_config, save_selected_config
 from sboxmgr.server.selection import list_servers as do_list_servers
-from logsetup.setup import setup_logging
-from sboxmgr.utils.env import get_log_file, get_config_file, get_backup_file, get_template_file, get_exclusion_file, get_selected_config_file, get_max_log_size, get_debug_level, get_url
 
 load_dotenv()
-
-# Централизованное логирование для всех CLI-команд
-LOG_FILE = get_log_file()
-MAX_LOG_SIZE = get_max_log_size()
-DEBUG_LEVEL = get_debug_level()
-setup_logging(DEBUG_LEVEL, LOG_FILE, MAX_LOG_SIZE)
 
 app = typer.Typer(help="sboxctl: Sing-box config manager (exclusions, dry-run, selection, etc.)")
 
@@ -39,6 +32,7 @@ def run(
     template_file: str = typer.Option(None, "--template-file", help="Path to config.template.json (overrides env)"),
 ):
     """Generate and apply sing-box config (default scenario)."""
+    logging.basicConfig(level=logging.WARNING - debug * 10)
     try:
         json_data = fetch_json(url)
     except Exception as e:
@@ -67,9 +61,9 @@ def run(
         save_selected_config({"selected": selected_servers})
 
     # Определяем актуальные пути
-    template_file = template_file or get_template_file()
-    config_file = config_file or get_config_file()
-    backup_file = backup_file or get_backup_file()
+    template_file = template_file or os.getenv("SBOXMGR_TEMPLATE_FILE", "./config.template.json")
+    config_file = config_file or os.getenv("SBOXMGR_CONFIG_FILE", "/etc/sboxmgr/config.json")
+    backup_file = backup_file or os.getenv("SBOXMGR_BACKUP_FILE", "/etc/sboxmgr/config.json.bak")
 
     if dry_run:
         from sboxmgr.config.generate import generate_temp_config, validate_config_file
@@ -120,6 +114,7 @@ def dry_run(
     template_file: str = typer.Option(None, "--template-file", help="Path to config.template.json (overrides env)"),
 ):
     """Validate config and print result (no changes)."""
+    logging.basicConfig(level=logging.WARNING - debug * 10)
     try:
         json_data = fetch_json(url)
     except Exception as e:
@@ -145,8 +140,8 @@ def dry_run(
     )
 
     # Определяем актуальные пути
-    template_file = template_file or get_template_file()
-    config_file = config_file or get_config_file()
+    template_file = template_file or os.getenv("SBOXMGR_TEMPLATE_FILE", "./config.template.json")
+    config_file = config_file or os.getenv("SBOXMGR_CONFIG_FILE", "/etc/sboxmgr/config.json")
 
     from sboxmgr.config.generate import generate_temp_config, validate_config_file
     import tempfile
@@ -219,7 +214,7 @@ def clear_exclusions(
     if not confirm:
         typer.echo("[Warning] Use --yes to confirm clearing all exclusions.")
         raise typer.Exit(1)
-    do_clear_exclusions()
+    do_clear_exclusions(debug)
     typer.echo("All exclusions cleared.")
 
 if __name__ == "__main__":

@@ -1,0 +1,2 @@
+[console_scripts]
+sboxctl = sboxmgr.cli.main:app

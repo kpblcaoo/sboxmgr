@@ -4,25 +4,30 @@ import datetime
 import sys
 from sboxmgr.utils.id import generate_server_id
 from sboxmgr.utils.file import handle_temp_file as atomic_handle_temp_file
-import logging
-from sboxmgr.utils.env import get_config_file, get_backup_file, get_template_file
-from sboxmgr.utils.file import atomic_write_json, file_exists, read_json, write_json
 
 SELECTED_CONFIG_FILE = os.getenv("SINGBOX_SELECTED_CONFIG_FILE", "./selected_config.json")
 
 
-def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
+def list_servers(json_data, supported_protocols, debug_level=0):
     """List all supported outbounds with indices and details."""
-    servers = json_data.get("outbounds", json_data)
-    logging.info("Index | Name | Protocol | Port")
-    logging.info("--------------------------------")
-    for index, server in enumerate(servers):
+    if isinstance(json_data, dict) and "outbounds" in json_data:
+        servers = json_data["outbounds"]
+    else:
+        servers = json_data
+
+    if debug_level >= 0:
+        print("Index | Name | Protocol | Port")
+        print("--------------------------------")
+    index = 0
+    for server in servers:
         if server.get("type") not in supported_protocols:
             continue
         name = server.get("tag", "N/A")
         protocol = server.get("type", "N/A")
         port = server.get("server_port", "N/A")
-        logging.info(f"{index} | {name} | {protocol} | {port}")
+        if debug_level >= 0:
+            print(f"{index} | {name} | {protocol} | {port}")
+        index += 1
 
 
 def load_selected_config():
@@ -45,7 +50,7 @@ def apply_exclusions(configs, excluded_ids, debug_level):
         server_id = generate_server_id(config)
         if server_id in excluded_ids:
             if debug_level >= 1:
-                logging.info(f"Skipping server {config.get('name', 'N/A')} (ID: {server_id}) due to exclusion.")
+                print(f"Skipping server {config.get('name', 'N/A')} (ID: {server_id}) due to exclusion.")
             continue
         valid_configs.append(config)
     return valid_configs
