@@ -191,3 +191,34 @@
 
 ### Добавлено
 - Изначальная версия с поддержкой VLESS и Shadowsocks.
+
+## [Unreleased]
+
+- Глубокий рефакторинг exclusions-логики: удалены все дублирующие реализации, оставлена только singbox.server.exclusions.
+- Централизован atomic file write: теперь только через singbox.utils.file.handle_temp_file.
+- Удалены устаревшие функции и модули (management.py, temp.py, дублирующие exclusions-функции).
+- Временные DeprecationWarning для плавного перехода (теперь не используются).
+- Улучшена обработка ошибок при загрузке невалидных/пустых URL, всегда корректный код возврата и сообщение.
+- Тесты CLI теперь не зависят от .env и переменных окружения, всегда проверяют именно переданный URL.
+- Добавлен флаг --exclude-only: позволяет обновлять exclusions.json без генерации основного конфига.
+- Проведён аудит и зачистка архитектуры, обновлён план рефакторинга в plans/struct_analysis_log.md.
+
+## CLI сценарии: входы и выходы
+
+| Сценарий/Флаг                | Входные файлы           | Конфиги (чтение)         | Артефакты/выходы                |
+|------------------------------|-------------------------|--------------------------|----------------------------------|
+| -u <url>                     | config.template.json    | exclusions.json          | config.json, backup.json         |
+| --dry-run                    | config.template.json    | exclusions.json          | (нет, только stdout)             |
+| --list-servers               | config.template.json    | exclusions.json          | (нет, только stdout)             |
+| --exclude <idx>              | config.template.json    | exclusions.json          | exclusions.json                  |
+| --exclude-only               | config.template.json    | exclusions.json          | exclusions.json                  |
+| --clear-exclusions           | exclusions.json         | exclusions.json          | exclusions.json (очищен/удалён)  |
+| --remarks/-r <name>          | config.template.json    | exclusions.json          | config.json, backup.json         |
+| --index/-i <n>               | config.template.json    | exclusions.json          | config.json, backup.json         |
+| (без флагов, только -u)      | config.template.json    | exclusions.json          | config.json, backup.json         |
+
+**Примечания:**
+- exclusions.json всегда обновляется только при соответствующих действиях.
+- config.json не изменяется в режиме --dry-run.
+- merged.json и selected_config.json создаются только при определённых сценариях (см. код).
+- Все артефакты пишутся в рабочую директорию или путь, заданный переменными окружения.

@@ -32,3 +32,5 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+.env
+.llmstruct_index/

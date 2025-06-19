@@ -1,5 +1,5 @@
 """
-Installation Wizard for Update Singbox
+Installation Wizard for sboxmgr (Sing-box config manager)
 
 Dev-mode: set WIZARD_DEV=1 to prevent any real changes to the system (no file writes, no systemd, no chmod, only logging actions).
 """
@@ -14,7 +14,8 @@ import logging
 import hashlib
 import importlib.metadata
 from inquirer.render.console import ConsoleRender
-from singbox.server.exclusions import load_exclusions, view_exclusions
+from sboxmgr.server.exclusions import load_exclusions, view_exclusions
+from dotenv import load_dotenv
 
 # Configure basic logging for debugging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -40,7 +41,7 @@ def check_inquirer_version():
 class CustomRender(ConsoleRender):
     """Custom renderer to visually distinguish excluded servers."""
     def render_choice(self, choice, pointer=False):
-        exclusions = load_exclusions()
+        exclusions = load_exclusions(dry_run=False)
         excluded_names = {ex["name"] for ex in exclusions["exclusions"]}
         if choice in excluded_names:
             return f"\033[90m{choice} (excluded)\033[0m"  # Gray text
@@ -55,8 +56,8 @@ def create_dedicated_user(username):
         print(f"User {username} created.")
     subprocess.run(["usermod", "-aG", "sudo", username], check=True)
     print(f"User {username} added to sudo group.")
-    sudoers_line = f"{username} ALL=(ALL) NOPASSWD: /bin/systemctl start sing-box.service, /bin/systemctl stop sing-box.service, /bin/systemctl restart sing-box.service"
-    with open("/etc/sudoers.d/singbox", "w") as sudoers_file:
+    sudoers_line = f"{username} ALL=(ALL) NOPASSWD: /bin/systemctl start sboxctl.service, /bin/systemctl stop sboxctl.service, /bin/systemctl restart sboxctl.service"
+    with open("/etc/sudoers.d/sboxmgr", "w") as sudoers_file:
         sudoers_file.write(sudoers_line)
     print(f"Sudoers file for {username} created.")
 
@@ -161,7 +162,7 @@ def get_server_list_with_exclusions(url):
     if not check_inquirer_version():
         return []
     server_list = get_server_list(url)
-    exclusions = load_exclusions()
+    exclusions = load_exclusions(dry_run=False)
     excluded_names = {ex["name"] for ex in exclusions["exclusions"]}
     # Format choices with exclusion markers
     return [
@@ -170,9 +171,9 @@ def get_server_list_with_exclusions(url):
     ]
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Installation Wizard for Update Singbox")
-    parser.add_argument("-p", "--path", default="/opt/update_singbox/", help="Installation path")
-    parser.add_argument("-u", "--url", default="https://default.link", help="Installation link")
+    parser = argparse.ArgumentParser(description="Installation Wizard for sboxmgr (Sing-box config manager)")
+    parser.add_argument("-p", "--path", default="/opt/sboxmgr/", help="Installation path")
+    parser.add_argument("-u", "--url", default=os.getenv("SINGBOX_URL", "https://default.link"), help="Sing-box subscription URL")
     parser.add_argument("-s", "--silent", action="store_true", help="Silent installation mode")
     parser.add_argument("-t", "--timer", default="15min", help="Timer frequency")
     parser.add_argument("-d", type=int, choices=range(3), default=1, help="Service verbosity level (0-2)")
@@ -197,20 +198,20 @@ def ensure_install_path(path):
         print(f"Installation path already exists: {path}")
 
 def setup_systemd_service(install_path, timer_frequency, service_verbosity, install_link):
-    service_path = "/etc/systemd/system/update_singbox.service"
-    timer_path = "/etc/systemd/system/update_singbox.timer"
+    service_path = "/etc/systemd/system/sboxctl.service"
+    timer_path = "/etc/systemd/system/sboxctl.timer"
     service_content = f"""
 [Unit]
-Description=Update Singbox Service
+Description=sboxctl Service (Sing-box config manager)
 StartLimitIntervalSec=60
 StartLimitBurst=3
 
 [Service]
 Type=oneshot
 WorkingDirectory={install_path}
-Environment="SINGBOX_DEBUG={service_verbosity}"
+Environment="SBOXMGR_DEBUG={service_verbosity}"
 Environment="SINGBOX_URL={install_link}"
-ExecStart={install_path}/venv/bin/python {install_path}/update_singbox.py
+ExecStart={install_path}/venv/bin/python {install_path}/sboxctl
 Restart=no
 RemainAfterExit=no
 
@@ -221,12 +222,12 @@ WantedBy=multi-user.target
     print(f"Systemd service created or updated at {service_path}")
     timer_content = f"""
 [Unit]
-Description=Run Update Singbox every {timer_frequency}
+Description=Run sboxctl every {timer_frequency}
 
 [Timer]
 OnBootSec={timer_frequency}
 OnUnitActiveSec={timer_frequency}
-Unit=update_singbox.service
+Unit=sboxctl.service
 
 [Install]
 WantedBy=timers.target
@@ -235,9 +236,9 @@ WantedBy=timers.target
     print(f"Systemd timer created or updated at {timer_path}")
     # Reload systemd and reset failed state
     safe_run(["systemctl", "daemon-reload"], check=True)
-    safe_run(["systemctl", "reset-failed", "update_singbox.service"], check=True)
-    safe_run(["systemctl", "enable", "update_singbox.timer"], check=True)
-    safe_run(["systemctl", "start", "update_singbox.timer"], check=True)
+    safe_run(["systemctl", "reset-failed", "sboxctl.service"], check=True)
+    safe_run(["systemctl", "enable", "sboxctl.timer"], check=True)
+    safe_run(["systemctl", "start", "sboxctl.timer"], check=True)
     print("Systemd timer enabled and started.")
 
 def run_installation_wizard():
@@ -310,8 +311,8 @@ def run_installation_wizard():
                 print("Error: No valid servers selected.")
                 continue
 
-            # Run update_singbox.py with selected indices
-            cmd = ["sudo", "-E", "./update_singbox.py", "-u", install_link, "-i", ",".join(map(str, selected_indices))]
+            # Run sboxctl with selected indices
+            cmd = ["sudo", "-E", "./sboxctl", "-u", install_link, "-i", ",".join(map(str, selected_indices))]
             try:
                 result = safe_run(cmd, capture_output=True, text=True, check=True)
                 print(f"Configuration applied successfully at /etc/sing-box/config.json")
@@ -360,7 +361,7 @@ def run_installation_wizard():
                 continue
 
             ensure_install_path(install_path)
-            copy_files_to_installation_path(["update_singbox.py", "config.template.json", "logging_setup.py"], install_path)
+            copy_files_to_installation_path(["sboxctl", "config.template.json", "logging_setup.py"], install_path)
             venv_path = create_virtualenv(install_path)
             activate_virtualenv(venv_path)
             safe_run([os.path.join(venv_path, "bin", "pip"), "install", "-r", "requirements.txt"], check=True)
@@ -399,7 +400,7 @@ def run_installation_wizard():
                     continue
                 exclude_args = server_answers["servers"] if exclusion_answers["exclusion_action"] == "Add Exclusions" else [f"-{s}" for s in server_answers["servers"]]
                 try:
-                    safe_run(["sudo", "-E", "./update_singbox.py", "-u", url_answers["install_link"], "-e"] + exclude_args, check=True)
+                    safe_run(["sudo", "-E", "./sboxctl", "-u", url_answers["install_link"], "-e"] + exclude_args, check=True)
                     print("Exclusions updated successfully.")
                 except subprocess.CalledProcessError as e:
                     logging.error(f"Failed to manage exclusions: {e.stderr}")
