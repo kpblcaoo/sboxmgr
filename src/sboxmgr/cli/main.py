@@ -37,6 +37,7 @@ def run(
     config_file: str = typer.Option(None, "--config-file", help="Path to config.json (overrides env)"),
     backup_file: str = typer.Option(None, "--backup-file", help="Path to config.json.bak (overrides env)"),
     template_file: str = typer.Option(None, "--template-file", help="Path to config.template.json (overrides env)"),
+    use_selected: bool = typer.Option(False, "--use-selected", help="Use selected_config.json for default selection (for installer/advanced)")
 ):
     """Generate and apply sing-box config (default scenario)."""
     try:
@@ -49,22 +50,37 @@ def run(
     indices = []
     if index:
         indices = [int(i) for i in index.split(",") if i.strip().isdigit()]
-    else:
+    elif use_selected:
         saved_config = load_selected_config()
         indices = [int(item["index"]) for item in saved_config["selected"] if "index" in item]
+    # иначе indices остаётся пустым — авто-режим
 
-    outbounds, excluded_ips, selected_servers = prepare_selection(
-        json_data,
-        indices,
-        remarks,
-        SUPPORTED_PROTOCOLS,
-        exclusions,
-        debug_level=debug,
-        dry_run=dry_run
-    )
+    try:
+        outbounds, excluded_ips, selected_servers = prepare_selection(
+            json_data,
+            indices,
+            remarks,
+            SUPPORTED_PROTOCOLS,
+            exclusions,
+            debug_level=debug,
+            dry_run=dry_run
+        )
+    except ValueError as e:
+        msg = str(e)
+        if "исключён" in msg or "excluded" in msg:
+            typer.echo(f"[Ошибка] {msg}", err=True)
+            raise typer.Exit(1)
+        else:
+            raise
 
+    # Если ничего не выбрано и есть исключение по excluded — выводим в stdout
+    if (remarks or indices) and not outbounds:
+        typer.echo("[Ошибка] Сервер с выбранным индексом или remarks находится в списке исключённых (excluded). Выберите другой.", err=True)
+        raise typer.Exit(1)
+
+    selected_config_file = get_selected_config_file()
     if (remarks or indices) and not dry_run and selected_servers:
-        save_selected_config({"selected": selected_servers})
+        save_selected_config({"selected": selected_servers}, selected_config_file)
 
     # Определяем актуальные пути
     template_file = template_file or get_template_file()

@@ -1,6 +1,0 @@
-__init__
-install
-logsetup
-main
-sboxmgr
-singbox

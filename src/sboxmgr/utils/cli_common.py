@@ -3,6 +3,9 @@
 Здесь размещаются функции типа load_outbounds, prepare_selection и др.
 """
 
+import logging
+import typer
+
 def load_outbounds(json_data, supported_protocols):
     """Возвращает список outbounds, поддерживаемых протоколами."""
     if isinstance(json_data, dict) and "outbounds" in json_data:
@@ -34,15 +37,14 @@ def prepare_selection(json_data, indices, remarks, supported_protocols, exclusio
                     outbounds.append(outbound)
                     if "server" in outbound:
                         if outbound["server"] in excluded_ids:
-                            import logging
                             logging.warning(f"Server {outbound['server']} at index {idx} is in the exclusion list.")
                         excluded_ips.append(outbound["server"])
                     selected_servers.append({"index": idx, "id": generate_server_id(outbound)})
                     if debug_level >= 1:
-                        import logging
                         logging.info(f"Selected server at index {idx}")
+                        msg = f"Selected server at index {idx}"
+                        typer.echo(msg)
                     if debug_level >= 2:
-                        import logging
                         logging.debug(f"Selected configuration details: {config}")
             else:
                 idx = indices[0] if indices else None
@@ -51,15 +53,14 @@ def prepare_selection(json_data, indices, remarks, supported_protocols, exclusio
                 outbounds = [outbound]
                 if "server" in outbound:
                     if outbound["server"] in excluded_ids:
-                        import logging
                         logging.warning(f"Server {outbound['server']} at index {idx} is in the exclusion list.")
                     excluded_ips.append(outbound["server"])
                 selected_servers = [{"index": idx, "id": generate_server_id(outbound)}]
                 if debug_level >= 1:
-                    import logging
                     logging.info(f"Selected server at index {idx}")
+                    msg = f"Selected server at index {idx}"
+                    typer.echo(msg)
                 if debug_level >= 2:
-                    import logging
                     logging.debug(f"Selected configuration details: {config}")
         except Exception as e:
             logging.error(f"[Ошибка] {e}")
@@ -75,7 +76,23 @@ def prepare_selection(json_data, indices, remarks, supported_protocols, exclusio
             ]
         else:
             configs = json_data
-        configs = apply_exclusions(configs, excluded_ids, debug_level)
+        total_servers = len(configs)
+        # Применяем exclusions
+        filtered_configs = apply_exclusions(configs, excluded_ids, debug_level)
+        excluded_count = total_servers - len(filtered_configs)
+        if debug_level >= 1:
+            msg = f"[sboxctl] Found {total_servers} servers, {excluded_count} excluded, {len(filtered_configs)} will be used."
+            typer.echo(msg)
+            logging.info(msg)
+        if debug_level >= 2:
+            excluded_ids_set = set(ex["id"] for ex in exclusions.get("exclusions", []))
+            for idx, config in enumerate(configs):
+                sid = generate_server_id(config)
+                if sid in excluded_ids_set:
+                    msg = f"[sboxctl][debug] Excluded server at index {idx}: tag={config.get('tag')}, id={sid}"
+                    typer.echo(msg)
+                    logging.info(msg)
+        configs = filtered_configs
         for idx, config in enumerate(configs):
             try:
                 outbound = validate_protocol(config, supported_protocols)
@@ -87,14 +104,11 @@ def prepare_selection(json_data, indices, remarks, supported_protocols, exclusio
                 if "server" in outbound:
                     excluded_ips.append(outbound["server"])
             except ValueError as e:
-                import logging
                 logging.warning(f"Skipping invalid configuration at index {idx}: {e}")
         if not outbounds:
-            import logging
             logging.warning("No valid configurations found for auto-selection, using direct")
             outbounds = []
         if debug_level >= 1:
-            import logging
             logging.info(f"Prepared {len(outbounds)} servers for auto-selection")
             logging.info(f"Excluded IPs: {excluded_ips}")
     return outbounds, excluded_ips, selected_servers 

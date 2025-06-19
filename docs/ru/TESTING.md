@@ -1,12 +1,15 @@
 # Инструкция по запуску тестов
 
-## Installing dependencies
-Before running tests, make sure all dependencies are installed:
+## Другие языки / Other languages
+- [English (TESTING.md)](../TESTING.md)
+
+## Установка зависимостей
+Перед запуском тестов убедитесь, что все зависимости установлены:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install .[dev]
-cp .env.example .env  # Edit as needed
+cp .env.example .env  # Отредактируйте при необходимости
 ```
 
 ## Запуск тестов
@@ -25,4 +28,4 @@ pytest --cov=. --cov-report=term-missing
 - Тесты находятся в папке `tests/`.
 - Каждый модуль имеет соответствующий файл тестов, например:
   - `config_fetch.py` -> `tests/test_config_fetch.py`
-  - `protocol_validation.py` -> `tests/test_protocol_validation.py`.
+  - `protocol_validation.py` -> `tests/test_protocol_validation.py`. 

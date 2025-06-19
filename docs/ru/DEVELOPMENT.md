@@ -1,34 +1,34 @@
-# Other languages / Другие языки
-- [Русский (docs/ru/DEVELOPMENT.md)](docs/ru/DEVELOPMENT.md)
+# Другие языки / Other languages
+- [English (DEVELOPMENT.md)](../DEVELOPMENT.md)
 
-# Onboarding
+# Онбординг
 
-Welcome to the development process! If you are new to the project, please follow these steps:
+Добро пожаловать в процесс разработки! Если вы новый участник, выполните следующие шаги:
 
-1. **Clone the repository:**
+1. **Клонируйте репозиторий:**
    ```bash
    git clone https://github.com/kpblcaoo/update-singbox.git
    cd update-singbox
    ```
-2. **Create a virtual environment and activate it:**
+2. **Создайте виртуальное окружение и активируйте его:**
    ```bash
    python -m venv .venv
    source .venv/bin/activate
    ```
-3. **Install development dependencies:**
+3. **Установите зависимости для разработки:**
    ```bash
    pip install .[dev]
    ```
-4. **Copy the example environment file:**
+4. **Скопируйте пример файла окружения:**
    ```bash
    cp .env.example .env
-   # Edit .env as needed
+   # Отредактируйте .env при необходимости
    ```
-5. **Run tests:**
+5. **Запустите тесты:**
    ```bash
    pytest
    ```
-6. **Read the CONTRIBUTING section in README.md for coding standards and PR process.**
+6. **Ознакомьтесь с разделом CONTRIBUTING в README.md для стандартов кода и процесса PR.**
 
 ---
 
@@ -46,4 +46,4 @@ Welcome to the development process! If you are new to the project, please follow
 
 ## Workflows
 - **CI для `dev`**: `.github/workflows/ci-dev.yml`
-- **Релиз для `main`**: `.github/workflows/release-main.yml`
+- **Релиз для `main`**: `.github/workflows/release-main.yml` 

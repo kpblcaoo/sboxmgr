@@ -1,6 +1,7 @@
 from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.utils.id import generate_server_id
 import logging
+import typer
 
 def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
     """
@@ -8,12 +9,12 @@ def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
     Excluded servers помечаются как (excluded), индексация сквозная.
     """
     exclusions = load_exclusions(dry_run=dry_run)
-    excluded_ids = {ex["id"] for ex in exclusions["exclusions"]}
-    if isinstance(json_data, dict) and "outbounds" in json_data:
-        servers = json_data["outbounds"]
-    else:
-        servers = json_data
+    excluded_ids = {ex["id"] for ex in exclusions.get("exclusions", [])}
+    servers = json_data.get("outbounds", json_data)
 
+    # Выводим заголовок всегда
+    typer.echo("Index | Name | Protocol | Port")
+    typer.echo("--------------------------------")
     if debug_level >= 0:
         logging.info("Index | Name | Protocol | Port")
         logging.info("--------------------------------")
@@ -25,6 +26,7 @@ def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
         port = server.get("server_port", "N/A")
         server_id = generate_server_id(server)
         if server_id in excluded_ids:
-            name += " [excluded]"
+            name = f"{name} [excluded]"
         if debug_level >= 0:
-            logging.info(f"{index} | {name} | {protocol} | {port}") 
+            logging.info(f"{index} | {name} | {protocol} | {port}")
+        typer.echo(f"{index} | {name} | {protocol} | {port}") 

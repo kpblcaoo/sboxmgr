@@ -1,5 +1,7 @@
 # CLI scenarios & outputs (для декомпозиции и тестирования)
 
+- [x] CLI Refactor Sub-Plan выполнен: структура очищена, дубли и legacy удалены, вся инфраструктурная логика централизована, CLI декомпозирован по best practice. Проект готов к дальнейшей адаптации тестов и документации.
+
 | Сценарий         | Флаги/аргументы           | Выход/действие                | Формат вывода      |
 |------------------|--------------------------|-------------------------------|--------------------|
 | exclusions-only  | --exclude, --exclude-only| Обновление exclusions.json, печать списка | stdout, файл      |
@@ -102,6 +104,7 @@
 - [x] Принято временное решение: CLI и тесты могут использовать переменные окружения из .env (SBOXMGR_URL, SINGBOX_URL, TEST_URL) для URL, чтобы обеспечить удобство и совместимость до полной изоляции тестов. Это зафиксировано как допустимый dev-паттерн.
 - [x] Функция generate_config теперь использует tempfile для временного файла (безопасно, без гонок и проблем с правами). Все тесты подменяют пути к артефактам через monkeypatch/setenv (best practice для CLI и тестов).
 - [x] Устранён DeprecationWarning (datetime.datetime.utcnow -> datetime.datetime.now(datetime.UTC)), теперь тесты полностью зелёные и без варнингов. Можно переходить к адаптации и запуску остальных тестов.
+- 2024-06-20: Все тесты CLI (pytest + Typer.CliRunner) проходят, tolerant-поиск реализован, баги с exclusions и selected_config.json устранены. CLI полностью покрыт тестами, структура CLI и тестов синхронизирована.
 
 ## Выполнено
 - [x] CLI matrix-тесты: файл создан, базовая таблица и структура pytest реализованы.
@@ -115,18 +118,43 @@
 - [x] Проведена ревизия CLI, устранено дублирование, старый main.py можно удалить после миграции тестов.
 - [x] Внедрён Typer, декомпозиция команд завершена, структура CLI готова к расширению и тестированию.
 - [x] Перевести зависимости на pyproject.toml, удалить requirements.txt, настроить entry point для CLI (sboxctl), разделить prod/dev зависимости.
+- [x] Перенести/адаптировать тесты для Typer CLI (pytest + Typer.CliRunner).
+- [ ] Обновить/добавить документацию и changelog по новой архитектуре CLI.
 - [ ] Проверить и скорректировать все личные данные (authors, email и т.д.) в pyproject.toml, лицензии, README, документации, чтобы не было placeholder-ов и некорректных данных.
 
-## Next steps
-- [ ] Перенести/адаптировать тесты для Typer CLI (pytest + Typer.CliRunner).
-- [ ] Обновить/добавить документацию и changelog по новой архитектуре CLI.
+## Known bugs & UX issues
 
-## 2024-06-18: Matrix CLI — финальный прогресс и оставшиеся несовпадения
-- Matrix CLI полностью изолирован, не зависит от root/systemctl, выявляет только реальные несовпадения между тестовой документацией и CLI.
-- CLI в боевом режиме работает корректно (ручная проверка).
-- Оставшиеся ошибки matrix:
-  1. Код возврата 1 при базовом запуске (возможно, manage_service не полностью замокан или subprocess внутри main.py не перехвачен).
-  2. Нет ожидаемых сообщений ('dry-run', 'Excluding server') в выводе или логе (CLI пишет их только в debug-лог или stdout, либо текст отличается).
-- Следующий шаг: обсудить, что фиксить в тестах, что — в документации, что — в коде (по согласованию).
+- [ ] [BUG] Server indices in `list-servers` may start from a non-zero value if the list is filtered. Re-index output from 0 for user clarity.
+- [ ] [BUG] Removing exclusions by index or ID may not work as expected. The mapping between displayed indices and internal exclusions is unclear, and no error is shown if removal fails. Make UX transparent, support both index and ID, always show a message.
+- [ ] [WORKAROUND] To fully clear exclusions, use `sboxctl clear-exclusions --yes` or manually edit `exclusions.json`. Add this note to documentation/FAQ/SHOWCASE.md.
+
+## Next steps
+- [ ] Финальный аудит документации, CLI и тестов.
+- [ ] Планирование релиза и презентации (дата, формат, сценарий).
+
+# План финализации документации, changelog и showcase (2025-06-20)
+
+## Цели
+- Зафиксировать все ключевые изменения после 1.3.1 в changelog и документации.
+- Обеспечить прозрачность для пользователей и разработчиков: актуальные usage, onboarding, примеры CLI, showcase.
+- Подготовить демонстрационный сценарий (showcase) для презентации возможностей CLI.
+
+## Этапы
+1. [x] **Сбор и анализ временных changelog-ов, логов и lessons learned**
+2. [x] **Обновление CHANGELOG.md (EN/RU)**
+3. [x] **Обновление README.md и usage examples (EN/RU)**
+4. [x] **Подготовка и оформление showcase (EN/RU)**
+5. [ ] **Финальный аудит**
+   - Проверить, что все инструкции и usage соответствуют реальному CLI и тестам.
+   - Проверить README.md, CHANGELOG.md, .env.example, pyproject.toml, LICENSE на отсутствие placeholder-ов и устаревших данных.
+   - Проверить наличие и корректность ссылок на другие языки (EN/RU).
+   - Внести lessons learned в отдельный раздел docs/ или wiki (опционально).
+6. [ ] **Планирование релиза и презентации**
+   - Зафиксировать дату релиза и шоукейса.
+   - Подготовить краткий сценарий для демонстрации (видео/скринкасты/документ).
+
+## Примечания
+- Все изменения фиксировать поэтапно, с коммитами и обновлением документации.
+- При необходимости — согласовывать формат showcase и changelog с командой.
 
 (дополнять по мере выполнения) 

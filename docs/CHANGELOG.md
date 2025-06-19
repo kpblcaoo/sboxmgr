@@ -1,35 +1,85 @@
 # Changelog
 
+## Other languages / Другие языки
+- [Русский (ru/CHANGELOG.md)](ru/CHANGELOG.md)
+
+# 1.4.0 (2025-06-20)
+
+## Added
+- Full CLI refactor: migrated to Typer for modern, modular CLI.
+- All CLI scenarios (run, dry-run, exclusions, list-servers, clear-exclusions) are now commands with unified interface.
+- Centralized logging (utils/logging.py), atomic file write, and environment variable management (utils/env.py).
+- .env.example added with all supported environment variables.
+- Entry point: CLI available as `sboxctl` after install.
+- CLI matrix tests: all scenarios covered, tolerant output matching.
+- New onboarding and usage examples in documentation.
+
+## Changed
+- All business logic moved out of CLI wrappers into core modules.
+- CLI wrappers are now thin orchestrators only.
+- Directory structure reorganized: cli/, core/, utils/, tests/ follow best practices.
+- All artifact paths (config, log, exclusions, etc.) are now controlled via environment variables.
+- Dev dependencies separated in pyproject.toml (`pip install .[dev]`).
+- Documentation (README, DEVELOPMENT, TESTING, ru/) fully updated and unified.
+
+## Fixed
+- All tests now isolated from .env and global environment.
+- Edge-case bugs with exclusions, selected_config.json, and server return fixed.
+- Improved error handling for invalid/empty URLs (always returns code 1).
+- Deprecation warnings (datetime, etc.) resolved.
+
+## Removed
+- requirements.txt deleted; all dependencies now in pyproject.toml (PEP 621).
+- All duplicate, dead, and legacy code removed.
+- Old CLI flags and patterns deprecated.
+
+## Breaking changes
+- CLI fully migrated to Typer: old flags/commands may not work.
+- requirements.txt removed; use only pyproject.toml.
+- All artifact paths must be set via environment variables.
+- CLI is now only available as `sboxctl` (entry point).
+
+## Migration notes
+- Copy `.env.example` to `.env` and adjust as needed.
+- Use `pip install .[dev]` for development, `pip install .` for users.
+- See updated README.md and usage examples for new CLI commands.
+
+## Lessons learned
+- Centralized logging and env management greatly improve maintainability and testability.
+- Thin CLI wrappers and modular core logic speed up refactoring and testing.
+- Full test isolation and CLI matrix ensure robust coverage.
+- Documenting lessons and architecture helps future contributors.
+
 ## [1.3.1] — 2024-06-18
 
 ### Added
-- Полная автоматизация тестирования CLI: exclusions, clear-exclusions, идемпотентность, обработка ошибок, user-friendly сообщения, dry-run, selected_config.json, --list-servers, выбор excluded.
-- User-friendly обработка ошибок при невалидном URL, повреждённом exclusions.json, попытке выбрать excluded сервер.
-- Логирование ключевых CLI-действий и ошибок.
+- Full automation of CLI testing: exclusions, clear-exclusions, idempotency, error handling, user-friendly messages, dry-run, selected_config.json, --list-servers, excluded selection.
+- User-friendly error handling for invalid URLs, corrupted exclusions.json, and attempts to select an excluded server.
+- Logging of key CLI actions and errors.
 
 ### Changed
-- exclusions.json теперь хранит только SHA256-хеши id, а для пользователя — человекочитаемое поле name.
-- selected_config.json не создаётся и не изменяется в режиме --dry-run.
-- Улучшен CLI-вывод при повторном исключении сервера (информативное сообщение вместо дублирования).
-- clear-exclusions теперь гарантированно удаляет exclusions.json вне зависимости от наличия URL.
+- exclusions.json now stores only SHA256 hashes of IDs, with a human-readable name field for users.
+- selected_config.json is not created or modified in --dry-run mode.
+- Improved CLI output for repeated server exclusion (informative message instead of duplication).
+- clear-exclusions now reliably deletes exclusions.json regardless of URL presence.
 
 ### Fixed
-- Исправлена идемпотентность exclusions: повторное добавление не дублирует записи.
-- Исправлена обработка повреждённого exclusions.json (user-friendly сброс).
-- Исправлена обработка невалидного URL (ошибка и returncode 1).
-- Исправлены все баги, выявленные ручным и автоматическим тестированием CLI.
+- Fixed idempotency of exclusions: repeated addition does not duplicate entries.
+- Fixed handling of corrupted exclusions.json (user-friendly reset).
+- Fixed handling of invalid URLs (error and return code 1).
+- Fixed all bugs found by manual and automated CLI testing.
 
 ### Refactored
-- Проведён рефакторинг структуры проекта: код перенесён в src/, декомпозиция крупных модулей, обновлены импорты.
-- Улучшена модульность и читаемость кода, подготовка к автотестам.
+- Refactored project structure: code moved to src/, large modules decomposed, imports updated.
+- Improved modularity and code readability, prepared for automated tests.
 
 ### Testing
-- Весь CLI покрыт автотестами (pytest), ручной чеклист полностью автоматизирован.
-- Покрытие тестами — 100% по ключевым сценариям CLI.
+- Entire CLI covered by automated tests (pytest), manual checklist fully automated.
+- Test coverage — 100% for key CLI scenarios.
 
 ---
 
-> Некоторые экспериментальные фичи (например, install wizard) пока не документируются официально и будут представлены в следующих релизах.
+> Some experimental features (e.g., install wizard) are not yet officially documented and will be presented in future releases.
 
 ## [v1.3.0] - 2025-05-16
 
@@ -87,7 +137,6 @@
  - Non-supported outbound types appear in the server list.
  - Server index numbers do not start at 0 and may not match the -i index used for exclusion.
 
-
 ---
 
 ## [v1.1.0] - 2025-05-14
@@ -110,135 +159,134 @@
 
 ## [v1.0.0] - 2025-05-13
 
-### Добавлено:
-- Автоматическое тестирование с использованием `pytest`.
-- Настроен CI/CD процесс с помощью GitHub Actions:
-  - Workflow для тестирования в ветке `dev`.
-  - Workflow для релиза в ветке `main`.
-- Документация:
-  - `DEVELOPMENT.md` с описанием процесса разработки.
-  - `TESTING.md` с инструкцией по запуску тестов.
+### Added:
+- Automated testing using `pytest`.
+- CI/CD process set up with GitHub Actions:
+  - Workflow for testing in the `dev` branch.
+  - Workflow for release in the `main` branch.
+- Documentation:
+  - `DEVELOPMENT.md` describing the development process.
+  - `TESTING.md` with instructions for running tests.
 
-### Изменено:
-- Улучшена структура проекта для поддержки тестирования и CI/CD.
-- Перемещены модули в папку `modules/`:
+### Changed:
+- Improved project structure to support testing and CI/CD.
+- Modules moved to the `modules/` folder:
   - `config_fetch.py`
   - `config_generate.py`
   - `protocol_validation.py`
   - `service_manage.py`
-- Перемещена документация в папку `docs/`:
+- Documentation moved to the `docs/` folder:
   - `README.md`
   - `CHANGELOG.md`
   - `DEVELOPMENT.md`
   - `TESTING.md`
-- Тестовые файлы теперь используют `tests/config.json` вместо корневого `config.json`.
+- Test files now use `tests/config.json` instead of the root `config.json`.
 
 ---
 
 ## [v0.3.0] - 2025-05-13
 
-### Изменено:
-- Скрипт `update_singbox.py` разделён на модули для улучшения читаемости, тестируемости и расширяемости.
-  - `logging_setup.py`: Настройка логирования.
-  - `config_fetch.py`: Загрузка и выбор конфигурации.
-  - `protocol_validation.py`: Валидация протоколов и обработка настроек безопасности.
-  - `config_generate.py`: Генерация и проверка конфигурации.
-  - `service_manage.py`: Управление сервисом `sing-box`.
+### Changed:
+- The `update_singbox.py` script was split into modules for improved readability, testability, and extensibility.
+  - `logging_setup.py`: Logging setup.
+  - `config_fetch.py`: Fetching and selecting configuration.
+  - `protocol_validation.py`: Protocol validation and security settings handling.
+  - `config_generate.py`: Configuration generation and validation.
+  - `service_manage.py`: Managing the `sing-box` service.
 
 ---
 
 ## [v0.2.3] - 2025-05-13
 
-### Добавлено:
-- Проверка изменений конфигурации перед её применением.
-- Перезапуск сервиса `sing-box` только при наличии изменений.
+### Added:
+- Configuration changes are checked before applying.
+- The `sing-box` service is restarted only if changes are detected.
 
 ---
 
 ## [v0.2.2] - 2025-05-12
 
-### Добавлено:
-- Уровни детализации логирования через флаг `--debug`:
-  - `--debug 0`: Минимум логов (по умолчанию).
-  - `--debug 1`: Информационные логи для ключевых действий.
-  - `--debug 2`: Подробные логи для отладки.
+### Added:
+- Logging verbosity levels via the `--debug` flag:
+  - `--debug 0`: Minimal logs (default).
+  - `--debug 1`: Informational logs for key actions.
+  - `--debug 2`: Detailed logs for debugging.
 
 ---
 
 ## [v0.2.1] - 2025-05-12
 
-### Изменено:
-- Улучшение: Переписан процесс записи конфигурации. Теперь конфигурация сохраняется во временный файл, проверяется на валидность и только затем заменяет основной файл.
-Это предотвращает возможные проблемы с повреждением основного конфигурационного файла.
+### Changed:
+- Improvement: The configuration writing process was rewritten. Now the configuration is saved to a temporary file, validated, and only then replaces the main file. This prevents possible issues with corrupting the main configuration file.
 
 ---
 
 ## [v0.2.0] - 2025-05-11
 
-### Добавлено
-- Поддержка прокси (SOCKS и HTTP) для загрузки удалённых конфигураций.
-- Начало ведения CHANGELOG.md!
+### Added
+- Proxy support (SOCKS and HTTP) for downloading remote configurations.
+- Started maintaining CHANGELOG.md!
 
-### Изменено
-- Перешёл с использования urllib на библиотеку requests для поддержки работы через прокси.
+### Changed
+- Switched from urllib to the requests library to support proxy usage.
 
-### Требования
-- Добавлена новая зависимость: библиотека [requests](https://pypi.org/project/requests/). Убедитесь, что она установлена.
+### Requirements
+- Added new dependency: [requests](https://pypi.org/project/requests/). Make sure it is installed.
 
 ---
 
-## [v0.1.0] - 2025-05-01 
+## [v0.1.0] - 2025-05-01
 
-### Добавлено
-- Изначальная версия с поддержкой VLESS и Shadowsocks.
+### Added
+- Initial version with VLESS and Shadowsocks support.
 
 ## [Unreleased]
 
-- Глубокий рефакторинг exclusions-логики: удалены все дублирующие реализации, оставлена только singbox.server.exclusions.
-- Централизован atomic file write: теперь только через singbox.utils.file.handle_temp_file.
-- Удалены устаревшие функции и модули (management.py, temp.py, дублирующие exclusions-функции).
-- Временные DeprecationWarning для плавного перехода (теперь не используются).
-- Улучшена обработка ошибок при загрузке невалидных/пустых URL, всегда корректный код возврата и сообщение.
-- Тесты CLI теперь не зависят от .env и переменных окружения, всегда проверяют именно переданный URL.
-- Добавлен флаг --exclude-only: позволяет обновлять exclusions.json без генерации основного конфига.
-- Проведён аудит и зачистка архитектуры, обновлён план рефакторинга в plans/struct_analysis_log.md.
+- Deep refactor of exclusions logic: all duplicate implementations removed, only singbox.server.exclusions remains.
+- Centralized atomic file write: now only via singbox.utils.file.handle_temp_file.
+- Removed deprecated functions and modules (management.py, temp.py, duplicate exclusions functions).
+- Temporary DeprecationWarnings for smooth transition (now unused).
+- Improved error handling for loading invalid/empty URLs, always correct return code and message.
+- CLI tests no longer depend on .env and environment variables, always check the provided URL.
+- Added --exclude-only flag: allows updating exclusions.json without generating the main config.
+- Architecture audit and cleanup performed, refactor plan updated in plans/struct_analysis_log.md.
 
-## CLI сценарии: входы и выходы
+## CLI scenarios: inputs and outputs
 
-| Сценарий/Флаг                | Входные файлы           | Конфиги (чтение)         | Артефакты/выходы                |
-|------------------------------|-------------------------|--------------------------|----------------------------------|
-| -u <url>                     | config.template.json    | exclusions.json          | config.json, backup.json         |
-| --dry-run                    | config.template.json    | exclusions.json          | (нет, только stdout)             |
-| --list-servers               | config.template.json    | exclusions.json          | (нет, только stdout)             |
-| --exclude <idx>              | config.template.json    | exclusions.json          | exclusions.json                  |
-| --exclude-only               | config.template.json    | exclusions.json          | exclusions.json                  |
-| --clear-exclusions           | exclusions.json         | exclusions.json          | exclusions.json (очищен/удалён)  |
-| --remarks/-r <name>          | config.template.json    | exclusions.json          | config.json, backup.json         |
-| --index/-i <n>               | config.template.json    | exclusions.json          | config.json, backup.json         |
-| (без флагов, только -u)      | config.template.json    | exclusions.json          | config.json, backup.json         |
+| Scenario/Flag                | Input files           | Configs (read)         | Artifacts/outputs                |
+|------------------------------|-----------------------|------------------------|----------------------------------|
+| -u <url>                     | config.template.json  | exclusions.json        | config.json, backup.json         |
+| --dry-run                    | config.template.json  | exclusions.json        | (none, only stdout)              |
+| --list-servers               | config.template.json  | exclusions.json        | (none, only stdout)              |
+| --exclude <idx>              | config.template.json  | exclusions.json        | exclusions.json                  |
+| --exclude-only               | config.template.json  | exclusions.json        | exclusions.json                  |
+| --clear-exclusions           | exclusions.json       | exclusions.json        | exclusions.json (cleared/deleted)|
+| --remarks/-r <name>          | config.template.json  | exclusions.json        | config.json, backup.json         |
+| --index/-i <n>               | config.template.json  | exclusions.json        | config.json, backup.json         |
+| (no flags, only -u)          | config.template.json  | exclusions.json        | config.json, backup.json         |
 
-**Примечания:**
-- exclusions.json всегда обновляется только при соответствующих действиях.
-- config.json не изменяется в режиме --dry-run.
-- merged.json и selected_config.json создаются только при определённых сценариях (см. код).
-- Все артефакты пишутся в рабочую директорию или путь, заданный переменными окружения.
+**Notes:**
+- exclusions.json is always updated only for relevant actions.
+- config.json is not changed in --dry-run mode.
+- merged.json and selected_config.json are created only for certain scenarios (see code).
+- All artifacts are written to the working directory or the path set by environment variables.
 
-## [Unreleased] — CLI v2: переход на Typer, централизация логики
+## [Unreleased] — CLI v2: migration to Typer, logic centralization
 
 ### Added:
-- Новый CLI на Typer: команды run, dry-run, list-servers, exclusions, clear-exclusions.
-- Автоматическая генерация help, алиасы, удобная структура команд.
-- Все пути к артефактам управляются через переменные окружения (SBOXMGR_LOG, SBOXMGR_CONFIG и др.).
+- New CLI on Typer: commands run, dry-run, list-servers, exclusions, clear-exclusions.
+- Automatic help generation, aliases, convenient command structure.
+- All artifact paths are managed via environment variables (SBOXMGR_LOG, SBOXMGR_CONFIG, etc.).
 
 ### Changed:
-- Вся бизнес-логика CLI вынесена в cli_common.py и связанные модули.
-- CLI-обёртка теперь thin: только маршрутизация, без дублирования логики.
-- Старый main.py может быть удалён после миграции тестов.
+- All CLI business logic moved to cli_common.py and related modules.
+- CLI wrapper is now thin: only routing, no logic duplication.
+- Old main.py can be removed after test migration.
 
 ### Fixed:
-- Исключено дублирование логики между CLI и core-модулями.
-- Тесты CLI проходят и для старого, и для нового интерфейса (до полной миграции).
+- No more logic duplication between CLI and core modules.
+- CLI tests pass for both old and new interfaces (until full migration).
 
 ### Best practices:
-- Для тестов CLI используйте Typer.CliRunner и monkeypatch для путей к артефактам.
-- Все новые команды оформлять как отдельные функции/подкоманды Typer.
+- For CLI tests, use Typer.CliRunner and monkeypatch for artifact paths.
+- All new commands should be implemented as separate Typer functions/subcommands.

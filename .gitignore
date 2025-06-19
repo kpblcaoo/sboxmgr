@@ -38,3 +38,15 @@ struct.json
 exclusions.json
 selected_config.json
 backup.json
+__pycache__
+build/
+*.egg-info/
+*.egg
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+event_log/

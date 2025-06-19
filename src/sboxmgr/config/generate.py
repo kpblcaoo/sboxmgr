@@ -48,6 +48,14 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
 
     # Write the temporary configuration using tempfile
     config = json.dumps(template, indent=2)
+    
+    # Ensure config_file directory exists
+    config_dir = os.path.dirname(config_file)
+    if not os.path.isdir(config_dir):
+        error(f"Config directory does not exist: {config_dir}. "
+              f"Set SBOXMGR_CONFIG_FILE to a writable path if your sing-box is installed elsewhere.")
+        raise FileNotFoundError(f"Config directory does not exist: {config_dir}")
+
     if os.path.exists(config_file):
         with open(config_file, "r") as current_config_file:
             current_config = current_config_file.read()

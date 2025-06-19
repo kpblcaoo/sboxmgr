@@ -4,10 +4,12 @@ def get_log_file():
     return os.getenv("SBOXMGR_LOG_FILE", "/var/log/sboxmgr.log")
 
 def get_config_file():
-    return os.getenv("SBOXMGR_CONFIG_FILE", "/etc/sboxmgr/config.json")
+    # Default matches sing-box config location
+    return os.getenv("SBOXMGR_CONFIG_FILE", "/etc/sing-box/config.json")
 
 def get_backup_file():
-    return os.getenv("SBOXMGR_BACKUP_FILE", "/etc/sboxmgr/config.json.bak")
+    # Default matches sing-box config location
+    return os.getenv("SBOXMGR_BACKUP_FILE", "/etc/sing-box/config.json.bak")
 
 def get_template_file():
     return os.getenv("SBOXMGR_TEMPLATE_FILE", "./config.template.json")
@@ -16,7 +18,7 @@ def get_exclusion_file():
     return os.getenv("SBOXMGR_EXCLUSION_FILE", "./exclusions.json")
 
 def get_selected_config_file():
-    return os.getenv("SINGBOX_SELECTED_CONFIG_FILE", "./selected_config.json")
+    return os.getenv("SBOXMGR_SELECTED_CONFIG_FILE", "./selected_config.json")
 
 def get_max_log_size():
     return int(os.getenv("SBOXMGR_MAX_LOG_SIZE", "1048576"))

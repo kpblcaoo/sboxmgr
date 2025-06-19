@@ -14,7 +14,8 @@ def load_selected_config():
             return {"selected": []}
     return {"selected": []}
 
-def save_selected_config(selected):
+def save_selected_config(data, selected_config_file=None):
     """Save selected configuration to file."""
-    SELECTED_CONFIG_FILE = get_selected_config_file()
-    atomic_write_json(selected, SELECTED_CONFIG_FILE) 
+    if selected_config_file is None:
+        selected_config_file = get_selected_config_file()
+    atomic_write_json(data, selected_config_file) 

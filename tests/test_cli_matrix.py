@@ -52,6 +52,7 @@ def test_cli_matrix(args, description, expected_exit, expected_files, expected_s
     if log_path.exists():
         log_text = log_path.read_text(encoding="utf-8")
     output = result.stdout + result.stderr + log_text
+    text = expected_stdout_contains[0] if expected_stdout_contains else ''
     try:
         assert result.returncode == expected_exit, f"{description}: неверный код возврата"
         for fname in expected_files:
@@ -85,4 +86,4 @@ def test_cli_matrix(args, description, expected_exit, expected_files, expected_s
         print(f"OUTPUT repr:\n{repr(output)}")
         print(f"TYPES: text={type(text)}, output={type(output)}")
         print("===============================\n")
-        raise 
+        assert False, f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе" 
