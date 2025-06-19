@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/kpblcaoo/update-singbox/actions/workflows/ci-dev.yml/badge.svg)](https://github.com/kpblcaoo/update-singbox/actions)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/kpblcaoo/update-singbox/actions)
-[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## Other languages / Другие языки
 - [Русский (docs/ru/README.md)](docs/ru/README.md)
@@ -159,7 +159,7 @@ Contributions are welcome! Fork, make changes, and submit a Pull Request.
 
 ## 📜 License
 
-This project is licensed under the GNU GPL v3. See LICENSE for details.
+This project is licensed under the terms of the MIT License. See the LICENSE file for details.
 
 
 

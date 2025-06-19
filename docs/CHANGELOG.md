@@ -290,3 +290,7 @@
 ### Best practices:
 - For CLI tests, use Typer.CliRunner and monkeypatch for artifact paths.
 - All new commands should be implemented as separate Typer functions/subcommands.
+
+## [1.5.0] - 2025-xx-xx
+### Changed
+- License changed from GPLv3 to MIT License (full project relicensing).
