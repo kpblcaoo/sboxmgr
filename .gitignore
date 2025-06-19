@@ -34,3 +34,6 @@ htmlcov/
 Thumbs.db
 .env
 .llmstruct_index/
+struct.json
+exclusions.json
+selected_config.json
