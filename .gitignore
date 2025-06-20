@@ -13,8 +13,8 @@ tests/ # Commented out to include tests in dev branch
 struct.json
 
 # plans (project logs, drafts)
-plans/
 
+plans/
 # pytest/coverage
 .pytest_cache/
 .coverage

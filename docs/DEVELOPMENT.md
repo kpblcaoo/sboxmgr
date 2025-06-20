@@ -34,16 +34,28 @@ Welcome to the development process! If you are new to the project, please follow
 
 # Процесс разработки и релиза
 
-## Ветка `dev`
-- Все изменения разрабатываются и тестируются в ветке `dev`.
-- CI автоматически запускает тесты и проверяет покрытие.
+## Базовые ветки
 
-## Ветка `main`
-- После принятия PR из `dev` в `main`:
-  - Удаляются тесты, CI/CD конфигурации и вспомогательные файлы.
-  - Генерируется changelog.
-  - Создаётся релиз с автогенерацией тегов.
+| Branch | Purpose |
+|--------|---------|
+| `main` | Always-green, production-ready. Release tags (`v1.4.0`, `v1.5.0` …). |
+| `develop` | Integration branch for the next version (currently 1.5.0). |
+| `release/x.y.z` | Pre-release stabilization; hot fixes only. Merged back to `main` & `develop`. |
+| `hotfix/x.y.z+1` | Critical fix for `main`; cherry-picked back to `develop`. |
 
-## Workflows
-- **CI для `dev`**: `.github/workflows/ci-dev.yml`
-- **Релиз для `main`**: `.github/workflows/release-main.yml`
+### Feature branches
+Create short-lived branches from `develop`:
+
+```bash
+git checkout develop && git pull
+git checkout -b feat/C-01-pydantic-models
+```
+
+Merge via Pull Request → squash-merge into `develop`.
+
+## CI / CD Workflows
+
+| Workflow | Trigger |
+|----------|---------|
+| `ci.yml` | Pull Requests & pushes to `develop` / feature branches — lint, tests, coverage |
+| `release.yml` | Tagged commits on `main` — build, publish artefacts, PyPI, Docker |
