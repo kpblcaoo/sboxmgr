@@ -7,7 +7,6 @@ import subprocess
 import os
 import sys
 import inquirer
-import argparse
 import re
 import shutil
 import logging
@@ -170,15 +169,6 @@ def get_server_list_with_exclusions(url):
         for name in server_list
     ]
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Installation Wizard for sboxmgr (Sing-box config manager)")
-    parser.add_argument("-p", "--path", default="/opt/sboxmgr/", help="Installation path")
-    parser.add_argument("-u", "--url", default=os.getenv("SINGBOX_URL", "https://default.link"), help="Sing-box subscription URL")
-    parser.add_argument("-s", "--silent", action="store_true", help="Silent installation mode")
-    parser.add_argument("-t", "--timer", default="15min", help="Timer frequency")
-    parser.add_argument("-d", type=int, choices=range(3), default=1, help="Service verbosity level (0-2)")
-    return parser.parse_args()
-
 def validate_url(url):
     regex = re.compile(
         r'^(?:http|ftp)s?://'
@@ -242,7 +232,6 @@ WantedBy=timers.target
     print("Systemd timer enabled and started.")
 
 def run_installation_wizard():
-    args = parse_arguments()
     main_menu = [
         inquirer.List(
             "action",
@@ -261,7 +250,7 @@ def run_installation_wizard():
 
         elif answers["action"] == "Get Config":
             config_questions = [
-                inquirer.Text("install_link", message="Enter subscription URL", default=args.url, validate=lambda _, x: validate_url(x)),
+                inquirer.Text("install_link", message="Enter subscription URL", default=os.getenv("SINGBOX_URL", "https://default.link"), validate=lambda _, x: validate_url(x)),
                 inquirer.List("server_type", message="Select installation type", choices=["Single Server", "Multi-Server"]),
             ]
             config_answers = inquirer.prompt(config_questions)
@@ -326,9 +315,9 @@ def run_installation_wizard():
 
         elif answers["action"] == "Install":
             install_questions = [
-                inquirer.Text("install_path", message="Installation path", default=args.path),
-                inquirer.Text("install_link", message="Subscription URL", default=args.url, validate=lambda _, x: validate_url(x)),
-                inquirer.Text("timer_frequency", message="Timer frequency", default=args.timer),
+                inquirer.Text("install_path", message="Installation path", default="/opt/sboxmgr/"),
+                inquirer.Text("install_link", message="Subscription URL", default=os.getenv("SINGBOX_URL", "https://default.link"), validate=lambda _, x: validate_url(x)),
+                inquirer.Text("timer_frequency", message="Timer frequency", default="15min"),
                 inquirer.List("debug_level", message="Debug level", choices=[
                     ("Minimal", 0), ("Detailed", 1), ("Verbose", 2)
                 ], default=1, carousel=True),
@@ -383,7 +372,7 @@ def run_installation_wizard():
                 view_exclusions()
             elif exclusion_answers["exclusion_action"] in ["Add Exclusions", "Remove Exclusions"]:
                 url_question = [
-                    inquirer.Text("install_link", message="Subscription URL", default=args.url, validate=lambda _, x: validate_url(x))
+                    inquirer.Text("install_link", message="Subscription URL", default=os.getenv("SINGBOX_URL", "https://default.link"), validate=lambda _, x: validate_url(x))
                 ]
                 url_answers = inquirer.prompt(url_question)
                 if not url_answers:

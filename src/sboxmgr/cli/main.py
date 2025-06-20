@@ -112,11 +112,7 @@ def run(
                 if debug >= 1:
                     typer.echo("Service restart completed.")
             except Exception as e:
-                if os.environ.get("MOCK_MANAGE_SERVICE") == "1":
-                    typer.echo("[Info] manage_service mock: ignoring error and exiting with code 0")
-                    raise typer.Exit(0)
-                else:
-                    raise
+                raise
     except Exception as e:
         typer.echo(f"Error during config update: {e}", err=True)
         raise typer.Exit(1)

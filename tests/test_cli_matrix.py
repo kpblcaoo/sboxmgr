@@ -16,26 +16,25 @@ DRYRUN_MSGS = ["Dry run: config is valid", "dry-run", "конфиг валиде
 # Таблица CLI-флагов и ожидаемого поведения
 CLI_MATRIX = [
     # (args, description, expected_exit, expected_files, expected_stdout_contains)
-    (["-u", TEST_URL], 'Базовый запуск: только URL', 0, ['config.json'], ['Update completed successfully', '[Info] manage_service mock: ignoring error and exiting with code 0']),
-    (["-u", TEST_URL, '--dry-run'], 'Dry-run: не должно быть изменений файлов', 0, [], DRYRUN_MSGS),
-    (["-u", TEST_URL, '--list-servers'], 'Список серверов', 0, [], ['Index', 'Name', 'Protocol', 'Port']),
-    (["-u", TEST_URL, '--exclude', '0'], 'Исключение сервера по индексу', 0, ['exclusions.json'], EXCLUDE_MSGS),
-    (["-u", TEST_URL, '--exclude', '0', '--exclude-only'], 'Только exclusions.json, без config.json', 0, ['exclusions.json'], EXCLUDE_MSGS),
-    (["-u", TEST_URL, '--exclude', '0', '--dry-run'], 'Исключение с dry-run (не должно менять exclusions.json)', 0, [], DRYRUN_MSGS + EXCLUDE_MSGS),
-    (["-u", TEST_URL, '--exclude', '0', '--clear-exclusions'], 'Очистка exclusions', 0, [], REMOVE_MSGS),
-    (["-u", TEST_URL, '--exclude', '0', '--exclude', '-0'], 'Исключение и возврат сервера', 0, ['exclusions.json'], EXCLUDE_MSGS + REMOVE_MSGS),
-    (["-u", TEST_URL, '--exclude', '0', '--dry-run', '--exclude-only'], 'Исключение с dry-run и exclude-only', 0, [], DRYRUN_MSGS + EXCLUDE_MSGS),
+    (["run", "-u", TEST_URL], 'Базовый запуск: только URL', 0, ['config.json'], ['Update completed successfully', '[Info] manage_service mock: ignoring error and exiting with code 0']),
+    (["dry-run", "-u", TEST_URL], 'Dry-run: не должно быть изменений файлов', 0, [], DRYRUN_MSGS),
+    (["list-servers", "-u", TEST_URL], 'Список серверов', 0, [], ['Index', 'Name', 'Protocol', 'Port']),
+    (["exclusions", "-u", TEST_URL, "--add", "0"], 'Исключение сервера по индексу', 0, ['exclusions.json'], EXCLUDE_MSGS),
+    (["exclusions", "-u", TEST_URL, "--add", "0"], 'Только exclusions.json, без config.json', 0, ['exclusions.json'], EXCLUDE_MSGS),
+    (["exclusions", "-u", TEST_URL, "--add", "0"], 'Исключение с dry-run (не должно менять exclusions.json)', 0, [], DRYRUN_MSGS + EXCLUDE_MSGS),
+    (["clear-exclusions", "--yes"], 'Очистка exclusions', 0, [], REMOVE_MSGS),
+    (["exclusions", "-u", TEST_URL, "--add", "0", "--remove", "0"], 'Исключение и возврат сервера', 0, ['exclusions.json'], EXCLUDE_MSGS + REMOVE_MSGS),
     # Добавить другие комбинации по мере необходимости
 ]
 
 @pytest.mark.parametrize('args, description, expected_exit, expected_files, expected_stdout_contains', CLI_MATRIX)
-def test_cli_matrix(args, description, expected_exit, expected_files, expected_stdout_contains, tmp_path, monkeypatch):
+def test_cli_matrix(args, description, expected_exit, expected_files, expected_stdout_contains, tmp_path):
     """
     CLI matrix: tolerant-поиск сообщений, не трогает exclusions.json вне tmp_path.
     Если тест падает — выводит stdout, stderr и лог для диагностики.
     """
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    cmd = [sys.executable, 'src/main.py'] + args
+    cmd = [sys.executable, 'src/sboxmgr/cli/main.py'] + args
     env = os.environ.copy()
     # Подменяем пути для артефактов на tmp_path
     env["SBOXMGR_CONFIG_FILE"] = str(tmp_path / "config.json")
@@ -43,9 +42,7 @@ def test_cli_matrix(args, description, expected_exit, expected_files, expected_s
     env["SBOXMGR_TEMPLATE_FILE"] = str(project_root + "/config.template.json")
     env["SBOXMGR_EXCLUSIONS_FILE"] = str(tmp_path / "exclusions.json")
     env["SBOXMGR_LOG_FILE"] = str(tmp_path / "log.txt")
-    env["MOCK_MANAGE_SERVICE"] = "1"
-    # Мокаем manage_service (systemctl) чтобы не требовать root и не ломать тесты
-    monkeypatch.setattr("src.sboxmgr.service.manage.manage_service", lambda: None)
+    env["SBOXMGR_TEST_MODE"] = "1"
     result = subprocess.run(cmd, capture_output=True, text=True, cwd=project_root, env=env)
     log_text = ""
     log_path = tmp_path / "log.txt"
