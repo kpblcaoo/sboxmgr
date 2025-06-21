@@ -50,3 +50,4 @@ build/
 *.pywz
 *.pyzw
 event_log/
+.cursor/

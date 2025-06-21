@@ -19,12 +19,14 @@ def minimal_config():
         ]
     }
 
-@pytest.fixture
-def patch_fetch_json(monkeypatch, minimal_config):
-    monkeypatch.setattr("sboxmgr.cli.main.fetch_json", lambda url: minimal_config)
+# === LEGACY TESTS (deprecated, covered by new architecture) ===
+# def patch_fetch_json(monkeypatch, minimal_config):
+#     monkeypatch.setattr("sboxmgr.cli.main.fetch_json", lambda url: minimal_config)
+#
+# def test_run_creates_selected_config(tmp_path, monkeypatch, fake_url, patch_fetch_json):
+#     ... (legacy test, replaced by test_run_creates_selected_config_new_arch)
 
-
-def test_run_creates_selected_config(tmp_path, monkeypatch, fake_url, patch_fetch_json):
+def test_run_creates_selected_config_new_arch(tmp_path, monkeypatch, fake_url):
     # Генерируем минимальный config.template.json
     template_path = tmp_path / "config.template.json"
     template_path.write_text(json.dumps({
@@ -40,11 +42,17 @@ def test_run_creates_selected_config(tmp_path, monkeypatch, fake_url, patch_fetc
     # Пробуем без --url, если не сработает — fallback на --url
     result = runner.invoke(app, ["run", "--index", "0"])
     if result.exit_code != 0:
-        # fallback: явно передаём --url
         result = runner.invoke(app, ["run", "--index", "0", "-u", fake_url])
     assert result.exit_code == 0, f"Output: {result.output}\nException: {result.exception}"
     config_path = tmp_path / "selected_config.json"
     assert config_path.exists()
     with open(config_path) as f:
         data = json.load(f)
-    assert "selected" in data 
+    assert "selected" in data
+    # Проверяем, что основной config содержит outbounds и route/rules
+    main_config_path = tmp_path / "config.json"
+    assert main_config_path.exists()
+    with open(main_config_path) as f:
+        config_data = json.load(f)
+    assert "outbounds" in config_data
+    assert "route" in config_data and "rules" in config_data["route"] 

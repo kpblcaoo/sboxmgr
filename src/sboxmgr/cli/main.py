@@ -11,6 +11,8 @@ from sboxmgr.server.state import load_selected_config, save_selected_config
 from sboxmgr.server.selection import list_servers as do_list_servers
 from logsetup.setup import setup_logging
 from sboxmgr.utils.env import get_log_file, get_config_file, get_backup_file, get_template_file, get_exclusion_file, get_selected_config_file, get_max_log_size, get_debug_level, get_url
+from src.sboxmgr.subscription.manager import SubscriptionManager
+from src.sboxmgr.subscription.models import SubscriptionSource
 
 load_dotenv()
 
@@ -41,60 +43,31 @@ def run(
 ):
     """Generate and apply sing-box config (default scenario)."""
     try:
-        json_data = fetch_json(url)
+        source = SubscriptionSource(url=url, source_type="url_base64")
+        mgr = SubscriptionManager(source)
+        exclusions = load_exclusions(dry_run=dry_run)
+        context = {"mode": "default", "debug": debug}
+        user_routes = []  # TODO: добавить опции CLI для user_routes при необходимости
+        config = mgr.export_config(exclusions=exclusions, user_routes=user_routes, context=context)
     except Exception as e:
-        typer.echo(f"[Ошибка] Не удалось загрузить конфиг: {e}", err=True)
+        typer.echo(f"[Ошибка] Не удалось обработать подписку: {e}", err=True)
         raise typer.Exit(1)
 
-    exclusions = load_exclusions(dry_run=dry_run)
-    indices = []
-    if index:
-        indices = [int(i) for i in index.split(",") if i.strip().isdigit()]
-    elif use_selected:
-        saved_config = load_selected_config()
-        indices = [int(item["index"]) for item in saved_config["selected"] if "index" in item]
-    # иначе indices остаётся пустым — авто-режим
-
-    try:
-        outbounds, excluded_ips, selected_servers = prepare_selection(
-            json_data,
-            indices,
-            remarks,
-            SUPPORTED_PROTOCOLS,
-            exclusions,
-            debug_level=debug,
-            dry_run=dry_run
-        )
-    except ValueError as e:
-        msg = str(e)
-        if "исключён" in msg or "excluded" in msg:
-            typer.echo(f"[Ошибка] {msg}", err=True)
-            raise typer.Exit(1)
-        else:
-            raise
-
-    # Если ничего не выбрано и есть исключение по excluded — выводим в stdout
-    if (remarks or indices) and not outbounds:
-        typer.echo("[Ошибка] Сервер с выбранным индексом или remarks находится в списке исключённых (excluded). Выберите другой.", err=True)
-        raise typer.Exit(1)
-
-    selected_config_file = get_selected_config_file()
-    if (remarks or indices) and not dry_run and selected_servers:
-        save_selected_config({"selected": selected_servers}, selected_config_file)
-
-    # Определяем актуальные пути
+    # Сохраняем/валидируем config как раньше
     template_file = template_file or get_template_file()
     config_file = config_file or get_config_file()
     backup_file = backup_file or get_backup_file()
 
+    import json
+    config_json = json.dumps(config, indent=2, ensure_ascii=False)
+
     if dry_run:
-        from sboxmgr.config.generate import generate_temp_config, validate_config_file
+        from sboxmgr.config.generate import validate_config_file
         import tempfile
         typer.echo("Режим dry-run: создаём временный конфиг и валидируем его")
         with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
             temp_path = tmp.name
-            config_content = generate_temp_config(outbounds, template_file, excluded_ips)
-            tmp.write(config_content)
+            tmp.write(config_json)
         valid, output = validate_config_file(temp_path)
         if valid:
             typer.echo("Dry run: config is valid")
@@ -105,14 +78,16 @@ def run(
         raise typer.Exit(0 if valid else 1)
 
     try:
-        changes_made = generate_config(outbounds, template_file, config_file, backup_file, excluded_ips)
-        if changes_made:
-            try:
-                manage_service()
-                if debug >= 1:
-                    typer.echo("Service restart completed.")
-            except Exception as e:
-                raise
+        with open(config_file, "w", encoding="utf-8") as f:
+            f.write(config_json)
+        # Бэкап
+        if backup_file:
+            import shutil
+            shutil.copy2(config_file, backup_file)
+        # Перезапуск сервиса
+        manage_service()
+        if debug >= 1:
+            typer.echo("Service restart completed.")
     except Exception as e:
         typer.echo(f"Error during config update: {e}", err=True)
         raise typer.Exit(1)
