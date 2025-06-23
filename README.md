@@ -19,9 +19,9 @@ A Python CLI tool for automating and managing [sing-box](https://sing-box.sagern
 - All paths and artifacts are configurable via environment variables
 - Modular architecture, fully tested with pytest + Typer.CliRunner
 
-## Архитектура подписочного пайплайна
+## Pipeline Architecture
 
-Пайплайн построен по модульной архитектуре с поддержкой плагинов для fetcher, parser, exporter, selector, postprocessor, middleware. Все этапы покрыты fail-tolerance, кэшированием, i18n, edge-тестами и best practices.
+The pipeline is built on a modular architecture with plugin support for fetcher, parser, exporter, selector, postprocessor, and middleware. All stages are covered by fail-tolerance, caching, i18n, edge tests, and best practices.
 
 ```mermaid
 flowchart TD
@@ -60,14 +60,14 @@ flowchart TD
     class A,B,C,D,E,F,G,H main;
 ```
 
-- **DX/CLI-генератор**: генерация шаблонов плагинов (fetcher, parser, exporter, postprocessor, validator) с автотестами и best practices.
-- **i18n**: мультиязычность CLI, fallback, sanitization, автоматизация sync_keys.py, edge-тесты.
-- **Middleware**: расширяемая цепочка middleware с edge-тестами, логированием, fail-tolerance.
-- **Кэширование**: in-memory кэш для SubscriptionManager и fetcher, поддержка force_reload.
-- **Fail-tolerance**: partial_success, strict/tolerant режимы, Error Reporter, покрытие edge-тестами.
-- **Coverage**: покрытие >90%, отдельные edge-тесты для всех слоёв пайплайна.
-- **Best practices**: модульная архитектура, docstring Google-style, автодокументация, SEC-чеклисты, DX-утилиты.
-- **SEC-валидация inbounds**: все inbounds проходят валидацию через pydantic (V2): bind только на localhost/private, порты 1024-65535, внешний bind требует явного подтверждения, edge-тесты, пример профиля см. cli_security.md.
+- **DX/CLI generator**: plugin template generator (fetcher, parser, exporter, postprocessor, validator) with tests and best practices.
+- **i18n**: multilingual CLI, fallback, sanitization, automated sync_keys.py, edge tests.
+- **Middleware**: extensible middleware chain with edge tests, logging, fail-tolerance.
+- **Caching**: in-memory cache for SubscriptionManager and fetcher, force_reload support.
+- **Fail-tolerance**: partial_success, strict/tolerant modes, Error Reporter, edge test coverage.
+- **Coverage**: >90% test coverage, dedicated edge tests for all pipeline layers.
+- **Best practices**: modular architecture, Google-style docstrings, auto-documentation, SEC checklists, DX utilities.
+- **SEC validation for inbounds**: all inbounds are validated via pydantic (V2): bind only to localhost/private, ports 1024-65535, external bind requires explicit confirmation, edge tests, see cli_security.md for profile example.
 
 ---
 
@@ -231,6 +231,14 @@ This project is licensed under the terms of the MIT License. See the LICENSE fil
   - Postprocessor: внешний enrichment без таймаута/валидации
 - Поведение пайплайна при ошибках: partial_success, fallback, логирование, пайплайн не падает.
 - См. также: sec_checklist.md, tests/edge/README.md
+
+## Best Practices & Security
+
+- The project implements multi-layer SEC validation, fail-tolerant pipeline, and a plugin-based architecture.
+- For details on security, threat model, and checklists, see:
+  - [Security Model](docs/security.md)
+  - [SEC Checklist](docs/sec_checklist.md)
+  - [Architecture](docs/arch/)
 
 
 

@@ -17,7 +17,7 @@ from sboxmgr.i18n.loader import LanguageLoader
 from pathlib import Path
 import locale
 from sboxmgr.i18n.t import t
-from .plugin_template import plugin_template
+from . import plugin_template
 from .commands.lang import lang_cmd
 from .commands.subscription import run, dry_run, list_servers
 
@@ -151,7 +151,7 @@ def dry_run(
             ua = ""
         else:
             ua = user_agent
-        source = SubscriptionSource(url=url, source_type="url_base4", user_agent=ua)
+        source = SubscriptionSource(url=url, source_type="url_base64", user_agent=ua)
         mgr = SubscriptionManager(source)
         exclusions = load_exclusions(dry_run=True)
         context = PipelineContext(mode="default", debug_level=debug)
@@ -342,7 +342,7 @@ def lang_cmd(
         typer.echo(f"To set language persistently: sboxctl lang --set ru")
         typer.echo(f"Or for one-time use: SBOXMGR_LANG=ru sboxctl ...")
 
-app.command("plugin-template")(plugin_template)
+app.command()(plugin_template.plugin_template)
 app.command()(run)
 app.command()(dry_run)
 app.command("list-servers")(list_servers)

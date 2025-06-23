@@ -294,3 +294,14 @@
 ## [1.5.0] - 2025-xx-xx
 ### Changed
 - License changed from GPLv3 to MIT License (full project relicensing).
+
+### Fixed
+- **sing-box 1.11.0+ Compatibility**: Updated sing-box exporter to remove deprecated legacy special outbounds (`block`, `dns`) and replaced them with modern rule actions (`hijack-dns`) as per sing-box 1.11.0+ requirements
+- **Configuration Template**: Updated config template to use `action: "hijack-dns"` instead of deprecated `outbound: "dns-out"` for DNS protocol rules
+- **Tests**: Updated test expectations to reflect removal of deprecated outbounds
+
+### Technical Details
+- Removed automatic generation of `{"type": "block", "tag": "block"}` and `{"type": "dns", "tag": "dns-out"}` outbounds
+- Updated route rules to use rule actions instead of special outbounds
+- DNS protocol routing now uses `"action": "hijack-dns"` instead of `"outbound": "dns-out"`
+- Maintains backward compatibility with sing-box versions that support the new syntax

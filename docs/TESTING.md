@@ -1,4 +1,4 @@
-# Инструкция по запуску тестов
+# Testing Instructions
 
 ## Installing dependencies
 Before running tests, make sure all dependencies are installed:
@@ -9,20 +9,20 @@ pip install .[dev]
 cp .env.example .env  # Edit as needed
 ```
 
-## Запуск тестов
-Для запуска всех тестов выполните команду:
+## Running tests
+To run all tests, use:
 ```bash
 pytest
 ```
 
-## Проверка покрытия тестов
-Для проверки покрытия кода выполните:
+## Checking test coverage
+To check code coverage, use:
 ```bash
 pytest --cov=. --cov-report=term-missing
 ```
 
-## Структура тестов
-- Тесты находятся в папке `tests/`.
-- Каждый модуль имеет соответствующий файл тестов, например:
+## Test structure
+- Tests are located in the `tests/` folder.
+- Each module has a corresponding test file, for example:
   - `config_fetch.py` -> `tests/test_config_fetch.py`
   - `protocol_validation.py` -> `tests/test_protocol_validation.py`.

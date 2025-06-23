@@ -1,11 +1,11 @@
 # LLM Integration in sboxmgr
 
 ## Roles
-- Parser (edge-case генерация, тесты)
+- Parser (edge-case generation, tests)
 - Security checker (SEC checklist, threat model)
-- Тестировщик (unit/integration tests)
+- Tester (unit/integration tests)
 
 ## Process
-- LLM выступал как ассистент в архитектуре, тестировании, ревью
-- Все ключевые решения фиксировались в ADR и логах
-- Логи запросов и решений сохранялись для аудита 
+- LLM acted as an assistant in architecture, testing, and review
+- All key decisions were recorded in ADRs and logs
+- Logs of queries and decisions were saved for audit 

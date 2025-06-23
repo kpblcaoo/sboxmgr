@@ -10,10 +10,10 @@ def test_empty_servers():
     assert isinstance(config, dict)
     assert "outbounds" in config
     tags = [o["tag"] for o in config["outbounds"]]
-    # Проверяем, что только стандартные outbounds
-    assert set(tags) >= {"direct", "block", "dns-out"}
+    # Проверяем, что только стандартные outbounds (legacy special outbounds удалены в sing-box 1.11.0+)
+    assert set(tags) >= {"direct"}
     # Не должно быть пользовательских (только стандартные)
-    assert len(tags) == 3
+    assert len(tags) == 1
 
 def test_invalid_server_fields():
     servers = [
@@ -194,4 +194,46 @@ def test_inbounds_port_conflict():
 def test_inbounds_sec_validation():
     """Тест: SEC — порт вне диапазона должен вызывать ошибку валидации."""
     with pytest.raises(ValueError):
-        InboundProfile(type="socks", listen="127.0.0.1", port=80) 
+        InboundProfile(type="socks", listen="127.0.0.1", port=80)
+
+def test_exporter_wireguard_missing_fields():
+    """Exporter: WireGuard outbound без обязательных полей должен скипаться с warning."""
+    from sboxmgr.export.export_manager import ExportManager
+    from sboxmgr.subscription.models import ParsedServer
+    servers = [ParsedServer(type="wireguard", address="", port=0, meta={})]
+    mgr = ExportManager()
+    config = mgr.export(servers, exclusions=[], user_routes=[], context=None)
+    assert "outbounds" in config
+    assert all(o.get("type") != "wireguard" or o.get("address") for o in config["outbounds"])
+
+def test_exporter_tuic_invalid():
+    """Exporter: tuic outbound с невалидными значениями должен скипаться с warning."""
+    from sboxmgr.export.export_manager import ExportManager
+    from sboxmgr.subscription.models import ParsedServer
+    servers = [ParsedServer(type="tuic", address="bad", port=-1, meta={})]
+    mgr = ExportManager()
+    config = mgr.export(servers, exclusions=[], user_routes=[], context=None)
+    assert "outbounds" in config
+    assert all(o.get("type") != "tuic" or o.get("port", 0) > 0 for o in config["outbounds"])
+
+def test_exporter_hysteria_missing_fields():
+    """Exporter: hysteria outbound без обязательных полей должен скипаться с warning."""
+    from sboxmgr.export.export_manager import ExportManager
+    from sboxmgr.subscription.models import ParsedServer
+    servers = [ParsedServer(type="hysteria", address="", port=0, meta={})]
+    mgr = ExportManager()
+    config = mgr.export(servers, exclusions=[], user_routes=[], context=None)
+    assert "outbounds" in config
+    assert all(o.get("type") != "hysteria" or o.get("address") for o in config["outbounds"])
+
+def test_exporter_shadowtls_anytls_tor_ssh():
+    """Exporter: shadowtls, anytls, tor, ssh — отсутствие обязательных полей, невалидные значения — должны скипаться с warning."""
+    from sboxmgr.export.export_manager import ExportManager
+    from sboxmgr.subscription.models import ParsedServer
+    types = ["shadowtls", "anytls", "tor", "ssh"]
+    for t in types:
+        servers = [ParsedServer(type=t, address="", port=0, meta={})]
+        mgr = ExportManager()
+        config = mgr.export(servers, exclusions=[], user_routes=[], context=None)
+        assert "outbounds" in config
+        assert all(o.get("type") != t or o.get("address") for o in config["outbounds"]) 

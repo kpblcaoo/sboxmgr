@@ -1,9 +1,9 @@
 # Test Plan: Subscription Pipeline & Routing Layer
 
 ## Coverage Goals
-- >=90% coverage обязательно перед миграцией
-- Edge-cases: смешанные схемы (ss:// как base64 и как URI), query-параметры, emoji, комментарии, сломанные строки
-- Для Routing Layer: тесты на передачу context, exclusions, user_routes, режимов (mode)
+- >=90% coverage required before migration
+- Edge-cases: mixed schemes (ss:// as base64 and as URI), query parameters, emoji, comments, broken lines
+- For Routing Layer: tests for context, exclusions, user_routes, mode passing
 
 ## Rationale
-Большинство подписок и сценариев маршрутизации в wild доступны в невалидном или нестандартном виде. Парсеры и роутеры обязаны быть fail-safe и forward-compatible. Тесты должны выявлять ошибки на сломанных строках, неожиданных параметрах, edge-cases. 
+Most subscriptions and routing scenarios in the wild are available in invalid or non-standard form. Parsers and routers must be fail-safe and forward-compatible. Tests should catch errors on broken lines, unexpected parameters, and edge-cases. 

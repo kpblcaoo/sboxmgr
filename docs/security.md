@@ -34,6 +34,7 @@
 - Middleware registry: контроль регистрации, валидация интерфейсов, изоляция выполнения
 - Sandbox для middleware, аудит цепочки, ограничение глубины, redaction логов, валидация enrichment, контроль user input в фильтрах.
 - Sandbox и контроль шаблонов для DX/CLI-генератора, review внешних плагинов, валидация автодокументации, ограничение автогенерации файлов.
+- SEC-PARSER-01: реализована многоуровневая валидация и sanitization данных после парсинга, edge-тесты, fail-tolerant pipeline, документация и чеклист (см. sec_checklist.md, tests/edge/test_parser_edge_cases.py)
 
 ## SEC Fallbacks by Pipeline Phase
 
@@ -55,4 +56,34 @@
 ### Exporter
 - Unsupported outbound, пустой config: warning+skip, partial config, пайплайн не падает.
 
-See also: sec_checklist.md, docs/tests/edge_cases.md 
+See also: sec_checklist.md, docs/tests/edge_cases.md
+
+## SEC-контуры и угрозы по фазам пайплайна (актуализация 2025-06-24)
+
+| Фаза             | Основные угрозы/риски | Реализовано | Упущения/рекомендации |
+|------------------|----------------------|-------------|-----------------------|
+| Fetch            | Невалидированные схемы, path traversal, обход check_url | Валидация схем, ограничение file:// | Не все edge-cases (symlink, вложенные file://) покрыты тестами |
+| Parser           | Side-effects (eval, exec, вложенные base64), proto pollution | Edge-тесты, sanitization | Не все типы вложенности и инъекций покрыты, нет ErrorSeverity |
+| Parsed Validator | Silent fallback, success=True при пустом config, неявные ошибки | SEC-PARSER-01: многоуровневая валидация, фильтрация, edge-тесты, fail-tolerant pipeline | Нет ErrorSeverity, не все ошибки фатальны |
+| Middleware       | Нет sandbox/изоляции для всех хуков, raise без обработки | Sandbox, audit, ограничение глубины | Нет строгой изоляции для пользовательских middleware |
+| Exporter         | Path traversal, запись вне allowed basedir, symlink-атаки | Ограничение file://, edge-тесты | Нет safe_path_check, нет edge-тестов на path traversal |
+| Final Validation | Не всегда вызывается, если был fatal error | Частично | Нет единого слоя для финальной проверки |
+| Routing Layer    | Конфликты user_routes/exclusions, route-injection, некорректная структура | Плагинная архитектура, edge-тесты | Нет строгой схемы user_routes, нет ErrorSeverity, нет финальной валидации маршрутов |
+| i18n             | Ошибки локализации, silent fallback | sync_keys.py, edge-тесты | Нет строгой проверки ключей, silent fallback без логов |
+| Plugin Registry  | Подмена REGISTRY, side-effect, нет sandbox | Registry, edge-тесты | Нет audit-обёртки, нет ограничений на параметры |
+| Error Handling   | Все ошибки равны, нет деления по значимости | ErrorReporter, redaction | Нет ErrorSeverity, нет категоризации |
+
+### Routing Layer: SEC-контуры и рекомендации
+- Ввести строгую валидацию структуры user_routes/exclusions
+- Запретить success=True при пустом config после фильтрации маршрутов
+- Ввести ErrorSeverity для ошибок маршрутизации
+- Edge-тесты на route-injection, path traversal, конфликт exclusions/user_routes
+- Финальная валидация маршрутов перед экспортом (уникальность tags, корректность outbounds)
+
+### Новые/уточнённые угрозы (см. чеклист)
+- Silent fallback на всех фазах
+- Нет sandbox/audit-обёртки на register_*
+- Нет safe_path_check для экспортеров
+- Нет ErrorSeverity в PipelineError
+- Нет строгой проверки i18n-ключей
+- Нет финальной валидации маршрутов

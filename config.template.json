@@ -35,7 +35,7 @@
       "rules": [
           {
               "protocol": "dns",
-              "outbound": "dns-out"
+              "action": "hijack-dns"
           },
           {
               "ip_is_private": true,

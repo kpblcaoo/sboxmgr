@@ -160,10 +160,6 @@ def singbox_export(
     tags = {o["tag"] for o in outbounds}
     if "direct" not in tags:
         outbounds.append({"type": "direct", "tag": "direct"})
-    if "block" not in tags:
-        outbounds.append({"type": "block", "tag": "block"})
-    if "dns-out" not in tags:
-        outbounds.append({"type": "dns", "tag": "dns-out"})
     config = {
         "outbounds": outbounds,
         "route": {"rules": routes}

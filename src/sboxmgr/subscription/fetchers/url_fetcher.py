@@ -1,5 +1,6 @@
 import os
 import requests
+import gzip
 from ..models import SubscriptionSource
 from ..base_fetcher import BaseFetcher
 from ..registry import register
@@ -43,6 +44,8 @@ class URLFetcher(BaseFetcher):
                 if len(data) > size_limit:
                     print(f"[fetcher][WARN] File size exceeds limit ({size_limit} bytes), skipping.")
                     raise ValueError("File size exceeds limit")
+                # Check if data is gzipped and decompress if needed
+                data = self._decompress_if_gzipped(data)
                 with self._cache_lock:
                     self._fetch_cache[key] = data
                 return data
@@ -60,9 +63,23 @@ class URLFetcher(BaseFetcher):
             if len(data) > size_limit:
                 print(f"[fetcher][WARN] Downloaded data exceeds limit ({size_limit} bytes), skipping.")
                 raise ValueError("Downloaded data exceeds limit")
+            # Check if data is gzipped and decompress if needed
+            data = self._decompress_if_gzipped(data)
             with self._cache_lock:
                 self._fetch_cache[key] = data
             return data
+
+    def _decompress_if_gzipped(self, data: bytes) -> bytes:
+        """Check if data is gzipped and decompress if needed."""
+        if data.startswith(b'\x1f\x8b'):  # gzip magic number
+            try:
+                decompressed = gzip.decompress(data)
+                print(f"[fetcher] Decompressed gzip data: {len(data)} -> {len(decompressed)} bytes")
+                return decompressed
+            except Exception as e:
+                print(f"[fetcher][WARN] Failed to decompress gzip data: {e}")
+                return data
+        return data
 
     def _get_size_limit(self) -> int:
         """Возвращает лимит размера входных данных в байтах (по умолчанию 2 MB)."""

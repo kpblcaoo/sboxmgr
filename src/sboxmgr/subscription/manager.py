@@ -1,6 +1,7 @@
 from .models import SubscriptionSource, ParsedServer, PipelineContext, PipelineResult
 from .registry import get_plugin, load_entry_points
 from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации
+from .validators import required_fields  # <--- Явный импорт валидатора
 from typing import List, Optional
 from sboxmgr.export.export_manager import ExportManager
 from .base_selector import DefaultSelector
@@ -162,6 +163,36 @@ class SubscriptionManager:
                 else:
                     return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
             servers = parser.parse(raw)
+            # === ParsedValidator ===
+            from sboxmgr.subscription.validators.base import PARSED_VALIDATOR_REGISTRY
+            parsed_validator_cls = PARSED_VALIDATOR_REGISTRY.get("required_fields")
+            if parsed_validator_cls:
+                parsed_validator = parsed_validator_cls()
+                parsed_result = parsed_validator.validate(servers, context)
+                print(f"[DEBUG] ParsedValidator valid_servers: {getattr(parsed_result, 'valid_servers', None)} errors: {parsed_result.errors}")
+                servers = getattr(parsed_result, 'valid_servers', servers)
+                print(f"[DEBUG] servers after validation: {servers}")
+                if not servers:
+                    print(f"[DEBUG] No valid servers after validation, returning empty config and success=False")
+                    err = PipelineError(
+                        type=ErrorType.VALIDATION,
+                        stage="parsed_validate",
+                        message="; ".join(parsed_result.errors),
+                        context={"source_type": self.fetcher.source.source_type},
+                        timestamp=datetime.now(timezone.utc)
+                    )
+                    context.metadata['errors'].append(err)
+                    return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
+                if parsed_result.errors:
+                    err = PipelineError(
+                        type=ErrorType.VALIDATION,
+                        stage="parsed_validate",
+                        message="; ".join(parsed_result.errors),
+                        context={"source_type": self.fetcher.source.source_type},
+                        timestamp=datetime.now(timezone.utc)
+                    )
+                    context.metadata['errors'].append(err)
+            # === End ParsedValidator ===
             servers = self.middleware_chain.process(servers, context)
             if debug_level > 0:
                 print(f"[debug] servers after middleware: {servers[:3]}{' ...' if len(servers) > 3 else ''}")
