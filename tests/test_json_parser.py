@@ -1,5 +1,5 @@
 import os
-from src.sboxmgr.subscription.parsers.json_parser import JSONParser
+from sboxmgr.subscription.parsers.json_parser import JSONParser
 
 def test_json_parser():
     example_path = os.path.join(os.path.dirname(__file__), '../src/sboxmgr/examples/example_json.json')

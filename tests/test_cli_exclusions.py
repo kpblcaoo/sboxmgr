@@ -2,7 +2,7 @@ import os
 import json
 import pytest
 from typer.testing import CliRunner
-from src.sboxmgr.cli.main import app
+from sboxmgr.cli.main import app
 
 runner = CliRunner()
 

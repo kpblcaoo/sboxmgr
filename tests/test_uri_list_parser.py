@@ -1,5 +1,5 @@
 import os
-from src.sboxmgr.subscription.parsers.uri_list_parser import URIListParser
+from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
 
 def test_uri_list_parser():
     example_path = os.path.join(os.path.dirname(__file__), '../src/sboxmgr/examples/example_uri_list.txt')

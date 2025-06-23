@@ -1,5 +1,5 @@
-from src.sboxmgr.subscription.exporters.singbox_exporter import SingboxExporter
-from src.sboxmgr.subscription.models import ParsedServer
+from sboxmgr.subscription.exporters.singbox_exporter import SingboxExporter
+from sboxmgr.subscription.models import ParsedServer
 
 def test_singbox_exporter():
     servers = [

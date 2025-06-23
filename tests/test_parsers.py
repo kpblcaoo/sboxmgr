@@ -1,7 +1,7 @@
 import pytest
-from src.sboxmgr.subscription.parsers.base64_parser import Base64Parser
-from src.sboxmgr.subscription.parsers.json_parser import JSONParser
-from src.sboxmgr.subscription.parsers.uri_list_parser import URIListParser
+from sboxmgr.subscription.parsers.base64_parser import Base64Parser
+from sboxmgr.subscription.parsers.json_parser import JSONParser
+from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
 
 SS_BASE64 = "YWVzLTI1Ni1nY206cGFzc0BleGFtcGxlLmNvbTo4Mzg4"  # pragma: allowlist secret
 SS_URI = "ss://aes-256-gcm:pass@example.com:8388#ssuri"  # pragma: allowlist secret
@@ -35,7 +35,7 @@ def test_parsers_edge_cases(parser_cls, raw, should_fail, expect_ss):
         # if parser_cls is URIListParser and ...: # можно добавить отдельный тест для emoji 
 
 def test_uri_list_parser_edge_cases():
-    from src.sboxmgr.subscription.parsers.uri_list_parser import URIListParser
+    from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
     parser = URIListParser()
     with open('src/sboxmgr/examples/example_uri_list.txt', 'rb') as f:
         raw = f.read()

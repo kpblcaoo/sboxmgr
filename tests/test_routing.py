@@ -1,7 +1,7 @@
-from src.sboxmgr.export.export_manager import ExportManager
-from src.sboxmgr.export.routing.default_router import DefaultRouter
-from src.sboxmgr.export.routing.base_router import BaseRoutingPlugin
-from src.sboxmgr.subscription.models import ParsedServer
+from sboxmgr.export.export_manager import ExportManager
+from sboxmgr.export.routing.default_router import DefaultRouter
+from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+from sboxmgr.subscription.models import ParsedServer
 
 class TestRouter(BaseRoutingPlugin):
     def __init__(self):

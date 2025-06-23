@@ -5,7 +5,9 @@ from ..models import ParsedServer
 from ..base_parser import BaseParser
 from .uri_list_parser import URIListParser
 from sboxmgr.utils.env import get_debug_level
+from ..registry import register
 
+@register("base64")
 class Base64Parser(BaseParser):
     def parse(self, raw: bytes) -> List[ParsedServer]:
         decoded = base64.b64decode(raw)

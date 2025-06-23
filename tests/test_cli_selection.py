@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from conftest import run_cli
 import json
 from typer.testing import CliRunner
-from src.sboxmgr.cli.main import app
+from sboxmgr.cli.main import app
 
 load_dotenv()
 
