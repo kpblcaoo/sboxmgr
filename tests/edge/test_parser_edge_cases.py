@@ -1,10 +1,13 @@
-import pytest
+from sboxmgr.subscription.parsers.base64_parser import Base64Parser
 from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
-from sboxmgr.subscription.models import ParsedServer
+from sboxmgr.subscription.models import ParsedServer, PipelineContext
+import pytest
 from sboxmgr.subscription.manager import SubscriptionManager
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
 from sboxmgr.subscription.middleware_base import MiddlewareChain, TagFilterMiddleware, EnrichMiddleware, BaseMiddleware, LoggingMiddleware
 import sys
+import os
+import base64
 
 def test_mixed_protocols():
     raw = """
@@ -373,3 +376,42 @@ def test_parsed_validator_required_fields():
     # print(f"[DEBUG TEST] result_strict.config={result_strict.config}, errors={result_strict.errors}, success={result_strict.success}")
     assert not result_strict.success
     assert any("missing type" in e.message or "missing address" in e.message or "invalid port" in e.message for e in result_strict.errors) 
+
+def test_ss_uri_without_port(caplog):
+    """Тест: SS URI без порта должен корректно обрабатываться без ValueError."""
+    # Устанавливаем debug level для получения логов
+    os.environ['SBOXMGR_DEBUG'] = '1'
+    
+    parser = URIListParser()
+    
+    # Тест 1: Plain SS URI без порта
+    test_uri1 = 'ss://aes-256-gcm:password123@example.com'  # pragma: allowlist secret
+    result1 = parser._parse_ss(test_uri1)
+    assert result1.address == "invalid"
+    assert result1.port == 0
+    assert result1.meta["error"] == "no port specified"
+    assert "no port specified" in caplog.text
+    
+    # Тест 2: Base64 SS URI без порта
+    plain_without_port = 'aes-256-gcm:password123@example.com'  # pragma: allowlist secret
+    encoded = base64.urlsafe_b64encode(plain_without_port.encode()).decode()
+    test_uri2 = f'ss://{encoded}'
+    
+    caplog.clear()  # Очищаем лог для второго теста
+    result2 = parser._parse_ss(test_uri2)
+    assert result2.address == "invalid"
+    assert result2.port == 0
+    assert result2.meta["error"] == "no port specified"
+    assert "no port specified" in caplog.text
+    
+    # Тест 3: SS URI с портом должен работать нормально
+    test_uri3 = 'ss://aes-256-gcm:password123@example.com:8388'  # pragma: allowlist secret
+    result3 = parser._parse_ss(test_uri3)
+    assert result3.address == "example.com"
+    assert result3.port == 8388
+    assert result3.meta["password"] == "password123"  # pragma: allowlist secret
+    assert result3.security == "aes-256-gcm"
+    
+    # Очищаем переменную окружения после теста
+    if 'SBOXMGR_DEBUG' in os.environ:
+        del os.environ['SBOXMGR_DEBUG'] 

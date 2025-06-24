@@ -79,8 +79,14 @@ class URIListParser(BaseParser):
                     logger.warning(f"ss:// parse failed (no colon in method:pass): {line}")
                 return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "parse failed"})
             
-            # host_port всегда содержит ':', так как мы проверили это выше
             method, password = method_pass.split(':', 1)
+            
+            # Проверяем наличие порта в host_port
+            if ':' not in host_port:
+                if debug_level > 0:
+                    logger.warning(f"ss:// parse failed (no port specified): {line}")
+                return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "no port specified"})
+            
             host, port_str = host_port.split(':', 1)
             
             try:
