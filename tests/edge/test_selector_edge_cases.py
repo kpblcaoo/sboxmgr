@@ -48,21 +48,23 @@ def test_custom_selector_in_subscription_manager():
         def select(self, servers, user_routes=None, exclusions=None, mode=None):
             return [s for s in servers if getattr(s, 'meta', {}).get('tag') == 'B']
     # Подготовим SubscriptionManager с кастомным selector
-    source = SubscriptionSource(url="file://dummy", source_type="url_base64")
+    source = SubscriptionSource(url="file://dummy_selector_test", source_type="url_base64")  # уникальный URL
     mgr = SubscriptionManager(source)
     mgr.selector = OnlyTagBSelector()
+    # Очищаем кеш
+    mgr._get_servers_cache.clear()
     # Мокаем fetcher и parser
     class DummyFetcher:
         def __init__(self, source):
             self.source = source
         def fetch(self):
-            return b''
+            return b'test_selector_data'
     mgr.fetcher = DummyFetcher(source)
     mgr.detect_parser = lambda raw, t: type('P', (), { 'parse': lambda self, raw: [
         ParsedServer(type="ss", address="1.2.3.4", port=443, meta={"tag": "A"}),
         ParsedServer(type="ss", address="2.2.2.2", port=1234, meta={"tag": "B"}),
         ParsedServer(type="ss", address="3.3.3.3", port=2000, meta={"tag": "C"}),
     ] })()
-    result = mgr.get_servers()
+    result = mgr.get_servers(force_reload=True)  # принудительно обновляем кеш
     tags = [s.meta.get("tag") for s in result.config]
     assert tags == ["B"] 
