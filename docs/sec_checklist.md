@@ -1,5 +1,6 @@
 # SEC Checklist
 
+## Core Security Checklist
 - [x] SEC-01: URL validation (source_url)  # Реализовано: валидация и логирование source_url, edge-тесты
 - [ ] SEC-02: Root checks
 - [x] SEC-03: Safe paths (file:// fetcher, inbounds SEC-валидация через pydantic: bind только на localhost/private, порты 1024-65535, edge-тесты)  # Реализовано: file:// fetcher ограничен рабочей директорией, логирование попыток
@@ -19,8 +20,22 @@
 - [x] SEC-17: Middleware registry: защита от несанкционированной регистрации плагинов, валидация интерфейсов, изоляция выполнения.  # Реализовано: registry, тесты, edge-cases
 - [x] SEC-FETCH-01: Проверка схем URL при инициализации fetcher (whitelist: http, https, file). [edge/test_fetcher_oversize.py]
 
-## SEC-MW: Middleware Security Checklist
+## SEC-CODE: Code Quality Security Checklist (NEW - 2024-12-24)
+- [ ] SEC-CODE-01: Рефакторинг критически сложных функций (F-E уровень) на меньшие компоненты для снижения security risks
+- [ ] SEC-CODE-02: Устранение shell=True в subprocess вызовах, использование безопасных альтернатив
+- [ ] SEC-CODE-03: Замена MD5 хеширования на SHA256 или более безопасные алгоритмы
+- [ ] SEC-CODE-04: Добавление timeout для всех HTTP запросов (защита от DoS)
+- [ ] SEC-CODE-05: Удаление неиспользуемых импортов и переменных (dead code может скрывать уязвимости)
+- [ ] SEC-CODE-06: Устранение дублированного кода (единая точка патчинга уязвимостей)
+- [ ] SEC-CODE-07: Замена try-except-pass на explicit error handling (предотвращение скрытых ошибок)
+- [ ] SEC-CODE-08: Регулярный аудит кода инструментами (Vulture, Radon, Bandit, Safety)
 
+## SEC-LEGACY: Legacy Components Security (NEW - 2024-12-24)
+- [x] SEC-LEGACY-01: Installation Wizard архивирован (устранена угроза subprocess vulnerabilities, privilege escalation)  # DONE: moved to archive/install_wizard_legacy
+- [ ] SEC-LEGACY-02: Аудит и архивирование/рефакторинг других legacy компонентов с security рисками
+- [ ] SEC-LEGACY-03: Документирование архивированных компонентов и причин их удаления
+
+## SEC-MW: Middleware Security Checklist
 - [x] SEC-MW-01: MiddlewareChain не допускает бесконечных/рекурсивных цепочек, глубина ограничена.  # Реализовано: ограничение глубины, тесты
 - [x] SEC-MW-02: Middleware registry: sandbox/audit при регистрации, строгая валидация интерфейса. [middleware_base.py, worklog]
 - [x] SEC-MW-03: LoggingMiddleware не логирует чувствительные данные, redaction при debug_level>0.  # Реализовано: redaction, debug_level
@@ -30,19 +45,20 @@
 - [x] SEC-MW-07: Все middleware валидируют вход/выход, не допускают side effects в context.  # Реализовано: валидация, тесты
 - [x] SEC-MW-08: Аудит и логирование регистрации/исполнения middleware.  # Реализовано: логирование, тесты
 
-_Last updated: 2025-06-22. See ADR-0001, ADR-0004, ADR-0005, ADR-0007. See also docs/tests/edge_cases.md._
+_Last updated: 2024-12-24. See ADR-0001, ADR-0004, ADR-0005, ADR-0007. See also docs/tests/edge_cases.md._
 
-## SEC Checklist (актуально на 2025-06-23)
-
+## SEC Checklist (актуально на 2024-12-24)
 - [x] SEC-PARSER-01: sanitize/validate_parsed_data, edge-тесты, документация. [edge/test_parser_edge_cases.py, worklog]
 - [x] Fail-tolerance: partial_success, ошибки одной подписки не валят весь пайплайн. [edge/test_subscription_fail_tolerance.py]
 - [x] i18n: sync_keys.py, pre-commit, edge-тесты, fallback, sanitization. [worklog]
 - [x] Enrichment timeout: sandbox/таймаут для внешних enrichment. [edge/test_parser_edge_cases.py]
 - [x] Все публичные методы и классы снабжены Google docstring. [ruff, worklog]
+- [x] Installation Wizard удален (security risk eliminated). [refactor/cleanup branch]
 
 **Ссылки на тесты и worklog:**
 - tests/edge/
 - plans/roadmap_v1.5.0/worklog.md
+- archive/install_wizard_legacy/ (archived components)
 
 ## SEC-ROUTE: Routing Layer Security Checklist
 - [ ] SEC-ROUTE-01: Валидация структуры user_routes/exclusions, запрет route-injection, edge-тесты (см. test_routing.py)
@@ -54,4 +70,23 @@ _Last updated: 2025-06-22. See ADR-0001, ADR-0004, ADR-0005, ADR-0007. See also 
 - [ ] SEC-ERROR-01: Ввести ErrorSeverity (fatal, recoverable, warning) в PipelineError, обновить обработку ошибок
 - [ ] SEC-FINAL-01: Гарантировать вызов финальной валидации перед экспортом, даже при частичных ошибках
 - [ ] SEC-I18N-01: Строгая проверка i18n-ключей, логирование ошибок локализации, запрет silent fallback
-- [ ] SEC-META-01: Документировать модель fallbacks по фазам (какой слой может fallback'нуться, а какой обязан упасть) 
+- [ ] SEC-META-01: Документировать модель fallbacks по фазам (какой слой может fallback'нуться, а какой обязан упасть)
+
+## Priority Matrix (NEW - 2024-12-24)
+
+### 🔴 Critical Priority (Security Impact: High)
+- SEC-CODE-01: Рефакторинг singbox_export (F-53 complexity)
+- SEC-CODE-02: Устранение shell=True
+- SEC-CODE-03: Замена MD5 на SHA256
+- SEC-CODE-04: HTTP timeout
+
+### 🟡 High Priority (Security Impact: Medium)
+- SEC-CODE-05: Dead code removal
+- SEC-CODE-06: Code deduplication
+- SEC-ROUTE-01-04: Routing security
+- SEC-ERROR-01: ErrorSeverity
+
+### 🟢 Medium Priority (Security Impact: Low)
+- SEC-CODE-07: Error handling improvement
+- SEC-LEGACY-02: Legacy audit
+- SEC-I18N-01: i18n validation 
