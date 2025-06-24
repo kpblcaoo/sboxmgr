@@ -20,15 +20,16 @@
 - [x] SEC-17: Middleware registry: защита от несанкционированной регистрации плагинов, валидация интерфейсов, изоляция выполнения.  # Реализовано: registry, тесты, edge-cases
 - [x] SEC-FETCH-01: Проверка схем URL при инициализации fetcher (whitelist: http, https, file). [edge/test_fetcher_oversize.py]
 
-## SEC-CODE: Code Quality Security Checklist (NEW - 2024-12-24)
-- [ ] SEC-CODE-01: Рефакторинг критически сложных функций (F-E уровень) на меньшие компоненты для снижения security risks
-- [ ] SEC-CODE-02: Устранение shell=True в subprocess вызовах, использование безопасных альтернатив
-- [ ] SEC-CODE-03: Замена MD5 хеширования на SHA256 или более безопасные алгоритмы
-- [ ] SEC-CODE-04: Добавление timeout для всех HTTP запросов (защита от DoS)
-- [ ] SEC-CODE-05: Удаление неиспользуемых импортов и переменных (dead code может скрывать уязвимости)
+## SEC-CODE: Code Quality Security Checklist (NEW - 2024-12-24, COMPLETED - 2025-06-24)
+- [x] SEC-CODE-01: Рефакторинг критически сложных функций (F-E уровень) на меньшие компоненты для снижения security risks  # DONE: singbox_export F-53 → B-7
+- [x] SEC-CODE-02: Устранение shell=True в subprocess вызовах, использование безопасных альтернатив  # VERIFIED: No shell=True usage found
+- [x] SEC-CODE-03: Замена MD5 хеширования на SHA256 или более безопасные алгоритмы  # DONE: Earlier in branch
+- [x] SEC-CODE-04: Добавление timeout для всех HTTP запросов (защита от DoS)  # DONE: Earlier in branch
+- [x] SEC-CODE-05: Удаление неиспользуемых импортов и переменных (dead code может скрывать уязвимости)  # DONE: 3 items removed
 - [ ] SEC-CODE-06: Устранение дублированного кода (единая точка патчинга уязвимостей)
 - [ ] SEC-CODE-07: Замена try-except-pass на explicit error handling (предотвращение скрытых ошибок)
 - [ ] SEC-CODE-08: Регулярный аудит кода инструментами (Vulture, Radon, Bandit, Safety)
+- [x] SEC-CODE-09: Безопасные пути логирования - использование XDG Base Directory spec вместо /var/log  # DONE: ~/.local/share/sboxmgr/ с fallback
 
 ## SEC-LEGACY: Legacy Components Security (NEW - 2024-12-24)
 - [x] SEC-LEGACY-01: Installation Wizard архивирован (устранена угроза subprocess vulnerabilities, privilege escalation)  # DONE: moved to archive/install_wizard_legacy
@@ -45,9 +46,9 @@
 - [x] SEC-MW-07: Все middleware валидируют вход/выход, не допускают side effects в context.  # Реализовано: валидация, тесты
 - [x] SEC-MW-08: Аудит и логирование регистрации/исполнения middleware.  # Реализовано: логирование, тесты
 
-_Last updated: 2024-12-24. See ADR-0001, ADR-0004, ADR-0005, ADR-0007. See also docs/tests/edge_cases.md._
+_Last updated: 2025-06-24. See ADR-0001, ADR-0004, ADR-0005, ADR-0007. See also docs/tests/edge_cases.md._
 
-## SEC Checklist (актуально на 2024-12-24)
+## SEC Checklist (актуально на 2025-06-24)
 - [x] SEC-PARSER-01: sanitize/validate_parsed_data, edge-тесты, документация. [edge/test_parser_edge_cases.py, worklog]
 - [x] Fail-tolerance: partial_success, ошибки одной подписки не валят весь пайплайн. [edge/test_subscription_fail_tolerance.py]
 - [x] i18n: sync_keys.py, pre-commit, edge-тесты, fallback, sanitization. [worklog]
@@ -72,19 +73,19 @@ _Last updated: 2024-12-24. See ADR-0001, ADR-0004, ADR-0005, ADR-0007. See also 
 - [ ] SEC-I18N-01: Строгая проверка i18n-ключей, логирование ошибок локализации, запрет silent fallback
 - [ ] SEC-META-01: Документировать модель fallbacks по фазам (какой слой может fallback'нуться, а какой обязан упасть)
 
-## Priority Matrix (NEW - 2024-12-24)
+## Priority Matrix (NEW - 2024-12-24, UPDATED - 2025-06-24)
 
-### 🔴 Critical Priority (Security Impact: High)
-- SEC-CODE-01: Рефакторинг singbox_export (F-53 complexity)
-- SEC-CODE-02: Устранение shell=True
-- SEC-CODE-03: Замена MD5 на SHA256
-- SEC-CODE-04: HTTP timeout
+### 🔴 Critical Priority (Security Impact: High) - COMPLETED ✅
+- [x] SEC-CODE-01: Рефакторинг singbox_export (F-53 complexity)  # DONE
+- [x] SEC-CODE-02: Устранение shell=True  # VERIFIED
+- [x] SEC-CODE-03: Замена MD5 на SHA256  # DONE
+- [x] SEC-CODE-04: HTTP timeout  # DONE
 
 ### 🟡 High Priority (Security Impact: Medium)
-- SEC-CODE-05: Dead code removal
-- SEC-CODE-06: Code deduplication
-- SEC-ROUTE-01-04: Routing security
-- SEC-ERROR-01: ErrorSeverity
+- [x] SEC-CODE-05: Dead code removal  # DONE
+- [ ] SEC-CODE-06: Code deduplication
+- [ ] SEC-ROUTE-01-04: Routing security
+- [ ] SEC-ERROR-01: ErrorSeverity
 
 ### 🟢 Medium Priority (Security Impact: Low)
 - SEC-CODE-07: Error handling improvement

@@ -1,7 +1,33 @@
 import os
+from pathlib import Path
 
 def get_log_file():
-    return os.getenv("SBOXMGR_LOG_FILE", "/var/log/sboxmgr.log")
+    """Get log file path with safe defaults.
+    
+    Priority:
+    1. SBOXMGR_LOG_FILE environment variable (explicit path)
+    2. ~/.local/share/sboxmgr/sboxmgr.log (user data directory)
+    3. ./sboxmgr.log (current directory fallback)
+    
+    Returns:
+        str: Log file path
+    """
+    if os.getenv("SBOXMGR_LOG_FILE"):
+        return os.getenv("SBOXMGR_LOG_FILE")
+    
+    # Try user data directory first (XDG Base Directory spec)
+    try:
+        user_data_dir = Path.home() / ".local" / "share" / "sboxmgr"
+        user_data_dir.mkdir(parents=True, exist_ok=True)
+        log_path = user_data_dir / "sboxmgr.log"
+        # Test if we can write to this location
+        test_file = user_data_dir / ".write_test"
+        test_file.touch()
+        test_file.unlink()
+        return str(log_path)
+    except (OSError, PermissionError):
+        # Fallback to current directory if user data dir is not writable
+        return "./sboxmgr.log"
 
 def get_config_file():
     # Default matches sing-box config location
