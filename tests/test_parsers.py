@@ -2,6 +2,7 @@ import pytest
 from sboxmgr.subscription.parsers.base64_parser import Base64Parser
 from sboxmgr.subscription.parsers.json_parser import JSONParser
 from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
+import os
 
 SS_BASE64 = "YWVzLTI1Ni1nY206cGFzc0BleGFtcGxlLmNvbTo4Mzg4"  # pragma: allowlist secret
 SS_URI = "ss://aes-256-gcm:pass@example.com:8388#ssuri"  # pragma: allowlist secret
@@ -37,7 +38,10 @@ def test_parsers_edge_cases(parser_cls, raw, should_fail, expect_ss):
 def test_uri_list_parser_edge_cases():
     from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
     parser = URIListParser()
-    with open('src/sboxmgr/examples/example_uri_list.txt', 'rb') as f:
+    # Правильный путь от корня проекта
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(project_root, 'src/sboxmgr/examples/example_uri_list.txt')
+    with open(file_path, 'rb') as f:
         raw = f.read()
     servers = parser.parse(raw)
     # Проверяем, что все ожидаемые типы присутствуют

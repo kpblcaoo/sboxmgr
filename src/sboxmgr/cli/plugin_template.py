@@ -2,6 +2,10 @@ import typer
 import textwrap
 import os
 
+# Создаем app для тестирования
+app = typer.Typer()
+
+@app.command()
 def plugin_template(
     type: str = typer.Argument(..., help="Type of plugin: fetcher, parser, validator, exporter, postprocessor, parsed_validator"),
     name: str = typer.Argument(..., help="Name of the plugin class (CamelCase)"),

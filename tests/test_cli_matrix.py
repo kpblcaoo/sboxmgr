@@ -18,7 +18,7 @@ CLI_MATRIX = [
     # (args, description, expected_exit, expected_files, expected_stdout_contains)
     (["run", "-u", TEST_URL], 'Базовый запуск: только URL', 0, ['config.json'], ['Update completed successfully', '[Info] manage_service mock: ignoring error and exiting with code 0']),
     (["dry-run", "-u", TEST_URL], 'Dry-run: не должно быть изменений файлов', 0, [], DRYRUN_MSGS),
-    (["list-servers", "-u", TEST_URL], 'Список серверов', 0, [], ['Index', 'Name', 'Protocol', 'Port']),
+    (["list-servers", "-u", TEST_URL], 'Список серверов', 0, [], ['[0]', '[1]', 'vless', 'shadowsocks']),
     (["exclusions", "-u", TEST_URL, "--add", "0"], 'Исключение сервера по индексу', 0, ['exclusions.json'], EXCLUDE_MSGS),
     (["exclusions", "-u", TEST_URL, "--add", "0"], 'Только exclusions.json, без config.json', 0, ['exclusions.json'], EXCLUDE_MSGS),
     (["exclusions", "-u", TEST_URL, "--add", "0"], 'Исключение с dry-run (не должно менять exclusions.json)', 0, [], DRYRUN_MSGS + EXCLUDE_MSGS),

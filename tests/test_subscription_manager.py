@@ -442,9 +442,9 @@ def test_subscription_manager_caching(monkeypatch):
         def __init__(self, source):
             self.source = source
         def fetch(self, force_reload=False):
-            calls['count'] = calls.get('count', 0) + 1
+            calls['count'] += 1  # Прямое инкрементирование
             return b'data'
-    servers = [type('S', (), {"type": "ss", "address": "1.2.3.4", "port": 443, "meta": {}})()]
+    servers = [type('S', (), {"type": "ss", "address": "1.2.3.4", "port": 443, "meta": {"method": "aes-256-gcm"}})()]
     class DummyParser:
         def parse(self, raw):
             return servers
@@ -453,6 +453,8 @@ def test_subscription_manager_caching(monkeypatch):
     mgr.fetcher = DummyFetcher(src)
     mgr.detect_parser = lambda raw, t: DummyParser()
     context = PipelineContext()
+    # Сбрасываем кеш перед тестом
+    mgr._get_servers_cache = {}
     # Первый вызов — fetch вызывается
     result1 = mgr.get_servers(context=context)
     assert result1.success
