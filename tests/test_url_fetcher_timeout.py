@@ -3,39 +3,29 @@ import pytest
 from unittest.mock import patch, MagicMock
 from sboxmgr.subscription.fetchers.url_fetcher import URLFetcher
 from sboxmgr.subscription.models import SubscriptionSource
+from sboxmgr.utils.env import get_fetch_timeout
 
 class TestURLFetcherTimeout:
     """Tests for URLFetcher timeout configuration."""
 
     def test_default_timeout(self):
         """Test that default timeout is 30 seconds."""
-        source = SubscriptionSource(url="https://example.com", source_type="url")
-        fetcher = URLFetcher(source)
-        assert fetcher._get_timeout() == 30
+        assert get_fetch_timeout() == 30
 
     def test_environment_timeout_valid(self):
         """Test that environment variable sets timeout correctly."""
-        source = SubscriptionSource(url="https://example.com", source_type="url")
-        fetcher = URLFetcher(source)
-        
         with patch.dict(os.environ, {"SBOXMGR_FETCH_TIMEOUT": "60"}):
-            assert fetcher._get_timeout() == 60
+            assert get_fetch_timeout() == 60
 
     def test_environment_timeout_invalid(self):
         """Test that invalid environment timeout falls back to default."""
-        source = SubscriptionSource(url="https://example.com", source_type="url")
-        fetcher = URLFetcher(source)
-        
         with patch.dict(os.environ, {"SBOXMGR_FETCH_TIMEOUT": "invalid"}):
-            assert fetcher._get_timeout() == 30
+            assert get_fetch_timeout() == 30
 
     def test_environment_timeout_empty(self):
         """Test that empty environment timeout falls back to default."""
-        source = SubscriptionSource(url="https://example.com", source_type="url")
-        fetcher = URLFetcher(source)
-        
         with patch.dict(os.environ, {"SBOXMGR_FETCH_TIMEOUT": ""}):
-            assert fetcher._get_timeout() == 30
+            assert get_fetch_timeout() == 30
 
     @patch('requests.get')
     def test_fetch_uses_configured_timeout(self, mock_get):

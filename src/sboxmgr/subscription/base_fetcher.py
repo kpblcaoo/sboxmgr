@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from .models import SubscriptionSource
 import os
 from urllib.parse import urlparse
+from sboxmgr.utils.env import get_fetch_size_limit
 
 class BaseAuthHandler(ABC):
     """Interface for generating authentication headers/tokens for protected APIs.
@@ -118,11 +119,4 @@ class BaseFetcher(ABC):
         Returns:
             Size limit in bytes (default: 2MB).
         """
-        env_limit = os.getenv("SBOXMGR_FETCH_SIZE_LIMIT")
-        if env_limit:
-            try:
-                return int(env_limit)
-            except Exception:
-                pass
-        # TODO: добавить чтение из config.toml
-        return 2 * 1024 * 1024 
+        return get_fetch_size_limit() 

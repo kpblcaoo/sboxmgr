@@ -4,6 +4,7 @@ from ..models import SubscriptionSource
 from ..base_fetcher import BaseFetcher
 from ..registry import register
 import threading
+from sboxmgr.utils.env import get_fetch_timeout
 
 @register("url")
 @register("url_base64")
@@ -56,7 +57,7 @@ class URLFetcher(BaseFetcher):
             if ua != "":
                 headers["User-Agent"] = ua
             # Убираем безусловный print - будет логироваться в manager.py
-            timeout = self._get_timeout()
+            timeout = get_fetch_timeout()
             resp = requests.get(self.source.url, headers=headers, stream=True, timeout=timeout)
             resp.raise_for_status()
             data = resp.raw.read(size_limit + 1)
@@ -68,24 +69,6 @@ class URLFetcher(BaseFetcher):
             with self._cache_lock:
                 self._fetch_cache[key] = data
             return data
-
-    def _get_timeout(self) -> int:
-        """Get the request timeout in seconds.
-        
-        Returns the timeout for HTTP requests. Can be configured via environment
-        variable SBOXMGR_FETCH_TIMEOUT or defaults to 30 seconds.
-        
-        Returns:
-            Timeout in seconds (default: 30).
-        """
-        import os
-        env_timeout = os.getenv("SBOXMGR_FETCH_TIMEOUT")
-        if env_timeout:
-            try:
-                return int(env_timeout)
-            except Exception:
-                pass
-        return 30
 
     def _decompress_if_gzipped(self, data: bytes) -> bytes:
         """Check if data is gzipped and decompress if needed."""
