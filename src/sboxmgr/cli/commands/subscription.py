@@ -7,7 +7,6 @@ from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_template_file, get_config_file, get_backup_file
 from sboxmgr.export.export_manager import ExportManager
-from sboxmgr.utils.version import check_version_compatibility, get_version_warning_message
 
 lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
 
@@ -17,14 +16,11 @@ def run(
         ..., "-u", "--url", help=t("cli.url.help"),
         envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"]
     ),
-    remarks: str = typer.Option(None, "-r", "--remarks", help=t("cli.remarks.help")),
-    index: str = typer.Option(None, "-i", "--index", help=t("cli.index.help")),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
     dry_run: bool = typer.Option(False, "--dry-run", help=t("cli.dry_run.help")),
     config_file: str = typer.Option(None, "--config-file", help=t("cli.config_file.help")),
     backup_file: str = typer.Option(None, "--backup-file", help=t("cli.backup_file.help")),
     template_file: str = typer.Option(None, "--template-file", help=t("cli.template_file.help")),
-    use_selected: bool = typer.Option(False, "--use-selected", help=t("cli.use_selected.help")),
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all"),
     format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
@@ -103,8 +99,6 @@ def dry_run(
         ..., "-u", "--url", help=t("cli.url.help"),
         envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"]
     ),
-    remarks: str = typer.Option(None, "-r", "--remarks", help=t("cli.remarks.help")),
-    index: str = typer.Option(None, "-i", "--index", help=t("cli.index.help")),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
     config_file: str = typer.Option(None, "--config-file", help=t("cli.config_file.help")),
     template_file: str = typer.Option(None, "--template-file", help=t("cli.template_file.help")),

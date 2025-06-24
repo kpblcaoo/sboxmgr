@@ -11,14 +11,11 @@
   "error.config_load_failed": "[Hata] Yapılandırma yüklenemedi",
   "cli.use_add_remove_view": "[Bilgi] Hariç tutmaları yönetmek için --add, --remove veya --view kullanın.",
   "cli.url.help": "Yapılandırma abonelik URL'si",
-  "cli.remarks.help": "Açıklamaya göre sunucu seç",
-  "cli.index.help": "Dizine göre sunucu seç (virgülle ayrılmış)",
   "cli.debug.help": "Hata ayıklama seviyesi: 0=min, 1=bilgi, 2=debug",
   "cli.dry_run.help": "Yapılandırmayı doğrula ve sonucu yazdır (değişiklik yok).",
   "cli.config_file.help": "config.json yolu (env'yi geçersiz kılar)",
   "cli.backup_file.help": "config.json.bak yolu (env'yi geçersiz kılar)",
   "cli.template_file.help": "config.template.json yolu (env'yi geçersiz kılar)",
-  "cli.use_selected.help": "Varsayılan seçim için selected_config.json'u kullan (kurucu/ileri düzey için)",
   "cli.add.help": "Hariç tutmaları ekle (virgülle ayrılmış dizinler veya adlar)",
   "cli.remove.help": "Hariç tutmaları kaldır (virgülle ayrılmış dizinler veya adlar)",
   "cli.view.help": "Mevcut hariç tutmaları görüntüle",
@@ -29,4 +26,4 @@
   "cli.clear_exclusions.help": "Tüm hariç tutmaları temizle.",
   "cli.lang.help": "CLI dili (i18n) yönetimi: mevcut dili göster, listele, ayarla ve kaydet.",
   "cli.lang.bilingual_notice": "Çift dilli mod (en + sistem) yalnızca dil açıkça ayarlanmadığında kullanılır. Dili açıkça ayarladığınızda yalnızca o dil gösterilecektir."
-} 
+}

@@ -11,13 +11,10 @@
   "error.config_load_failed": "[خطا] بارگذاری پیکربندی ناموفق بود",
   "cli.use_add_remove_view": "[اطلاعات] برای مدیریت استثناها از --add، --remove یا --view استفاده کنید.",
   "cli.url.help": "آدرس اشتراک پیکربندی",
-  "cli.remarks.help": "انتخاب سرور بر اساس توضیحات",
-  "cli.index.help": "انتخاب سرور بر اساس شاخص (با کاما جدا شود)",
   "cli.dry_run.help": "اعتبارسنجی پیکربندی و نمایش نتیجه (بدون تغییر).",
   "cli.config_file.help": "مسیر config.json (جایگزین env)",
   "cli.backup_file.help": "مسیر config.json.bak (جایگزین env)",
   "cli.template_file.help": "مسیر config.template.json (جایگزین env)",
-  "cli.use_selected.help": "استفاده از selected_config.json برای انتخاب پیش‌فرض (برای نصب‌کننده/پیشرفته)",
   "cli.add.help": "افزودن استثناها (شاخص‌ها یا نام‌ها با کاما جدا شوند)",
   "cli.remove.help": "حذف استثناها (شاخص‌ها یا نام‌ها با کاما جدا شوند)",
   "cli.view.help": "نمایش استثناهای فعلی",
@@ -28,4 +25,4 @@
   "cli.clear_exclusions.help": "پاک‌سازی همه استثناها.",
   "cli.lang.help": "مدیریت زبان CLI (i18n): نمایش فعلی، لیست، تنظیم و ذخیره زبان.",
   "cli.lang.bilingual_notice": "حالت دو زبانه (en + system) فقط زمانی استفاده می‌شود که زبان به‌طور صریح تنظیم نشده باشد. با تنظیم صریح زبان، فقط همان زبان نمایش داده می‌شود."
-} 
+}

@@ -2,7 +2,6 @@ import typer
 from pathlib import Path
 from sboxmgr.i18n.loader import LanguageLoader
 from ..utils import is_ai_lang, detect_lang_source
-import locale
 import os
 
 lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
@@ -23,7 +22,6 @@ LANG_NAMES = {
 
 def lang_cmd(
     set_lang: str = typer.Option(None, "--set", "-s", help=lang.get_with_fallback("cli.lang.set.help")),
-    check: bool = typer.Option(False, "--check", help=lang.get_with_fallback("cli.lang.check.help")),
 ):
     """
     Manage CLI language (i18n): show current, list available, set and persist language.

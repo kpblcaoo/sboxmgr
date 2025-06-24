@@ -11,13 +11,10 @@
   "error.config_load_failed": "[Erreur] Échec du chargement de la configuration",
   "cli.use_add_remove_view": "[Info] Utilisez --add, --remove ou --view pour gérer les exclusions.",
   "cli.url.help": "URL d'abonnement à la configuration",
-  "cli.remarks.help": "Sélectionner le serveur par remarques",
-  "cli.index.help": "Sélectionner le serveur par index (séparés par des virgules)",
   "cli.dry_run.help": "Valider la configuration et afficher le résultat (aucun changement).",
   "cli.config_file.help": "Chemin vers config.json (remplace env)",
   "cli.backup_file.help": "Chemin vers config.json.bak (remplace env)",
   "cli.template_file.help": "Chemin vers config.template.json (remplace env)",
-  "cli.use_selected.help": "Utiliser selected_config.json pour la sélection par défaut (pour l'installateur/avancé)",
   "cli.add.help": "Ajouter des exclusions (indices ou noms séparés par des virgules)",
   "cli.remove.help": "Supprimer des exclusions (indices ou noms séparés par des virgules)",
   "cli.view.help": "Voir les exclusions actuelles",
@@ -28,4 +25,4 @@
   "cli.clear_exclusions.help": "Effacer toutes les exclusions.",
   "cli.lang.help": "Gérer la langue de la CLI (i18n) : afficher l'actuelle, lister, définir et enregistrer la langue.",
   "cli.lang.bilingual_notice": "Le mode bilingue (en + system) n'est utilisé que lorsque la langue n'est pas explicitement définie. Lorsque vous définissez une langue explicitement, seule cette langue sera affichée."
-} 
+}

@@ -11,13 +11,10 @@
   "error.config_load_failed": "[خطأ] فشل في تحميل التكوين",
   "cli.use_add_remove_view": "[معلومات] استخدم --add أو --remove أو --view لإدارة الاستبعادات.",
   "cli.url.help": "عنوان URL لاشتراك التكوين",
-  "cli.remarks.help": "اختر الخادم حسب الملاحظات",
-  "cli.index.help": "اختر الخادم حسب الفهرس (مفصول بفواصل)",
   "cli.dry_run.help": "تحقق من التكوين واطبع النتيجة (بدون تغييرات).",
   "cli.config_file.help": "مسار config.json (يتجاوز env)",
   "cli.backup_file.help": "مسار config.json.bak (يتجاوز env)",
   "cli.template_file.help": "مسار config.template.json (يتجاوز env)",
-  "cli.use_selected.help": "استخدم selected_config.json للاختيار الافتراضي (للمثبت/المتقدم)",
   "cli.add.help": "أضف الاستبعادات (فهرس أو أسماء مفصولة بفواصل)",
   "cli.remove.help": "احذف الاستبعادات (فهرس أو أسماء مفصولة بفواصل)",
   "cli.view.help": "عرض الاستبعادات الحالية",
@@ -28,4 +25,4 @@
   "cli.clear_exclusions.help": "مسح جميع الاستبعادات.",
   "cli.lang.help": "إدارة لغة CLI (i18n): عرض الحالي، قائمة، تعيين وحفظ اللغة.",
   "cli.lang.bilingual_notice": "يتم استخدام الوضع ثنائي اللغة (en + system) فقط عند عدم تعيين اللغة صراحةً. عند تعيين اللغة صراحةً، سيتم عرض تلك اللغة فقط."
-} 
+}

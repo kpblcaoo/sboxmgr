@@ -11,14 +11,11 @@
   "error.config_load_failed": "[Error] Error al cargar la configuración",
   "cli.use_add_remove_view": "[Info] Use --add, --remove o --view para gestionar exclusiones.",
   "cli.url.help": "URL de suscripción de configuración",
-  "cli.remarks.help": "Seleccionar servidor por comentarios",
-  "cli.index.help": "Seleccionar servidor por índice (separado por comas)",
   "cli.debug.help": "Nivel de depuración: 0=mín, 1=info, 2=depuración",
   "cli.dry_run.help": "Validar configuración e imprimir resultado (sin cambios).",
   "cli.config_file.help": "Ruta a config.json (anula env)",
   "cli.backup_file.help": "Ruta a config.json.bak (anula env)",
   "cli.template_file.help": "Ruta a config.template.json (anula env)",
-  "cli.use_selected.help": "Usar selected_config.json para selección predeterminada (para instalador/avanzado)",
   "cli.add.help": "Agregar exclusiones (índices o nombres separados por comas)",
   "cli.remove.help": "Eliminar exclusiones (índices o nombres separados por comas)",
   "cli.view.help": "Ver exclusiones actuales",
@@ -29,4 +26,4 @@
   "cli.clear_exclusions.help": "Limpiar todas las exclusiones.",
   "cli.lang.help": "Gestionar el idioma de la CLI (i18n): mostrar actual, listar, establecer y guardar idioma.",
   "cli.lang.bilingual_notice": "El modo bilingüe (en + system) solo se usa cuando el idioma no está configurado explícitamente. Cuando se establece un idioma explícitamente, solo se mostrará ese idioma."
-} 
+}

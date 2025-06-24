@@ -11,14 +11,11 @@
   "error.config_load_failed": "[错误] 加载配置失败",
   "cli.use_add_remove_view": "[信息] 使用 --add、--remove 或 --view 管理排除项。",
   "cli.url.help": "配置订阅 URL",
-  "cli.remarks.help": "按备注选择服务器",
-  "cli.index.help": "按索引选择服务器（逗号分隔）",
   "cli.debug.help": "调试级别：0=最小，1=信息，2=调试",
   "cli.dry_run.help": "验证配置并输出结果（无更改）。",
   "cli.config_file.help": "config.json 路径（覆盖环境变量）",
   "cli.backup_file.help": "config.json.bak 路径（覆盖环境变量）",
   "cli.template_file.help": "config.template.json 路径（覆盖环境变量）",
-  "cli.use_selected.help": "使用 selected_config.json 作为默认选择（适用于安装程序/高级用户）",
   "cli.add.help": "添加排除项（逗号分隔的索引或名称）",
   "cli.remove.help": "删除排除项（逗号分隔的索引或名称）",
   "cli.view.help": "查看当前排除项",
@@ -29,4 +26,4 @@
   "cli.clear_exclusions.help": "清除所有排除项。",
   "cli.lang.help": "管理 CLI 语言（i18n）：显示当前、列出可用、设置并保存语言。",
   "cli.lang.bilingual_notice": "仅在未显式设置语言时使用双语模式（en + system）。显式设置语言后只会显示该语言。"
-} 
+}
