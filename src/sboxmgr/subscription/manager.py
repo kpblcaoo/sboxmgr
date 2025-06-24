@@ -1,7 +1,7 @@
 from .models import SubscriptionSource, ParsedServer, PipelineContext, PipelineResult
 from .registry import get_plugin, load_entry_points
 from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации
-from .validators import required_fields  # <--- Явный импорт валидатора
+
 from typing import List, Optional
 from sboxmgr.export.export_manager import ExportManager
 from .base_selector import DefaultSelector
@@ -10,7 +10,7 @@ from .errors import PipelineError, ErrorType
 from datetime import datetime, timezone
 from .validators.base import RAW_VALIDATOR_REGISTRY, ValidationResult
 from .middleware_base import MiddlewareChain
-import functools
+
 import threading
 
 def detect_parser(raw: bytes, source_type: str) -> Optional[object]:
@@ -34,7 +34,7 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[object]:
     """
     text = raw[:2000].decode('utf-8', errors='ignore').lstrip()
     # 1. Пробуем tolerant JSON
-    from .parsers.json_parser import TolerantJSONParser, JSONParser
+    from .parsers.json_parser import TolerantJSONParser
     try:
         parser = TolerantJSONParser()
         data = parser._strip_comments_and_validate(text)[0]

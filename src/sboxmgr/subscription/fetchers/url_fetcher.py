@@ -57,7 +57,7 @@ class URLFetcher(BaseFetcher):
             if ua != "":
                 headers["User-Agent"] = ua
             # Убираем безусловный print - будет логироваться в manager.py
-            resp = requests.get(self.source.url, headers=headers, stream=True)
+            resp = requests.get(self.source.url, headers=headers, stream=True, timeout=30)
             resp.raise_for_status()
             data = resp.raw.read(size_limit + 1)
             if len(data) > size_limit:

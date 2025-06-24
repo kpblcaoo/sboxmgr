@@ -6,7 +6,7 @@ from sboxmgr.utils.id import generate_server_id
 from sboxmgr.utils.file import handle_temp_file as atomic_handle_temp_file
 import logging
 from sboxmgr.utils.env import get_config_file, get_backup_file, get_template_file
-from sboxmgr.utils.file import atomic_write_json, file_exists, read_json, write_json
+from sboxmgr.utils.file import atomic_write_json, file_exists, read_json
 
 SELECTED_CONFIG_FILE = os.getenv("SINGBOX_SELECTED_CONFIG_FILE", "./selected_config.json")
 

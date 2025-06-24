@@ -3,14 +3,10 @@ import os
 import sys
 from dotenv import load_dotenv
 from sboxmgr.config.fetch import fetch_json
-from sboxmgr.utils.cli_common import prepare_selection
-from sboxmgr.config.generate import generate_config
 from sboxmgr.service.manage import manage_service
 from sboxmgr.server.exclusions import load_exclusions, exclude_servers, remove_exclusions, view_exclusions
-from sboxmgr.server.state import load_selected_config, save_selected_config
-from sboxmgr.server.selection import list_servers as do_list_servers
 from logsetup.setup import setup_logging
-from sboxmgr.utils.env import get_log_file, get_config_file, get_backup_file, get_template_file, get_exclusion_file, get_selected_config_file, get_max_log_size, get_debug_level, get_url
+from sboxmgr.utils.env import get_log_file, get_config_file, get_backup_file, get_template_file, get_exclusion_file, get_selected_config_file, get_max_log_size, get_debug_level
 from sboxmgr.subscription.manager import SubscriptionManager
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
 from sboxmgr.i18n.loader import LanguageLoader
@@ -18,7 +14,6 @@ from pathlib import Path
 import locale
 from sboxmgr.i18n.t import t
 from sboxmgr.cli import plugin_template
-from sboxmgr.cli.commands.lang import lang_cmd
 
 load_dotenv()
 

@@ -49,7 +49,7 @@ class JSONFetcher(BaseFetcher):
             if ua != "":
                 headers["User-Agent"] = ua
             print(f"[fetcher] Using User-Agent: {headers.get('User-Agent', '[none]')}")
-            resp = requests.get(self.source.url, headers=headers, stream=True)
+            resp = requests.get(self.source.url, headers=headers, stream=True, timeout=30)
             resp.raise_for_status()
             
             # Используем iter_content для правильной обработки сжатых данных

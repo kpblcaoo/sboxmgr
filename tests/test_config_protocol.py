@@ -105,7 +105,7 @@ class TestValidateProtocol:
             "server": "ss.example.com",
             "server_port": 8388,
             "method": "aes-256-gcm",
-            "password": "secret123"  # pragma: allowlist secret,
+            "password": "secret123",  # pragma: allowlist secret
             "network": "tcp"
         }
         supported_protocols = ["shadowsocks"]
@@ -118,7 +118,7 @@ class TestValidateProtocol:
             "server": "ss.example.com",
             "server_port": 8388,
             "method": "aes-256-gcm",
-            "password": "secret123"  # pragma: allowlist secret,
+            "password": "secret123",  # pragma: allowlist secret
             "network": "tcp"
         }
         assert result == expected
@@ -217,7 +217,7 @@ class TestValidateProtocol:
             "tag": "trojan-out",
             "server": "trojan.example.com",
             "server_port": 443,
-            "password": "trojan_password"  # pragma: allowlist secret,
+            "password": "trojan_password",  # pragma: allowlist secret
             "tls": {"enabled": True}
         }
         supported_protocols = ["trojan"]
@@ -229,7 +229,7 @@ class TestValidateProtocol:
             "tag": "trojan-out",
             "server": "trojan.example.com",
             "server_port": 443,
-            "password": "trojan_password"  # pragma: allowlist secret,
+            "password": "trojan_password",  # pragma: allowlist secret
             "tls": {"enabled": True}
         }
         assert result == expected
@@ -257,7 +257,7 @@ class TestValidateProtocol:
             "server": "tuic.example.com",
             "server_port": 443,
             "uuid": "12345678-1234-1234-1234-123456789abc",
-            "password": "tuic_password"  # pragma: allowlist secret,
+            "password": "tuic_password",  # pragma: allowlist secret
             "tls": {"enabled": True}
         }
         supported_protocols = ["tuic"]
@@ -270,7 +270,7 @@ class TestValidateProtocol:
             "server": "tuic.example.com",
             "server_port": 443,
             "uuid": "12345678-1234-1234-1234-123456789abc",
-            "password": "tuic_password"  # pragma: allowlist secret,
+            "password": "tuic_password",  # pragma: allowlist secret
             "tls": {"enabled": True}
         }
         assert result == expected
@@ -303,7 +303,7 @@ class TestValidateProtocol:
             "tag": "hy2-out",
             "server": "hy2.example.com",
             "server_port": 443,
-            "password": "hy2_password"  # pragma: allowlist secret,
+            "password": "hy2_password",  # pragma: allowlist secret
             "tls": {"enabled": True}
         }
         supported_protocols = ["hysteria2"]
@@ -315,7 +315,7 @@ class TestValidateProtocol:
             "tag": "hy2-out",
             "server": "hy2.example.com",
             "server_port": 443,
-            "password": "hy2_password"  # pragma: allowlist secret,
+            "password": "hy2_password",  # pragma: allowlist secret
             "tls": {"enabled": True}
         }
         assert result == expected
@@ -548,7 +548,7 @@ class TestValidateProtocolIntegration:
             "server": "ss.example.com",
             "server_port": 8388,
             "method": "2022-blake3-aes-256-gcm",
-            "password": "8JCsPssfgS8tiRwiMlhARg=="  # pragma: allowlist secret,
+            "password": "8JCsPssfgS8tiRwiMlhARg==",  # pragma: allowlist secret
             "network": "tcp"
         }
         
