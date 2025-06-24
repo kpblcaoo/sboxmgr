@@ -5,7 +5,7 @@ import json
 from typing import List, Optional
 from rich.console import Console
 from rich.table import Table
-from rich.text import Text
+
 from rich.prompt import Confirm, Prompt
 from rich import print as rprint
 

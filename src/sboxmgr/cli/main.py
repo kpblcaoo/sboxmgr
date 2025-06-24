@@ -128,7 +128,6 @@ def clear_exclusions(
 @app.command("lang")
 def lang_cmd(
     set_lang: str = typer.Option(None, "--set", "-s", help=lang.get_with_fallback("cli.lang.set.help")),
-    check: bool = typer.Option(False, "--check", help=lang.get_with_fallback("cli.lang.check.help")),
 ):
     """Manage CLI internationalization language settings.
     

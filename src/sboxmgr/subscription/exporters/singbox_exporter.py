@@ -36,6 +36,275 @@ def generate_inbounds(profile: ClientProfile) -> list:
         inbounds.append(inb)
     return inbounds
 
+
+def _get_protocol_dispatcher() -> Dict[str, callable]:
+    """Возвращает словарь диспетчеров для специальных протоколов.
+    
+    Returns:
+        Dict[str, callable]: Маппинг протокол -> функция экспорта.
+    """
+    return {
+        "wireguard": _export_wireguard,
+        "hysteria2": _export_hysteria2,
+        "tuic": _export_tuic,
+        "shadowtls": _export_shadowtls,
+        "anytls": _export_anytls,
+        "tor": _export_tor,
+        "ssh": _export_ssh,
+    }
+
+
+def _normalize_protocol_type(server_type: str) -> str:
+    """Нормализует тип протокола для sing-box.
+    
+    Args:
+        server_type (str): Исходный тип протокола.
+        
+    Returns:
+        str: Нормализованный тип протокола.
+    """
+    if server_type == "ss":
+        return "shadowsocks"
+    return server_type
+
+
+def _is_supported_protocol(protocol_type: str) -> bool:
+    """Проверяет поддержку протокола.
+    
+    Args:
+        protocol_type (str): Тип протокола.
+        
+    Returns:
+        bool: True если протокол поддерживается.
+    """
+    supported_types = {
+        "vless", "vmess", "trojan", "ss", "shadowsocks", 
+        "wireguard", "hysteria2", "tuic", "shadowtls", 
+        "anytls", "tor", "ssh"
+    }
+    return protocol_type in supported_types
+
+
+
+def _create_base_outbound(server: ParsedServer, protocol_type: str) -> Dict[str, Any]:
+    """Создаёт базовую структуру outbound.
+    
+    Args:
+        server (ParsedServer): Сервер для экспорта.
+        protocol_type (str): Нормализованный тип протокола.
+        
+    Returns:
+        Dict[str, Any]: Базовая структура outbound.
+    """
+    return {
+        "type": protocol_type,
+        "server": server.address,
+        "server_port": server.port,
+    }
+
+
+def _process_shadowsocks_config(outbound: Dict[str, Any], server: ParsedServer, meta: Dict[str, Any]) -> bool:
+    """Обрабатывает конфигурацию Shadowsocks.
+    
+    Args:
+        outbound (Dict[str, Any]): Outbound конфигурация для модификации.
+        server (ParsedServer): Исходный сервер.
+        meta (Dict[str, Any]): Метаданные сервера.
+        
+    Returns:
+        bool: True если конфигурация валидна, False если нужно пропустить сервер.
+    """
+    method = meta.get("cipher") or meta.get("method") or server.security
+    if not method:
+        logger.warning(f"WARNING: shadowsocks outbound without method/cipher, skipping: {server.address}:{server.port}")
+        return False
+    outbound["method"] = method
+    return True
+
+
+def _process_transport_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
+    """Обрабатывает конфигурацию транспорта (ws, grpc, tcp, udp).
+    
+    Args:
+        outbound (Dict[str, Any]): Outbound конфигурация для модификации.
+        meta (Dict[str, Any]): Метаданные сервера для модификации.
+    """
+    network = meta.pop("network", None)
+    if network in ("ws", "grpc"):
+        outbound["transport"] = {"type": network}
+        for k in list(meta.keys()):
+            if k.startswith(network):
+                outbound["transport"][k[len(network)+1:]] = meta.pop(k)
+    elif network in ("tcp", "udp"):
+        outbound["network"] = network
+
+
+def _process_tls_config(outbound: Dict[str, Any], meta: Dict[str, Any], protocol_type: str) -> None:
+    """Обрабатывает конфигурацию TLS/Reality/uTLS.
+    
+    Args:
+        outbound (Dict[str, Any]): Outbound конфигурация для модификации.
+        meta (Dict[str, Any]): Метаданные сервера для модификации.
+        protocol_type (str): Тип протокола.
+    """
+    tls = {}
+    
+    # Базовая TLS конфигурация
+    if meta.get("tls") or meta.get("security") == "tls":
+        tls["enabled"] = True
+        meta.pop("tls", None)
+        meta.pop("security", None)
+    
+    # Server name
+    if meta.get("servername"):
+        tls["server_name"] = meta.pop("servername")
+    
+    # Reality конфигурация
+    if meta.get("reality-opts"):
+        reality = kebab_to_snake(meta.pop("reality-opts"))
+        tls.setdefault("reality", {}).update(reality)
+    
+    if meta.get("pbk"):
+        tls.setdefault("reality", {})["public_key"] = meta.pop("pbk")
+    
+    if meta.get("short_id"):
+        tls.setdefault("reality", {})["short_id"] = meta.pop("short_id")
+    
+    # uTLS конфигурация
+    utls_fp = meta.pop("client-fingerprint", None) or meta.pop("fp", None)
+    if utls_fp:
+        tls.setdefault("utls", {})["fingerprint"] = utls_fp
+        tls["utls"]["enabled"] = True
+    
+    # ALPN
+    if meta.get("alpn"):
+        tls["alpn"] = meta.pop("alpn")
+    
+    # Добавляем TLS конфигурацию только для поддерживающих протоколов
+    if tls and protocol_type in {"vless", "vmess", "trojan"}:
+        outbound["tls"] = tls
+
+
+def _process_auth_and_flow_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
+    """Обрабатывает конфигурацию аутентификации и flow.
+    
+    Args:
+        outbound (Dict[str, Any]): Outbound конфигурация для модификации.
+        meta (Dict[str, Any]): Метаданные сервера для модификации.
+    """
+    if meta.get("uuid"):
+        outbound["uuid"] = meta.pop("uuid")
+    
+    if meta.get("flow"):
+        outbound["flow"] = meta.pop("flow")
+
+
+def _process_tag_config(outbound: Dict[str, Any], server: ParsedServer, meta: Dict[str, Any]) -> None:
+    """Обрабатывает конфигурацию тега outbound.
+    
+    Args:
+        outbound (Dict[str, Any]): Outbound конфигурация для модификации.
+        server (ParsedServer): Исходный сервер.
+        meta (Dict[str, Any]): Метаданные сервера для модификации.
+    """
+    label = meta.pop("label", None)
+    if label:
+        outbound["tag"] = label
+    elif meta.get("name"):
+        outbound["tag"] = meta.pop("name")
+    else:
+        outbound["tag"] = server.address
+
+
+def _process_additional_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
+    """Обрабатывает дополнительные параметры конфигурации.
+    
+    Args:
+        outbound (Dict[str, Any]): Outbound конфигурация для модификации.
+        meta (Dict[str, Any]): Метаданные сервера.
+    """
+    whitelist = {
+        "password", "method", "multiplex", "packet_encoding", 
+        "udp_over_tcp", "udp_relay_mode", "udp_fragment", "udp_timeout"
+    }
+    for k, v in meta.items():
+        if k in whitelist:
+            outbound[k] = v
+
+
+def _process_standard_server(server: ParsedServer, protocol_type: str) -> Optional[Dict[str, Any]]:
+    """Обрабатывает стандартный сервер (не специальный протокол).
+    
+    Args:
+        server (ParsedServer): Сервер для обработки.
+        protocol_type (str): Нормализованный тип протокола.
+        
+    Returns:
+        Optional[Dict[str, Any]]: Outbound конфигурация или None если нужно пропустить.
+    """
+    outbound = _create_base_outbound(server, protocol_type)
+    meta = dict(server.meta or {})
+    
+    # Обрабатываем Shadowsocks конфигурацию
+    if protocol_type == "shadowsocks":
+        if not _process_shadowsocks_config(outbound, server, meta):
+            return None
+    
+    # Обрабатываем различные аспекты конфигурации
+    _process_transport_config(outbound, meta)
+    _process_tls_config(outbound, meta, protocol_type)
+    _process_auth_and_flow_config(outbound, meta)
+    _process_tag_config(outbound, server, meta)
+    _process_additional_config(outbound, meta)
+    
+    return outbound
+
+
+def _process_single_server(server: ParsedServer) -> Optional[Dict[str, Any]]:
+    """Обрабатывает один сервер и возвращает outbound конфигурацию.
+    
+    Args:
+        server (ParsedServer): Сервер для обработки.
+        
+    Returns:
+        Optional[Dict[str, Any]]: Outbound конфигурация или None если нужно пропустить.
+    """
+    protocol_type = _normalize_protocol_type(server.type)
+    
+    # Проверяем поддержку протокола
+    if not _is_supported_protocol(protocol_type):
+        logger.warning(f"Unsupported outbound type: {server.type}, skipping {server.address}:{server.port}")
+        return None
+    
+    # Обрабатываем специальные протоколы
+    dispatcher = _get_protocol_dispatcher()
+    if protocol_type in dispatcher:
+        return dispatcher[protocol_type](server)  # Может вернуть None
+    
+    # Обрабатываем стандартные протоколы
+    return _process_standard_server(server, protocol_type)
+
+
+def _add_special_outbounds(outbounds: List[Dict[str, Any]], use_legacy: bool) -> None:
+    """Добавляет специальные outbounds (direct, block, dns-out).
+    
+    Args:
+        outbounds (List[Dict[str, Any]]): Список outbounds для модификации.
+        use_legacy (bool): Использовать ли legacy режим.
+    """
+    tags = {o["tag"] for o in outbounds}
+    
+    if "direct" not in tags:
+        outbounds.append({"type": "direct", "tag": "direct"})
+    
+    # Добавляем legacy special outbounds для совместимости с sing-box < 1.11.0
+    if use_legacy:
+        if "block" not in tags:
+            outbounds.append({"type": "block", "tag": "block"})
+        if "dns-out" not in tags:
+            outbounds.append({"type": "dns", "tag": "dns-out"})
+
+
 def singbox_export(
     servers: List[ParsedServer],
     routes,
@@ -64,139 +333,32 @@ def singbox_export(
         Automatically adds special outbounds (direct, block, dns-out) based
         on version compatibility. Supports legacy mode for sing-box < 1.11.0.
     """
-    supported_types = {"vless", "vmess", "trojan", "ss", "shadowsocks", "wireguard", "hysteria2", "tuic", "shadowtls", "anytls", "tor", "ssh"}
     outbounds = []
     
     # Определяем нужно ли использовать legacy outbounds
-    # Если пропускаем проверку версии, используем современный синтаксис
     use_legacy = False if skip_version_check else should_use_legacy_outbounds(singbox_version)
     
     if use_legacy and singbox_version:
         logger.warning(f"Using legacy outbounds for sing-box {singbox_version} compatibility")
     
-    for s in servers:
-        out_type = s.type
-        if out_type == "ss":
-            out_type = "shadowsocks"
-        if out_type not in supported_types:
-            logger.warning(f"Unsupported outbound type: {s.type}, skipping {s.address}:{s.port}")
-            continue
-        if out_type == "wireguard":
-            outbound = _export_wireguard(s)
-            if outbound:
-                outbounds.append(outbound)
-            continue
-        if out_type == "hysteria2":
-            outbound = _export_hysteria2(s)
-            if outbound:
-                outbounds.append(outbound)
-            continue
-        if out_type == "tuic":
-            outbound = _export_tuic(s)
-            if outbound:
-                outbounds.append(outbound)
-            continue
-        if out_type == "shadowtls":
-            outbound = _export_shadowtls(s)
-            if outbound:
-                outbounds.append(outbound)
-            continue
-        if out_type == "anytls":
-            outbound = _export_anytls(s)
-            if outbound:
-                outbounds.append(outbound)
-            continue
-        if out_type == "tor":
-            outbound = _export_tor(s)
-            if outbound:
-                outbounds.append(outbound)
-            continue
-        if out_type == "ssh":
-            outbound = _export_ssh(s)
-            if outbound:
-                outbounds.append(outbound)
-            continue
-        out = {
-            "type": out_type,
-            "server": s.address,
-            "server_port": s.port,
-        }
-        meta = dict(s.meta or {})
-        # Shadowsocks: method/cipher
-        if out_type == "shadowsocks":
-            method = meta.get("cipher") or meta.get("method") or s.security
-            if not method:
-                logger.warning(f"WARNING: shadowsocks outbound without method/cipher, skipping: {s.address}:{s.port}")
-                continue
-            out["method"] = method
-        # Transport (ws, grpc, etc)
-        network = meta.pop("network", None)
-        if network in ("ws", "grpc"):
-            out["transport"] = {"type": network}
-            for k in list(meta.keys()):
-                if k.startswith(network):
-                    out["transport"][k[len(network)+1:]] = meta.pop(k)
-        elif network in ("tcp", "udp"):
-            out["network"] = network
-        # Группируем tls/reality/utls
-        tls = {}
-        if meta.get("tls") or meta.get("security") == "tls":
-            tls["enabled"] = True
-            meta.pop("tls", None)
-            meta.pop("security", None)
-        if meta.get("servername"):
-            tls["server_name"] = meta.pop("servername")
-        if meta.get("reality-opts"):
-            reality = kebab_to_snake(meta.pop("reality-opts"))
-            tls.setdefault("reality", {}).update(reality)
-        if meta.get("pbk"):
-            tls.setdefault("reality", {})["public_key"] = meta.pop("pbk")
-        if meta.get("short_id"):
-            tls.setdefault("reality", {})["short_id"] = meta.pop("short_id")
-        # utls только внутри tls/utls
-        utls_fp = meta.pop("client-fingerprint", None) or meta.pop("fp", None)
-        if utls_fp:
-            tls.setdefault("utls", {})["fingerprint"] = utls_fp
-            tls["utls"]["enabled"] = True
-        if meta.get("alpn"):
-            tls["alpn"] = meta.pop("alpn")
-        if tls and out_type in {"vless", "vmess", "trojan"}:
-            out["tls"] = tls
-        # uuid, flow, label, tag
-        if meta.get("uuid"):
-            out["uuid"] = meta.pop("uuid")
-        if meta.get("flow"):
-            out["flow"] = meta.pop("flow")
-        label = meta.pop("label", None)
-        if label:
-            out["tag"] = label
-        elif meta.get("name"):
-            out["tag"] = meta.pop("name")
-        else:
-            out["tag"] = s.address
-        whitelist = {"password", "method", "multiplex", "packet_encoding", "udp_over_tcp", "udp_relay_mode", "udp_fragment", "udp_timeout"}
-        for k, v in meta.items():
-            if k in whitelist:
-                out[k] = v
-        outbounds.append(out)
+    # Обрабатываем каждый сервер
+    for server in servers:
+        outbound = _process_single_server(server)
+        if outbound:
+            outbounds.append(outbound)
     
-    tags = {o["tag"] for o in outbounds}
-    if "direct" not in tags:
-        outbounds.append({"type": "direct", "tag": "direct"})
+    # Добавляем специальные outbounds
+    _add_special_outbounds(outbounds, use_legacy)
     
-    # Добавляем legacy special outbounds для совместимости с sing-box < 1.11.0
-    if use_legacy:
-        if "block" not in tags:
-            outbounds.append({"type": "block", "tag": "block"})
-        if "dns-out" not in tags:
-            outbounds.append({"type": "dns", "tag": "dns-out"})
-    
+    # Формируем финальную конфигурацию
     config = {
         "outbounds": outbounds,
         "route": {"rules": routes}
     }
+    
     if client_profile is not None:
         config["inbounds"] = generate_inbounds(client_profile)
+    
     return config
 
 def _export_wireguard(s: ParsedServer) -> dict:
