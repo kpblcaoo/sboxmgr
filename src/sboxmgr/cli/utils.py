@@ -2,6 +2,7 @@ import json
 import os
 from pathlib import Path
 import locale
+import logging
 
 def is_ai_lang(code):
     """Check if language file contains AI-generated translations.
@@ -55,13 +56,13 @@ def detect_lang_source():
             cfg = toml.load(config_path)
             if "default_lang" in cfg:
                 return cfg["default_lang"], f"config ({config_path})"
-        except Exception:
-            pass
+        except Exception as e:
+            logging.debug(f"Failed to read config file {config_path}: {e}")
     try:
         sys_lang = locale.getdefaultlocale()[0]
         if sys_lang:
             return sys_lang.split("_")[0], "system LANG"
-    except Exception:
+    except Exception as e:
         # Обрабатываем возможные исключения при работе с locale
-        pass
+        logging.debug(f"Failed to detect system locale: {e}")
     return "en", "default" 

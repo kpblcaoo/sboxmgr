@@ -2,7 +2,7 @@
 
 import typer
 import json
-from typing import List, Optional
+from typing import Optional
 from rich.console import Console
 from rich.table import Table
 
@@ -75,35 +75,76 @@ def exclusions_v2(
     
     manager = ExclusionManager.default()
     
-    # Handle view command first (no URL needed)
+    # Handle view-only operations first (no URL needed)
     if view:
         _view_exclusions(manager, json_output)
         return
     
-    # Handle clear command
     if clear:
-        if not Confirm.ask("[bold red]Are you sure you want to clear ALL exclusions?[/bold red]"):
-            rprint("[yellow]Operation cancelled.[/yellow]")
-            return
-        
-        count = manager.clear()
-        if json_output:
-            print(json.dumps({"action": "clear", "removed_count": count}))
-        else:
-            rprint(f"[green]✅ Cleared {count} exclusions.[/green]")
+        _handle_clear_operation(manager, json_output)
         return
     
-    # Fetch server data for other operations
+    # For operations requiring server data, fetch and cache it
+    if any([add, remove, list_servers, interactive]):
+        json_data = _fetch_and_validate_subscription(url, json_output)
+        _cache_server_data(manager, json_data, json_output)
+    
+    # Handle operations that require server data
+    if list_servers:
+        _list_servers(manager, json_output, show_excluded)
+        return
+    
+    if interactive:
+        _interactive_exclusions(manager, json_output, reason)
+        return
+    
+    if add:
+        _add_exclusions(manager, add, reason, json_output)
+    
+    if remove:
+        _remove_exclusions(manager, remove, json_output)
+    
+    # Show help if no action specified
+    if not any([add, remove, view, clear, list_servers, interactive]):
+        _show_usage_help()
+
+def _handle_clear_operation(manager: ExclusionManager, json_output: bool) -> None:
+    """Handle the clear exclusions operation with confirmation."""
+    if not Confirm.ask("[bold red]Are you sure you want to clear ALL exclusions?[/bold red]"):
+        rprint("[yellow]Operation cancelled.[/yellow]")
+        return
+    
+    count = manager.clear()
+    if json_output:
+        print(json.dumps({"action": "clear", "removed_count": count}))
+    else:
+        rprint(f"[green]✅ Cleared {count} exclusions.[/green]")
+
+def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
+    """Fetch and validate subscription data from URL.
+    
+    Args:
+        url: Subscription URL to fetch from
+        json_output: Whether to output errors in JSON format
+        
+    Returns:
+        Parsed JSON data from subscription
+        
+    Raises:
+        typer.Exit: If fetching or parsing fails
+    """
     try:
         json_data = fetch_json(url)
         if json_data is None:
+            error_msg = "Failed to fetch subscription data"
             if json_output:
-                print(json.dumps({"error": "Failed to fetch subscription data", "url": url}))
+                print(json.dumps({"error": error_msg, "url": url}))
             else:
-                rprint(f"[red]❌ Failed to fetch subscription data from:[/red]")
+                rprint(f"[red]❌ {error_msg} from:[/red]")
                 rprint(f"[dim]   {url}[/dim]")
                 rprint("[yellow]💡 Check URL and internet connection[/yellow]")
             raise typer.Exit(1)
+        return json_data
     except Exception as e:
         if json_output:
             print(json.dumps({"error": str(e), "url": url}))
@@ -111,40 +152,33 @@ def exclusions_v2(
             rprint(f"[red]❌ {t('error.config_load_failed')}: {e}[/red]")
             rprint(f"[dim]URL: {url}[/dim]")
         raise typer.Exit(1)
+
+def _cache_server_data(manager: ExclusionManager, json_data: dict, json_output: bool) -> None:
+    """Cache server data in exclusion manager.
     
-    # Cache server data
+    Args:
+        manager: ExclusionManager instance
+        json_data: Server data to cache
+        json_output: Whether to output errors in JSON format
+        
+    Raises:
+        typer.Exit: If server data format is invalid
+    """
     try:
         manager.set_servers_cache(json_data, SUPPORTED_PROTOCOLS)
     except Exception as e:
+        error_msg = f"Invalid server data format: {e}"
         if json_output:
-            print(json.dumps({"error": f"Invalid server data format: {e}"}))
+            print(json.dumps({"error": error_msg}))
         else:
-            rprint(f"[red]❌ Invalid server data format: {e}[/red]")
+            rprint(f"[red]❌ {error_msg}[/red]")
             rprint("[yellow]💡 The subscription might not be in the expected format[/yellow]")
         raise typer.Exit(1)
-    
-    # Handle list-servers command
-    if list_servers:
-        _list_servers(manager, json_output, show_excluded)
-        return
-    
-    # Handle interactive mode
-    if interactive:
-        _interactive_exclusions(manager, json_output, reason)
-        return
-    
-    # Handle add command
-    if add:
-        _add_exclusions(manager, add, reason, json_output)
-    
-    # Handle remove command  
-    if remove:
-        _remove_exclusions(manager, remove, json_output)
-    
-    # Show help if no action specified
-    if not (add or remove or view or clear or list_servers or interactive):
-        rprint("[yellow]💡 Use --add, --remove, --view, --clear, --list-servers, or --interactive[/yellow]")
-        rprint("[dim]Example: sboxmgr exclusions --url URL --add '0,1,server-*' --reason 'Testing'[/dim]")
+
+def _show_usage_help() -> None:
+    """Display usage help when no action is specified."""
+    rprint("[yellow]💡 Use --add, --remove, --view, --clear, --list-servers, or --interactive[/yellow]")
+    rprint("[dim]Example: sboxmgr exclusions --url URL --add '0,1,server-*' --reason 'Testing'[/dim]")
 
 def _view_exclusions(manager: ExclusionManager, json_output: bool) -> None:
     """Display current exclusions in table or JSON format.
@@ -386,7 +420,6 @@ def _remove_exclusions(manager: ExclusionManager, remove_str: str, json_output: 
 # Helper method for getting server ID (should be added to manager)
 def _get_server_id(server: dict) -> str:
     """Get server ID - temporary helper until added to manager."""
-    from sboxmgr.utils.id import generate_server_id
     return generate_server_id(server)
 
 # Monkey patch for now

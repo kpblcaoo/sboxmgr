@@ -1,7 +1,7 @@
 import json
 import logging
 from typing import List, Optional, Dict, Any
-from ..models import ParsedServer, ClientProfile, InboundProfile
+from ..models import ParsedServer, ClientProfile
 from ..base_exporter import BaseExporter
 from ..registry import register
 from ...utils.version import should_use_legacy_outbounds
@@ -553,5 +553,4 @@ class SingboxExporter(BaseExporter):
             ValueError: If server data is invalid or cannot be exported.
         """
         config = singbox_export(servers, [])
-        import json
         return json.dumps(config, indent=2, ensure_ascii=False) 

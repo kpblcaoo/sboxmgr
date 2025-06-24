@@ -1,6 +1,5 @@
 from ..registry import register
 from ..base_fetcher import BaseFetcher
-from ..models import SubscriptionSource, ParsedServer
 
 
 @register("custom_fetcher")

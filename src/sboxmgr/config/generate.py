@@ -3,8 +3,6 @@ import json
 import subprocess
 from logging import info, error
 import tempfile
-from sboxmgr.utils.env import get_config_file, get_backup_file, get_template_file
-from sboxmgr.utils.file import atomic_write_json, file_exists, read_json
 
 def generate_config(outbounds, template_file, config_file, backup_file, excluded_ips):
     """Generate sing-box configuration from template."""

@@ -1,17 +1,17 @@
 {
   "errors": [],
-  "generated_at": "2025-06-24T13:28:43Z",
+  "generated_at": "2025-06-24T14:39:39Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 26,
+      "CONFIDENCE.HIGH": 18,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 26,
+      "SEVERITY.LOW": 18,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 4680,
+      "loc": 4670,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -128,20 +128,20 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 115,
+      "loc": 223,
       "nosec": 0,
       "skipped_tests": 0
     },
     "src/sboxmgr/cli/utils.py": {
-      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 2,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 58,
+      "loc": 59,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -510,54 +510,54 @@
       "skipped_tests": 0
     },
     "src/sboxmgr/subscription/fetchers/file_fetcher.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 1,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 46,
+      "loc": 48,
       "nosec": 0,
       "skipped_tests": 0
     },
     "src/sboxmgr/subscription/fetchers/json_fetcher.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 1,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 66,
+      "loc": 57,
       "nosec": 0,
       "skipped_tests": 0
     },
     "src/sboxmgr/subscription/fetchers/url_fetcher.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 1,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 81,
+      "loc": 72,
       "nosec": 0,
       "skipped_tests": 0
     },
     "src/sboxmgr/subscription/manager.py": {
-      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 2,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 295,
+      "loc": 290,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -718,15 +718,15 @@
       "skipped_tests": 0
     },
     "src/sboxmgr/subscription/registry.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 1,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 17,
+      "loc": 18,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -791,7 +791,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 107,
+      "loc": 8,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -862,49 +862,6 @@
     }
   },
   "results": [
-    {
-      "code": "57                 return cfg[\"default_lang\"], f\"config ({config_path})\"\n58         except Exception:\n59             pass\n60     try:\n",
-      "col_offset": 8,
-      "end_col_offset": 16,
-      "filename": "src/sboxmgr/cli/utils.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 58,
-      "line_range": [
-        58,
-        59
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.5/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "63             return sys_lang.split(\"_\")[0], \"system LANG\"\n64     except Exception:\n65         # \u041e\u0431\u0440\u0430\u0431\u0430\u0442\u044b\u0432\u0430\u0435\u043c \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u044b\u0435 \u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f \u043f\u0440\u0438 \u0440\u0430\u0431\u043e\u0442\u0435 \u0441 locale\n66         pass\n67     return \"en\", \"default\" \n",
-      "col_offset": 4,
-      "end_col_offset": 12,
-      "filename": "src/sboxmgr/cli/utils.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 64,
-      "line_range": [
-        64,
-        65,
-        66
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.5/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
     {
       "code": "2 import json\n3 import subprocess\n4 from logging import info, error\n",
       "col_offset": 0,
@@ -1162,132 +1119,6 @@
       "line_range": [
         126,
         127
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.5/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "50                 return int(env_limit)\n51             except Exception:\n52                 pass\n53         # TODO: \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0447\u0442\u0435\u043d\u0438\u0435 \u0438\u0437 config.toml\n",
-      "col_offset": 12,
-      "end_col_offset": 20,
-      "filename": "src/sboxmgr/subscription/fetchers/file_fetcher.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 51,
-      "line_range": [
-        51,
-        52
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.5/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "72                 return int(env_limit)\n73             except Exception:\n74                 pass\n75         # TODO: \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0447\u0442\u0435\u043d\u0438\u0435 \u0438\u0437 config.toml\n",
-      "col_offset": 12,
-      "end_col_offset": 20,
-      "filename": "src/sboxmgr/subscription/fetchers/json_fetcher.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 73,
-      "line_range": [
-        73,
-        74
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.5/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "89                 return int(env_limit)\n90             except Exception:\n91                 pass\n92         # TODO: \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0447\u0442\u0435\u043d\u0438\u0435 \u0438\u0437 config.toml\n",
-      "col_offset": 12,
-      "end_col_offset": 20,
-      "filename": "src/sboxmgr/subscription/fetchers/url_fetcher.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 90,
-      "line_range": [
-        90,
-        91
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.5/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "43         return parser\n44     except Exception:\n45         pass\n46     # 2. \u041f\u0440\u043e\u0431\u0443\u0435\u043c Clash YAML\n",
-      "col_offset": 4,
-      "end_col_offset": 12,
-      "filename": "src/sboxmgr/subscription/manager.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 44,
-      "line_range": [
-        44,
-        45
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.5/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "60                 return Base64Parser()\n61         except Exception:\n62             pass\n63     # 4. \u041f\u0440\u043e\u0431\u0443\u0435\u043c plain URI list\n",
-      "col_offset": 8,
-      "end_col_offset": 16,
-      "filename": "src/sboxmgr/subscription/manager.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 61,
-      "line_range": [
-        61,
-        62
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.5/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "24             PLUGIN_REGISTRY[ep.name] = ep.load()\n25     except Exception:\n26         pass  # entry points optional, \u043d\u0435 \u043a\u0440\u0438\u0442\u0438\u0447\u043d\u043e \u0434\u043b\u044f MVP \n",
-      "col_offset": 4,
-      "end_col_offset": 12,
-      "filename": "src/sboxmgr/subscription/registry.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 25,
-      "line_range": [
-        25,
-        26
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.5/plugins/b110_try_except_pass.html",
       "test_id": "B110",

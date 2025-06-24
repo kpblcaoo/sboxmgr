@@ -1,5 +1,4 @@
 from .loader import LanguageLoader
-import os
 from functools import lru_cache
 
 @lru_cache()

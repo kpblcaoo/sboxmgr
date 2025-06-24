@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from .models import SubscriptionSource
-from typing import Any
 import os
 from urllib.parse import urlparse
 

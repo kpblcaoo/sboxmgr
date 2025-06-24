@@ -1,6 +1,5 @@
 from ..registry import register
 from ..postprocessor_base import BasePostProcessor
-from ..models import SubscriptionSource, ParsedServer
 
 
 @register("geo_filter")

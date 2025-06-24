@@ -200,7 +200,7 @@ def test_subscription_pipeline_modes():
         result_tolerant = mgr.get_servers(context=context_tolerant)
         
         # В tolerant режиме pipeline должен продолжить работу
-        assert result_tolerant.success or len(result_tolerant.config) == 0
+        assert result_tolerant.success or (result_tolerant.config is None or len(result_tolerant.config) == 0)
         
         # Тест strict режима
         context_strict = PipelineContext(mode="strict") 

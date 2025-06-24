@@ -23,7 +23,7 @@ class ClashParser(BaseParser):
             print(f"[ClashParser] Unexpected YAML root type: {type(data)}")
             return []
         if not proxies:
-            print(f"[ClashParser] No proxies section found or section is empty.")
+            print("[ClashParser] No proxies section found or section is empty.")
             return []
         for p in proxies:
             servers.append(ParsedServer(

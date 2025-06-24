@@ -1,5 +1,4 @@
 from ..validators.base import BaseValidator
-from ..models import SubscriptionSource, ParsedServer
 
 
 class GeoValidator(BaseValidator):

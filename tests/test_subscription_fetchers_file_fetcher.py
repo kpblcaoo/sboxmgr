@@ -137,7 +137,7 @@ class TestFileFetcher:
             source = SubscriptionSource(url=f"file://{tmp_file_path}", source_type="file")
             fetcher = FileFetcher(source)
             
-            with pytest.raises(ValueError, match="File size exceeds limit"):
+            with pytest.raises(ValueError, match="File size .* exceeds limit"):
                 fetcher.fetch()
                 
         finally:
@@ -204,7 +204,10 @@ class TestFileFetcherCaching:
         fetcher = FileFetcher(source)
         
         # Mock file operations
-        with patch("builtins.open", mock_open(read_data=b"test")):
+        with patch("pathlib.Path.exists", return_value=True), \
+             patch("pathlib.Path.stat") as mock_stat, \
+             patch("builtins.open", mock_open(read_data=b"test")):
+            mock_stat.return_value.st_size = 4  # Size of "test"
             fetcher.fetch()
             
         key = (source.url,)
@@ -360,7 +363,7 @@ class TestFileFetcherEdgeCases:
             fetcher = FileFetcher(source)
             
             with patch.dict(os.environ, {"SBOXMGR_FETCH_SIZE_LIMIT": str(limit)}):
-                with pytest.raises(ValueError, match="File size exceeds limit"):
+                with pytest.raises(ValueError, match="File size .* exceeds limit"):
                     fetcher.fetch()
                     
         finally:
@@ -378,7 +381,7 @@ class TestFileFetcherEdgeCases:
             # URL without file:// prefix should fail validation
             source = SubscriptionSource(url=tmp_file_path, source_type="file")
             
-            with pytest.raises(ValueError, match="unsupported scheme"):
+            with pytest.raises(ValueError, match="FileFetcher supports only file:// URLs"):
                 FileFetcher(source)
             
         finally:

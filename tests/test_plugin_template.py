@@ -33,7 +33,7 @@ def test_plugin_template_generates_all_types(tmp_path):
         result = runner.invoke(plugin_template.app, [t, name, "--output-dir", str(output_dir)])
         assert result.exit_code == 0, f"Failed for type {t}: {result.output}"
         py_file = output_dir / f"{name.lower()}.py"
-        test_file = output_dir / f"test_{name.lower()}.py"
+        test_file = output_dir / f"template_test_{name.lower()}.py"
         assert py_file.exists(), f"{py_file} not created"
         assert test_file.exists(), f"{test_file} not created"
         # Проверяем docstring и импорты
@@ -69,7 +69,7 @@ class TestPluginTemplate:
         
         # Check files were created
         plugin_file = Path(output_dir) / "custom.py"
-        test_file = Path(output_dir) / "test_custom.py"
+        test_file = Path(output_dir) / "template_test_custom.py"
         
         assert plugin_file.exists()
         assert test_file.exists()
@@ -98,7 +98,7 @@ class TestPluginTemplate:
         
         # Check files were created
         plugin_file = Path(output_dir) / "custom.py"
-        test_file = Path(output_dir) / "test_custom.py"
+        test_file = Path(output_dir) / "template_test_custom.py"
         
         assert plugin_file.exists()
         assert test_file.exists()
@@ -108,7 +108,7 @@ class TestPluginTemplate:
         assert "class CustomParser(BaseParser):" in content
         assert "from ..base_parser import BaseParser" in content
         assert "@register(\"custom_parser\")" in content
-        assert "def parse(self, raw: bytes):" in content
+        assert "def parse(self, raw: bytes) -> list[ParsedServer]:" in content
         
         # Check test file content
         test_content = test_file.read_text()
@@ -123,7 +123,7 @@ class TestPluginTemplate:
         
         # Check files were created
         plugin_file = Path(output_dir) / "custom.py"
-        test_file = Path(output_dir) / "test_custom.py"
+        test_file = Path(output_dir) / "template_test_custom.py"
         
         assert plugin_file.exists()
         assert test_file.exists()
@@ -133,7 +133,7 @@ class TestPluginTemplate:
         assert "class CustomValidator(BaseValidator):" in content
         assert "from ..validators.base import BaseValidator" in content
         assert "@register" not in content  # Validators don't use @register
-        assert "def validate(self, raw: bytes):" in content
+        assert "def validate(self, raw: bytes, context=None):" in content
         
         # Check test file content
         test_content = test_file.read_text()
@@ -148,7 +148,7 @@ class TestPluginTemplate:
         
         # Check files were created
         plugin_file = Path(output_dir) / "custom.py"
-        test_file = Path(output_dir) / "test_custom.py"
+        test_file = Path(output_dir) / "template_test_custom.py"
         
         assert plugin_file.exists()
         assert test_file.exists()
@@ -158,7 +158,7 @@ class TestPluginTemplate:
         assert "class CustomParsedValidator(BaseParsedValidator):" in content
         assert "from ..validators.base import BaseParsedValidator" in content
         assert "@register_parsed_validator(\"custom_parsed_validator\")" in content
-        assert "def validate(self, servers, context):" in content
+        assert "def validate(self, servers: list[ParsedServer], context):" in content
         
         # Check test file content
         test_content = test_file.read_text()
@@ -173,7 +173,7 @@ class TestPluginTemplate:
         
         # Check files were created
         plugin_file = Path(output_dir) / "custom.py"
-        test_file = Path(output_dir) / "test_custom.py"
+        test_file = Path(output_dir) / "template_test_custom.py"
         
         assert plugin_file.exists()
         assert test_file.exists()
@@ -183,7 +183,7 @@ class TestPluginTemplate:
         assert "class CustomExporter(BaseExporter):" in content
         assert "from ..base_exporter import BaseExporter" in content
         assert "@register(\"custom_exporter\")" in content
-        assert "def export(self, servers):" in content
+        assert "def export(self, servers: list[ParsedServer]) -> dict:" in content
         
         # Check test file content
         test_content = test_file.read_text()
@@ -198,7 +198,7 @@ class TestPluginTemplate:
         
         # Check files were created
         plugin_file = Path(output_dir) / "custom.py"
-        test_file = Path(output_dir) / "test_custom.py"
+        test_file = Path(output_dir) / "template_test_custom.py"
         
         assert plugin_file.exists()
         assert test_file.exists()
@@ -208,7 +208,7 @@ class TestPluginTemplate:
         assert "class CustomPostProcessor(BasePostProcessor):" in content
         assert "from ..postprocessor_base import BasePostProcessor" in content
         assert "@register(\"custom_postprocessor\")" in content
-        assert "def process(self, servers, context):" in content
+        assert "def process(self, servers: list[ParsedServer], context) -> list[ParsedServer]:" in content
         
         # Check test file content
         test_content = test_file.read_text()
@@ -330,16 +330,16 @@ class TestPluginTemplateContent:
         assert "class MyCustomFetcher(BaseFetcher):" in content
         
         # Check docstring
-        assert "MyCustomFetcher fetches subscription data." in content
+        assert "MyCustomFetcher fetches subscription data from custom source." in content
         assert "Example:" in content
         assert "fetcher = MyCustomFetcher(source)" in content
         
         # Check method
         assert "def fetch(self, force_reload: bool = False) -> bytes:" in content
-        assert "force_reload (bool, optional): Force reload and ignore cache." in content
+        assert "force_reload: Whether to bypass cache and force fresh data retrieval." in content
         assert "Returns:" in content
-        assert "bytes: Raw data." in content
-        assert "raise NotImplementedError()" in content
+        assert "Raw subscription data as bytes." in content
+        assert "raise NotImplementedError(\"Implement your custom fetch logic here\")" in content
     
     def test_parser_template_content(self, tmp_path):
         """Test parser template has correct content structure."""
@@ -359,9 +359,9 @@ class TestPluginTemplateContent:
         assert "class MyCustomParser(BaseParser):" in content
         
         # Check method
-        assert "def parse(self, raw: bytes):" in content
-        assert "raw (bytes): Raw data." in content
-        assert "list[ParsedServer]: Servers." in content
+        assert "def parse(self, raw: bytes) -> list[ParsedServer]:" in content
+        assert "raw: Raw subscription data as bytes." in content
+        assert "List of ParsedServer objects representing the server configurations." in content
     
     def test_validator_template_content(self, tmp_path):
         """Test validator template has correct content structure."""
@@ -381,8 +381,8 @@ class TestPluginTemplateContent:
         assert "class MyCustomValidator(BaseValidator):" in content
         
         # Check method
-        assert "def validate(self, raw: bytes):" in content
-        assert "ValidationResult: Result." in content
+        assert "def validate(self, raw: bytes, context=None):" in content
+        assert "ValidationResult indicating whether the data is valid." in content
     
     def test_test_template_content(self, tmp_path):
         """Test generated test file has correct content."""
@@ -390,7 +390,7 @@ class TestPluginTemplateContent:
         
         plugin_template_func(type="fetcher", name="MyCustom", output_dir=output_dir)
         
-        test_file = Path(output_dir) / "test_mycustom.py"
+        test_file = Path(output_dir) / "template_test_mycustom.py"
         content = test_file.read_text()
         
         # Check imports
@@ -428,8 +428,8 @@ class TestPluginTemplateEdgeCases:
         types_and_expected = [
             ("fetcher", "BaseFetcher", "def fetch("),
             ("parser", "BaseParser", "def parse("),
-            ("validator", "BaseValidator", "def validate(self, raw: bytes):"),
-            ("parsed_validator", "BaseParsedValidator", "def validate(self, servers, context):"),
+            ("validator", "BaseValidator", "def validate(self, raw: bytes, context=None):"),
+            ("parsed_validator", "BaseParsedValidator", "def validate(self, servers: list[ParsedServer], context):"),
             ("exporter", "BaseExporter", "def export("),
             ("postprocessor", "BasePostProcessor", "def process("),
         ]
@@ -445,7 +445,7 @@ class TestPluginTemplateEdgeCases:
             
             # Clean up for next iteration
             plugin_file.unlink()
-            (Path(output_dir) / "test_test.py").unlink()
+            (Path(output_dir) / "template_test_test.py").unlink()
     
     def test_plugin_template_debug_output(self, tmp_path):
         """Test debug output messages."""
@@ -456,7 +456,7 @@ class TestPluginTemplateEdgeCases:
         
         # Check debug messages
         plugin_file = Path(output_dir) / "custom.py"
-        test_file = Path(output_dir) / "test_custom.py"
+        test_file = Path(output_dir) / "template_test_custom.py"
         
         mock_echo.assert_any_call(f"[DEBUG] Attempting to write template to {plugin_file}")
         mock_echo.assert_any_call(f"[DEBUG] Successfully wrote {plugin_file}")
@@ -500,7 +500,7 @@ class TestPluginTemplateIntegration:
         for plugin_type in plugin_types:
             name = f"test{plugin_type.lower()}"
             plugin_file = Path(output_dir) / f"{name}.py"
-            test_file = Path(output_dir) / f"test_{name}.py"
+            test_file = Path(output_dir) / f"template_test_{name}.py"
             
             assert plugin_file.exists(), f"Plugin file missing for {plugin_type}"
             assert test_file.exists(), f"Test file missing for {plugin_type}"
@@ -508,7 +508,7 @@ class TestPluginTemplateIntegration:
             # Verify basic content structure
             content = plugin_file.read_text()
             assert f"class Test{plugin_type.title()}" in content
-            assert "raise NotImplementedError()" in content
+            assert "raise NotImplementedError(" in content
             
             test_content = test_file.read_text()
             assert "import pytest" in test_content

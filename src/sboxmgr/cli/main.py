@@ -1,14 +1,10 @@
 import typer
 import os
-import sys
 from dotenv import load_dotenv
 from sboxmgr.config.fetch import fetch_json
-from sboxmgr.service.manage import manage_service
-from sboxmgr.server.exclusions import load_exclusions, exclude_servers, remove_exclusions, view_exclusions
+from sboxmgr.server.exclusions import exclude_servers, remove_exclusions, view_exclusions
 from logsetup.setup import setup_logging
-from sboxmgr.utils.env import get_log_file, get_config_file, get_backup_file, get_template_file, get_exclusion_file, get_selected_config_file, get_max_log_size, get_debug_level
-from sboxmgr.subscription.manager import SubscriptionManager
-from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
+from sboxmgr.utils.env import get_log_file, get_max_log_size, get_debug_level
 from sboxmgr.i18n.loader import LanguageLoader
 from pathlib import Path
 import locale
@@ -219,12 +215,12 @@ def lang_cmd(
             ai = " [AI]" if is_ai_lang(code) else ""
             langs_out.append(f"  {code} - {name}{ai}")
         typer.echo("Available languages:")
-        for l in langs_out:
-            typer.echo(l)
+        for lang_line in langs_out:
+            typer.echo(lang_line)
         if any(is_ai_lang(code) for code in langs):
             typer.echo("Note: [AI] = machine-translated, not reviewed. Contributions welcome!")
-        typer.echo(f"To set language persistently: sboxctl lang --set ru")
-        typer.echo(f"Or for one-time use: SBOXMGR_LANG=ru sboxctl ...")
+        typer.echo("To set language persistently: sboxctl lang --set ru")
+        typer.echo("Or for one-time use: SBOXMGR_LANG=ru sboxctl ...")
 
 app.command("plugin-template")(plugin_template.plugin_template)
 

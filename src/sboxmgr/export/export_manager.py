@@ -74,7 +74,7 @@ class ExportManager:
             # Проверяем версию ТОЛЬКО для sing-box формата и только если не пропускаем проверку
             singbox_version = None
             if not skip_version_check:
-                from sboxmgr.utils.version import get_singbox_version, check_version_compatibility, get_version_warning_message
+                from sboxmgr.utils.version import check_version_compatibility, get_version_warning_message
                 import typer
                 
                 is_compatible, singbox_version, message = check_version_compatibility()

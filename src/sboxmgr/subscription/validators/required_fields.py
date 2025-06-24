@@ -1,5 +1,5 @@
 from .base import BaseParsedValidator, register_parsed_validator, ValidationResult
-from sboxmgr.subscription.models import ParsedServer, PipelineContext
+from sboxmgr.subscription.models import PipelineContext
 
 @register_parsed_validator("required_fields")
 class RequiredFieldsValidator(BaseParsedValidator):

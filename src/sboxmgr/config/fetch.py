@@ -3,8 +3,6 @@ import json
 from logging import error
 from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.utils.id import generate_server_id
-from sboxmgr.utils.env import get_config_file, get_backup_file, get_template_file
-from sboxmgr.utils.file import file_exists, read_json
 
 def fetch_json(url, proxy_url=None):
     """Fetch JSON from URL with optional proxy."""

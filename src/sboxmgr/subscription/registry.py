@@ -1,4 +1,5 @@
 from typing import Type, Dict
+import logging
 
 PLUGIN_REGISTRY: Dict[str, Type] = {}
 
@@ -22,5 +23,6 @@ def load_entry_points():
         eps = importlib.metadata.entry_points()
         for ep in eps.select(group="sboxmgr.plugins"):  # group name по соглашению
             PLUGIN_REGISTRY[ep.name] = ep.load()
-    except Exception:
-        pass  # entry points optional, не критично для MVP 
+    except Exception as e:
+        # entry points optional, не критично для MVP
+        logging.debug(f"Failed to load entry points: {e}") 
