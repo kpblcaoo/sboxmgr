@@ -11,8 +11,18 @@ from sboxmgr.server.state import load_selected_config, save_selected_config
 from sboxmgr.server.selection import list_servers as do_list_servers
 from logsetup.setup import setup_logging
 from sboxmgr.utils.env import get_log_file, get_config_file, get_backup_file, get_template_file, get_exclusion_file, get_selected_config_file, get_max_log_size, get_debug_level, get_url
+from sboxmgr.subscription.manager import SubscriptionManager
+from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
+from sboxmgr.i18n.loader import LanguageLoader
+from pathlib import Path
+import locale
+from sboxmgr.i18n.t import t
+from sboxmgr.cli import plugin_template
+from sboxmgr.cli.commands.lang import lang_cmd
 
 load_dotenv()
+
+lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
 
 # Централизованное логирование для всех CLI-команд
 LOG_FILE = get_log_file()
@@ -20,194 +30,42 @@ MAX_LOG_SIZE = get_max_log_size()
 DEBUG_LEVEL = get_debug_level()
 setup_logging(DEBUG_LEVEL, LOG_FILE, MAX_LOG_SIZE)
 
-app = typer.Typer(help="sboxctl: Sing-box config manager (exclusions, dry-run, selection, etc.)")
+app = typer.Typer(help=lang.get("cli.help"))
 
 SUPPORTED_PROTOCOLS = {"vless", "shadowsocks", "vmess", "trojan", "tuic", "hysteria2"}
 
-@app.command()
-def run(
-    url: str = typer.Option(
-        ..., "-u", "--url", help="Config subscription URL",
-        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"]
-    ),
-    remarks: str = typer.Option(None, "-r", "--remarks", help="Select server by remarks"),
-    index: str = typer.Option(None, "-i", "--index", help="Select server by index (comma-separated)"),
-    debug: int = typer.Option(0, "-d", "--debug", help="Debug level: 0=min, 1=info, 2=debug"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Validate config only, do not write"),
-    config_file: str = typer.Option(None, "--config-file", help="Path to config.json (overrides env)"),
-    backup_file: str = typer.Option(None, "--backup-file", help="Path to config.json.bak (overrides env)"),
-    template_file: str = typer.Option(None, "--template-file", help="Path to config.template.json (overrides env)"),
-    use_selected: bool = typer.Option(False, "--use-selected", help="Use selected_config.json for default selection (for installer/advanced)")
-):
-    """Generate and apply sing-box config (default scenario)."""
-    try:
-        json_data = fetch_json(url)
-    except Exception as e:
-        typer.echo(f"[Ошибка] Не удалось загрузить конфиг: {e}", err=True)
-        raise typer.Exit(1)
+def is_ai_lang(code):
+    import json
+    from pathlib import Path
+    i18n_dir = Path(__file__).parent.parent / "i18n"
+    lang_file = i18n_dir / f"{code}.json"
+    if lang_file.exists():
+        try:
+            with open(lang_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return "__note__" in data and "AI-generated" in data["__note__"]
+        except Exception:
+            return False
+    return False
 
-    exclusions = load_exclusions(dry_run=dry_run)
-    indices = []
-    if index:
-        indices = [int(i) for i in index.split(",") if i.strip().isdigit()]
-    elif use_selected:
-        saved_config = load_selected_config()
-        indices = [int(item["index"]) for item in saved_config["selected"] if "index" in item]
-    # иначе indices остаётся пустым — авто-режим
 
-    try:
-        outbounds, excluded_ips, selected_servers = prepare_selection(
-            json_data,
-            indices,
-            remarks,
-            SUPPORTED_PROTOCOLS,
-            exclusions,
-            debug_level=debug,
-            dry_run=dry_run
-        )
-    except ValueError as e:
-        msg = str(e)
-        if "исключён" in msg or "excluded" in msg:
-            typer.echo(f"[Ошибка] {msg}", err=True)
-            raise typer.Exit(1)
-        else:
-            raise
 
-    # Если ничего не выбрано и есть исключение по excluded — выводим в stdout
-    if (remarks or indices) and not outbounds:
-        typer.echo("[Ошибка] Сервер с выбранным индексом или remarks находится в списке исключённых (excluded). Выберите другой.", err=True)
-        raise typer.Exit(1)
-
-    selected_config_file = get_selected_config_file()
-    if (remarks or indices) and not dry_run and selected_servers:
-        save_selected_config({"selected": selected_servers}, selected_config_file)
-
-    # Определяем актуальные пути
-    template_file = template_file or get_template_file()
-    config_file = config_file or get_config_file()
-    backup_file = backup_file or get_backup_file()
-
-    if dry_run:
-        from sboxmgr.config.generate import generate_temp_config, validate_config_file
-        import tempfile
-        typer.echo("Режим dry-run: создаём временный конфиг и валидируем его")
-        with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
-            temp_path = tmp.name
-            config_content = generate_temp_config(outbounds, template_file, excluded_ips)
-            tmp.write(config_content)
-        valid, output = validate_config_file(temp_path)
-        if valid:
-            typer.echo("Dry run: config is valid")
-        else:
-            typer.echo(f"Конфиг невалиден:\n{output}", err=True)
-        os.unlink(temp_path)
-        typer.echo("Временный файл удалён. Основной конфиг не изменён, сервис не перезапущен.")
-        raise typer.Exit(0 if valid else 1)
-
-    try:
-        changes_made = generate_config(outbounds, template_file, config_file, backup_file, excluded_ips)
-        if changes_made:
-            try:
-                manage_service()
-                if debug >= 1:
-                    typer.echo("Service restart completed.")
-            except Exception as e:
-                raise
-    except Exception as e:
-        typer.echo(f"Error during config update: {e}", err=True)
-        raise typer.Exit(1)
-
-    typer.echo("=== Update completed successfully ===")
-
-@app.command()
-def dry_run(
-    url: str = typer.Option(
-        ..., "-u", "--url", help="Config subscription URL",
-        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"]
-    ),
-    remarks: str = typer.Option(None, "-r", "--remarks", help="Select server by remarks"),
-    index: str = typer.Option(None, "-i", "--index", help="Select server by index (comma-separated)"),
-    debug: int = typer.Option(0, "-d", "--debug", help="Debug level: 0=min, 1=info, 2=debug"),
-    config_file: str = typer.Option(None, "--config-file", help="Path to config.json (overrides env)"),
-    template_file: str = typer.Option(None, "--template-file", help="Path to config.template.json (overrides env)"),
-):
-    """Validate config and print result (no changes)."""
-    try:
-        json_data = fetch_json(url)
-    except Exception as e:
-        typer.echo(f"[Ошибка] Не удалось загрузить конфиг: {e}", err=True)
-        raise typer.Exit(1)
-
-    exclusions = load_exclusions(dry_run=True)
-    indices = []
-    if index:
-        indices = [int(i) for i in index.split(",") if i.strip().isdigit()]
-    else:
-        saved_config = load_selected_config()
-        indices = [int(item["index"]) for item in saved_config["selected"] if "index" in item]
-
-    outbounds, excluded_ips, selected_servers = prepare_selection(
-        json_data,
-        indices,
-        remarks,
-        SUPPORTED_PROTOCOLS,
-        exclusions,
-        debug_level=debug,
-        dry_run=True
-    )
-
-    # Определяем актуальные пути
-    template_file = template_file or get_template_file()
-    config_file = config_file or get_config_file()
-
-    from sboxmgr.config.generate import generate_temp_config, validate_config_file
-    import tempfile
-    typer.echo("Режим dry-run: создаём временный конфиг и валидируем его")
-    with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
-        temp_path = tmp.name
-        config_content = generate_temp_config(outbounds, template_file, excluded_ips)
-        tmp.write(config_content)
-    valid, output = validate_config_file(temp_path)
-    if valid:
-        typer.echo("Dry run: config is valid")
-    else:
-        typer.echo(f"Конфиг невалиден:\n{output}", err=True)
-    os.unlink(temp_path)
-    typer.echo("Временный файл удалён. Основной конфиг не изменён, сервис не перезапущен.")
-    raise typer.Exit(0 if valid else 1)
-
-@app.command("list-servers")
-def list_servers(
-    url: str = typer.Option(
-        ..., "-u", "--url", help="Config subscription URL",
-        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"]
-    ),
-    debug: int = typer.Option(0, "-d", "--debug", help="Debug level: 0=min, 1=info, 2=debug"),
-):
-    """List all available servers from config."""
-    try:
-        json_data = fetch_json(url)
-    except Exception as e:
-        typer.echo(f"[Ошибка] Не удалось загрузить конфиг: {e}", err=True)
-        raise typer.Exit(1)
-    do_list_servers(json_data, SUPPORTED_PROTOCOLS, debug_level=debug, dry_run=True)
-
-@app.command()
+@app.command(help=t("cli.exclusions.help"))
 def exclusions(
     url: str = typer.Option(
-        ..., "-u", "--url", help="Config subscription URL",
+        ..., "-u", "--url", help=t("cli.url.help"),
         envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"]
     ),
-    add: str = typer.Option(None, "--add", help="Add exclusions (comma-separated indices or names)"),
-    remove: str = typer.Option(None, "--remove", help="Remove exclusions (comma-separated indices or names)"),
-    view: bool = typer.Option(False, "--view", help="View current exclusions"),
-    debug: int = typer.Option(0, "-d", "--debug", help="Debug level: 0=min, 1=info, 2=debug"),
+    add: str = typer.Option(None, "--add", help=t("cli.add.help")),
+    remove: str = typer.Option(None, "--remove", help=t("cli.remove.help")),
+    view: bool = typer.Option(False, "--view", help=t("cli.view.help")),
+    debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
 ):
     """Manage exclusions: add, remove, view."""
     try:
         json_data = fetch_json(url)
     except Exception as e:
-        typer.echo(f"[Ошибка] Не удалось загрузить конфиг: {e}", err=True)
+        typer.echo(f"{lang.get('error.config_load_failed')}: {e}", err=True)
         raise typer.Exit(1)
     if view:
         view_exclusions(debug)
@@ -219,12 +77,12 @@ def exclusions(
         remove_exclusions_list = [x.strip() for x in remove.split(",") if x.strip()]
         remove_exclusions(remove_exclusions_list, json_data, SUPPORTED_PROTOCOLS, debug)
     if not (add or remove or view):
-        typer.echo("[Info] Use --add, --remove или --view для управления exclusions.")
+        typer.echo(lang.get("cli.use_add_remove_view"))
 
-@app.command("clear-exclusions")
+@app.command("clear-exclusions", help=t("cli.clear_exclusions.help"))
 def clear_exclusions(
-    confirm: bool = typer.Option(False, "--yes", help="Confirm clearing exclusions"),
-    debug: int = typer.Option(0, "-d", "--debug", help="Debug level: 0=min, 1=info, 2=debug"),
+    confirm: bool = typer.Option(False, "--yes", help=t("cli.confirm.help")),
+    debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
 ):
     """Clear all exclusions."""
     from sboxmgr.server.exclusions import clear_exclusions as do_clear_exclusions
@@ -233,6 +91,104 @@ def clear_exclusions(
         raise typer.Exit(1)
     do_clear_exclusions()
     typer.echo("All exclusions cleared.")
+
+@app.command("lang")
+def lang_cmd(
+    set_lang: str = typer.Option(None, "--set", "-s", help=lang.get_with_fallback("cli.lang.set.help")),
+    check: bool = typer.Option(False, "--check", help=lang.get_with_fallback("cli.lang.check.help")),
+):
+    """
+    Manage CLI language (i18n): show current, list available, set and persist language.
+    """
+    config_path = Path.home() / ".sboxmgr" / "config.toml"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def detect_lang_source():
+        if os.environ.get("SBOXMGR_LANG"):
+            return os.environ["SBOXMGR_LANG"], "env (SBOXMGR_LANG)"
+        if config_path.exists():
+            try:
+                import toml
+                cfg = toml.load(config_path)
+                if "default_lang" in cfg:
+                    return cfg["default_lang"], f"config ({config_path})"
+            except Exception as e:
+                typer.echo(f"[Warning] Failed to read {config_path}: {e}. Falling back to system LANG.", err=True)
+        sys_lang = locale.getdefaultlocale()[0]
+        if sys_lang:
+            return sys_lang.split("_")[0], "system LANG"
+        return "en", "default"
+
+    if set_lang:
+        loader = LanguageLoader()
+        if not loader.exists(set_lang):
+            typer.echo(f"Language '{set_lang}' not found in i18n folder.")
+            typer.echo(f"Available: {', '.join(loader.list_languages())}")
+            raise typer.Exit(1)
+        try:
+            import toml
+            with open(config_path, "w") as f:
+                toml.dump({"default_lang": set_lang}, f)
+            typer.echo(f"Language set to '{set_lang}' and persisted in {config_path}.")
+        except Exception as e:
+            typer.echo(f"[Error] Failed to write config: {e}", err=True)
+            raise typer.Exit(1)
+    else:
+        lang_code, source = detect_lang_source()
+        loader = LanguageLoader(lang_code)
+        typer.echo(f"Current language: {lang_code} (source: {source})")
+        if source in ("system LANG", "default"):
+            # Двуязычный вывод help и notice
+            en_loader = LanguageLoader("en")
+            local_loader = loader if lang_code != "en" else None
+            typer.echo("--- English ---")
+            typer.echo(en_loader.get("cli.lang.help"))
+            typer.echo(en_loader.get("cli.lang.bilingual_notice"))
+            if local_loader:
+                typer.echo("--- Русский ---" if lang_code == "ru" else f"--- {lang_code.upper()} ---")
+                typer.echo(local_loader.get("cli.lang.help"))
+                typer.echo(local_loader.get("cli.lang.bilingual_notice"))
+        else:
+            typer.echo(loader.get("cli.lang.help"))
+        # --- Вывод языков с самоназванием и пометками ---
+        LANG_NAMES = {
+            "en": "English",
+            "ru": "Русский",
+            "de": "Deutsch",
+            "zh": "中文",
+            "fa": "فارسی",
+            "tr": "Türkçe",
+            "uk": "Українська",
+            "es": "Español",
+            "fr": "Français",
+            "ar": "العربية",
+            "pl": "Polski",
+        }
+        langs = loader.list_languages()
+        langs_out = []
+        for code in langs:
+            name = LANG_NAMES.get(code, code)
+            ai = " [AI]" if is_ai_lang(code) else ""
+            langs_out.append(f"  {code} - {name}{ai}")
+        typer.echo("Available languages:")
+        for l in langs_out:
+            typer.echo(l)
+        if any(is_ai_lang(code) for code in langs):
+            typer.echo("Note: [AI] = machine-translated, not reviewed. Contributions welcome!")
+        typer.echo(f"To set language persistently: sboxctl lang --set ru")
+        typer.echo(f"Or for one-time use: SBOXMGR_LANG=ru sboxctl ...")
+
+app.command("plugin-template")(plugin_template.plugin_template)
+
+# Регистрируем команды из commands/subscription.py
+from sboxmgr.cli.commands.subscription import run as subscription_run, dry_run as subscription_dry_run, list_servers as subscription_list_servers
+app.command("run", help=t("cli.run.help"))(subscription_run)
+app.command()(subscription_dry_run) 
+app.command("list-servers", help=t("cli.list_servers.help"))(subscription_list_servers)
+
+# Регистрируем новую команду exclusions_v2
+from sboxmgr.cli.commands.exclusions_v2 import exclusions_v2
+app.command("exclusions-v2")(exclusions_v2)
 
 if __name__ == "__main__":
     app() 

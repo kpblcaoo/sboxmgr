@@ -1,0 +1,32 @@
+# Example URI list with edge-cases
+# ss:// as base64
+ss://YWVzLTI1Ni1nY206cGFzc3dvcmRAMTI3LjAuMC4xOjgw  # pragma: allowlist secret
+# ss:// as URI
+ss://aes-256-gcm:password123@127.0.0.1:8388#RU-SS  # pragma: allowlist secret
+# ss:// with query params
+ss://YWVzLTI1Ni1nY206cGFzc3dvcmRAMTI3LjAuMC4xOjgw?plugin=obfs-local;obfs=http;obfs-host=example.com#ObfsSS  # pragma: allowlist secret
+# trojan:// with query and tag
+trojan://password@host:443?security=tls&sni=example.com#TrojanTLS  # pragma: allowlist secret
+# vless:// with flow, udp, ws-path
+vless://uuid@host:443?encryption=none&flow=xtls-rprx-vision&udp=1&path=%2Fws#VLESS-WS  # pragma: allowlist secret
+# vmess:// with ws-path and emoji
+vmess://eyJhZGQiOiJ2bWVzcy5leGFtcGxlLmNvbSIsInBvcnQiOiI0NDMiLCJzZWN1cml0eSI6ImF1dG8iLCJ1dWlkIjoiMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAiLCJwYXRoIjoiL3dzIiwidGFnIjoi8J+YgFZNRVNTLVdTIn0=  # pragma: allowlist secret
+# Unicode/emoji in user/tag
+ss://YWVzLTI1Ni1nY2068J+YgFBlbW9qaUBleGFtcGxlLmNvbTo4Mzg4#EmojiUser  # pragma: allowlist secret
+# Mixed protocols
+ss://YWVzLTI1Ni1nY206cGFzc3dvcmRAMTI3LjAuMC4xOjgw  # pragma: allowlist secret
+vless://uuid@host:443?encryption=none#MixVLESS  # pragma: allowlist secret
+vmess://eyJhZGQiOiJ2bWVzcy5leGFtcGxlLmNvbSIsInBvcnQiOiI0NDMiLCJzZWN1cml0eSI6ImF1dG8iLCJ1dWlkIjoiMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAifQ==  # pragma: allowlist secret
+trojan://password@host:443#MixTrojan  # pragma: allowlist secret
+# Escaped characters and spaces
+ss://YWVzLTI1Ni1nY206cGFzcyB3b3JkQDEyNy4wLjAuMTo4MDA=#SpaceInPassword  # pragma: allowlist secret
+# Very long line (truncated for brevity)
+ss://YWVzLTI1Ni1nY206cGFzc3dvcmRAMTI3LjAuMC4xOjgw?plugin=obfs-local;obfs=http;obfs-host=example.com#LongLine  # pragma: allowlist secret
+# Empty line
+
+# Only comments
+# just a comment
+# another comment
+# Only invalid lines
+not_a_valid_uri
+12345 

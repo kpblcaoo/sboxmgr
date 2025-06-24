@@ -3,7 +3,22 @@ repos:
     rev: v1.5.0
     hooks:
       - id: detect-secrets
+        args:
+          - "--baseline"
+          - ".secrets.baseline"
+          - "--exclude-files"
+          - "^\\.secrets\\.baseline$"
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-      - id: check-added-large-files 
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: check-i18n
+        name: Check i18n keys
+        entry: python scripts/i18n/sync_keys.py --check --fail-on-missing --fail-on-unused
+        language: system
+        files: ^src/
+        pass_filenames: false

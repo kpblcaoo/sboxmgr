@@ -19,6 +19,56 @@ A Python CLI tool for automating and managing [sing-box](https://sing-box.sagern
 - All paths and artifacts are configurable via environment variables
 - Modular architecture, fully tested with pytest + Typer.CliRunner
 
+## Pipeline Architecture
+
+The pipeline is built on a modular architecture with plugin support for fetcher, parser, exporter, selector, postprocessor, and middleware. All stages are covered by fail-tolerance, caching, i18n, edge tests, and best practices.
+
+```mermaid
+flowchart TD
+    A[Fetcher] --> B[Raw Validator]
+    B --> C[Parser]
+    C --> D[PostProcessorChain]
+    D --> E[MiddlewareChain]
+    E --> F[Selector]
+    F --> G[Exporter]
+    G --> H[Config Output]
+    
+    subgraph Context
+      X[PipelineContext] 
+    end
+    X -.-> A
+    X -.-> D
+    X -.-> E
+    X -.-> F
+    X -.-> G
+    
+    subgraph ErrorHandling
+      Y[Error Reporter]
+    end
+    Y -.-> A
+    Y -.-> B
+    Y -.-> C
+    Y -.-> D
+    Y -.-> E
+    Y -.-> F
+    Y -.-> G
+    
+    style X fill:#f9f,stroke:#333,stroke-width:2px
+    style Y fill:#ff9,stroke:#333,stroke-width:2px
+    
+    classDef main fill:#bbf,stroke:#333,stroke-width:2px;
+    class A,B,C,D,E,F,G,H main;
+```
+
+- **DX/CLI generator**: plugin template generator (fetcher, parser, exporter, postprocessor, validator) with tests and best practices.
+- **i18n**: multilingual CLI, fallback, sanitization, automated sync_keys.py, edge tests.
+- **Middleware**: extensible middleware chain with edge tests, logging, fail-tolerance.
+- **Caching**: in-memory cache for SubscriptionManager and fetcher, force_reload support.
+- **Fail-tolerance**: partial_success, strict/tolerant modes, Error Reporter, edge test coverage.
+- **Coverage**: >90% test coverage, dedicated edge tests for all pipeline layers.
+- **Best practices**: modular architecture, Google-style docstrings, auto-documentation, SEC checklists, DX utilities.
+- **SEC validation for inbounds**: all inbounds are validated via pydantic (V2): bind only to localhost/private, ports 1024-65535, external bind requires explicit confirmation, edge tests, see cli_security.md for profile example.
+
 ---
 
 ## 🚀 Quick start
@@ -47,6 +97,24 @@ cp .env.example .env  # Edit as needed
 ```
 
 Requirements: Python 3.10+, sing-box, requests[socks], python-dotenv
+
+### Sing-box Version Compatibility
+
+**Recommended:** sing-box 1.11.0 or higher
+
+- **sing-box 1.11.0+**: Full support with modern rule actions syntax
+- **sing-box < 1.11.0**: Automatic compatibility mode with legacy special outbounds (`block`, `dns`)
+
+The tool automatically detects your sing-box version and adapts the configuration format:
+- For newer versions: Uses modern `rule actions` (recommended)
+- For older versions: Falls back to legacy `special outbounds` for compatibility
+
+To skip version checking (not recommended):
+```bash
+sboxctl run -u <url> --skip-version-check
+```
+
+⚠️ **Note**: Legacy special outbounds are deprecated and will be removed in sing-box 1.13.0. Please update to sing-box 1.11.0+ for best experience.
 
 ---
 
@@ -160,6 +228,35 @@ Contributions are welcome! Fork, make changes, and submit a Pull Request.
 ## 📜 License
 
 This project is licensed under the terms of the MIT License. See the LICENSE file for details.
+
+## Расширение: плагины и генератор шаблонов
+
+Для быстрого старта новых fetcher, parser, exporter, postprocessor, validator используйте CLI-генератор шаблонов:
+
+- Примеры команд, шаблонов и best practices см. в [docs/plugins/README.md](docs/plugins/README.md)
+- Генератор: `sboxctl plugin-template <type> <ClassName> --output-dir ./src/sboxmgr/subscription/<type>s/`
+
+Это ускоряет разработку, стандартизирует docstring и тесты, облегчает онбординг новых контрибьюторов.
+
+## Edge-case coverage
+
+- Все ключевые edge-cases пайплайна покрыты тестами (см. [docs/tests/edge_cases.md](docs/tests/edge_cases.md)).
+- Для каждого слоя (fetch, parse, postprocess, middleware, export, i18n, DX/CLI) есть отдельные edge-тесты.
+- Критичные SEC edge-cases:
+  - Parser: вредоносный payload (инъекции, DoS, eval)
+  - Fetcher: нестандартные схемы (ftp://, data://, chrome-extension://)
+  - Middleware: unsafe hook/external command (sandbox, privilege escalation)
+  - Postprocessor: внешний enrichment без таймаута/валидации
+- Поведение пайплайна при ошибках: partial_success, fallback, логирование, пайплайн не падает.
+- См. также: sec_checklist.md, tests/edge/README.md
+
+## Best Practices & Security
+
+- The project implements multi-layer SEC validation, fail-tolerant pipeline, and a plugin-based architecture.
+- For details on security, threat model, and checklists, see:
+  - [Security Model](docs/security.md)
+  - [SEC Checklist](docs/sec_checklist.md)
+  - [Architecture](docs/arch/)
 
 
 

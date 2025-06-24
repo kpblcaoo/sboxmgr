@@ -1,0 +1,20 @@
+{
+  "outbounds": [
+    {
+      "type": "vmess",
+      "tag": "proxy-1",
+      "server": "example.com",
+      "server_port": 443,
+      "uuid": "example-uuid",
+      "security": "auto"
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "proxy-2",
+      "server": "ss.example.net",
+      "server_port": 8388,
+      "method": "aes-256-gcm",
+      "password": "placeholder-password"
+    }
+  ]
+} 

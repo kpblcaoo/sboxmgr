@@ -294,3 +294,36 @@
 ## [1.5.0] - 2025-xx-xx
 ### Changed
 - License changed from GPLv3 to MIT License (full project relicensing).
+
+### Fixed
+- **sing-box 1.11.0+ Compatibility**: Updated sing-box exporter to remove deprecated legacy special outbounds (`block`, `dns`) and replaced them with modern rule actions (`hijack-dns`) as per sing-box 1.11.0+ requirements
+- **Configuration Template**: Updated config template to use `action: "hijack-dns"` instead of deprecated `outbound: "dns-out"` for DNS protocol rules
+- **Tests**: Updated test expectations to reflect removal of deprecated outbounds
+
+### Technical Details
+- Removed automatic generation of `{"type": "block", "tag": "block"}` and `{"type": "dns", "tag": "dns-out"}` outbounds
+- Updated route rules to use rule actions instead of special outbounds
+- DNS protocol routing now uses `"action": "hijack-dns"` instead of `"outbound": "dns-out"`
+- Maintains backward compatibility with sing-box versions that support the new syntax
+
+### Added
+- **Sing-box Version Compatibility**: Automatic version detection and graceful degradation for sing-box < 1.11.0
+  - Detects installed sing-box version automatically
+  - Uses modern rule actions syntax for sing-box 1.11.0+
+  - Falls back to legacy special outbounds for older versions
+  - Shows compatibility warnings for outdated versions
+  - Added `--skip-version-check` option to bypass version checking
+- **Version Utilities**: New `sboxmgr.utils.version` module with version checking functions
+
+### Fixed
+- **sing-box 1.11.0+ Compatibility**: Updated sing-box exporter to remove deprecated legacy special outbounds (`block`, `dns`) and replaced them with modern rule actions as per sing-box 1.11.0+ requirements
+- **Configuration Template**: Updated config template to use `action: \"hijack-dns\"` instead of deprecated `outbound: \"dns-out\"` for DNS protocol rules
+- **Tests**: Updated test expectations to reflect removal of deprecated outbounds
+
+### Technical Details
+- Removed automatic generation of `{\"type\": \"block\", \"tag\": \"block\"}` and `{\"type\": \"dns\", \"tag\": \"dns-out\"}` outbounds for sing-box 1.11.0+
+- Added automatic legacy outbound generation for sing-box < 1.11.0 compatibility
+- Updated route rules to use rule actions instead of special outbounds
+- DNS protocol routing now uses `\"action\": \"hijack-dns\"` instead of `\"outbound\": \"dns-out\"` for modern versions
+- Added `packaging` dependency for version comparison
+- Version checking integrated into CLI commands (`run`, `dry-run`) with debug output
