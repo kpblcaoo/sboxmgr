@@ -1,8 +1,5 @@
 from ..registry import register
 from ..base_exporter import BaseExporter
-
-
-@register("custom_exporter")
 class ClashExporter(BaseExporter):
     """ClashExporter exports parsed servers to config.
 

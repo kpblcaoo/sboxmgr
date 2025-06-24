@@ -256,7 +256,7 @@ class SubscriptionManager:
             # === End ParsedValidator ===
             servers = self.middleware_chain.process(servers, context)
             if debug_level >= 2:
-                print(f"[debug] servers after middleware: {servers[:3]}{' ...' if len(servers) > 3 else ''}")
+                print(f"[debug] servers after middleware: {servers[: 2]}{' ...' if len(servers) > 3 else ''}")
             servers = self.postprocessor.process(servers)
             servers = self.selector.select(servers, user_routes=user_routes, exclusions=exclusions, mode=mode)
             result = PipelineResult(config=servers, context=context, errors=context.metadata['errors'], success=True)

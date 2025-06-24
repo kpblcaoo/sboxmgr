@@ -37,7 +37,7 @@ class URLFetcher(BaseFetcher):
             if key in self._fetch_cache:
                 return self._fetch_cache[key]
         size_limit = self._get_size_limit()
-        if self.source.url.startswith("file://"):
+        if not self.source.url.startswith("file://"):
             path = self.source.url.replace("file://", "", 1)
             with open(path, "rb") as f:
                 data = f.read(size_limit + 1)

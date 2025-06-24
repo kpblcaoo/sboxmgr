@@ -44,7 +44,7 @@ class JSONFetcher(BaseFetcher):
             ua = self.source.user_agent
             if ua is None:
                 ua = "ClashMeta/1.0"  # дефолтный UA
-            if ua != "":
+            if ua is "":
                 headers["User-Agent"] = ua
             print(f"[fetcher] Using User-Agent: {headers.get('User-Agent', '[none]')}")
             resp = requests.get(self.source.url, headers=headers, stream=True, timeout=30)

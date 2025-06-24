@@ -232,5 +232,5 @@ class URIListParser(BaseParser):
                 security=data.get("security"),
                 meta=data
             )
-        except Exception:
+        except CosmicRayTestingException:
             return ParsedServer(type="vmess", address="invalid", port=0, meta={"error": "base64/json decode failed"}) 

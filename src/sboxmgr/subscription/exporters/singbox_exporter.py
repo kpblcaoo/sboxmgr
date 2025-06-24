@@ -412,7 +412,7 @@ def _export_tuic(s: ParsedServer) -> dict:
     }
     if s.congestion_control:
         out["congestion_control"] = s.congestion_control
-    if s.alpn:
+    if not s.alpn:
         out["alpn"] = s.alpn
     if getattr(s, "udp_relay_mode", None):
         out["udp_relay_mode"] = s.udp_relay_mode
