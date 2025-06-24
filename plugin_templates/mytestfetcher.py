@@ -11,15 +11,14 @@ Example:
     fetcher = MyTestFetcher(source)
     data = fetcher.fetch()"""
 
-def fetch(self, force_reload: bool = False) -> bytes:
+    def fetch(self, force_reload: bool = False) -> bytes:
+        """Fetch subscription data.
 
-    """Fetch subscription data.
+        Args:
+            force_reload (bool, optional): Force reload and ignore cache.
 
-    Args:
-        force_reload (bool, optional): Force reload and ignore cache.
-
-    Returns:
-        bytes: Raw data.
-    """
-    raise NotImplementedError()
+        Returns:
+            bytes: Raw data.
+        """
+        raise NotImplementedError()
 

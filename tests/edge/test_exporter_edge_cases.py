@@ -43,7 +43,7 @@ def test_too_long_values():
         assert len(str(outbound.get("server", ""))) <= 1000
         assert len(str(outbound.get("tag", ""))) <= 1000
 
-def test_failtolerance_skip_unsupported_type(capsys):
+def test_failtolerance_skip_unsupported_type(caplog):
     """Если среди ParsedServer есть unsupported type или неполные поля, он скипается, partial config генерируется, warning выводится."""
     servers = [
         ParsedServer(type="vmess", address="ok.com", port=443, meta={}),
@@ -58,10 +58,9 @@ def test_failtolerance_skip_unsupported_type(capsys):
     for outbound in config["outbounds"]:
         assert outbound["type"] != "wireguard"
     # Проверяем warning
-    captured = capsys.readouterr()
-    assert "Incomplete wireguard fields" in captured.out
+    assert "Incomplete wireguard fields" in caplog.text
 
-def test_export_wireguard_success(capsys):
+def test_export_wireguard_success(caplog):
     servers = [ParsedServer(type="wireguard", address="1.2.3.4", port=51820, private_key="priv", peer_public_key="pub", local_address=["10.0.0.2/32"], tag="wg1")]
     config = singbox_export(servers, routes=[])
     assert "wireguard" in str(config)
@@ -69,71 +68,63 @@ def test_export_wireguard_success(capsys):
     assert "priv" in str(config)
     assert "pub" in str(config)
     assert "10.0.0.2" in str(config)
-    captured = capsys.readouterr()
-    assert "WARN" not in captured.out
+    assert "WARN" not in caplog.text
 
-def test_export_wireguard_missing_fields(capsys):
+def test_export_wireguard_missing_fields(caplog):
     servers = [ParsedServer(type="wireguard", address="1.2.3.4", port=51820)]
     config = singbox_export(servers, routes=[])
     assert "wireguard" not in str(config)
-    captured = capsys.readouterr()
-    assert "Incomplete wireguard fields" in captured.out
+    assert "Incomplete wireguard fields" in caplog.text
 
-def test_export_hysteria2_success(capsys):
+def test_export_hysteria2_success(caplog):
     servers = [ParsedServer(type="hysteria2", address="h.com", port=443, password="pw", tag="hyst2")]
     config = singbox_export(servers, routes=[])
     assert "hysteria2" in str(config)
     assert "h.com" in str(config)
     assert "pw" in str(config)
-    captured = capsys.readouterr()
-    assert "WARN" not in captured.out
+    assert "WARN" not in caplog.text
 
-def test_export_tuic_success(capsys):
+def test_export_tuic_success(caplog):
     servers = [ParsedServer(type="tuic", address="t.com", port=443, uuid="uuid", password="pw", tag="tuic1")]
     config = singbox_export(servers, routes=[])
     assert "tuic" in str(config)
     assert "t.com" in str(config)
     assert "uuid" in str(config)
     assert "pw" in str(config)
-    captured = capsys.readouterr()
-    assert "WARN" not in captured.out
+    assert "WARN" not in caplog.text
 
-def test_export_shadowtls_success(capsys):
+def test_export_shadowtls_success(caplog):
     servers = [ParsedServer(type="shadowtls", address="s.com", port=443, password="pw", version=3, tag="stls")]
     config = singbox_export(servers, routes=[])
     assert "shadowtls" in str(config)
     assert "s.com" in str(config)
     assert "pw" in str(config)
     assert "3" in str(config)
-    captured = capsys.readouterr()
-    assert "WARN" not in captured.out
+    assert "WARN" not in caplog.text
 
-def test_export_anytls_success(capsys):
+def test_export_anytls_success(caplog):
     servers = [ParsedServer(type="anytls", address="a.com", port=443, uuid="uuid", tag="anytls")]
     config = singbox_export(servers, routes=[])
     assert "anytls" in str(config)
     assert "a.com" in str(config)
     assert "uuid" in str(config)
-    captured = capsys.readouterr()
-    assert "WARN" not in captured.out
+    assert "WARN" not in caplog.text
 
-def test_export_tor_success(capsys):
+def test_export_tor_success(caplog):
     servers = [ParsedServer(type="tor", address="127.0.0.1", port=9050, tag="tor1")]
     config = singbox_export(servers, routes=[])
     assert "tor" in str(config)
     assert "127.0.0.1" in str(config)
-    captured = capsys.readouterr()
-    assert "WARN" not in captured.out
+    assert "WARN" not in caplog.text
 
-def test_export_ssh_success(capsys):
+def test_export_ssh_success(caplog):
     servers = [ParsedServer(type="ssh", address="ssh.com", port=22, username="user", password="pw", tag="ssh1")]
     config = singbox_export(servers, routes=[])
     assert "ssh" in str(config)
     assert "ssh.com" in str(config)
     assert "user" in str(config)
     assert "pw" in str(config)
-    captured = capsys.readouterr()
-    assert "WARN" not in captured.out
+    assert "WARN" not in caplog.text
 
 def test_postprocessor_chain_dedup_and_filter():
     # Дубликаты и порты

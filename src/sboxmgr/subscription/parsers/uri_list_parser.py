@@ -1,4 +1,5 @@
 import base64
+import logging
 import re
 from typing import List
 from urllib.parse import urlparse, parse_qs, unquote
@@ -6,6 +7,8 @@ from ..models import ParsedServer
 from ..base_parser import BaseParser
 from sboxmgr.utils.env import get_debug_level
 from ..registry import register
+
+logger = logging.getLogger(__name__)
 
 @register("parser_uri_list")
 class URIListParser(BaseParser):
@@ -23,7 +26,7 @@ class URIListParser(BaseParser):
                     servers.append(ss)
                 else:
                     if debug_level > 0:
-                        print(f"[WARN] Failed to parse ss:// line: {line}")
+                        logger.warning(f"Failed to parse ss:// line: {line}")
             elif line.startswith('vless://'):
                 servers.append(self._parse_vless(line))
             elif line.startswith('vmess://'):
@@ -34,10 +37,10 @@ class URIListParser(BaseParser):
                     servers.append(trojan)
                 else:
                     if debug_level > 0:
-                        print(f"[WARN] Failed to parse trojan:// line: {line}")
+                        logger.warning(f"Failed to parse trojan:// line: {line}")
             else:
                 if debug_level > 0:
-                    print(f"[WARN] Ignored line in uri list: {line}")
+                    logger.warning(f"Ignored line in uri list: {line}")
                 servers.append(ParsedServer(type="unknown", address=line, port=0))
         return servers
 
@@ -69,17 +72,24 @@ class URIListParser(BaseParser):
                     method_pass, host_port = decoded.split('@', 1)
                 else:
                     if debug_level > 0:
-                        print(f"[WARN] ss:// no host in line: {line}")
+                        logger.warning(f"ss:// no host in line: {line}")
                     return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "no host in ss://"})
-            if ':' not in method_pass or ':' not in host_port:
+            if ':' not in method_pass:
                 if debug_level > 0:
-                    print(f"[WARN] ss:// parse failed (no colon): {line}")
+                    logger.warning(f"ss:// parse failed (no colon in method:pass): {line}")
                 return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "parse failed"})
+            
+            # host_port всегда содержит ':', так как мы проверили это выше
             method, password = method_pass.split(':', 1)
-            if ':' in host_port:
-                host, port = host_port.split(':', 1)
-            else:
-                host, port = host_port, 0
+            host, port_str = host_port.split(':', 1)
+            
+            try:
+                port = int(port_str)
+            except ValueError:
+                if debug_level > 0:
+                    logger.warning(f"ss:// invalid port: {port_str} in line: {line}")
+                return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "invalid port"})
+            
             meta = {"password": password}  # pragma: allowlist secret
             if tag:
                 meta["tag"] = tag
@@ -88,7 +98,7 @@ class URIListParser(BaseParser):
             return ParsedServer(
                 type="ss",
                 address=host,
-                port=int(port),
+                port=port,
                 security=method,
                 meta=meta
             )
@@ -109,7 +119,7 @@ class URIListParser(BaseParser):
                     meta=meta
                 )
             if debug_level > 0:
-                print(f"[WARN] ss:// totally failed to parse: {line} ({e})")
+                logger.warning(f"ss:// totally failed to parse: {line} ({e})")
             return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "parse failed"})
 
     def _parse_trojan(self, line: str) -> ParsedServer:

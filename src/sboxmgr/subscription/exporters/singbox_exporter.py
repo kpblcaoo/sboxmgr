@@ -1,9 +1,12 @@
 import json
+import logging
 from typing import List, Optional, Dict, Any
 from ..models import ParsedServer, ClientProfile, InboundProfile
 from ..base_exporter import BaseExporter
 from ..registry import register
 from ...utils.version import should_use_legacy_outbounds
+
+logger = logging.getLogger(__name__)
 
 def kebab_to_snake(d):
     if not isinstance(d, dict):
@@ -64,14 +67,14 @@ def singbox_export(
     use_legacy = False if skip_version_check else should_use_legacy_outbounds(singbox_version)
     
     if use_legacy and singbox_version:
-        print(f"[singbox_exporter] Using legacy outbounds for sing-box {singbox_version} compatibility")
+        logger.warning(f"Using legacy outbounds for sing-box {singbox_version} compatibility")
     
     for s in servers:
         out_type = s.type
         if out_type == "ss":
             out_type = "shadowsocks"
         if out_type not in supported_types:
-            print(f"[singbox_exporter][WARN] Unsupported outbound type: {s.type}, skipping {s.address}:{s.port}")
+            logger.warning(f"Unsupported outbound type: {s.type}, skipping {s.address}:{s.port}")
             continue
         if out_type == "wireguard":
             outbound = _export_wireguard(s)
@@ -118,7 +121,7 @@ def singbox_export(
         if out_type == "shadowsocks":
             method = meta.get("cipher") or meta.get("method") or s.security
             if not method:
-                print(f"[singbox_exporter] WARNING: shadowsocks outbound without method/cipher, skipping: {s.address}:{s.port}")
+                logger.warning(f"WARNING: shadowsocks outbound without method/cipher, skipping: {s.address}:{s.port}")
                 continue
             out["method"] = method
         # Transport (ws, grpc, etc)
@@ -202,7 +205,7 @@ def _export_wireguard(s: ParsedServer) -> dict:
     """
     required = [s.address, s.port, s.private_key, s.peer_public_key, s.local_address]
     if not all(required):
-        print(f"[singbox_exporter][WARN] Incomplete wireguard fields, skipping: {s.address}:{s.port}")
+        logger.warning(f"Incomplete wireguard fields, skipping: {s.address}:{s.port}")
         return None
     out = {
         "type": "wireguard",
@@ -231,7 +234,7 @@ def _export_tuic(s: ParsedServer) -> dict:
     """
     required = [s.address, s.port, s.uuid, s.password]
     if not all(required):
-        print(f"[singbox_exporter][WARN] Incomplete tuic fields, skipping: {s.address}:{s.port}")
+        logger.warning(f"Incomplete tuic fields, skipping: {s.address}:{s.port}")
         return None
     out = {
         "type": "tuic",
@@ -261,7 +264,7 @@ def _export_shadowtls(s: ParsedServer) -> dict:
     """
     required = [s.address, s.port, s.password, s.version]
     if not all(required):
-        print(f"[singbox_exporter][WARN] Incomplete shadowtls fields, skipping: {s.address}:{s.port}")
+        logger.warning(f"Incomplete shadowtls fields, skipping: {s.address}:{s.port}")
         return None
     out = {
         "type": "shadowtls",
@@ -287,7 +290,7 @@ def _export_anytls(s: ParsedServer) -> dict:
     """
     required = [s.address, s.port, s.uuid]
     if not all(required):
-        print(f"[singbox_exporter][WARN] Incomplete anytls fields, skipping: {s.address}:{s.port}")
+        logger.warning(f"Incomplete anytls fields, skipping: {s.address}:{s.port}")
         return None
     out = {
         "type": "anytls",
@@ -310,7 +313,7 @@ def _export_tor(s: ParsedServer) -> dict:
     """
     required = [s.address, s.port]
     if not all(required):
-        print(f"[singbox_exporter][WARN] Incomplete tor fields, skipping: {s.address}:{s.port}")
+        logger.warning(f"Incomplete tor fields, skipping: {s.address}:{s.port}")
         return None
     out = {
         "type": "tor",
@@ -330,7 +333,7 @@ def _export_ssh(s: ParsedServer) -> dict:
     """
     required = [s.address, s.port, s.username]
     if not all(required):
-        print(f"[singbox_exporter][WARN] Incomplete ssh fields, skipping: {s.address}:{s.port}")
+        logger.warning(f"Incomplete ssh fields, skipping: {s.address}:{s.port}")
         return None
     out = {
         "type": "ssh",
@@ -351,7 +354,7 @@ def _export_ssh(s: ParsedServer) -> dict:
 def _export_hysteria2(server):
     required = [server.address, server.port, server.password]
     if not all(required):
-        print(f"[singbox_exporter][WARN] Incomplete hysteria2 fields, skipping: {server.address}:{server.port}")
+        logger.warning(f"Incomplete hysteria2 fields, skipping: {server.address}:{server.port}")
         return None
     return {
         "type": "hysteria2",
