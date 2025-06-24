@@ -35,6 +35,17 @@ app = typer.Typer(help=lang.get("cli.help"))
 SUPPORTED_PROTOCOLS = {"vless", "shadowsocks", "vmess", "trojan", "tuic", "hysteria2"}
 
 def is_ai_lang(code):
+    """Check if language is AI-generated based on metadata.
+    
+    Examines the language file's metadata to determine if it contains
+    AI-generated translations that may need human review.
+    
+    Args:
+        code: Language code to check (e.g., 'en', 'ru', 'de').
+        
+    Returns:
+        True if language is marked as AI-generated, False otherwise.
+    """
     import json
     from pathlib import Path
     i18n_dir = Path(__file__).parent.parent / "i18n"
@@ -61,7 +72,22 @@ def exclusions(
     view: bool = typer.Option(False, "--view", help=t("cli.view.help")),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
 ):
-    """Manage exclusions: add, remove, view."""
+    """Manage server exclusions for subscription filtering.
+    
+    Provides functionality to add, remove, and view server exclusions
+    for subscription-based proxy configurations. Exclusions are persistent
+    and apply to all subscription processing operations.
+    
+    Args:
+        url: Subscription URL to fetch server list from.
+        add: Comma-separated list of servers to exclude.
+        remove: Comma-separated list of servers to remove from exclusions.
+        view: Display current exclusions without modification.
+        debug: Debug verbosity level (0-2).
+        
+    Raises:
+        typer.Exit: On configuration load failure or invalid operations.
+    """
     try:
         json_data = fetch_json(url)
     except Exception as e:
@@ -84,7 +110,19 @@ def clear_exclusions(
     confirm: bool = typer.Option(False, "--yes", help=t("cli.confirm.help")),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
 ):
-    """Clear all exclusions."""
+    """Clear all server exclusions with confirmation.
+    
+    Removes all exclusion entries from the exclusion database. This operation
+    is irreversible and requires explicit confirmation via the --yes flag
+    for safety.
+    
+    Args:
+        confirm: Explicit confirmation flag to proceed with clearing.
+        debug: Debug verbosity level (0-2).
+        
+    Raises:
+        typer.Exit: If confirmation is not provided.
+    """
     from sboxmgr.server.exclusions import clear_exclusions as do_clear_exclusions
     if not confirm:
         typer.echo("[Warning] Use --yes to confirm clearing all exclusions.")
@@ -97,8 +135,24 @@ def lang_cmd(
     set_lang: str = typer.Option(None, "--set", "-s", help=lang.get_with_fallback("cli.lang.set.help")),
     check: bool = typer.Option(False, "--check", help=lang.get_with_fallback("cli.lang.check.help")),
 ):
-    """
-    Manage CLI language (i18n): show current, list available, set and persist language.
+    """Manage CLI internationalization language settings.
+    
+    Provides language management functionality including displaying current
+    language, listing available languages, and persistently setting the
+    preferred language for CLI output.
+    
+    The language priority is:
+    1. SBOXMGR_LANG environment variable
+    2. Configuration file setting (~/.sboxmgr/config.toml)
+    3. System locale (LANG)
+    4. Default (English)
+    
+    Args:
+        set_lang: Language code to set as default (e.g., 'en', 'ru', 'de').
+        check: Display current language information without modification.
+        
+    Raises:
+        typer.Exit: If specified language is not available or config write fails.
     """
     config_path = Path.home() / ".sboxmgr" / "config.toml"
     config_path.parent.mkdir(parents=True, exist_ok=True)

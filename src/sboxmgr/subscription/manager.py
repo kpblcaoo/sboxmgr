@@ -14,6 +14,24 @@ import functools
 import threading
 
 def detect_parser(raw: bytes, source_type: str) -> Optional[object]:
+    """Detect the appropriate parser for subscription data.
+    
+    Attempts to identify the correct parser based on data format analysis
+    and source type hints. Uses various heuristics including content
+    inspection, format detection, and fallback strategies.
+    
+    Args:
+        raw: Raw subscription data to analyze.
+        source_type: Hint about the expected source type.
+        
+    Returns:
+        Parser instance capable of handling the data format, or None if
+        no suitable parser could be determined.
+        
+    Note:
+        Falls back to Base64Parser if no specific parser is detected,
+        as this handles the most common subscription format.
+    """
     text = raw[:2000].decode('utf-8', errors='ignore').lstrip()
     # 1. Пробуем tolerant JSON
     from .parsers.json_parser import TolerantJSONParser, JSONParser
@@ -52,17 +70,44 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[object]:
     return Base64Parser()
 
 class SubscriptionManager:
+    """Manages subscription data processing pipeline.
+    
+    This class orchestrates the complete subscription processing workflow
+    including fetching, validation, parsing, middleware processing, and
+    server selection. It provides a unified interface for handling various
+    subscription formats and sources with comprehensive error handling
+    and caching support.
+    
+    The pipeline stages are:
+    1. Fetch raw data from source
+    2. Validate raw data
+    3. Parse into server configurations  
+    4. Apply middleware transformations
+    5. Post-process and deduplicate
+    6. Select servers based on criteria
+    
+    Attributes:
+        fetcher: Plugin for fetching subscription data.
+        postprocessor: Chain of post-processing plugins.
+        middleware_chain: Chain of middleware plugins.
+        selector: Server selection strategy.
+        detect_parser: Function for auto-detecting parsers.
+    """
+    
     _cache_lock = threading.Lock()
     _get_servers_cache = {}
 
     def __init__(self, source: SubscriptionSource, detect_parser=None, postprocessor_chain=None, middleware_chain=None):
-        """Инициализация менеджера подписок.
+        """Initialize subscription manager with configuration.
 
         Args:
-            source (SubscriptionSource): Описание источника подписки.
-            detect_parser (callable, optional): Функция для auto-detect парсера.
-            postprocessor_chain (BasePostProcessor, optional): Цепочка postprocessor-плагинов (по умолчанию DedupPostProcessor).
-            middleware_chain (BaseMiddleware, optional): Цепочка middleware (по умолчанию пустая).
+            source: Subscription source configuration.
+            detect_parser: Optional custom parser detection function.
+            postprocessor_chain: Optional custom post-processor chain.
+            middleware_chain: Optional custom middleware chain.
+            
+        Raises:
+            ValueError: If source_type is unknown or unsupported.
         """
         load_entry_points()  # Подгружаем entry points, если есть
         fetcher_cls = get_plugin(source.source_type)
@@ -89,20 +134,32 @@ class SubscriptionManager:
             self.detect_parser = detect_parser
 
     def get_servers(self, user_routes=None, exclusions=None, mode=None, context: PipelineContext = None, force_reload: bool = False) -> PipelineResult:
-        """Получить список ParsedServer из подписки с учётом фильтрации, fail-tolerance и edge-cases.
+        """Retrieve and process servers from subscription with comprehensive pipeline.
+
+        Executes the complete subscription processing pipeline including fetching,
+        validation, parsing, middleware processing, and server selection. Supports
+        caching, error tolerance, and detailed debugging information.
 
         Args:
-            user_routes (list, optional): Список пользовательских маршрутов (тегов) для фильтрации серверов.
-            exclusions (list, optional): Список исключаемых маршрутов (тегов).
-            mode (str, optional): Режим работы пайплайна ('strict' — fail-fast, 'tolerant' — partial success).
-            context (PipelineContext, optional): Контекст выполнения пайплайна (trace_id, debug_level и др.).
-            force_reload (bool, optional): Принудительно сбросить кеш и заново получить результат.
+            user_routes: Optional list of route tags to include in selection.
+            exclusions: Optional list of route tags to exclude from selection.
+            mode: Pipeline execution mode ('strict' for fail-fast, 'tolerant' for partial success).
+            context: Optional pipeline execution context for tracing and debugging.
+            force_reload: Whether to bypass cache and force fresh data retrieval.
 
         Returns:
-            PipelineResult: Результат выполнения пайплайна, включающий список ParsedServer (config), контекст, ошибки и флаг успеха.
-
-        Raises:
-            None: Все ошибки аккумулируются в errors PipelineResult, критические ошибки приводят к success=False.
+            PipelineResult containing:
+            - config: List of ParsedServer objects or None on critical failure
+            - context: Execution context with trace information
+            - errors: List of PipelineError objects for any issues encountered
+            - success: Boolean indicating overall pipeline success
+            
+        Note:
+            In 'tolerant' mode, partial failures may still return success=True with
+            warnings in the errors list. In 'strict' mode, any error causes failure.
+            
+            Results are cached based on source URL, headers, filters, and mode to
+            improve performance for repeated requests.
         """
         context = context or PipelineContext()
         if 'errors' not in context.metadata:
@@ -226,21 +283,33 @@ class SubscriptionManager:
             return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
 
     def export_config(self, exclusions=None, user_routes=None, context: PipelineContext = None, routing_plugin=None, export_manager: Optional[ExportManager] = None, skip_version_check: bool = False) -> PipelineResult:
-        """Экспортировать подписку в итоговый конфиг (например, sing-box JSON) с учётом фильтрации, роутинга и fail-tolerance.
+        """Export subscription to final configuration format.
+
+        Processes the subscription through the complete pipeline and exports
+        the result to a target configuration format (e.g., sing-box JSON)
+        with routing rules, filtering, and format-specific optimizations.
 
         Args:
-            exclusions (list, optional): Список исключаемых маршрутов (тегов).
-            user_routes (list, optional): Список пользовательских маршрутов (тегов).
-            context (PipelineContext, optional): Контекст выполнения пайплайна (trace_id, debug_level и др.).
-            routing_plugin (object, optional): Плагин для генерации маршрутов (по умолчанию — стандартный).
-            export_manager (Optional[ExportManager]): Менеджер экспорта с выбранным форматом.
-            skip_version_check (bool): Пропустить проверку версии.
+            exclusions: Optional list of route tags to exclude.
+            user_routes: Optional list of route tags to include.
+            context: Optional pipeline execution context.
+            routing_plugin: Optional custom routing plugin for rule generation.
+            export_manager: Optional export manager with target format configuration.
+            skip_version_check: Whether to skip version compatibility checks.
 
         Returns:
-            PipelineResult: Результат экспорта, включающий итоговый конфиг (config), контекст, ошибки и флаг успеха.
-
+            PipelineResult containing:
+            - config: Final configuration in target format or None on failure
+            - context: Execution context with processing details
+            - errors: List of any errors encountered during export
+            - success: Boolean indicating export success
+            
         Raises:
-            None: Все ошибки аккумулируются в errors PipelineResult, критические ошибки приводят к success=False.
+            None: All errors are captured in the PipelineResult.errors list.
+            
+        Note:
+            This method combines get_servers() with format-specific export logic.
+            The export format is determined by the export_manager configuration.
         """
         exclusions = exclusions or []
         user_routes = user_routes or []

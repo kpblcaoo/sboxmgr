@@ -35,7 +35,43 @@ def exclusions_v2(
     show_excluded: bool = typer.Option(True, "--show-excluded/--hide-excluded", help="Show excluded servers in list"),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
 ):
-    """Enhanced exclusions management with improved UX."""
+    """Enhanced exclusions management with improved user experience.
+    
+    Provides comprehensive server exclusion management for subscription-based
+    proxy configurations. Supports multiple input methods including indices,
+    server names, wildcard patterns, and interactive selection. Features
+    rich console output, JSON export, and persistent exclusion storage.
+    
+    Supported operations:
+    - Add exclusions by index, name, or wildcard pattern
+    - Remove exclusions by index or server ID
+    - View current exclusions with details
+    - List all available servers with exclusion status
+    - Interactive mode for convenient server selection
+    - Clear all exclusions with confirmation
+    
+    Args:
+        url: Subscription URL to fetch server list from.
+        add: Comma-separated list of servers to exclude (indices, names, or wildcards).
+        remove: Comma-separated list of exclusions to remove (indices or IDs).
+        view: Display current exclusions without fetching subscription.
+        clear: Remove all exclusions with interactive confirmation.
+        list_servers: Display all servers with indices and exclusion status.
+        interactive: Enter interactive mode for server selection.
+        reason: Reason text to record with new exclusions.
+        json_output: Output results in JSON format instead of rich console.
+        show_excluded: Include excluded servers in server listings.
+        debug: Debug verbosity level (0-2).
+        
+    Raises:
+        typer.Exit: On subscription fetch failure, invalid server data, or user cancellation.
+        
+    Examples:
+        sboxmgr exclusions-v2 -u URL --add "0,1,2" --reason "Slow servers"
+        sboxmgr exclusions-v2 -u URL --add "server-*,*tokyo*" --reason "Geo filtering"
+        sboxmgr exclusions-v2 --view --json
+        sboxmgr exclusions-v2 -u URL --interactive
+    """
     
     manager = ExclusionManager.default()
     
@@ -111,7 +147,12 @@ def exclusions_v2(
         rprint("[dim]Example: sboxmgr exclusions --url URL --add '0,1,server-*' --reason 'Testing'[/dim]")
 
 def _view_exclusions(manager: ExclusionManager, json_output: bool) -> None:
-    """View current exclusions."""
+    """Display current exclusions in table or JSON format.
+    
+    Args:
+        manager: ExclusionManager instance for data access.
+        json_output: If True, output JSON format; otherwise rich table format.
+    """
     exclusions = manager.list_all()
     
     if json_output:
@@ -143,7 +184,13 @@ def _view_exclusions(manager: ExclusionManager, json_output: bool) -> None:
     console.print(table)
 
 def _list_servers(manager: ExclusionManager, json_output: bool, show_excluded: bool) -> None:
-    """List available servers with indices."""
+    """Display server list with indices, status, and exclusion information.
+    
+    Args:
+        manager: ExclusionManager instance with cached server data.
+        json_output: If True, output JSON format; otherwise rich table format.
+        show_excluded: Whether to include excluded servers in the listing.
+    """
     servers_info = manager.list_servers(show_excluded=show_excluded)
     
     if json_output:
