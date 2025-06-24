@@ -5,6 +5,19 @@ from pydantic import BaseModel, Field, field_validator
 
 @dataclass
 class SubscriptionSource:
+    """Configuration for a subscription data source.
+    
+    Defines the source of subscription data including URL, type, headers,
+    and other metadata needed to fetch and process the subscription.
+    
+    Attributes:
+        url: The URL or path to the subscription data.
+        source_type: Type of source (url_base64, url_json, file_json, uri_list, etc.).
+        headers: Optional HTTP headers for requests.
+        label: Optional human-readable label for the source.
+        user_agent: Optional custom User-Agent string.
+    """
+    
     url: str
     source_type: str  # url_base64, url_json, file_json, uri_list, ...
     headers: Optional[Dict[str, str]] = None
@@ -13,30 +26,35 @@ class SubscriptionSource:
 
 @dataclass
 class ParsedServer:
-    """Универсальная модель сервера для подписочного пайплайна.
-
-    Args:
-        type (str): Тип протокола (vmess, vless, trojan, ss, wireguard, hysteria2, tuic, shadowtls, anytls, tor, ssh и др.).
-        address (str): Адрес сервера (host/IP).
-        port (int): Порт сервера.
-        security (Optional[str]): Тип шифрования/безопасности (если применимо).
-        meta (Dict[str, str]): Дополнительные параметры (legacy/edge-case).
-        uuid (Optional[str]): UUID пользователя (vmess, tuic и др.).
-        password (Optional[str]): Пароль (trojan, hysteria2, tuic, shadowtls, ssh и др.).
-        private_key (Optional[str]): Приватный ключ (wireguard, ssh).
-        peer_public_key (Optional[str]): Публичный ключ peer (wireguard).
-        pre_shared_key (Optional[str]): Pre-shared key (wireguard).
-        local_address (Optional[List[str]]): Локальные адреса (wireguard).
-        username (Optional[str]): Имя пользователя (ssh).
-        version (Optional[int]): Версия протокола (shadowtls).
-        uuid_list (Optional[List[str]]): Список UUID (tuic).
-        alpn (Optional[List[str]]): ALPN (hysteria2, tuic).
-        obfs (Optional[Dict[str, Any]]): Обфускация (hysteria2).
-        tls (Optional[Dict[str, Any]]): TLS-опции (hysteria2, tuic, shadowtls, anytls, ssh).
-        handshake (Optional[Dict[str, Any]]): Handshake-опции (shadowtls).
-        congestion_control (Optional[str]): Алгоритм congestion control (tuic).
-        tag (Optional[str]): Ярлык/метка сервера.
+    """Universal server model for subscription pipeline processing.
+    
+    This class represents a parsed server configuration that can handle
+    multiple proxy protocols including vmess, vless, trojan, shadowsocks,
+    wireguard, hysteria2, tuic, and others.
+    
+    Attributes:
+        type: Protocol type (vmess, vless, trojan, ss, wireguard, hysteria2, etc.).
+        address: Server address (hostname or IP).
+        port: Server port number.
+        security: Optional security/encryption type.
+        meta: Additional protocol-specific parameters.
+        uuid: User UUID for vmess, tuic, etc.
+        password: Password for trojan, hysteria2, tuic, shadowtls, ssh, etc.
+        private_key: Private key for wireguard, ssh.
+        peer_public_key: Peer public key for wireguard.
+        pre_shared_key: Pre-shared key for wireguard.
+        local_address: Local addresses for wireguard.
+        username: Username for ssh.
+        version: Protocol version for shadowtls.
+        uuid_list: List of UUIDs for tuic.
+        alpn: ALPN protocols for hysteria2, tuic.
+        obfs: Obfuscation settings for hysteria2.
+        tls: TLS options for hysteria2, tuic, shadowtls, anytls, ssh.
+        handshake: Handshake options for shadowtls.
+        congestion_control: Congestion control algorithm for tuic.
+        tag: Server tag/label.
     """
+    
     type: str
     address: str
     port: int
@@ -61,6 +79,22 @@ class ParsedServer:
 
 @dataclass
 class PipelineContext:
+    """Execution context for subscription processing pipeline.
+    
+    Contains configuration and state information that flows through
+    the entire pipeline execution, including tracing, filtering,
+    and debug information.
+    
+    Attributes:
+        trace_id: Unique identifier for this pipeline execution.
+        source: Optional source identifier.
+        mode: Pipeline mode ('strict' for fail-fast, 'tolerant' for partial success).
+        user_routes: List of user-specified routes for filtering.
+        exclusions: List of routes to exclude from processing.
+        debug_level: Debug verbosity level.
+        metadata: Additional metadata dictionary.
+    """
+    
     trace_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     source: Optional[str] = None
     mode: str = "tolerant"  # 'strict' or 'tolerant'
@@ -71,34 +105,44 @@ class PipelineContext:
 
 @dataclass
 class PipelineResult:
-    """Результат выполнения пайплайна подписки (fetch → validate → parse → ...).
-
-    Атрибуты:
-        config (Any): Результат экспорта (например, JSON-конфиг или список ParsedServer).
-        context (PipelineContext): Контекст выполнения пайплайна (trace_id, режим, метаданные и т.д.).
-        errors (list): Список ошибок (PipelineError или строки), возникших на любом этапе пайплайна.
-        success (bool): Флаг успешности выполнения пайплайна (True — успех, False — были критические ошибки).
+    """Result of subscription pipeline execution.
+    
+    Contains the output of the pipeline processing including the final
+    configuration, execution context, any errors encountered, and
+    success status.
+    
+    Attributes:
+        config: Pipeline output (JSON config, server list, etc.).
+        context: Pipeline execution context.
+        errors: List of errors encountered during processing.
+        success: Whether the pipeline executed successfully.
     """
+    
     config: Any  # результат экспорта (например, JSON-конфиг)
     context: PipelineContext
     errors: list
     success: bool
 
 class InboundProfile(BaseModel):
-    """InboundProfile описывает параметры входящих прокси-интерфейсов для экспорта в конфиг.
-
-    Args:
-        type (str): Тип инбаунда (socks, http, tun, tproxy, ssh, dns, reality-inbound, shadowtls и др.).
-        listen (str): Адрес для bind (по умолчанию 127.0.0.1).
-        port (int): Порт (по умолчанию безопасный нестандартный порт).
-        options (dict): Дополнительные параметры (stack, authentication, dns-mode и др.).
-
-    SEC:
-        - По умолчанию bind только на localhost (127.0.0.1).
-        - Порты по умолчанию: socks=10808, http=off, tun=off, dns=system.
-        - Внешний bind (0.0.0.0) только при явном подтверждении.
-        - Валидация типа и диапазона порта.
+    """Configuration profile for inbound proxy interfaces.
+    
+    Defines parameters for incoming proxy connections including type,
+    bind address, port, and protocol-specific options. Includes security
+    validations to ensure safe defaults.
+    
+    Security features:
+    - Defaults to localhost binding (127.0.0.1)
+    - Uses safe non-standard port defaults
+    - Validates port ranges and bind addresses
+    - Requires explicit confirmation for external binding
+    
+    Attributes:
+        type: Inbound type (socks, http, tun, tproxy, ssh, dns, etc.).
+        listen: Bind address (defaults to 127.0.0.1 for security).
+        port: Port number (defaults to safe values per type).
+        options: Additional protocol-specific options.
     """
+    
     type: Literal['socks', 'http', 'tun', 'tproxy', 'ssh', 'dns', 'reality-inbound', 'shadowtls']
     listen: str = Field(default="127.0.0.1", description="Адрес для bind, по умолчанию localhost.")
     port: Optional[int] = Field(default=None, description="Порт, по умолчанию безопасный для типа.")
@@ -106,11 +150,35 @@ class InboundProfile(BaseModel):
 
     @field_validator('listen')
     def validate_listen(cls, v):
+        """Validate bind address for security.
+        
+        Args:
+            v: The bind address to validate.
+            
+        Returns:
+            The validated bind address.
+            
+        Raises:
+            ValueError: If bind address is not localhost or private network.
+        """
         if v not in ("127.0.0.1", "::1") and not v.startswith("192.168."):
             raise ValueError("Bind address must be localhost or private network unless explicitly allowed.")
         return v
+    
     @field_validator('port')
     def validate_port(cls, v, values):
+        """Validate port number range.
+        
+        Args:
+            v: The port number to validate.
+            values: Other field values (unused).
+            
+        Returns:
+            The validated port number.
+            
+        Raises:
+            ValueError: If port is not in valid range.
+        """
         if v is None:
             return v
         if not (1024 <= v <= 65535):
@@ -118,13 +186,18 @@ class InboundProfile(BaseModel):
         return v
 
 class ClientProfile(BaseModel):
-    """ClientProfile описывает профиль клиента для экспорта (inbounds, режимы, опции).
-
-    Args:
-        inbounds (List[InboundProfile]): Список инбаундов для генерации.
-        dns_mode (str): Режим работы DNS (system, tunnel, off).
-        extra (dict): Дополнительные параметры профиля.
+    """Client configuration profile for export operations.
+    
+    Defines the client-side configuration including inbound interfaces,
+    DNS settings, and additional options for generating proxy client
+    configurations.
+    
+    Attributes:
+        inbounds: List of inbound interface configurations.
+        dns_mode: DNS resolution mode (system, tunnel, off).
+        extra: Additional profile parameters.
     """
-    inbounds: List[InboundProfile] = Field(default_factory=list, description="Список инбаундов.")
-    dns_mode: Optional[str] = Field(default="system", description="Режим работы DNS.")
-    extra: Optional[dict] = Field(default_factory=dict, description="Дополнительные параметры профиля.") 
+    
+    inbounds: List[InboundProfile] = Field(default_factory=list, description="List of inbound configurations.")
+    dns_mode: Optional[str] = Field(default="system", description="DNS resolution mode.")
+    extra: Optional[dict] = Field(default_factory=dict, description="Additional profile parameters.") 

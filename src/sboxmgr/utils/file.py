@@ -6,7 +6,25 @@ import logging
 from logging import error
 
 def handle_temp_file(content, target_path, validate_fn=None):
-    """Write content to a temporary file, validate, and move to target path."""
+    """Write content to temporary file with validation and atomic move.
+    
+    Provides safe file operations by writing to a temporary location,
+    optionally validating the content, then atomically moving to the
+    target path. Ensures data integrity and prevents corruption.
+    
+    Args:
+        content: Data to write (will be JSON-serialized).
+        target_path: Final destination path for the file.
+        validate_fn: Optional validation function that takes file path
+                    and returns True if content is valid.
+                    
+    Returns:
+        True if operation completed successfully.
+        
+         Raises:
+         ValueError: If validation fails.
+         Exception: For file I/O errors or other failures.
+     """
     temp_path = os.path.join(tempfile.gettempdir(), os.path.basename(target_path))
     try:
         with open(temp_path, "w") as f:

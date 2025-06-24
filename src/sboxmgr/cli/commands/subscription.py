@@ -26,7 +26,36 @@ def run(
     format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
     skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check")
 ):
-    """Обновить конфигурацию sing-box из подписки."""
+    """Update sing-box configuration from subscription with comprehensive pipeline.
+    
+    Fetches subscription data, processes it through the complete pipeline
+    including parsing, filtering, and format conversion, then updates the
+    local configuration file with automatic service restart.
+    
+    The process includes:
+    1. Fetch subscription data with optional User-Agent customization
+    2. Parse and validate server configurations
+    3. Apply exclusions and filtering rules  
+    4. Export to target format (sing-box, clash, v2ray)
+    5. Validate generated configuration
+    6. Update configuration file with backup
+    7. Restart proxy service if applicable
+    
+    Args:
+        url: Subscription URL to fetch from.
+        debug: Debug verbosity level (0-2).
+        dry_run: Validate configuration without applying changes.
+        config_file: Override path to main configuration file.
+        backup_file: Override path to backup configuration file.
+        template_file: Override path to configuration template.
+        user_agent: Custom User-Agent header for subscription requests.
+        no_user_agent: Disable User-Agent header completely.
+        format: Target export format (singbox, clash, v2ray).
+                 skip_version_check: Skip version compatibility validation.
+         
+     Raises:
+         typer.Exit: On subscription fetch failure, parse errors, or config write errors.
+     """
     from logsetup.setup import setup_logging
     setup_logging(debug_level=debug)
     
@@ -107,7 +136,26 @@ def dry_run(
     format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
     skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check")
 ):
-    """Validate config and print result (no changes)."""
+    """Validate subscription configuration without making changes.
+    
+    Performs the complete subscription processing pipeline including fetch,
+    parse, and export operations, then validates the generated configuration
+    but does not write any files or restart services. This is useful for
+    testing subscriptions and troubleshooting configuration issues.
+    
+    Args:
+        url: Subscription URL to validate.
+        debug: Debug verbosity level (0-2).
+        config_file: Override path to configuration file (for reference only).
+        template_file: Override path to configuration template.
+        user_agent: Custom User-Agent header for subscription requests.
+        no_user_agent: Disable User-Agent header completely.
+        format: Target export format for validation.
+        skip_version_check: Skip version compatibility validation.
+        
+    Raises:
+        typer.Exit: Exit code 0 if validation passes, 1 if validation fails.
+    """
     from logsetup.setup import setup_logging
     setup_logging(debug_level=debug)
     
@@ -159,7 +207,22 @@ def list_servers(
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all")
 ):
-    """List all available servers from config."""
+    """List all available servers from subscription.
+    
+    Fetches and parses the subscription to display all available server
+    configurations with their basic information including index, name,
+    protocol type, and connection details. Useful for inspecting
+    subscription content and planning exclusions.
+    
+    Args:
+        url: Subscription URL to list servers from.
+        debug: Debug verbosity level (0-2).
+        user_agent: Custom User-Agent header for subscription requests.
+        no_user_agent: Disable User-Agent header completely.
+        
+    Raises:
+        typer.Exit: On subscription fetch failure or parsing errors.
+    """
     try:
         if no_user_agent:
             ua = ""

@@ -9,31 +9,52 @@ EXPORTER_REGISTRY = {
 }
 
 class ExportManager:
+    """Manages configuration export for various proxy clients.
+    
+    This class handles the export of parsed server configurations to different
+    client formats (sing-box, Clash, v2ray, etc.) with routing rules generation,
+    client profile customization, and version compatibility checks.
+    
+    Attributes:
+        routing_plugin: Plugin for generating routing rules.
+        export_format: Target export format (singbox, clash, v2ray, etc.).
+        client_profile: Client configuration profile for inbound generation.
+    """
+    
     def __init__(self, routing_plugin=None, export_format="singbox", client_profile: 'Optional[ClientProfile]' = None):
-        """Менеджер экспорта конфигов для разных клиентов.
+        """Initialize export manager with configuration.
 
         Args:
-            routing_plugin: Плагин для генерации маршрутов.
-            export_format (str): Формат экспорта (singbox, clash, v2ray и др.).
-            client_profile (Optional[ClientProfile]): Профиль клиента для генерации секции inbounds.
+            routing_plugin: Optional routing plugin for rule generation. 
+                          Defaults to DefaultRouter if not provided.
+            export_format: Target export format. Defaults to "singbox".
+            client_profile: Optional client profile for inbound configuration.
         """
         self.routing_plugin = routing_plugin or DefaultRouter()
         self.export_format = export_format
         self.client_profile = client_profile
 
     def export(self, servers: List[ParsedServer], exclusions: List[str] = None, user_routes: List[Dict] = None, context: Dict[str, Any] = None, client_profile: 'Optional[ClientProfile]' = None, skip_version_check: bool = False) -> Dict:
-        """Экспортирует конфиг для выбранного клиента с учётом профиля и маршрутов.
+        """Export configuration for the selected client with profile and routing.
+
+        Processes the server list through filtering, routing rule generation,
+        and format-specific export with client profile customization and
+        version compatibility handling.
 
         Args:
-            servers (List[ParsedServer]): Список серверов.
-            exclusions (List[str], optional): Исключения.
-            user_routes (List[Dict], optional): Пользовательские маршруты.
-            context (Dict, optional): Контекст.
-            client_profile (Optional[ClientProfile]): Профиль клиента (если не задан — берётся из self).
-            skip_version_check (bool): Пропустить проверку версии.
+            servers: List of parsed server configurations to export.
+            exclusions: Optional list of server addresses to exclude.
+            user_routes: Optional list of custom routing rules.
+            context: Optional context dictionary for export customization.
+            client_profile: Optional client profile override.
+            skip_version_check: Whether to skip version compatibility checks.
 
         Returns:
-            Dict: Итоговый конфиг.
+            Dictionary containing the final client configuration in the
+            specified export format.
+            
+        Raises:
+            ValueError: If the export format is unknown or unsupported.
         """
         exclusions = exclusions or []
         user_routes = user_routes or []
@@ -70,16 +91,20 @@ class ExportManager:
             return exporter(filtered_servers, routes)
     
     def export_to_singbox(self, servers: List[ParsedServer], routes: List[Dict] = None, client_profile: 'Optional[ClientProfile]' = None, singbox_version: Optional[str] = None) -> Dict:
-        """Упрощенный метод для экспорта в sing-box формат.
+        """Simplified method for exporting to sing-box format.
+        
+        Provides a direct interface for sing-box export without routing
+        plugin processing. Useful for cases where routing rules are
+        already prepared or not needed.
         
         Args:
-            servers (List[ParsedServer]): Список серверов.
-            routes (List[Dict], optional): Готовые маршруты.
-            client_profile (Optional[ClientProfile]): Профиль клиента.
-            singbox_version (Optional[str]): Версия sing-box для совместимости.
+            servers: List of server configurations to export.
+            routes: Optional pre-prepared routing rules.
+            client_profile: Optional client configuration profile.
+            singbox_version: Optional sing-box version for compatibility.
             
         Returns:
-            Dict: Sing-box конфигурация.
+            Dictionary containing sing-box configuration.
         """
         routes = routes or []
         client_profile = client_profile or self.client_profile

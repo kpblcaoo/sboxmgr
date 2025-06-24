@@ -9,7 +9,36 @@ from ..registry import register
 
 @register("base64")
 class Base64Parser(BaseParser):
+    """Parser for base64-encoded subscription data.
+    
+    Handles the most common subscription format where proxy configurations
+    are base64-encoded and contain URI-style proxy links. Supports various
+    proxy protocols including ss://, vless://, vmess://, and legacy formats.
+    
+    Features:
+    - Automatic base64 decoding
+    - URI protocol detection and delegation
+    - Legacy shadowsocks format support (auto-prefix ss://)
+    - Comment line filtering (lines starting with #)
+    - Debug output for unsupported formats
+    """
+    
     def parse(self, raw: bytes) -> List[ParsedServer]:
+        """Parse base64-encoded subscription data into server configurations.
+        
+        Decodes base64 content, splits into lines, and processes each line
+        as a proxy URI. Delegates actual URI parsing to URIListParser.
+        
+        Args:
+            raw: Base64-encoded subscription data.
+            
+        Returns:
+            List of ParsedServer objects from all valid proxy URIs.
+            
+        Note:
+            Automatically adds "ss://" prefix to legacy shadowsocks format
+            lines that match the pattern "method:password@server:port".
+        """
         decoded = base64.b64decode(raw)
         lines = decoded.decode("utf-8").splitlines()
         servers = []

@@ -43,21 +43,26 @@ def singbox_export(
     singbox_version: Optional[str] = None,
     skip_version_check: bool = False
 ) -> dict:
-    """Генерирует sing-box outbound-конфиг из списка ParsedServer с fail-tolerance для неподдерживаемых типов.
-
+    """Export parsed servers to sing-box configuration format.
+    
+    Converts a list of parsed server configurations into a complete sing-box
+    configuration with outbounds, routing rules, and optional inbound profiles.
+    Supports version compatibility checks and legacy outbound generation.
+    
     Args:
-        servers (List[ParsedServer]): Список серверов (ParsedServer).
-        routes: Маршруты для секции route.
-        client_profile (Optional[ClientProfile]): Профиль клиента для генерации секции inbounds.
-        singbox_version (Optional[str]): Версия sing-box для совместимости.
-        skip_version_check (bool): Пропустить проверку версии.
-
+        servers: List of ParsedServer objects to export.
+        routes: Routing rules configuration.
+        client_profile: Optional client profile for inbound generation.
+        singbox_version: Optional sing-box version for compatibility checks.
+        skip_version_check: Whether to skip version compatibility validation.
+        
     Returns:
-        dict: Конфиг для sing-box (inbounds + outbounds + route).
-
-    Warning:
-        Если тип ParsedServer не поддержан, он будет пропущен с предупреждением (fail-tolerance).
-        Для версий sing-box < 1.11.0 автоматически добавляются legacy special outbounds.
+        Dictionary containing complete sing-box configuration with outbounds,
+        routing rules, and optional inbounds section.
+        
+    Note:
+        Automatically adds special outbounds (direct, block, dns-out) based
+        on version compatibility. Supports legacy mode for sing-box < 1.11.0.
     """
     supported_types = {"vless", "vmess", "trojan", "ss", "shadowsocks", "wireguard", "hysteria2", "tuic", "shadowtls", "anytls", "tor", "ssh"}
     outbounds = []
@@ -366,5 +371,25 @@ def _export_hysteria2(server):
 
 @register("singbox")
 class SingboxExporter(BaseExporter):
-    """Экспортер для формата sing-box."""
-    # Реализация класса находится выше (или ниже) по файлу, если используется динамическая регистрация. 
+    """Sing-box format configuration exporter.
+    
+    Implements the BaseExporter interface for generating sing-box compatible
+    JSON configurations from parsed server data. Handles protocol-specific
+    outbound generation and version compatibility.
+    """
+    
+    def export(self, servers: List[ParsedServer]) -> str:
+        """Export servers to sing-box JSON configuration string.
+        
+        Args:
+            servers: List of ParsedServer objects to export.
+            
+        Returns:
+            JSON string containing sing-box configuration.
+            
+        Raises:
+            ValueError: If server data is invalid or cannot be exported.
+        """
+        config = singbox_export(servers, [])
+        import json
+        return json.dumps(config, indent=2, ensure_ascii=False) 
