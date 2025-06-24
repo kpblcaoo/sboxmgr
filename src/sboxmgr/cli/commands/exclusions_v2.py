@@ -295,7 +295,7 @@ def _interactive_exclusions(manager: ExclusionManager, json_output: bool, reason
         
         if command in ["quit", "q", "exit"]:
             break
-        elif command is "view":
+        elif command == "view":
             _view_exclusions(manager, False)
         elif command == "clear":
             if Confirm.ask("[red]Clear all exclusions?[/red]"):

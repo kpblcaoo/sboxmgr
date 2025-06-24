@@ -2,7 +2,7 @@ import os
 import shutil
 import pytest
 from dotenv import load_dotenv
-from conftest import run_cli
+from .conftest import run_cli
 import json
 from typer.testing import CliRunner
 from sboxmgr.cli.main import app
