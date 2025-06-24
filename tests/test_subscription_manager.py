@@ -80,7 +80,7 @@ def test_export_config_with_test_router(tmp_path):
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     # Мокаем get_servers для простоты
-    mgr.get_servers = lambda *a, **kw: PipelineResult(
+    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
         config=[type('S', (), {"type": "ss", "address": "1.2.3.4", "port": 1234, "security": None, "meta": {"tag": "test"}})()],
         context=PipelineContext(), errors=[], success=True)
     router = MockRouter()
@@ -115,7 +115,8 @@ def test_export_config_integration_edge_cases(tmp_path):
     ]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda *a, **kw: PipelineResult(config=servers, context=PipelineContext(), errors=[], success=True)
+    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
+        config=servers, context=PipelineContext(), errors=[], success=True)
     class MockRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (edge-case).
@@ -160,7 +161,8 @@ def test_export_config_unicode_emoji(tmp_path):
     ]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda: servers
+    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
+        config=servers, context=PipelineContext(), errors=[], success=True)
     class MockRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (unicode/emoji).
@@ -192,7 +194,8 @@ def test_export_config_large_server_list(tmp_path):
     servers = [S("ss", f"10.0.0.{i}", 1000+i) for i in range(1000)]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda: servers
+    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
+        config=servers, context=PipelineContext(), errors=[], success=True)
     class TestRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (большой список).
@@ -216,7 +219,8 @@ def test_export_config_invalid_inputs(tmp_path):
     from sboxmgr.export.routing.base_router import BaseRoutingPlugin
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda: []
+    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
+        config=[], context=PipelineContext(), errors=[], success=True)
     class TestRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (пустые inputs).
@@ -260,7 +264,8 @@ def test_export_config_same_tag_different_types(tmp_path):
     ]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda: servers
+    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
+        config=servers, context=PipelineContext(), errors=[], success=True)
     class TagRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (одинаковые теги).
@@ -292,7 +297,8 @@ def test_export_config_user_routes_vs_exclusions(tmp_path):
     servers = [S("ss", "1.2.3.4", 1234, meta={"tag": "A"})]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda: servers
+    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
+        config=servers, context=PipelineContext(), errors=[], success=True)
     class ConflictRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (exclusions vs user_routes).
@@ -328,7 +334,8 @@ def test_export_config_user_routes_wildcard_not_implemented(tmp_path):
     servers = [S("ss", "1.2.3.4", 1234)]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda: servers
+    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
+        config=servers, context=PipelineContext(), errors=[], success=True)
     class WildcardRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (wildcard).
@@ -367,7 +374,8 @@ def test_export_config_unsupported_mode(tmp_path):
     servers = [S("ss", "1.2.3.4", 1234)]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda: servers
+    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
+        config=servers, context=PipelineContext(), errors=[], success=True)
     class ModeRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (unsupported mode).

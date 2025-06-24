@@ -29,7 +29,11 @@ def detect_lang_source():
                 return cfg["default_lang"], f"config ({config_path})"
         except Exception:
             pass
-    sys_lang = locale.getdefaultlocale()[0]
-    if sys_lang:
-        return sys_lang.split("_")[0], "system LANG"
+    try:
+        sys_lang = locale.getdefaultlocale()[0]
+        if sys_lang:
+            return sys_lang.split("_")[0], "system LANG"
+    except Exception:
+        # Обрабатываем возможные исключения при работе с locale
+        pass
     return "en", "default" 

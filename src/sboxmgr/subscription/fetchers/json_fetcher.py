@@ -51,10 +51,15 @@ class JSONFetcher(BaseFetcher):
             print(f"[fetcher] Using User-Agent: {headers.get('User-Agent', '[none]')}")
             resp = requests.get(self.source.url, headers=headers, stream=True)
             resp.raise_for_status()
-            data = resp.raw.read(size_limit + 1)
-            if len(data) > size_limit:
-                print(f"[fetcher][WARN] Downloaded data exceeds limit ({size_limit} bytes), skipping.")
-                raise ValueError("Downloaded data exceeds limit")
+            
+            # Используем iter_content для правильной обработки сжатых данных
+            data = b""
+            for chunk in resp.iter_content(chunk_size=8192):
+                if len(data) + len(chunk) > size_limit:
+                    print(f"[fetcher][WARN] Downloaded data exceeds limit ({size_limit} bytes), skipping.")
+                    raise ValueError("Downloaded data exceeds limit")
+                data += chunk
+            
             with self._cache_lock:
                 self._fetch_cache[key] = data
             return data
