@@ -1,8 +1,9 @@
 import json
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from ..models import ParsedServer, ClientProfile, InboundProfile
 from ..base_exporter import BaseExporter
 from ..registry import register
+from ...utils.version import should_use_legacy_outbounds
 
 def kebab_to_snake(d):
     if not isinstance(d, dict):
@@ -35,7 +36,9 @@ def generate_inbounds(profile: ClientProfile) -> list:
 def singbox_export(
     servers: List[ParsedServer],
     routes,
-    client_profile: Optional[ClientProfile] = None
+    client_profile: Optional[ClientProfile] = None,
+    singbox_version: Optional[str] = None,
+    skip_version_check: bool = False
 ) -> dict:
     """Генерирует sing-box outbound-конфиг из списка ParsedServer с fail-tolerance для неподдерживаемых типов.
 
@@ -43,15 +46,26 @@ def singbox_export(
         servers (List[ParsedServer]): Список серверов (ParsedServer).
         routes: Маршруты для секции route.
         client_profile (Optional[ClientProfile]): Профиль клиента для генерации секции inbounds.
+        singbox_version (Optional[str]): Версия sing-box для совместимости.
+        skip_version_check (bool): Пропустить проверку версии.
 
     Returns:
         dict: Конфиг для sing-box (inbounds + outbounds + route).
 
     Warning:
         Если тип ParsedServer не поддержан, он будет пропущен с предупреждением (fail-tolerance).
+        Для версий sing-box < 1.11.0 автоматически добавляются legacy special outbounds.
     """
     supported_types = {"vless", "vmess", "trojan", "ss", "shadowsocks", "wireguard", "hysteria2", "tuic", "shadowtls", "anytls", "tor", "ssh"}
     outbounds = []
+    
+    # Определяем нужно ли использовать legacy outbounds
+    # Если пропускаем проверку версии, используем современный синтаксис
+    use_legacy = False if skip_version_check else should_use_legacy_outbounds(singbox_version)
+    
+    if use_legacy and singbox_version:
+        print(f"[singbox_exporter] Using legacy outbounds for sing-box {singbox_version} compatibility")
+    
     for s in servers:
         out_type = s.type
         if out_type == "ss":
@@ -157,9 +171,18 @@ def singbox_export(
             if k in whitelist:
                 out[k] = v
         outbounds.append(out)
+    
     tags = {o["tag"] for o in outbounds}
     if "direct" not in tags:
         outbounds.append({"type": "direct", "tag": "direct"})
+    
+    # Добавляем legacy special outbounds для совместимости с sing-box < 1.11.0
+    if use_legacy:
+        if "block" not in tags:
+            outbounds.append({"type": "block", "tag": "block"})
+        if "dns-out" not in tags:
+            outbounds.append({"type": "dns", "tag": "dns-out"})
+    
     config = {
         "outbounds": outbounds,
         "route": {"rules": routes}

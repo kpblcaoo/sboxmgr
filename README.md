@@ -98,6 +98,24 @@ cp .env.example .env  # Edit as needed
 
 Requirements: Python 3.10+, sing-box, requests[socks], python-dotenv
 
+### Sing-box Version Compatibility
+
+**Recommended:** sing-box 1.11.0 or higher
+
+- **sing-box 1.11.0+**: Full support with modern rule actions syntax
+- **sing-box < 1.11.0**: Automatic compatibility mode with legacy special outbounds (`block`, `dns`)
+
+The tool automatically detects your sing-box version and adapts the configuration format:
+- For newer versions: Uses modern `rule actions` (recommended)
+- For older versions: Falls back to legacy `special outbounds` for compatibility
+
+To skip version checking (not recommended):
+```bash
+sboxctl run -u <url> --skip-version-check
+```
+
+⚠️ **Note**: Legacy special outbounds are deprecated and will be removed in sing-box 1.13.0. Please update to sing-box 1.11.0+ for best experience.
+
 ---
 
 ## ⚙️ Usage

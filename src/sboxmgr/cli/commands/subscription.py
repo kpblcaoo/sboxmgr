@@ -6,6 +6,8 @@ from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_template_file, get_config_file, get_backup_file
+from sboxmgr.export.export_manager import ExportManager
+from sboxmgr.utils.version import check_version_compatibility, get_version_warning_message
 
 lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
 
@@ -24,9 +26,14 @@ def run(
     template_file: str = typer.Option(None, "--template-file", help=t("cli.template_file.help")),
     use_selected: bool = typer.Option(False, "--use-selected", help=t("cli.use_selected.help")),
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
-    no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all")
+    no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all"),
+    format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
+    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check")
 ):
-    """Generate and apply sing-box config (default scenario)."""
+    """Обновить конфигурацию sing-box из подписки."""
+    from logsetup.setup import setup_logging
+    setup_logging(debug_level=debug)
+    
     try:
         if no_user_agent:
             ua = ""
@@ -37,7 +44,10 @@ def run(
         exclusions = load_exclusions(dry_run=dry_run)
         context = PipelineContext(mode="default", debug_level=debug)
         user_routes = []
-        config = mgr.export_config(exclusions=exclusions, user_routes=user_routes, context=context)
+        
+        # Создаём ExportManager с выбранным форматом
+        export_mgr = ExportManager(export_format=format)
+        config = mgr.export_config(exclusions=exclusions, user_routes=user_routes, context=context, export_manager=export_mgr, skip_version_check=skip_version_check)
         if not config.success or not config.config or not config.config.get("outbounds"):
             typer.echo("ERROR: No servers parsed from subscription, config not updated.", err=True)
             raise typer.Exit(1)
@@ -99,9 +109,14 @@ def dry_run(
     config_file: str = typer.Option(None, "--config-file", help=t("cli.config_file.help")),
     template_file: str = typer.Option(None, "--template-file", help=t("cli.template_file.help")),
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
-    no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all")
+    no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all"),
+    format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
+    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check")
 ):
     """Validate config and print result (no changes)."""
+    from logsetup.setup import setup_logging
+    setup_logging(debug_level=debug)
+    
     try:
         if no_user_agent:
             ua = ""
@@ -112,7 +127,10 @@ def dry_run(
         exclusions = load_exclusions(dry_run=True)
         context = PipelineContext(mode="default", debug_level=debug)
         user_routes = []
-        config = mgr.export_config(exclusions=exclusions, user_routes=user_routes, context=context)
+        
+        # Создаём ExportManager с выбранным форматом
+        export_mgr = ExportManager(export_format=format)
+        config = mgr.export_config(exclusions=exclusions, user_routes=user_routes, context=context, export_manager=export_mgr, skip_version_check=skip_version_check)
         if not config.success or not config.config or not config.config.get("outbounds"):
             typer.echo("ERROR: No servers parsed from subscription, nothing to validate.", err=True)
             raise typer.Exit(1)

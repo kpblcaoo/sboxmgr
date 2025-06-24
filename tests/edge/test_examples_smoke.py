@@ -3,7 +3,7 @@ import pytest
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
 from sboxmgr.subscription.manager import SubscriptionManager
 
-EXAMPLES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../examples'))
+EXAMPLES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src/sboxmgr/examples'))
 
 def detect_source_type(filename):
     if filename.endswith('.json'):

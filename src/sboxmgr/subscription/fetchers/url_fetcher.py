@@ -56,7 +56,7 @@ class URLFetcher(BaseFetcher):
                 ua = "ClashMeta/1.0"  # дефолтный UA
             if ua != "":
                 headers["User-Agent"] = ua
-            print(f"[fetcher] Using User-Agent: {headers.get('User-Agent', '[none]')}")
+            # Убираем безусловный print - будет логироваться в manager.py
             resp = requests.get(self.source.url, headers=headers, stream=True)
             resp.raise_for_status()
             data = resp.raw.read(size_limit + 1)

@@ -3,11 +3,13 @@ import json
 import pytest
 from typer.testing import CliRunner
 from sboxmgr.cli.main import app
+from tests.utils.http_mocking import setup_legacy_cli_mock
 
 runner = CliRunner()
 
 @pytest.mark.usefixtures("cleanup_files")
 def test_exclude_and_idempotent(tmp_path, monkeypatch):
+    setup_legacy_cli_mock(monkeypatch)
     monkeypatch.setenv("SBOXMGR_EXCLUSION_FILE", str(tmp_path / "exclusions.json"))
     result1 = runner.invoke(app, ["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "1"])
     result2 = runner.invoke(app, ["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "1"])
@@ -20,6 +22,7 @@ def test_exclude_and_idempotent(tmp_path, monkeypatch):
 
 @pytest.mark.usefixtures("cleanup_files")
 def test_clear_exclusions(tmp_path, monkeypatch):
+    setup_legacy_cli_mock(monkeypatch)
     monkeypatch.setenv("SBOXMGR_EXCLUSION_FILE", str(tmp_path / "exclusions.json"))
     runner.invoke(app, ["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "1"])
     exclusions_path = tmp_path / "exclusions.json"
@@ -32,11 +35,12 @@ def test_clear_exclusions(tmp_path, monkeypatch):
 
 @pytest.mark.usefixtures("cleanup_files")
 def test_broken_exclusions_json(tmp_path, monkeypatch):
+    setup_legacy_cli_mock(monkeypatch)
     monkeypatch.setenv("SBOXMGR_EXCLUSION_FILE", str(tmp_path / "exclusions.json"))
     exclusions_path = tmp_path / "exclusions.json"
     with open(exclusions_path, "w") as f:
         f.write("{broken json")
-    result = runner.invoke(app, ["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "2"])
+    result = runner.invoke(app, ["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "0"])
     assert "повреждён" in (result.stdout or "") or "поврежден" in (result.stdout or "")
     with open(exclusions_path) as f:
         data = json.load(f)
@@ -44,6 +48,7 @@ def test_broken_exclusions_json(tmp_path, monkeypatch):
 
 @pytest.mark.usefixtures("cleanup_files")
 def test_view_exclusions(tmp_path, monkeypatch):
+    setup_legacy_cli_mock(monkeypatch)
     monkeypatch.setenv("SBOXMGR_EXCLUSION_FILE", str(tmp_path / "exclusions.json"))
     runner.invoke(app, ["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--add", "1"])
     result = runner.invoke(app, ["exclusions", "-u", os.getenv("TEST_URL", "https://example.com/sub-link"), "--view"])

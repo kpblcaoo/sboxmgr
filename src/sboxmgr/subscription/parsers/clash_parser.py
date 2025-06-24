@@ -33,5 +33,5 @@ class ClashParser(BaseParser):
                 security=p.get("cipher", None),
                 meta=p
             ))
-        print(f"[ClashParser] Parsed {len(servers)} servers from proxies section.")
+        # Убираем безусловный print - логирование будет в manager.py
         return servers 

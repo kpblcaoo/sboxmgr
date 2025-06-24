@@ -125,10 +125,17 @@ class SubscriptionManager:
                 if result.success:
                     return result
         try:
-            raw = self.fetcher.fetch()
-            # Удаляем все отладочные print, кроме debug_level > 0
+            # Логируем User-Agent на уровне 1
             debug_level = getattr(context, 'debug_level', 0)
-            if debug_level > 0:
+            if debug_level >= 1:
+                ua = getattr(self.fetcher.source, 'user_agent', None)
+                if ua:
+                    print(f"[fetcher] Using User-Agent: {ua}")
+                else:
+                    print(f"[fetcher] Using User-Agent: [default]")
+            raw = self.fetcher.fetch()
+            # Отладочные print в зависимости от debug_level
+            if debug_level >= 2:
                 print(f"[debug] Fetched {len(raw)} bytes. First 200 bytes: {raw[:200]!r}")
             validator_cls = RAW_VALIDATOR_REGISTRY.get("noop")
             validator = validator_cls()
@@ -147,7 +154,7 @@ class SubscriptionManager:
                 else:
                     return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
             parser = self.detect_parser(raw, self.fetcher.source.source_type)
-            if debug_level > 0:
+            if debug_level >= 2:
                 print(f"[debug] Selected parser: {getattr(parser, '__class__', type(parser)).__name__}")
             if not parser:
                 err = PipelineError(
@@ -163,17 +170,22 @@ class SubscriptionManager:
                 else:
                     return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
             servers = parser.parse(raw)
+            if debug_level >= 1:
+                print(f"[info] Parsed {len(servers)} servers from subscription")
             # === ParsedValidator ===
             from sboxmgr.subscription.validators.base import PARSED_VALIDATOR_REGISTRY
             parsed_validator_cls = PARSED_VALIDATOR_REGISTRY.get("required_fields")
             if parsed_validator_cls:
                 parsed_validator = parsed_validator_cls()
                 parsed_result = parsed_validator.validate(servers, context)
-                print(f"[DEBUG] ParsedValidator valid_servers: {getattr(parsed_result, 'valid_servers', None)} errors: {parsed_result.errors}")
+                if debug_level >= 2:
+                    print(f"[DEBUG] ParsedValidator valid_servers: {getattr(parsed_result, 'valid_servers', None)} errors: {parsed_result.errors}")
                 servers = getattr(parsed_result, 'valid_servers', servers)
-                print(f"[DEBUG] servers after validation: {servers}")
+                if debug_level >= 2:
+                    print(f"[DEBUG] servers after validation: {servers}")
                 if not servers:
-                    print(f"[DEBUG] No valid servers after validation, returning empty config and success=False")
+                    if debug_level >= 2:
+                        print(f"[DEBUG] No valid servers after validation, returning empty config and success=False")
                     err = PipelineError(
                         type=ErrorType.VALIDATION,
                         stage="parsed_validate",
@@ -194,7 +206,7 @@ class SubscriptionManager:
                     context.metadata['errors'].append(err)
             # === End ParsedValidator ===
             servers = self.middleware_chain.process(servers, context)
-            if debug_level > 0:
+            if debug_level >= 2:
                 print(f"[debug] servers after middleware: {servers[:3]}{' ...' if len(servers) > 3 else ''}")
             servers = self.postprocessor.process(servers)
             servers = self.selector.select(servers, user_routes=user_routes, exclusions=exclusions, mode=mode)
@@ -213,7 +225,7 @@ class SubscriptionManager:
             context.metadata['errors'].append(err)
             return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
 
-    def export_config(self, exclusions=None, user_routes=None, context: PipelineContext = None, routing_plugin=None) -> PipelineResult:
+    def export_config(self, exclusions=None, user_routes=None, context: PipelineContext = None, routing_plugin=None, export_manager: Optional[ExportManager] = None, skip_version_check: bool = False) -> PipelineResult:
         """Экспортировать подписку в итоговый конфиг (например, sing-box JSON) с учётом фильтрации, роутинга и fail-tolerance.
 
         Args:
@@ -221,6 +233,8 @@ class SubscriptionManager:
             user_routes (list, optional): Список пользовательских маршрутов (тегов).
             context (PipelineContext, optional): Контекст выполнения пайплайна (trace_id, debug_level и др.).
             routing_plugin (object, optional): Плагин для генерации маршрутов (по умолчанию — стандартный).
+            export_manager (Optional[ExportManager]): Менеджер экспорта с выбранным форматом.
+            skip_version_check (bool): Пропустить проверку версии.
 
         Returns:
             PipelineResult: Результат экспорта, включающий итоговый конфиг (config), контекст, ошибки и флаг успеха.
@@ -236,9 +250,11 @@ class SubscriptionManager:
         servers_result = self.get_servers(user_routes=user_routes, exclusions=exclusions, mode=context.mode, context=context)
         if not servers_result.success:
             return PipelineResult(config=None, context=servers_result.context, errors=servers_result.errors, success=False)
-        mgr = ExportManager(routing_plugin=routing_plugin)
+        
+        # Используем переданный ExportManager или создаём дефолтный
+        mgr = export_manager or ExportManager(routing_plugin=routing_plugin)
         try:
-            config = mgr.export(servers_result.config, exclusions, user_routes, context)
+            config = mgr.export(servers_result.config, exclusions, user_routes, context, skip_version_check=skip_version_check)
             return PipelineResult(config=config, context=context, errors=context.metadata['errors'], success=True)
         except Exception as e:
             err = PipelineError(
