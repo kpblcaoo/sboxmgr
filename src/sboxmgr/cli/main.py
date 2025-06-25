@@ -10,6 +10,7 @@ from pathlib import Path
 import locale
 from sboxmgr.i18n.t import t
 from sboxmgr.cli import plugin_template
+from sboxmgr.cli.commands.config import config_app
 
 load_dotenv()
 
@@ -233,6 +234,9 @@ app.command("list-servers", help=t("cli.list_servers.help"))(subscription_list_s
 # Регистрируем новую команду exclusions_v2
 from sboxmgr.cli.commands.exclusions_v2 import exclusions_v2
 app.command("exclusions-v2")(exclusions_v2)
+
+# Регистрируем config команды
+app.add_typer(config_app)
 
 if __name__ == "__main__":
     app() 

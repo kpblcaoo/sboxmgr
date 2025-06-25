@@ -9,48 +9,40 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-import click
+import typer
 import yaml
 from pydantic import ValidationError
 
-from ...config import AppConfig, load_config, get_environment_info, ConfigValidationError
+from ...config.models import AppConfig
+from ...config.loader import load_config
+from ...config.detection import get_environment_info
+
+# Create Typer app for config commands
+config_app = typer.Typer(name="config", help="Configuration management commands")
 
 
-@click.group(name="config")
-def config_group():
-    """Configuration management commands."""
-    pass
-
-
-@config_group.command(name="dump")
-@click.option(
-    "--format",
-    type=click.Choice(["yaml", "json", "env"]),
-    default="yaml",
-    help="Output format for configuration dump"
-)
-@click.option(
-    "--include-defaults",
-    is_flag=True,
-    default=False,
-    help="Include default values in output"
-)
-@click.option(
-    "--include-env-info",
-    is_flag=True,
-    default=False,
-    help="Include environment detection information"
-)
-@click.option(
-    "--config-file",
-    type=click.Path(exists=True, readable=True),
-    help="Configuration file to load"
-)
+@config_app.command(name="dump")
 def dump_config(
-    format: str,
-    include_defaults: bool,
-    include_env_info: bool,
-    config_file: Optional[str]
+    format: str = typer.Option(
+        "yaml",
+        "--format",
+        help="Output format for configuration dump"
+    ),
+    include_defaults: bool = typer.Option(
+        False,
+        "--include-defaults",
+        help="Include default values in output"
+    ),
+    include_env_info: bool = typer.Option(
+        False,
+        "--include-env-info", 
+        help="Include environment detection information"
+    ),
+    config_file: Optional[str] = typer.Option(
+        None,
+        "--config-file",
+        help="Configuration file to load"
+    )
 ):
     """Dump resolved configuration in specified format.
     
@@ -72,9 +64,9 @@ def dump_config(
         
         # Prepare output data
         if include_defaults:
-            config_data = config.dict(exclude_unset=False, exclude_none=False)
+            config_data = config.model_dump(exclude_unset=False, exclude_none=False)
         else:
-            config_data = config.dict(exclude_unset=True, exclude_none=True)
+            config_data = config.model_dump(exclude_unset=True, exclude_none=True)
         
         # Add environment information if requested
         if include_env_info:
@@ -96,7 +88,7 @@ def dump_config(
                 sort_keys=True,
                 indent=2
             )
-            click.echo(yaml_output)
+            typer.echo(yaml_output)
         
         elif format == "json":
             json_output = json.dumps(
@@ -105,31 +97,28 @@ def dump_config(
                 sort_keys=True,
                 default=str
             )
-            click.echo(json_output)
+            typer.echo(json_output)
         
         elif format == "env":
             # Output as environment variables
             _output_env_format(config_data, prefix="SBOXMGR")
     
     except ValidationError as e:
-        click.echo(f"❌ Configuration validation error:", err=True)
+        typer.echo(f"❌ Configuration validation error:", err=True)
         for error in e.errors():
             field = " -> ".join(str(x) for x in error["loc"])
-            click.echo(f"  {field}: {error['msg']}", err=True)
-        sys.exit(1)
-    
-    except ConfigValidationError as e:
-        click.echo(f"❌ Configuration file error: {e}", err=True)
-        sys.exit(1)
+            typer.echo(f"  {field}: {error['msg']}", err=True)
+        raise typer.Exit(1)
     
     except Exception as e:
-        click.echo(f"❌ Unexpected error: {e}", err=True)
-        sys.exit(1)
+        typer.echo(f"❌ Unexpected error: {e}", err=True)
+        raise typer.Exit(1)
 
 
-@config_group.command(name="validate")
-@click.argument("config_file", type=click.Path(exists=True, readable=True))
-def validate_config(config_file: str):
+@config_app.command(name="validate")
+def validate_config(
+    config_file: str = typer.Argument(..., help="Configuration file to validate")
+):
     """Validate configuration file syntax and values.
     
     Checks configuration file for:
@@ -140,34 +129,35 @@ def validate_config(config_file: str):
     """
     try:
         config = load_config(config_file_path=config_file)
-        click.echo(f"✅ Configuration file '{config_file}' is valid")
+        typer.echo(f"✅ Configuration file '{config_file}' is valid")
         
         # Show key configuration values
-        click.echo("\nKey settings:")
-        click.echo(f"  Service mode: {config.service.service_mode}")
-        click.echo(f"  Log level: {config.logging.level}")
-        click.echo(f"  Log format: {config.logging.format}")
-        click.echo(f"  Log sinks: {', '.join(config.logging.sinks)}")
+        typer.echo("\nKey settings:")
+        typer.echo(f"  Service mode: {config.service.service_mode}")
+        typer.echo(f"  Log level: {config.logging.level}")
+        typer.echo(f"  Log format: {config.logging.format}")
+        typer.echo(f"  Log sinks: {', '.join(config.logging.sinks)}")
         
     except ValidationError as e:
-        click.echo(f"❌ Configuration validation failed:", err=True)
+        typer.echo(f"❌ Configuration validation failed:", err=True)
         for error in e.errors():
             field = " -> ".join(str(x) for x in error["loc"])
-            click.echo(f"  {field}: {error['msg']}", err=True)
-        sys.exit(1)
+            typer.echo(f"  {field}: {error['msg']}", err=True)
+        raise typer.Exit(1)
     
     except Exception as e:
-        click.echo(f"❌ Error validating configuration: {e}", err=True)
-        sys.exit(1)
+        typer.echo(f"❌ Error validating configuration: {e}", err=True)
+        raise typer.Exit(1)
 
 
-@config_group.command(name="schema")
-@click.option(
-    "--output",
-    type=click.Path(),
-    help="Output file for JSON schema (default: stdout)"
-)
-def generate_schema(output: Optional[str]):
+@config_app.command(name="schema")
+def generate_schema(
+    output: Optional[str] = typer.Option(
+        None,
+        "--output",
+        help="Output file for JSON schema (default: stdout)"
+    )
+):
     """Generate JSON schema for configuration validation.
     
     Useful for:
@@ -177,23 +167,23 @@ def generate_schema(output: Optional[str]):
     """
     try:
         config = AppConfig()
-        schema = config.generate_json_schema()
+        schema = config.model_json_schema()
         
         schema_json = json.dumps(schema, indent=2, sort_keys=True)
         
         if output:
             with open(output, 'w') as f:
                 f.write(schema_json)
-            click.echo(f"✅ JSON schema written to {output}")
+            typer.echo(f"✅ JSON schema written to {output}")
         else:
-            click.echo(schema_json)
+            typer.echo(schema_json)
     
     except Exception as e:
-        click.echo(f"❌ Error generating schema: {e}", err=True)
-        sys.exit(1)
+        typer.echo(f"❌ Error generating schema: {e}", err=True)
+        raise typer.Exit(1)
 
 
-@config_group.command(name="env-info")
+@config_app.command(name="env-info")
 def environment_info():
     """Show environment detection information.
     
@@ -206,45 +196,45 @@ def environment_info():
     try:
         env_info = get_environment_info()
         
-        click.echo("🔍 Environment Detection Results:")
-        click.echo()
+        typer.echo("🔍 Environment Detection Results:")
+        typer.echo()
         
         # Service mode detection
         service_mode = "✅ Enabled" if env_info["service_mode"] else "❌ Disabled"
-        click.echo(f"Service Mode: {service_mode}")
+        typer.echo(f"Service Mode: {service_mode}")
         
         # Container detection
         container = "✅ Detected" if env_info["container_environment"] else "❌ Not detected"
-        click.echo(f"Container Environment: {container}")
+        typer.echo(f"Container Environment: {container}")
         
         # Systemd detection
         systemd = "✅ Available" if env_info["systemd_environment"] else "❌ Not available"
-        click.echo(f"Systemd Environment: {systemd}")
+        typer.echo(f"Systemd Environment: {systemd}")
         
         # Development detection
         dev = "✅ Detected" if env_info["development_environment"] else "❌ Not detected"
-        click.echo(f"Development Environment: {dev}")
+        typer.echo(f"Development Environment: {dev}")
         
-        click.echo()
-        click.echo("📋 Environment Variables:")
+        typer.echo()
+        typer.echo("📋 Environment Variables:")
         for key, value in env_info["environment_variables"].items():
             if value:
-                click.echo(f"  {key}: {value}")
+                typer.echo(f"  {key}: {value}")
         
-        click.echo()
-        click.echo("🔧 Process Information:")
+        typer.echo()
+        typer.echo("🔧 Process Information:")
         for key, value in env_info["process_info"].items():
-            click.echo(f"  {key}: {value}")
+            typer.echo(f"  {key}: {value}")
         
-        click.echo()
-        click.echo("📁 File Indicators:")
+        typer.echo()
+        typer.echo("📁 File Indicators:")
         for path, exists in env_info["file_indicators"].items():
             status = "✅ Exists" if exists else "❌ Missing"
-            click.echo(f"  {path}: {status}")
+            typer.echo(f"  {path}: {status}")
     
     except Exception as e:
-        click.echo(f"❌ Error getting environment info: {e}", err=True)
-        sys.exit(1)
+        typer.echo(f"❌ Error getting environment info: {e}", err=True)
+        raise typer.Exit(1)
 
 
 def _output_env_format(data: dict, prefix: str = "", parent_key: str = ""):
@@ -263,12 +253,10 @@ def _output_env_format(data: dict, prefix: str = "", parent_key: str = ""):
         elif isinstance(value, list):
             # Convert lists to comma-separated strings
             env_value = ",".join(str(v) for v in value)
-            click.echo(f"{env_key}={env_value}")
+            typer.echo(f"{env_key}={env_value}")
         else:
-            click.echo(f"{env_key}={value}")
+            typer.echo(f"{env_key}={value}")
 
 
-# Add to main CLI
-def register_config_commands(cli_app):
-    """Register configuration commands with main CLI application."""
-    cli_app.add_command(config_group) 
+# For backward compatibility
+config_group = config_app 

@@ -67,10 +67,11 @@ class LoggingConfig(BaseSettings):
         description="Include structured metadata in log entries"
     )
     
-    class Config:
-        env_prefix = "SBOXMGR_LOGGING_"
-        env_nested_delimiter = "__"
-        case_sensitive = False
+    model_config = {
+        "env_prefix": "SBOXMGR_LOGGING_",
+        "env_nested_delimiter": "__",
+        "case_sensitive": False
+    }
     
     @field_validator('level')
     @classmethod
@@ -161,10 +162,38 @@ class ServiceConfig(BaseSettings):
         description="Enable metrics collection and endpoint"
     )
     
-    class Config:
-        env_prefix = "SBOXMGR_SERVICE_"
-        env_nested_delimiter = "__"
-        case_sensitive = False
+    model_config = {
+        "env_prefix": "SBOXMGR_SERVICE_",
+        "env_nested_delimiter": "__",
+        "case_sensitive": False
+    }
+
+
+class AppSettings(BaseSettings):
+    """Core application settings section."""
+    
+    name: str = Field(
+        default="sboxmgr",
+        description="Application name"
+    )
+    version: str = Field(
+        default="0.2.0",
+        description="Application version"
+    )
+    debug: bool = Field(
+        default=False,
+        description="Enable debug mode"
+    )
+    verbose: bool = Field(
+        default=False,
+        description="Enable verbose output"
+    )
+    
+    model_config = {
+        "env_prefix": "SBOXMGR_APP_",
+        "env_nested_delimiter": "__",
+        "case_sensitive": False
+    }
 
 
 class AppConfig(BaseSettings):
@@ -180,16 +209,6 @@ class AppConfig(BaseSettings):
         description="Path to configuration file (TOML format)"
     )
     
-    # Core application settings
-    debug: bool = Field(
-        default=False,
-        description="Enable debug mode"
-    )
-    verbose: bool = Field(
-        default=False,
-        description="Enable verbose output"
-    )
-    
     # Container/environment detection
     container_mode: bool = Field(
         default_factory=detect_container_environment,
@@ -197,6 +216,10 @@ class AppConfig(BaseSettings):
     )
     
     # Nested configuration sections
+    app: AppSettings = Field(
+        default_factory=AppSettings,
+        description="Core application settings"
+    )
     logging: LoggingConfig = Field(
         default_factory=LoggingConfig,
         description="Logging configuration"
@@ -206,15 +229,22 @@ class AppConfig(BaseSettings):
         description="Service mode configuration"
     )
     
-    class Config:
-        env_prefix = "SBOXMGR_"
-        env_nested_delimiter = "__"
-        env_file = ".env"
-        case_sensitive = False
+    model_config = {
+        "env_prefix": "SBOXMGR_",
+        "env_nested_delimiter": "__",
+        "env_file": ".env",
+        "case_sensitive": False,
         # Allow population by field name for CLI integration
-        validate_by_name = True
+        "validate_by_name": True,
         # Allow extra fields for backward compatibility
-        extra = "allow"
+        "extra": "allow"
+    }
+        
+    def __init__(self, **kwargs):
+        """Initialize with proper environment variable handling for nested models."""
+        # Don't override nested configs if they're provided
+        # Let Pydantic handle environment variables for nested models
+        super().__init__(**kwargs)
     
     @field_validator('config_file')
     @classmethod
@@ -249,7 +279,7 @@ class AppConfig(BaseSettings):
                 self.logging.sinks = ["journald"]
             
             # Reduce verbosity in service mode unless explicitly set
-            if not self.debug and self.logging.level == "DEBUG":
+            if not self.app.debug and self.logging.level == "DEBUG":
                 self.logging.level = "INFO"
         
         return self
