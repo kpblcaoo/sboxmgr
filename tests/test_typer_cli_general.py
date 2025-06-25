@@ -8,11 +8,20 @@ runner = CliRunner()
 
 @pytest.fixture
 def fake_url():
+    """Provide a fake subscription URL for testing.
+    
+    Returns:
+        str: Test subscription URL.
+    """
     return "https://example.com/sub-link"
 
 @pytest.fixture
 def minimal_config():
-    # Минимальный валидный конфиг для fetch_json
+    """Provide minimal valid configuration for testing.
+    
+    Returns:
+        dict: Minimal valid configuration with one outbound.
+    """
     return {
         "outbounds": [
             {"type": "vless", "tag": "proxy-1", "server": "1.2.3.4", "server_port": 443, "uuid": "abc"}
@@ -61,6 +70,6 @@ def test_run_creates_selected_config_new_arch(tmp_path, monkeypatch, fake_url):
                 assert "route" in config_data and "rules" in config_data["route"]
     else:
         # Если код возврата 1, проверяем что это корректная ошибка подписки
-        assert ("Failed to restart" in result.stderr or 
-                "No servers parsed" in result.stderr or
-                "ERROR:" in result.stderr), "Должна быть корректная ошибка обработки" 
+        assert ("Failed to restart" in result.output or 
+                "No servers parsed" in result.output or
+                "ERROR:" in result.output), "Должна быть корректная ошибка обработки" 
