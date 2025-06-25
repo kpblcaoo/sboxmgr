@@ -167,7 +167,7 @@ class TestBugFix7CLIUnsupportedFormatHandling:
         assert result.exit_code == 1
         
         # Should show clear error message
-        output = result.stdout + result.stderr if hasattr(result, 'stderr') else result.output
+        output = result.output
         assert "Unsupported format: 'unknown'" in output
         assert "Supported formats: yaml, json, env" in output
 
