@@ -1,8 +1,9 @@
 import os
 import json
-import subprocess
 from logging import info, error
 import tempfile
+
+from ..validation.internal import validate_temp_config, validate_config_file
 
 def generate_config(outbounds, template_file, config_file, backup_file, excluded_ips):
     """Generate sing-box configuration from template."""
@@ -67,14 +68,10 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
     info(f"Temporary configuration written to {temp_config_file}")
 
     try:
-        subprocess.run(["sing-box", "check", "-c", temp_config_file], check=True)
+        validate_temp_config(config)
         info("Temporary configuration validated successfully")
-    except FileNotFoundError:
-        error("sing-box executable not found. Please install sing-box and ensure it is in your PATH.")
-        os.unlink(temp_config_file)
-        return False
-    except subprocess.CalledProcessError as e:
-        error(f"Temporary configuration is invalid or sing-box not found: {e}")
+    except ValueError as e:
+        error(f"Temporary configuration is invalid: {e}")
         os.unlink(temp_config_file)
         raise
 
@@ -113,11 +110,4 @@ def generate_temp_config(outbounds, template_file, excluded_ips):
             rule["ip_cidr"] = excluded_ips_cidr
     return json.dumps(template, indent=2)
 
-def validate_config_file(config_path):
-    """Валидирует конфиг-файл через sing-box check. Возвращает (bool, вывод)."""
-    import subprocess
-    try:
-        result = subprocess.run(["sing-box", "check", "-c", config_path], capture_output=True, text=True)
-        return result.returncode == 0, result.stdout + result.stderr
-    except FileNotFoundError:
-        return False, "sing-box executable not found. Please install sing-box and ensure it is in your PATH."
+# validate_config_file function is now imported from validation.internal module
