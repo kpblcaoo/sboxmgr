@@ -4,7 +4,8 @@ import json
 import pytest
 from unittest.mock import patch, mock_open, Mock
 from sboxmgr.validation.internal import validate_temp_config
-from sboxmgr.config.generate import generate_config
+from sboxmgr.config.generate import generate_config, generate_temp_config, validate_temp_config_dict
+from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
 
 
 class TestConfigGenerateBugfixes:
@@ -77,3 +78,101 @@ class TestConfigGenerateBugfixes:
         assert "outbounds: Field required" in error_message
         # Should not contain artifacts from joining a string character by character
         assert not any(char in error_message for char in ["o; u; t; b; o; u; n; d; s"])
+
+    def test_json_parsing_fix(self):
+        """Test that JSON parsing validation uses correct function."""
+        template_data = {
+            "outbounds": [],
+            "inbounds": [{"type": "mixed", "listen": "127.0.0.1", "listen_port": 1080}]
+        }
+        servers = [{"type": "shadowsocks", "server": "1.2.3.4", "server_port": 8388}]
+        
+        config = generate_temp_config(template_data, servers)
+        
+        # This should not raise an error
+        validate_temp_config_dict(config)
+        
+    def test_server_port_conversion(self):
+        """Test that server_port is properly converted to port."""
+        template_data = {"outbounds": []}
+        servers = [
+            {"type": "shadowsocks", "server": "1.2.3.4", "server_port": 8388, "method": "aes-256-gcm"},
+            {"type": "trojan", "server": "2.3.4.5", "port": 443},  # Already has port
+            {"type": "vmess", "server": "3.4.5.6", "server_port": 80, "port": 8080}  # Both fields
+        ]
+        
+        config = generate_temp_config(template_data, servers)
+        outbounds = config["outbounds"]
+        
+        # First server: server_port should be converted to port
+        assert outbounds[0]["port"] == 8388
+        assert "server_port" not in outbounds[0]
+        
+        # Second server: port should remain unchanged
+        assert outbounds[1]["port"] == 443
+        assert "server_port" not in outbounds[1]
+        
+        # Third server: port should be preserved, server_port removed
+        assert outbounds[2]["port"] == 8080
+        assert "server_port" not in outbounds[2]
+        
+    def test_server_port_missing_both_fields(self):
+        """Test behavior when neither port nor server_port is present."""
+        template_data = {"outbounds": []}
+        servers = [{"type": "shadowsocks", "server": "1.2.3.4", "method": "aes-256-gcm"}]
+        
+        config = generate_temp_config(template_data, servers)
+        outbounds = config["outbounds"]
+        
+        # Should not have port field added
+        assert "port" not in outbounds[0]
+        assert "server_port" not in outbounds[0]
+
+
+class TestURIParserExceptionHandling:
+    """Test improved exception handling in URI parser."""
+    
+    def test_vmess_specific_exceptions(self):
+        """Test that vmess parsing catches specific exceptions."""
+        parser = URIListParser()
+        
+        # Test invalid base64
+        invalid_b64 = "vmess://invalid!base64!"
+        result = parser._parse_vmess(invalid_b64)
+        assert result.type == "vmess"
+        assert result.address == "invalid"
+        assert "decode failed" in result.meta["error"]
+        
+        # Test invalid JSON after base64 decode
+        import base64
+        invalid_json = base64.urlsafe_b64encode(b"not json").decode()
+        invalid_json_uri = f"vmess://{invalid_json}"
+        result = parser._parse_vmess(invalid_json_uri)
+        assert result.type == "vmess"
+        assert result.address == "invalid"
+        assert "decode failed" in result.meta["error"]
+        
+    def test_ss_base64_fallback(self):
+        """Test that SS parsing falls back gracefully on decode errors."""
+        parser = URIListParser()
+        
+        # Test with invalid base64 that should fallback to plain text
+        uri_data = "invalid!base64@example.com:8388"
+        line = f"ss://{uri_data}"
+        result = parser._extract_ss_components(uri_data, line)
+        
+        # Should fallback to treating as plain text
+        assert result == ("invalid!base64", "example.com:8388")
+        
+    def test_ss_parsing_with_various_errors(self):
+        """Test SS parsing handles various error conditions."""
+        parser = URIListParser()
+        
+        # Test completely malformed URI
+        malformed = "ss://totally-broken-uri-with-no-structure"
+        result = parser._parse_ss(malformed)
+        
+        # Should return invalid server
+        assert result.type == "ss"
+        assert result.address == "invalid"
+        assert "error" in result.meta

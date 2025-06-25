@@ -144,9 +144,15 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
                 **server
             }
             
-            # Remove redundant fields
+            # Remove redundant fields and normalize port field
             outbound.pop("name", None)
-            outbound.pop("server_port", None)  # Use port instead
+            
+            # Convert server_port to port if needed
+            if "server_port" in outbound and "port" not in outbound:
+                outbound["port"] = outbound.pop("server_port")
+            elif "server_port" in outbound:
+                # If both exist, remove server_port and keep port
+                outbound.pop("server_port", None)
             
             outbounds.append(outbound)
         
