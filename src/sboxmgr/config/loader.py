@@ -36,9 +36,10 @@ def load_config(config_file_path: Optional[str] = None) -> AppConfig:
     
     # Create config with file data (environment variables handled by Pydantic)
     try:
-        config = AppConfig(**config_data)
+        # Include config_file in initialization to trigger validation
         if config_file_path:
-            config.config_file = config_file_path
+            config_data['config_file'] = config_file_path
+        config = AppConfig(**config_data)
         return config
     except ValidationError:
         # Re-raise original ValidationError to preserve structured error details
@@ -81,7 +82,6 @@ def load_config_file(file_path: str) -> Dict[str, Any]:
             else:
                 # Try to auto-detect format
                 content = f.read()
-                f.seek(0)
                 
                 # Try TOML first
                 try:
