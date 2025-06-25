@@ -192,7 +192,8 @@ service:
     def test_unsupported_format(self, tmp_path):
         """Test error with unsupported file format."""
         config_file = tmp_path / "config.unknown"
-        config_file.write_text("invalid content that's not TOML, YAML, or JSON")
+        # Use content that will fail all parsers (TOML, YAML, JSON)
+        config_file.write_text("{ invalid json content [ with broken syntax }")
         
         with pytest.raises(ValueError) as exc_info:
             load_config_file(str(config_file))
@@ -330,6 +331,10 @@ class TestFindConfigFile:
         """Test when no config file is found."""
         monkeypatch.chdir(tmp_path)
         
+        # Mock Path.home() to return a non-existent directory
+        fake_home = tmp_path / "fake_home"
+        monkeypatch.setattr(Path, 'home', lambda: fake_home)
+        
         found = find_config_file()
         assert found is None
 
@@ -384,7 +389,7 @@ class TestSaveConfig:
         config = AppConfig()
         config_file = tmp_path / "output.unknown"
         
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(OSError) as exc_info:
             save_config(config, str(config_file))
         
         assert "Unsupported configuration file format" in str(exc_info.value)

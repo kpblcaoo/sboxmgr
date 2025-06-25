@@ -254,12 +254,12 @@ def merge_cli_args_to_config(
         config_dict["logging"]["level"] = log_level.upper()
     
     if debug is not None:
-        config_dict["debug"] = debug
+        config_dict["app"]["debug"] = debug
         if debug:
             config_dict["logging"]["level"] = "DEBUG"
     
     if verbose is not None:
-        config_dict["verbose"] = verbose
+        config_dict["app"]["verbose"] = verbose
     
     if service_mode is not None:
         config_dict["service"]["service_mode"] = service_mode
