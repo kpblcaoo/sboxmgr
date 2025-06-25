@@ -246,7 +246,7 @@ def environment_info():
         raise typer.Exit(1)
 
 
-def _output_env_format(data: dict, prefix: str = "", parent_key: str = ""):
+def _output_env_format(data: dict, prefix: str = "", parent_key: str = "") -> None:
     """Output configuration in environment variable format.
     
     Converts nested configuration to SBOXMGR__SECTION__KEY format.

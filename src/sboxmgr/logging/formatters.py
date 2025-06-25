@@ -8,7 +8,7 @@ import json
 import logging
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
 from .trace import get_trace_id
@@ -53,8 +53,8 @@ class StructuredFormatter(logging.Formatter):
         Args:
             record: Log record to enhance
         """
-        # Basic structured fields from LOG-02
-        record.timestamp = datetime.fromtimestamp(record.created).isoformat()
+        # Basic structured fields from LOG-02 (UTC timestamps for structured logging)
+        record.timestamp = datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat()
         record.component = self.component
         record.trace_id = get_trace_id()
         record.pid = self.pid

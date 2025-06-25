@@ -112,6 +112,8 @@ class LoggingCore:
                 self._root_logger.addHandler(handler)
             except Exception as e:
                 # Log error but continue with other sinks
+                # Use stderr directly since logging may not be fully initialized
+                import sys
                 print(f"Warning: Failed to setup {sink_name} sink: {e}", file=sys.stderr)
     
     def _determine_sinks(self) -> Dict[str, Dict]:

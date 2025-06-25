@@ -188,8 +188,6 @@ def _create_journald_handler(config: 'LoggingConfig', level: Optional[str] = Non
     
     except ImportError:
         # Fallback to systemd-cat pipe handler
-        import subprocess
-        
         class SystemdCatHandler(logging.Handler):
             """Custom handler that pipes to systemd-cat."""
             
@@ -198,20 +196,58 @@ def _create_journald_handler(config: 'LoggingConfig', level: Optional[str] = Non
                 self.process = None
             
             def emit(self, record):
+                """Emit log record to systemd-cat with proper error handling."""
                 if not self.process or self.process.poll() is not None:
-                    self.process = subprocess.Popen(
-                        ["systemd-cat", "-t", "sboxmgr"],
-                        stdin=subprocess.PIPE,
-                        text=True
-                    )
+                    try:
+                        self.process = subprocess.Popen(
+                            ["systemd-cat", "-t", "sboxmgr"],
+                            stdin=subprocess.PIPE,
+                            text=True
+                        )
+                    except (OSError, subprocess.SubprocessError) as e:
+                        # Failed to start systemd-cat, silently ignore
+                        self.process = None
+                        return
+                
+                if self.process is None:
+                    return
                 
                 try:
                     msg = self.format(record)
-                    self.process.stdin.write(msg + '\n')
-                    self.process.stdin.flush()
-                except (BrokenPipeError, OSError):
-                    # systemd-cat died, will be recreated on next emit
-                    self.process = None
+                    if self.process.stdin is not None:
+                        self.process.stdin.write(msg + '\n')
+                        self.process.stdin.flush()
+                except (BrokenPipeError, OSError, AttributeError):
+                    # systemd-cat died or stdin is None, cleanup and reset
+                    self._cleanup_process()
+                except Exception:
+                    # Any other error, cleanup and reset
+                    self._cleanup_process()
+            
+            def _cleanup_process(self):
+                """Clean up the systemd-cat process to prevent resource leaks."""
+                if self.process is not None:
+                    try:
+                        if self.process.stdin:
+                            self.process.stdin.close()
+                        self.process.terminate()
+                        # Give it a moment to terminate gracefully
+                        try:
+                            self.process.wait(timeout=1.0)
+                        except subprocess.TimeoutExpired:
+                            # Force kill if it doesn't terminate
+                            self.process.kill()
+                            self.process.wait()
+                    except (OSError, subprocess.SubprocessError):
+                        # Process might already be dead, ignore
+                        pass
+                    finally:
+                        self.process = None
+            
+            def close(self):
+                """Close the handler and cleanup resources."""
+                self._cleanup_process()
+                super().close()
         
         handler = SystemdCatHandler()
         handler.setLevel(level or config.level)
