@@ -113,7 +113,7 @@ def create_handler(
         else:
             raise ValueError(f"Unknown sink type: {sink}")
     
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError, ValueError, RuntimeError) as e:
         # Fallback to stdout if sink creation fails
         if sink != LogSink.STDOUT:
             logging.error(f"Failed to create {sink.value} handler: {e}, falling back to stdout")
@@ -220,8 +220,9 @@ def _create_journald_handler(config: 'LoggingConfig', level: Optional[str] = Non
                 except (BrokenPipeError, OSError, AttributeError):
                     # systemd-cat died or stdin is None, cleanup and reset
                     self._cleanup_process()
-                except Exception:
-                    # Any other error, cleanup and reset
+                except (IOError, ValueError) as e:
+                    # Other I/O or formatting errors, cleanup and reset
+                    logging.debug(f"SystemdCat handler error: {e}")
                     self._cleanup_process()
             
             def _cleanup_process(self):

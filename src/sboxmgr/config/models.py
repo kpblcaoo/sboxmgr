@@ -267,20 +267,30 @@ class AppConfig(BaseSettings):
         When in service mode:
         - Use JSON logging format
         - Prefer journald sink
-        - Reduce log verbosity
+        - Keep explicit DEBUG settings (don't downgrade)
         """
         if self.service.service_mode:
-            # Service mode optimizations
+            # Create new instances with updated values to preserve validation
+            updates = {}
+            
+            # Service mode optimizations - use model_copy to maintain validation
             if self.logging.format == "text":
-                self.logging.format = "json"
+                updates['logging'] = self.logging.model_copy(update={'format': 'json'})
             
             # Prefer journald in service mode
             if self.logging.sinks == ["auto"]:
-                self.logging.sinks = ["journald"]
+                current_logging = updates.get('logging', self.logging)
+                updates['logging'] = current_logging.model_copy(update={'sinks': ['journald']})
             
-            # Reduce verbosity in service mode unless explicitly set
-            if not self.app.debug and self.logging.level == "DEBUG":
-                self.logging.level = "INFO"
+            # BUG FIX: Don't downgrade explicit DEBUG settings
+            # Only adjust level if it wasn't explicitly set by user
+            # This preserves troubleshooting capability in service mode
+            
+            # Apply updates using model_copy to maintain validation
+            if updates:
+                # Update self with new validated instances
+                for key, value in updates.items():
+                    setattr(self, key, value)
         
         return self
     
