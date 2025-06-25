@@ -71,7 +71,9 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
     info(f"Temporary configuration written to {temp_config_file}")
 
     try:
-        validate_temp_config(json.loads(config))
+        # Use imported validation function that expects JSON string
+        from ..validation.internal import validate_temp_config as validate_temp_config_json
+        validate_temp_config_json(config)
         info("Temporary configuration validated successfully")
     except ValueError as e:
         error(f"Temporary configuration is invalid: {e}")
@@ -185,8 +187,8 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
         )
         raise
 
-def validate_temp_config(config_data: dict) -> None:
-    """Validate temporary configuration using internal validation.
+def validate_temp_config_dict(config_data: dict) -> None:
+    """Validate temporary configuration dictionary using internal validation.
     
     Args:
         config_data: Configuration dictionary to validate

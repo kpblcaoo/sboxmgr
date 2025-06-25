@@ -59,7 +59,7 @@ class TestConfigDumpCommand:
         assert result.exit_code == 1
         
         # Should show clear error message (typer outputs to stderr by default)
-        output = result.stdout + result.stderr if hasattr(result, 'stderr') else result.output
+        output = result.output
         assert "Unsupported format: 'unknown'" in output
         assert "Supported formats: yaml, json, env" in output
     
@@ -101,7 +101,7 @@ level = "DEBUG"
         
         assert result.exit_code == 1
         # Check the actual error message format
-        output = result.stdout + result.stderr if hasattr(result, 'stderr') else result.output
+        output = result.output
         assert "Configuration file not found" in output
 
 
@@ -142,7 +142,7 @@ level = "INVALID_LEVEL"
         result = self.runner.invoke(config_app, ["validate", str(config_file)])
         
         assert result.exit_code == 1
-        output = result.stdout + result.stderr if hasattr(result, 'stderr') else result.output
+        output = result.output
         assert "Configuration validation failed" in output
         assert "logging -> level" in output
     
@@ -151,7 +151,7 @@ level = "INVALID_LEVEL"
         result = self.runner.invoke(config_app, ["validate", "/nonexistent.toml"])
         
         assert result.exit_code == 1
-        output = result.stdout + result.stderr if hasattr(result, 'stderr') else result.output
+        output = result.output
         assert "Error validating configuration" in output
 
 
