@@ -118,7 +118,7 @@ class TestHumanFormatter:
         )
         record.created = 1640995200.0
         
-        with patch('sboxmgr.logging.trace.get_trace_id', return_value='test123'):
+        with patch('sboxmgr.logging.formatters.get_trace_id', return_value='test123'):
             formatted = formatter.format(record)
         
         # Should include trace ID in brackets
@@ -135,7 +135,7 @@ class TestHumanFormatter:
         )
         record.created = 1640995200.0
         
-        with patch('sboxmgr.logging.trace.get_trace_id', return_value='test123'):
+        with patch('sboxmgr.logging.formatters.get_trace_id', return_value='test123'):
             formatted = formatter.format(record)
         
         # Should not include trace ID

@@ -23,16 +23,18 @@ class MockSubscriptionManager(SubscriptionManagerInterface):
     """Mock subscription manager for testing."""
     
     def __init__(self, mock_result: PipelineResult = None):
-        self.mock_result = mock_result or PipelineResult(
-            config=[{"type": "vmess", "tag": "test-server", "server": "example.com"}],
-            context=PipelineContext(),
-            success=True
-        )
         self.get_servers_calls = []
         self.export_config_calls = []
+        self.mock_result = mock_result or PipelineResult(
+            config=[{"type": "vmess", "tag": "test-server"}],
+            context=PipelineContext(),
+            errors=[],
+            success=True
+        )
     
     def get_servers(self, user_routes=None, exclusions=None, mode=None, 
                    context=None, force_reload=False):
+        """Mock get_servers method."""
         self.get_servers_calls.append({
             'user_routes': user_routes,
             'exclusions': exclusions,
@@ -44,31 +46,27 @@ class MockSubscriptionManager(SubscriptionManagerInterface):
     
     def export_config(self, exclusions=None, user_routes=None, context=None,
                      routing_plugin=None, export_manager=None, skip_version_check=False):
+        """Mock export_config method."""
         self.export_config_calls.append({
             'exclusions': exclusions,
             'user_routes': user_routes,
             'context': context,
+            'routing_plugin': routing_plugin,
+            'export_manager': export_manager,
             'skip_version_check': skip_version_check
         })
-        return self.mock_result
+        return {"outbounds": [{"tag": "exported"}]}
 
 
 class MockExportManager(ExportManagerInterface):
     """Mock export manager for testing."""
     
     def __init__(self, mock_config: Dict = None):
-        self.mock_config = mock_config or {"outbounds": [{"tag": "test"}]}
-        self.export_calls = []
+        self.mock_config = mock_config or {"outbounds": []}
     
     def export(self, servers, exclusions=None, user_routes=None, context=None,
               client_profile=None, skip_version_check=False):
-        self.export_calls.append({
-            'servers': servers,
-            'exclusions': exclusions,
-            'user_routes': user_routes,
-            'context': context,
-            'skip_version_check': skip_version_check
-        })
+        """Mock export method."""
         return self.mock_config
 
 
@@ -76,36 +74,36 @@ class MockExclusionManager(ExclusionManagerInterface):
     """Mock exclusion manager for testing."""
     
     def __init__(self):
-        self.exclusions = {}
-        self.operation_calls = []
+        self.exclusions = set()
     
     def add(self, server_id: str, name=None, reason=None):
-        self.operation_calls.append(('add', server_id, name, reason))
-        if server_id not in self.exclusions:
-            self.exclusions[server_id] = {'name': name, 'reason': reason}
-            return True
-        return False
+        """Mock add method."""
+        self.exclusions.add(server_id)
+        return True
     
     def remove(self, server_id: str):
-        self.operation_calls.append(('remove', server_id))
-        if server_id in self.exclusions:
-            del self.exclusions[server_id]
-            return True
-        return False
-    
+        """Mock remove method."""
+        was_present = server_id in self.exclusions
+        self.exclusions.discard(server_id)
+        return was_present  # Возвращаем boolean как ожидает orchestrator
+
     def contains(self, server_id: str):
+        """Mock contains method."""
         return server_id in self.exclusions
-    
+
     def list_all(self):
-        return [{'server_id': sid, **data} for sid, data in self.exclusions.items()]
-    
+        """Mock list_all method."""
+        return list(self.exclusions)
+
     def clear(self):
+        """Mock clear method."""
         count = len(self.exclusions)
         self.exclusions.clear()
-        return count
-    
+        return count  # Возвращаем int как ожидает orchestrator
+
     def filter_servers(self, servers):
-        return [s for s in servers if not self.contains(s.get('tag', ''))]
+        """Mock filter_servers method."""
+        return [s for s in servers if s.get("tag") not in self.exclusions]
 
 
 class TestOrchestratorConfig:
@@ -291,6 +289,7 @@ class TestOrchestrator:
                 {"type": "vmess", "tag": "server2", "server": "example2.com"}
             ],
             context=PipelineContext(),
+            errors=[],
             success=True
         )
         
@@ -315,8 +314,8 @@ class TestOrchestrator:
         sub_mgr = MockSubscriptionManager(PipelineResult(
             config=None,
             context=PipelineContext(),
-            success=False,
-            errors=["Mock error"]
+            errors=["Mock error"],
+            success=False
         ))
         
         config = OrchestratorConfig(fail_safe=True)
@@ -392,6 +391,7 @@ class TestOrchestrator:
         mock_servers_result = PipelineResult(
             config=[{"type": "vmess", "tag": "test-server"}],
             context=PipelineContext(),
+            errors=[],
             success=True
         )
         
@@ -421,12 +421,13 @@ class TestOrchestrator:
         mock_failed_result = PipelineResult(
             config=None,
             context=PipelineContext(),
-            success=False,
-            errors=["Server fetch failed"]
+            errors=["Server fetch failed"],
+            success=False
         )
         
         sub_mgr = MockSubscriptionManager(mock_failed_result)
-        orchestrator = Orchestrator(subscription_manager=sub_mgr)
+        config = OrchestratorConfig(fail_safe=False)  # Настраиваем strict режим
+        orchestrator = Orchestrator(subscription_manager=sub_mgr, config=config)
         
         with patch.object(orchestrator, 'get_subscription_servers', return_value=mock_failed_result):
             with pytest.raises(OrchestratorError) as exc_info:

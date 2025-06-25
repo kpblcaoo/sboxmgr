@@ -57,3 +57,4 @@ mutants/
 .mutmut-cache
 .mutmut
 mutation_testing/
+struct_src.json

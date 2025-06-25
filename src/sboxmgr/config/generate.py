@@ -71,7 +71,7 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
     info(f"Temporary configuration written to {temp_config_file}")
 
     try:
-        validate_temp_config(config)
+        validate_temp_config(json.loads(config))
         info("Temporary configuration validated successfully")
     except ValueError as e:
         error(f"Temporary configuration is invalid: {e}")
@@ -104,7 +104,7 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
     emit_event(
         EventType.CONFIG_GENERATED,
         {
-            "template_keys": list(template_data.keys()),
+            "template_keys": list(template_data.keys()) if isinstance(template_data, dict) else [],
             "server_count": len(servers),
             "user_routes_count": len(user_routes) if user_routes else 0,
             "status": "started"
@@ -137,7 +137,7 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
                 
             # Create outbound configuration
             outbound = {
-                "tag": f"proxy-{i+1}",
+                "tag": server.get("tag", f"proxy-{i+1}"),
                 "type": server.get("type", "shadowsocks"),
                 **server
             }

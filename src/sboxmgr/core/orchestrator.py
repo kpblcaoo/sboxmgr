@@ -186,10 +186,12 @@ class Orchestrator:
                 mode=mode or self.config.default_mode,
                 debug_level=self.config.debug_level
             )
-            
-            # Create subscription manager for this source
-            from sboxmgr.subscription.manager import SubscriptionManager
-            sub_manager = SubscriptionManager(source)
+            if hasattr(self, "_subscription_manager") and self._subscription_manager is not None:
+                sub_manager = self._subscription_manager
+            else:
+                # Create subscription manager for this source
+                from sboxmgr.subscription.manager import SubscriptionManager
+                sub_manager = SubscriptionManager(source)
             
             # Get servers through pipeline
             result = sub_manager.get_servers(
