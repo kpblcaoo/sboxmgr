@@ -26,7 +26,7 @@ def dump_config(
     format: str = typer.Option(
         "yaml",
         "--format",
-        help="Output format for configuration dump"
+        help="Output format for configuration dump (yaml, json, env)"
     ),
     include_defaults: bool = typer.Option(
         False,
@@ -102,6 +102,15 @@ def dump_config(
         elif format == "env":
             # Output as environment variables
             _output_env_format(config_data, prefix="SBOXMGR")
+        
+        else:
+            typer.echo(f"❌ Unsupported format: '{format}'", err=True)
+            typer.echo("Supported formats: yaml, json, env", err=True)
+            raise typer.Exit(1)
+    
+    except typer.Exit:
+        # Re-raise typer.Exit without modification
+        raise
     
     except ValidationError as e:
         typer.echo(f"❌ Configuration validation error:", err=True)
@@ -241,6 +250,11 @@ def _output_env_format(data: dict, prefix: str = "", parent_key: str = ""):
     """Output configuration in environment variable format.
     
     Converts nested configuration to SBOXMGR__SECTION__KEY format.
+    
+    Args:
+        data: Configuration dictionary to convert
+        prefix: Environment variable prefix
+        parent_key: Parent key for nested structures
     """
     for key, value in data.items():
         if key.startswith("_"):  # Skip metadata

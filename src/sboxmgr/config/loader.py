@@ -40,8 +40,9 @@ def load_config(config_file_path: Optional[str] = None) -> AppConfig:
         if config_file_path:
             config.config_file = config_file_path
         return config
-    except ValidationError as e:
-        raise ValidationError(f"Configuration validation failed: {e}")
+    except ValidationError:
+        # Re-raise original ValidationError to preserve structured error details
+        raise
 
 
 def load_config_file(file_path: str) -> Dict[str, Any]:
@@ -219,7 +220,7 @@ def create_default_config_file(output_path: str) -> None:
             toml.dump(default_config, f)
             
     except Exception as e:
-        raise ConfigValidationError(f"Cannot create config file {output_path}: {e}")
+        raise OSError(f"Cannot create config file {output_path}: {e}")
 
 
 def merge_cli_args_to_config(
@@ -246,7 +247,7 @@ def merge_cli_args_to_config(
     Returns:
         AppConfig: Updated configuration object
     """
-    config_dict = base_config.dict()
+    config_dict = base_config.model_dump()
     
     # Apply CLI overrides
     if log_level is not None:
