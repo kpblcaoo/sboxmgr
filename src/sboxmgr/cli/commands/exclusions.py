@@ -1,6 +1,6 @@
 import typer
 from sboxmgr.config.fetch import fetch_json
-from sboxmgr.server.exclusions import load_exclusions, exclude_servers, remove_exclusions, view_exclusions
+from sboxmgr.server.exclusions import exclude_servers, remove_exclusions, view_exclusions
 from sboxmgr.utils.env import SUPPORTED_PROTOCOLS
 from sboxmgr.i18n.t import t
 

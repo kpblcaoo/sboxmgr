@@ -35,8 +35,8 @@ class LoggingMiddleware(BaseMiddleware):
         debug_level = getattr(context, 'debug_level', 0)
         if debug_level > 0:
             data = str([(s.type, s.address, s.port) for s in servers]).encode()
-            h = hashlib.md5(data).hexdigest()
-            print(f"[DEBUG][{self.stage_name}] servers: {len(servers)}, md5: {h}")
+            h = hashlib.sha256(data).hexdigest()[:16]  # Truncate for readability
+            print(f"[DEBUG][{self.stage_name}] servers: {len(servers)}, sha256: {h}")
         return servers
 
 # === Sandbox/audit registration ===

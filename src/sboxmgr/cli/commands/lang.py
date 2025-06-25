@@ -97,9 +97,9 @@ def lang_cmd(
             ai = " [AI]" if is_ai_lang(code) else ""
             langs_out.append(f"  {code} - {name}{ai}")
         typer.echo("Available languages:")
-        for l in langs_out:
-            typer.echo(l)
+        for lang_line in langs_out:
+            typer.echo(lang_line)
         if any(is_ai_lang(code) for code in langs):
             typer.echo("Note: [AI] = machine-translated, not reviewed. Contributions welcome!")
-        typer.echo(f"To set language persistently: sboxctl lang --set ru")
-        typer.echo(f"Or for one-time use: SBOXMGR_LANG=ru sboxctl ...") 
+        typer.echo("To set language persistently: sboxctl lang --set ru")
+        typer.echo("Or for one-time use: SBOXMGR_LANG=ru sboxctl ...") 

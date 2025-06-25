@@ -1,10 +1,10 @@
-import os
 import requests
 import gzip
 from ..models import SubscriptionSource
 from ..base_fetcher import BaseFetcher
 from ..registry import register
 import threading
+from sboxmgr.utils.env import get_fetch_timeout
 
 @register("url")
 @register("url_base64")
@@ -57,7 +57,8 @@ class URLFetcher(BaseFetcher):
             if ua != "":
                 headers["User-Agent"] = ua
             # Убираем безусловный print - будет логироваться в manager.py
-            resp = requests.get(self.source.url, headers=headers, stream=True)
+            timeout = get_fetch_timeout()
+            resp = requests.get(self.source.url, headers=headers, stream=True, timeout=timeout)
             resp.raise_for_status()
             data = resp.raw.read(size_limit + 1)
             if len(data) > size_limit:
@@ -79,15 +80,4 @@ class URLFetcher(BaseFetcher):
             except Exception as e:
                 print(f"[fetcher][WARN] Failed to decompress gzip data: {e}")
                 return data
-        return data
-
-    def _get_size_limit(self) -> int:
-        """Возвращает лимит размера входных данных в байтах (по умолчанию 2 MB)."""
-        env_limit = os.getenv("SBOXMGR_FETCH_SIZE_LIMIT")
-        if env_limit:
-            try:
-                return int(env_limit)
-            except Exception:
-                pass
-        # TODO: добавить чтение из config.toml
-        return 2 * 1024 * 1024 
+        return data 

@@ -1,6 +1,4 @@
-import os
 import requests
-from ..models import SubscriptionSource
 from ..base_fetcher import BaseFetcher
 from ..registry import register
 import threading
@@ -46,10 +44,10 @@ class JSONFetcher(BaseFetcher):
             ua = self.source.user_agent
             if ua is None:
                 ua = "ClashMeta/1.0"  # дефолтный UA
-            if ua != "":
+            if ua is "":
                 headers["User-Agent"] = ua
             print(f"[fetcher] Using User-Agent: {headers.get('User-Agent', '[none]')}")
-            resp = requests.get(self.source.url, headers=headers, stream=True)
+            resp = requests.get(self.source.url, headers=headers, stream=True, timeout=30)
             resp.raise_for_status()
             
             # Используем iter_content для правильной обработки сжатых данных
@@ -64,13 +62,4 @@ class JSONFetcher(BaseFetcher):
                 self._fetch_cache[key] = data
             return data
 
-    def _get_size_limit(self) -> int:
-        """Возвращает лимит размера входных данных в байтах (по умолчанию 2 MB)."""
-        env_limit = os.getenv("SBOXMGR_FETCH_SIZE_LIMIT")
-        if env_limit:
-            try:
-                return int(env_limit)
-            except Exception:
-                pass
-        # TODO: добавить чтение из config.toml
-        return 2 * 1024 * 1024 
+ 

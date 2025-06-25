@@ -16,7 +16,7 @@ def load_exclusions(dry_run=False):
         except json.JSONDecodeError:
             if not dry_run:
                 logging.error(f"Файл {EXCLUSION_FILE} повреждён или невалиден. Игнорируем содержимое и продолжаем с пустым списком исключений.")
-                typer.echo(f"[Ошибка] exclusions.json повреждён или невалиден. Сброшен до пустого состояния.")
+                typer.echo("[Ошибка] exclusions.json повреждён или невалиден. Сброшен до пустого состояния.")
             return {"last_modified": "", "exclusions": []}
     return {"last_modified": "", "exclusions": []}
 

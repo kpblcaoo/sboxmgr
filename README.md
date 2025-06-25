@@ -210,12 +210,14 @@ All paths are configurable via environment variables:
 |---------------------------------|------------------------------|
 | `SBOXMGR_CONFIG_FILE`           | ./config.json                |
 | `SBOXMGR_TEMPLATE_FILE`         | ./config.template.json       |
-| `SBOXMGR_LOG_FILE`              | ./sboxmgr.log                |
+| `SBOXMGR_LOG_FILE`              | ~/.local/share/sboxmgr/sboxmgr.log (or ./sboxmgr.log) |
 | `SBOXMGR_EXCLUSION_FILE`        | ./exclusions.json            |
 | `SBOXMGR_SELECTED_CONFIG_FILE`  | ./selected_config.json       |
 | `SBOXMGR_URL`                   | (no default, must be set)    |
 
 You can use a `.env` file in the project root for local development.
+
+**Note on logging:** By default, logs are written to `~/.local/share/sboxmgr/sboxmgr.log` (XDG Base Directory spec). If this directory is not writable, logs fall back to `./sboxmgr.log` in the current directory. For system service deployment, set `SBOXMGR_LOG_FILE=/var/log/sboxmgr.log` explicitly.
 
 ---
 

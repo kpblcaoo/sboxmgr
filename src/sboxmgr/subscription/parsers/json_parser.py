@@ -11,9 +11,9 @@ class JSONParser(BaseParser):
     def parse(self, raw: bytes) -> List[ParsedServer]:
         debug_level = get_debug_level()
         try:
-            data = json.loads(raw.decode("utf-8"))
+            json.loads(raw.decode("utf-8"))
         except Exception as e:
-            if debug_level > 1:
+            if debug_level > 2:
                 print(f"[WARN] JSON parse error: {e}")
             raise  # выбрасываем ошибку дальше
         # TODO: распарсить data в список ParsedServer (заглушка)
@@ -27,7 +27,7 @@ class TolerantJSONParser(BaseParser):
         if removed and debug_level > 0:
             print(f"[TolerantJSONParser] Removed comments/fields: {removed}")
         try:
-            data = json.loads(clean_json)
+            json.loads(clean_json)
         except Exception as e:
             if debug_level > 0:
                 print(f"[TolerantJSONParser] JSON parse error after cleaning: {e}")
@@ -42,16 +42,16 @@ class TolerantJSONParser(BaseParser):
         clean_lines = []
         found_json_start = False
         for line in lines:
-            l = line.strip()
+            stripped_line = line.strip()
             if not found_json_start:
-                if l.startswith("{") or l.startswith("["):
+                if stripped_line.startswith("{") or stripped_line.startswith("["):
                     found_json_start = True
                     clean_lines.append(line)
                 else:
                     removed.append(line)
                 continue
             # После старта JSON — обычная очистка
-            if l.startswith("//") or l.startswith("#"):
+            if stripped_line.startswith("//") or stripped_line.startswith("#"):
                 removed.append(line)
                 continue
             # Удаляем inline // и # комментарии

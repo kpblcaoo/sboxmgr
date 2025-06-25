@@ -76,12 +76,14 @@ pytest -v tests/
 |---------------------------------|-------------------------------|
 | `SBOXMGR_CONFIG_FILE`           | ./config.json                 |
 | `SBOXMGR_TEMPLATE_FILE`         | ./config.template.json        |
-| `SBOXMGR_LOG_FILE`              | ./sboxmgr.log                 |
+| `SBOXMGR_LOG_FILE`              | ~/.local/share/sboxmgr/sboxmgr.log (или ./sboxmgr.log) |
 | `SBOXMGR_EXCLUSION_FILE`        | ./exclusions.json             |
 | `SBOXMGR_SELECTED_CONFIG_FILE`  | ./selected_config.json        |
 | `SBOXMGR_URL`                   | (нет значения по умолчанию)   |
 
 Для локальной разработки можно использовать файл `.env` в корне проекта.
+
+**Примечание о логировании:** По умолчанию логи записываются в `~/.local/share/sboxmgr/sboxmgr.log` (XDG Base Directory spec). Если эта директория недоступна для записи, логи сохраняются в `./sboxmgr.log` в текущей директории. Для развертывания как системный сервис установите `SBOXMGR_LOG_FILE=/var/log/sboxmgr.log` явно.
 
 **Примечание:** По умолчанию конфиг пишется в `/etc/sing-box/config.json` (дефолтная директория sing-box). Если ваша установка sing-box использует другой путь, задайте `SBOXMGR_CONFIG_FILE` в `.env`.
 

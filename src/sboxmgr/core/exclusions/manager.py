@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import List, Dict, Optional, Any, Tuple, Union
 import threading
 import fnmatch
-from datetime import datetime, timezone
 
 from .interface import ExclusionManagerInterface
 from .models import ExclusionEntry, ExclusionList

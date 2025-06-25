@@ -1,8 +1,7 @@
 """Interface for ExclusionManager implementations."""
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Optional
-from pathlib import Path
+from typing import List, Dict
 
 
 class ExclusionManagerInterface(ABC):

@@ -1,48 +1,41 @@
-from .models import SubscriptionSource, ParsedServer, PipelineContext, PipelineResult
+from .models import SubscriptionSource, PipelineContext, PipelineResult
 from .registry import get_plugin, load_entry_points
 from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации
-from .validators import required_fields  # <--- Явный импорт валидатора
-from typing import List, Optional
+
+from typing import Optional
 from sboxmgr.export.export_manager import ExportManager
 from .base_selector import DefaultSelector
 from .postprocessor_base import DedupPostProcessor, PostProcessorChain
 from .errors import PipelineError, ErrorType
 from datetime import datetime, timezone
-from .validators.base import RAW_VALIDATOR_REGISTRY, ValidationResult
+from .validators.base import RAW_VALIDATOR_REGISTRY
 from .middleware_base import MiddlewareChain
-import functools
+
 import threading
 
 def detect_parser(raw: bytes, source_type: str) -> Optional[object]:
-    """Detect the appropriate parser for subscription data.
-    
-    Attempts to identify the correct parser based on data format analysis
-    and source type hints. Uses various heuristics including content
-    inspection, format detection, and fallback strategies.
+    """Auto-detect appropriate parser based on data content.
     
     Args:
-        raw: Raw subscription data to analyze.
-        source_type: Hint about the expected source type.
+        raw: Raw subscription data bytes.
+        source_type: Subscription source type hint.
         
     Returns:
-        Parser instance capable of handling the data format, or None if
-        no suitable parser could be determined.
-        
-    Note:
-        Falls back to Base64Parser if no specific parser is detected,
-        as this handles the most common subscription format.
+        Parser instance or None if detection fails.
     """
-    text = raw[:2000].decode('utf-8', errors='ignore').lstrip()
-    # 1. Пробуем tolerant JSON
-    from .parsers.json_parser import TolerantJSONParser, JSONParser
+    # Декодируем данные
+    text = raw.decode('utf-8', errors='ignore')
+    # 1. Пробуем JSON (SingBox)
     try:
-        parser = TolerantJSONParser()
+        from .parsers.singbox_parser import SingBoxParser
+        parser = SingBoxParser()
         data = parser._strip_comments_and_validate(text)[0]
         import json
         json.loads(data)
         return parser
-    except Exception:
-        pass
+    except Exception as e:
+        import logging
+        logging.debug(f"JSON parser detection failed: {e}")
     # 2. Пробуем Clash YAML
     if text.startswith(("mixed-port:", "proxies:", "proxy-groups:", "proxy-providers:")) or 'proxies:' in text:
         from .parsers.clash_parser import ClashParser
@@ -58,11 +51,12 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[object]:
             if any(proto in decoded_text for proto in ("vless://", "vmess://", "trojan://", "ss://")):
                 from .parsers.base64_parser import Base64Parser
                 return Base64Parser()
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.debug(f"Base64 parser detection failed: {e}")
     # 4. Пробуем plain URI list
     lines = text.splitlines()
-    if any(l.strip().startswith(("vless://", "vmess://", "trojan://", "ss://")) for l in lines):
+    if any(line.strip().startswith(("vless://", "vmess://", "trojan://", "ss://")) for line in lines):
         from .parsers.uri_list_parser import URIListParser
         return URIListParser()
     # fallback
@@ -116,12 +110,10 @@ class SubscriptionManager:
             # Пока просто ошибка
             raise ValueError(f"Unknown source_type: {source.source_type}")
         self.fetcher = fetcher_cls(source)
-        from .postprocessor_base import PostProcessorChain, DedupPostProcessor
         if postprocessor_chain is not None:
             self.postprocessor = postprocessor_chain
         else:
             self.postprocessor = PostProcessorChain([DedupPostProcessor()])
-        from .middleware_base import MiddlewareChain
         if middleware_chain is not None:
             self.middleware_chain = middleware_chain
         else:
@@ -189,7 +181,7 @@ class SubscriptionManager:
                 if ua:
                     print(f"[fetcher] Using User-Agent: {ua}")
                 else:
-                    print(f"[fetcher] Using User-Agent: [default]")
+                    print("[fetcher] Using User-Agent: [default]")
             raw = self.fetcher.fetch()
             # Отладочные print в зависимости от debug_level
             if debug_level >= 2:
@@ -242,7 +234,7 @@ class SubscriptionManager:
                     print(f"[DEBUG] servers after validation: {servers}")
                 if not servers:
                     if debug_level >= 2:
-                        print(f"[DEBUG] No valid servers after validation, returning empty config and success=False")
+                        print("[DEBUG] No valid servers after validation, returning empty config and success=False")
                     err = PipelineError(
                         type=ErrorType.VALIDATION,
                         stage="parsed_validate",
@@ -264,7 +256,7 @@ class SubscriptionManager:
             # === End ParsedValidator ===
             servers = self.middleware_chain.process(servers, context)
             if debug_level >= 2:
-                print(f"[debug] servers after middleware: {servers[:3]}{' ...' if len(servers) > 3 else ''}")
+                print(f"[debug] servers after middleware: {servers[: 2]}{' ...' if len(servers) > 3 else ''}")
             servers = self.postprocessor.process(servers)
             servers = self.selector.select(servers, user_routes=user_routes, exclusions=exclusions, mode=mode)
             result = PipelineResult(config=servers, context=context, errors=context.metadata['errors'], success=True)

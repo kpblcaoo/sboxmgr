@@ -45,88 +45,144 @@ class URIListParser(BaseParser):
         return servers
 
     def _parse_ss(self, line: str) -> ParsedServer:
-        # ss://[base64-encoded] или ss://method:password@host:port[#tag][?query]
+        """Parse shadowsocks URI into ParsedServer object.
+        
+        Supports both base64-encoded and plain format:
+        - ss://base64(method:password@host:port)  # pragma: allowlist secret
+        - ss://method:password@host:port  # pragma: allowlist secret
+        
+        Args:
+            line: Shadowsocks URI string
+            
+        Returns:
+            ParsedServer object with parsed configuration
+        """
         parsed = urlparse(line)
         uri = parsed.netloc + parsed.path
         tag = unquote(parsed.fragment) if parsed.fragment else ""
         query = parse_qs(parsed.query)
-        debug_level = get_debug_level()
-        # Попытка tolerant-декодирования как base64
+        
         try:
-            # Если есть @, base64 до @, иначе вся строка
-            if '@' in uri:
-                b64, after = uri.split('@', 1)
-                try:
-                    decoded = base64.urlsafe_b64decode(b64 + '=' * (-len(b64) % 4)).decode('utf-8')
-                except Exception:
-                    decoded = b64  # fallback: не base64, возможно plain
-                method_pass = decoded
-                host_port = after
-            else:
-                # Вся строка — base64 или plain
-                try:
-                    decoded = base64.urlsafe_b64decode(uri + '=' * (-len(uri) % 4)).decode('utf-8')
-                except Exception:
-                    decoded = uri  # fallback: не base64, возможно plain
-                if '@' in decoded:
-                    method_pass, host_port = decoded.split('@', 1)
-                else:
-                    if debug_level > 0:
-                        logger.warning(f"ss:// no host in line: {line}")
-                    return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "no host in ss://"})
-            if ':' not in method_pass:
-                if debug_level > 0:
-                    logger.warning(f"ss:// parse failed (no colon in method:pass): {line}")
-                return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "parse failed"})
+            method_pass, host_port = self._extract_ss_components(uri, line)
+            if not method_pass or not host_port:
+                return self._create_invalid_ss_server("failed to extract components")
+                
+            method, password = self._parse_ss_credentials(method_pass, line)
+            if not method or not password:
+                return self._create_invalid_ss_server("failed to parse credentials")
+                
+            host, port, endpoint_error = self._parse_ss_endpoint(host_port, line)
+            if not host or port == 0:
+                return self._create_invalid_ss_server(endpoint_error or "failed to parse endpoint")
+                
+            return self._create_ss_server(method, password, host, port, tag, query)
             
-            method, password = method_pass.split(':', 1)
-            
-            # Проверяем наличие порта в host_port
-            if ':' not in host_port:
-                if debug_level > 0:
-                    logger.warning(f"ss:// parse failed (no port specified): {line}")
-                return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "no port specified"})
-            
-            host, port_str = host_port.split(':', 1)
-            
+        except Exception:
+            return self._parse_ss_with_regex(uri, tag, query, line)
+
+    def _extract_ss_components(self, uri: str, line: str) -> tuple[str, str]:
+        """Extract method:password and host:port components from SS URI."""
+        debug_level = get_debug_level()
+        
+        # Try base64 decoding first
+        if '@' in uri:
+            b64, after = uri.split('@', 1)
             try:
-                port = int(port_str)
-            except ValueError:
-                if debug_level > 0:
-                    logger.warning(f"ss:// invalid port: {port_str} in line: {line}")
-                return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "invalid port"})
+                decoded = base64.urlsafe_b64decode(b64 + '=' * (-len(b64) % 4)).decode('utf-8')
+            except Exception:
+                decoded = b64  # fallback: not base64
+            return decoded, after
+        else:
+            # Whole string is base64 or plain
+            try:
+                decoded = base64.urlsafe_b64decode(uri + '=' * (-len(uri) % 4)).decode('utf-8')
+            except Exception:
+                decoded = uri  # fallback: not base64
             
-            meta = {"password": password}  # pragma: allowlist secret
+            if '@' in decoded:
+                return decoded.split('@', 1)
+            else:
+                if debug_level > 0:
+                    logger.warning(f"ss:// no host in line: {line}")
+                return "", ""
+
+    def _parse_ss_credentials(self, method_pass: str, line: str) -> tuple[str, str]:
+        """Parse method and password from method:password string."""
+        debug_level = get_debug_level()
+        
+        if ':' not in method_pass:
+            if debug_level > 0:
+                logger.warning(f"ss:// parse failed (no colon in method:pass): {line}")
+            return "", ""
+        
+        return method_pass.split(':', 1)
+
+    def _parse_ss_endpoint(self, host_port: str, line: str) -> tuple[str, int, str]:
+        """Parse host and port from host:port string.
+        
+        Returns:
+            Tuple of (host, port, error_message). If parsing fails, 
+            host/port will be empty/0 and error_message will describe the issue.
+        """
+        debug_level = get_debug_level()
+        
+        if ':' not in host_port:
+            if debug_level > 0:
+                logger.warning(f"ss:// parse failed (no port specified): {line}")
+            return "", 0, "no port specified"
+        
+        host, port_str = host_port.split(':', 1)
+        
+        try:
+            port = int(port_str)
+            return host, port, ""
+        except ValueError:
+            if debug_level > 0:
+                logger.warning(f"ss:// invalid port: {port_str} in line: {line}")
+            return "", 0, "invalid port"
+
+    def _create_ss_server(self, method: str, password: str, host: str, port: int, tag: str, query: dict) -> ParsedServer:
+        """Create ParsedServer object for shadowsocks configuration."""
+        meta = {"password": password}  # pragma: allowlist secret
+        if tag:
+            meta["tag"] = tag
+        for k, v in query.items():
+            meta[k] = v[0] if v else ""
+        
+        return ParsedServer(
+            type="ss",
+            address=host,
+            port=port,
+            security=method,
+            meta=meta
+        )
+
+    def _create_invalid_ss_server(self, error: str) -> ParsedServer:
+        """Create invalid ParsedServer for failed SS parsing."""
+        return ParsedServer(type="ss", address="invalid", port=0, meta={"error": error})
+
+    def _parse_ss_with_regex(self, uri: str, tag: str, query: dict, line: str) -> ParsedServer:
+        """Fallback SS parsing using regex pattern matching."""
+        debug_level = get_debug_level()
+        
+        match = re.match(r'(?P<method>[^:]+):(?P<password>[^@]+)@(?P<host>[^:]+):(?P<port>\d+)', uri)  # pragma: allowlist secret
+        if match:
+            meta = {"password": match.group('password')}  # pragma: allowlist secret
             if tag:
                 meta["tag"] = tag
             for k, v in query.items():
                 meta[k] = v[0] if v else ""
             return ParsedServer(
                 type="ss",
-                address=host,
-                port=port,
-                security=method,
+                address=match.group('host'),
+                port=int(match.group('port')),
+                security=match.group('method'),
                 meta=meta
             )
-        except Exception as e:
-            # Если не base64 и не plain, пробуем tolerant-regex
-            match = re.match(r'(?P<method>[^:]+):(?P<password>[^@]+)@(?P<host>[^:]+):(?P<port>\d+)', uri)
-            if match:
-                meta = {"password": match.group('password')}  # pragma: allowlist secret
-                if tag:
-                    meta["tag"] = tag
-                for k, v in query.items():
-                    meta[k] = v[0] if v else ""
-                return ParsedServer(
-                    type="ss",
-                    address=match.group('host'),
-                    port=int(match.group('port')),
-                    security=match.group('method'),
-                    meta=meta
-                )
-            if debug_level > 0:
-                logger.warning(f"ss:// totally failed to parse: {line} ({e})")
-            return ParsedServer(type="ss", address="invalid", port=0, meta={"error": "parse failed"})
+        
+        if debug_level > 0:
+            logger.warning(f"ss:// totally failed to parse: {line}")
+        return self._create_invalid_ss_server("parse failed")
 
     def _parse_trojan(self, line: str) -> ParsedServer:
         # trojan://password@host:port?params#tag
@@ -176,5 +232,5 @@ class URIListParser(BaseParser):
                 security=data.get("security"),
                 meta=data
             )
-        except Exception:
+        except CosmicRayTestingException:
             return ParsedServer(type="vmess", address="invalid", port=0, meta={"error": "base64/json decode failed"}) 

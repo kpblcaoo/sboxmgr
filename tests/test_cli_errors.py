@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from conftest import run_cli
+from .conftest import run_cli
 
 load_dotenv()
 

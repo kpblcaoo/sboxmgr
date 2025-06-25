@@ -51,3 +51,9 @@ build/
 *.pyzw
 event_log/
 .cursor/
+
+# Mutation testing
+mutants/
+.mutmut-cache
+.mutmut
+mutation_testing/

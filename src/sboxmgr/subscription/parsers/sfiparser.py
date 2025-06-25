@@ -1,6 +1,5 @@
 from ..registry import register
 from ..base_parser import BaseParser
-from ..models import SubscriptionSource, ParsedServer
 
 
 @register("custom_parser")

@@ -166,12 +166,11 @@ class InboundProfile(BaseModel):
         return v
     
     @field_validator('port')
-    def validate_port(cls, v, values):
+    def validate_port(cls, v):
         """Validate port number range.
         
         Args:
             v: The port number to validate.
-            values: Other field values (unused).
             
         Returns:
             The validated port number.
