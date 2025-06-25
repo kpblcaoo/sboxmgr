@@ -1,3 +1,10 @@
+"""Configuration generation and validation.
+
+This module handles the generation of sing-box configuration files from
+templates and server lists. It includes functions for merging templates with
+outbound configurations, validating the resulting configuration using internal
+Pydantic schemas, and writing configurations to disk with backup support.
+"""
 import os
 import json
 from logging import info, error

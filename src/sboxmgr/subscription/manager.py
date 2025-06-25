@@ -1,3 +1,11 @@
+"""Subscription management and orchestration.
+
+This module provides the main SubscriptionManager class that orchestrates
+the entire subscription processing pipeline from fetching to export. It
+coordinates fetchers, parsers, validators, postprocessors, and exporters
+to provide a unified subscription processing interface.
+"""
+
 from .models import SubscriptionSource, PipelineContext, PipelineResult
 from .registry import get_plugin, load_entry_points
 from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации

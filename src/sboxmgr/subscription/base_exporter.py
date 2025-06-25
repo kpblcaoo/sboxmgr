@@ -1,3 +1,10 @@
+"""Base exporter interface for subscription data transformation.
+
+This module defines the abstract base class for exporters that convert parsed
+server configurations into various client formats (sing-box JSON, Clash YAML,
+v2ray config, etc.). All concrete exporters must implement the BaseExporter
+interface to ensure consistent behavior across different output formats.
+"""
 from abc import ABC, abstractmethod
 from .models import ParsedServer
 from typing import List

@@ -25,5 +25,6 @@
   "cli.exclusions.help": "管理排除项：添加、删除、查看。",
   "cli.clear_exclusions.help": "清除所有排除项。",
   "cli.lang.help": "管理 CLI 语言（i18n）：显示当前、列出可用、设置并保存语言。",
-  "cli.lang.bilingual_notice": "仅在未显式设置语言时使用双语模式（en + system）。显式设置语言后只会显示该语言。"
+  "cli.lang.bilingual_notice": "仅在未显式设置语言时使用双语模式（en + system）。显式设置语言后只会显示该语言。",
+  "cli.lang.set.help": "Set CLI language code (e.g., en, ru)."
 }

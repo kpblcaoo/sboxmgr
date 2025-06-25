@@ -1,3 +1,9 @@
+"""Base64-encoded subscription parser implementation.
+
+This module provides the Base64Parser class for parsing base64-encoded
+subscription data. It handles base64 decoding and delegates to appropriate
+parsers based on the decoded content format (URI lists, JSON, YAML, etc.).
+"""
 import base64
 import re
 from typing import List

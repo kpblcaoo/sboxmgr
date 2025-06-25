@@ -24,5 +24,6 @@
   "cli.exclusions.help": "Gérer les exclusions : ajouter, supprimer, voir.",
   "cli.clear_exclusions.help": "Effacer toutes les exclusions.",
   "cli.lang.help": "Gérer la langue de la CLI (i18n) : afficher l'actuelle, lister, définir et enregistrer la langue.",
-  "cli.lang.bilingual_notice": "Le mode bilingue (en + system) n'est utilisé que lorsque la langue n'est pas explicitement définie. Lorsque vous définissez une langue explicitement, seule cette langue sera affichée."
+  "cli.lang.bilingual_notice": "Le mode bilingue (en + system) n'est utilisé que lorsque la langue n'est pas explicitement définie. Lorsque vous définissez une langue explicitement, seule cette langue sera affichée.",
+  "cli.lang.set.help": "Set CLI language code (e.g., en, ru)."
 }

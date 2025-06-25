@@ -1,5 +1,12 @@
 """
 Sing-box version checking and compatibility utilities.
+
+DEPRECATED: Version detection relies on executing the external ``sing-box
+version`` command which is considered an **external dependency**.  As of
+v1.5.0 the default CLI behaviour is to **skip** version compatibility checks
+(see ``--skip-version-check`` flag) and delegate this responsibility to the
+up-coming *sboxagent* component.  This module will be removed once agent-based
+validation is fully integrated.
 """
 import subprocess
 import re

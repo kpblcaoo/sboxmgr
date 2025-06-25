@@ -1,3 +1,10 @@
+"""Base middleware interface for subscription processing pipeline.
+
+This module defines the abstract base class for middleware components that
+process subscription data between pipeline stages. Middleware can transform,
+filter, or enhance server data as it flows through the subscription
+processing pipeline.
+"""
 from abc import ABC, abstractmethod
 from typing import List
 from .models import ParsedServer, PipelineContext
@@ -16,22 +23,57 @@ class BaseMiddleware(ABC):
     """
     @abstractmethod
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
-        pass
+        """Process servers through middleware transformation.
+        
+        Args:
+            servers: List of ParsedServer objects to process.
+            context: Pipeline context containing processing state and configuration.
+            
+        Returns:
+            List[ParsedServer]: Processed servers after middleware transformation.
+            
+        Raises:
+            NotImplementedError: If called directly on base class.
+        """
 
 class MiddlewareChain(BaseMiddleware):
     """Цепочка middleware, вызываемых по порядку для обработки списка ParsedServer."""
     def __init__(self, middlewares: list):
         self.middlewares = middlewares
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
+        """Process servers through the middleware chain sequentially.
+        
+        Args:
+            servers: List of ParsedServer objects to process.
+            context: Pipeline context containing processing state.
+            
+        Returns:
+            List[ParsedServer]: Servers after processing through all middleware.
+        """
         for mw in self.middlewares:
             servers = mw.process(servers, context)
         return servers
 
 class LoggingMiddleware(BaseMiddleware):
-    """Логирует этап, длину списка и hash, учитывает debug_level."""
+    """Debug middleware for logging server processing information.
+    
+    This middleware logs processing stage information including server count
+    and content hash for debugging and audit purposes.
+    """
+    
     def __init__(self, stage_name: str = "middleware"):
         self.stage_name = stage_name
+        
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
+        """Process servers with debug logging information.
+        
+        Args:
+            servers: List of ParsedServer objects to process.
+            context: Pipeline context containing debug configuration.
+            
+        Returns:
+            List[ParsedServer]: Original servers (unchanged by debug middleware).
+        """
         debug_level = getattr(context, 'debug_level', 0)
         if debug_level > 0:
             data = str([(s.type, s.address, s.port) for s in servers]).encode()

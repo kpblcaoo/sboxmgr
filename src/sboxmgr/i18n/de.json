@@ -25,5 +25,6 @@
   "cli.exclusions.help": "Ausschlüsse verwalten: hinzufügen, entfernen, anzeigen.",
   "cli.clear_exclusions.help": "Alle Ausschlüsse löschen.",
   "cli.lang.help": "CLI-Sprache (i18n) verwalten: aktuelle anzeigen, auflisten, festlegen und speichern.",
-  "cli.lang.bilingual_notice": "Der zweisprachige Modus (en + system) wird nur verwendet, wenn die Sprache nicht explizit festgelegt ist. Wenn Sie eine Sprache explizit festlegen, wird nur diese Sprache angezeigt."
+  "cli.lang.bilingual_notice": "Der zweisprachige Modus (en + system) wird nur verwendet, wenn die Sprache nicht explizit festgelegt ist. Wenn Sie eine Sprache explizit festlegen, wird nur diese Sprache angezeigt.",
+  "cli.lang.set.help": "Set CLI language code (e.g., en, ru)."
 }

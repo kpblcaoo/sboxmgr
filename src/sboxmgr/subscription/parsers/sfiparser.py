@@ -1,3 +1,10 @@
+"""SFI (Sing-box Format Import) parser implementation.
+
+This module provides the SFIParser class for parsing SFI-format subscription
+data. SFI is a specialized format for sing-box configuration imports that
+provides native compatibility with sing-box outbound configurations and
+routing rules.
+"""
 from ..registry import register
 from ..base_parser import BaseParser
 

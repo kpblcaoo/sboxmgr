@@ -1,3 +1,11 @@
+"""Base validator interfaces for subscription data validation.
+
+This module defines the abstract base classes for validators that ensure
+subscription data quality and consistency. It provides interfaces for
+validating raw subscription data, parsed servers, and final configurations
+before export to client applications.
+"""
+
 from abc import ABC, abstractmethod
 from typing import List
 from sboxmgr.subscription.models import PipelineContext

@@ -1,3 +1,11 @@
+"""Server state management and tracking.
+
+This module provides utilities for tracking server state, availability, and
+performance metrics. It manages persistent state information about servers
+including connection success rates, latency measurements, and historical
+performance data.
+"""
+
 import json
 import logging
 from sboxmgr.utils.env import get_selected_config_file

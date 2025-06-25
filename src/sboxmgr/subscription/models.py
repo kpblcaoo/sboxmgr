@@ -1,3 +1,11 @@
+"""Data models for subscription processing pipeline.
+
+This module defines the core data models used throughout the subscription
+processing pipeline including SubscriptionSource, ParsedServer, ClientProfile,
+PipelineContext, and other data structures that represent subscription
+configuration and processing state.
+"""
+
 from dataclasses import dataclass, field
 from typing import Optional, Dict, List, Any, Literal
 import uuid

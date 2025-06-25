@@ -1,15 +1,36 @@
+"""Base postprocessor interface for subscription data enhancement.
+
+This module defines the abstract base class for postprocessors that enhance
+or transform parsed server data after parsing. Postprocessors can add
+metadata, apply filters, perform optimizations, or implement custom
+transformations before final export.
+"""
 from abc import ABC, abstractmethod
-from .models import ParsedServer
+from .models import ParsedServer, PipelineContext
 from typing import List
 
 class BasePostProcessor(ABC):
-    """BasePostProcessor: абстрактный класс для postprocessor-плагинов.
-    plugin_type = "postprocessor" для автодокументации и фильтрации.
+    """Abstract base class for subscription data postprocessors.
+    
+    Postprocessors transform or enhance parsed server data after the parsing
+    stage. They can add geographic information, apply filtering rules,
+    optimize server lists, or perform custom transformations.
     """
     plugin_type = "postprocessor"
     @abstractmethod
-    def process(self, servers: List[ParsedServer]) -> List[ParsedServer]:
-        """Обработать/фильтровать список ParsedServer (dedup, geo, latency и т.д.)."""
+    def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
+        """Process and transform parsed server data.
+        
+        Args:
+            servers: List of ParsedServer objects to process.
+            context: Pipeline context containing processing configuration.
+            
+        Returns:
+            List[ParsedServer]: Processed servers after transformation.
+            
+        Raises:
+            NotImplementedError: If called directly on base class.
+        """
         pass
 
 class DedupPostProcessor(BasePostProcessor):

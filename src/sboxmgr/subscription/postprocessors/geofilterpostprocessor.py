@@ -1,3 +1,11 @@
+"""Geographic filtering postprocessor implementation.
+
+This module provides postprocessing functionality for filtering servers
+based on geographic location. It supports country-based filtering, region
+filtering, and custom geographic rules for optimizing server selection
+based on user location and preferences.
+"""
+
 from ..registry import register
 from ..postprocessor_base import BasePostProcessor
 

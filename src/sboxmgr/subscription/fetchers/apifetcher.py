@@ -1,3 +1,10 @@
+"""API-based subscription fetcher implementation.
+
+This module provides the APIFetcher class for retrieving subscription data
+from API endpoints with authentication, rate limiting, and error handling.
+It supports various authentication methods and provides robust error recovery
+for production API integrations.
+"""
 from ..registry import register
 from ..base_fetcher import BaseFetcher
 

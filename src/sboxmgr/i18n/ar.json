@@ -24,5 +24,6 @@
   "cli.exclusions.help": "إدارة الاستبعادات: إضافة، حذف، عرض.",
   "cli.clear_exclusions.help": "مسح جميع الاستبعادات.",
   "cli.lang.help": "إدارة لغة CLI (i18n): عرض الحالي، قائمة، تعيين وحفظ اللغة.",
-  "cli.lang.bilingual_notice": "يتم استخدام الوضع ثنائي اللغة (en + system) فقط عند عدم تعيين اللغة صراحةً. عند تعيين اللغة صراحةً، سيتم عرض تلك اللغة فقط."
+  "cli.lang.bilingual_notice": "يتم استخدام الوضع ثنائي اللغة (en + system) فقط عند عدم تعيين اللغة صراحةً. عند تعيين اللغة صراحةً، سيتم عرض تلك اللغة فقط.",
+  "cli.lang.set.help": "Set CLI language code (e.g., en, ru)."
 }
