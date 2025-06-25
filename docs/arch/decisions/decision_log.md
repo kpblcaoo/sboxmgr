@@ -11,6 +11,10 @@ _Часть ADR написана ретроспективно для фикса�
 | ADR-0005  | Extensible Routing Layer              | Accepted   | 2025-06-22 | RoutingPlugin, context, mode, fallback  |
 | ADR-0006  | Internationalization (i18n) Architecture | Accepted   | 2025-06-22 | Multilingual support with security focus |
 | ADR-0007  | Validator Architecture and Pipeline Context | Proposed | 2025-06-22 | Comprehensive validation pipeline with context tracking and fail-tolerance |
+| ADR-0008  | Defaults and Fail-tolerance Architecture    | Accepted | 2025-06-22 | Default value management and graceful degradation patterns |
+| ADR-0009  | Configuration System Architecture           | Accepted | 2024-12-19 | Pydantic BaseSettings with hierarchical configuration and service mode detection |
+| ADR-0010  | Logging Core Architecture                   | Accepted | 2024-12-19 | Multi-sink structured logging with trace ID propagation |
+| ADR-0011  | Event System Architecture                   | Accepted | 2024-12-19 | Lightweight EventBus with pydispatch for component decoupling |
 
 ## Summary
 - **Security**: ADR-0001 establishes CLI security foundation
@@ -18,4 +22,8 @@ _Часть ADR написана ретроспективно для фикса�
 - **Data Models**: ADR-0003 standardizes subscription data structures  
 - **Routing**: ADR-0005 handles config generation and routing
 - **i18n**: ADR-0006 provides multilingual support with security focus
-- **Validation**: ADR-0007 introduces comprehensive validation pipeline with context tracking and fail-tolerance 
+- **Validation**: ADR-0007 introduces comprehensive validation pipeline with context tracking and fail-tolerance
+- **Resilience**: ADR-0008 defines fail-tolerance and default value patterns
+- **Configuration**: ADR-0009 establishes Pydantic-based configuration system with service mode detection
+- **Logging**: ADR-0010 implements multi-sink structured logging with trace correlation
+- **Events**: ADR-0011 provides lightweight event system for component decoupling 
