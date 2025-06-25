@@ -186,8 +186,9 @@ class Orchestrator:
                 mode=mode or self.config.default_mode,
                 debug_level=self.config.debug_level
             )
-            
-            # Create subscription manager for this source
+            # Always create subscription manager for the specific source URL
+            # SubscriptionManager is tied to a specific source, so we can't reuse 
+            # it for different URLs as it would fetch from the wrong source
             from sboxmgr.subscription.manager import SubscriptionManager
             sub_manager = SubscriptionManager(source)
             

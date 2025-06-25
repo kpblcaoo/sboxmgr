@@ -7,8 +7,56 @@ from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_template_file, get_config_file, get_backup_file
 from sboxmgr.export.export_manager import ExportManager
+from sboxmgr.agent import AgentBridge, AgentNotAvailableError, ClientType
 
 lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
+
+
+def _run_agent_check(config_file: str, with_agent_check: bool) -> None:
+    """Run agent validation and installation check if requested.
+    
+    Args:
+        config_file: Path to the configuration file
+        with_agent_check: Whether to run agent checks
+    """
+    if not with_agent_check:
+        return
+        
+    try:
+        bridge = AgentBridge()
+        if not bridge.is_available():
+            typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
+            return
+            
+        # Validate config with agent
+        from pathlib import Path
+        response = bridge.validate(Path(config_file), client_type=ClientType.SING_BOX)
+        
+        if response.success:
+            typer.echo("✅ External validation passed")
+            if response.client_detected:
+                typer.echo(f"   Detected client: {response.client_detected}")
+            if response.client_version:
+                typer.echo(f"   Client version: {response.client_version}")
+        else:
+            typer.echo("❌ External validation failed:", err=True)
+            for error in response.errors:
+                typer.echo(f"   • {error}", err=True)
+                
+        # Check client availability
+        check_response = bridge.check()
+        if check_response.success and check_response.clients:
+            available_clients = [name for name, info in check_response.clients.items() 
+                               if info.get("available", False)]
+            if available_clients:
+                typer.echo(f"📦 Available clients: {', '.join(available_clients)}")
+            else:
+                typer.echo("💡 No VPN clients detected. Run with --install-client to install sing-box", err=True)
+                
+    except AgentNotAvailableError:
+        typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
+    except Exception as e:
+        typer.echo(f"⚠️  Agent check failed: {e}", err=True)
 
 
 def run(
@@ -24,7 +72,8 @@ def run(
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all"),
     format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
-    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check")
+    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check"),
+    with_agent_check: bool = typer.Option(False, "--with-agent-check", help="Use sboxagent for external validation and client detection")
 ):
     """Update sing-box configuration from subscription with comprehensive pipeline.
     
@@ -40,6 +89,7 @@ def run(
     5. Validate generated configuration
     6. Update configuration file with backup
     7. Restart proxy service if applicable
+    8. Optional: External validation and client checks via sboxagent
     
     Args:
         url: Subscription URL to fetch from.
@@ -51,7 +101,8 @@ def run(
         user_agent: Custom User-Agent header for subscription requests.
         no_user_agent: Disable User-Agent header completely.
         format: Target export format (singbox, clash, v2ray).
-                 skip_version_check: Skip version compatibility validation.
+        skip_version_check: Skip version compatibility validation.
+        with_agent_check: Use sboxagent for external validation and client detection.
          
      Raises:
          typer.Exit: On subscription fetch failure, parse errors, or config write errors.
@@ -88,7 +139,7 @@ def run(
     config_json = json.dumps(config.config, indent=2, ensure_ascii=False)
 
     if dry_run:
-        from sboxmgr.config.generate import validate_config_file
+        from sboxmgr.validation.internal import validate_config_file
         import tempfile
         typer.echo(lang.get("cli.dry_run_mode"))
         with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
@@ -99,6 +150,11 @@ def run(
             typer.echo(lang.get("cli.dry_run_valid"))
         else:
             typer.echo(f"{lang.get('cli.config_invalid')}\n{output}", err=True)
+        
+        # Run agent check in dry-run mode
+        if with_agent_check:
+            _run_agent_check(temp_path, with_agent_check)
+            
         os.unlink(temp_path)
         typer.echo(lang.get("cli.temp_file_deleted"))
         raise typer.Exit(0 if valid else 1)
@@ -109,6 +165,10 @@ def run(
         if backup_file:
             import shutil
             shutil.copy2(config_file, backup_file)
+            
+        # Run agent check after writing config
+        _run_agent_check(config_file, with_agent_check)
+            
         try:
             from sboxmgr.service.manage import manage_service
             manage_service()
@@ -134,7 +194,8 @@ def dry_run(
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all"),
     format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
-    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check")
+    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check"),
+    with_agent_check: bool = typer.Option(False, "--with-agent-check", help="Use sboxagent for external validation and client detection")
 ):
     """Validate subscription configuration without making changes.
     
@@ -152,6 +213,7 @@ def dry_run(
         no_user_agent: Disable User-Agent header completely.
         format: Target export format for validation.
         skip_version_check: Skip version compatibility validation.
+        with_agent_check: Use sboxagent for external validation and client detection.
         
     Raises:
         typer.Exit: Exit code 0 if validation passes, 1 if validation fails.
@@ -182,7 +244,7 @@ def dry_run(
 
     import json
     config_json = json.dumps(config.config, indent=2, ensure_ascii=False)
-    from sboxmgr.config.generate import validate_config_file
+    from sboxmgr.validation.internal import validate_config_file
     import tempfile
     typer.echo(lang.get("cli.dry_run_mode"))
     with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
@@ -193,6 +255,11 @@ def dry_run(
         typer.echo(lang.get("cli.dry_run_valid"))
     else:
         typer.echo(f"{lang.get('cli.config_invalid')}\n{output}", err=True)
+        
+    # Run agent check in dry-run mode
+    if with_agent_check:
+        _run_agent_check(temp_path, with_agent_check)
+        
     os.unlink(temp_path)
     typer.echo(lang.get("cli.temp_file_deleted"))
     raise typer.Exit(0 if valid else 1)

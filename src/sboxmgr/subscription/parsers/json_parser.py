@@ -13,7 +13,7 @@ class JSONParser(BaseParser):
         try:
             json.loads(raw.decode("utf-8"))
         except Exception as e:
-            if debug_level > 2:
+            if debug_level >= 2:
                 print(f"[WARN] JSON parse error: {e}")
             raise  # выбрасываем ошибку дальше
         # TODO: распарсить data в список ParsedServer (заглушка)
