@@ -210,7 +210,7 @@ def validate_temp_config_dict(config_data: dict) -> None:
     
     try:
         from ..validation.internal import validate_config_dict
-        is_valid, errors = validate_config_dict(config_data)
+        is_valid, error_message = validate_config_dict(config_data)
         
         if not is_valid:
             # Emit validation failure event
@@ -218,13 +218,13 @@ def validate_temp_config_dict(config_data: dict) -> None:
                 EventType.CONFIG_VALIDATED,
                 {
                     "status": "failed",
-                    "errors": errors,
+                    "errors": error_message,
                     "validation_type": "internal"
                 },
                 source="config.validate",
                 priority=EventPriority.HIGH
             )
-            raise ValueError(f"Configuration validation failed: {'; '.join(errors)}")
+            raise ValueError(f"Configuration validation failed: {error_message}")
         
         # Emit successful validation event
         emit_event(

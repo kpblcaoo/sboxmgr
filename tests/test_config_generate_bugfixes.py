@@ -56,3 +56,24 @@ class TestConfigGenerateBugfixes:
             assert isinstance(call2_source, SubscriptionSource)
             assert call1_source.url == url1
             assert call2_source.url == url2
+
+    def test_validate_temp_config_dict_error_handling(self):
+        """Test that validate_temp_config_dict handles error messages correctly.
+        
+        This test verifies that the function correctly handles string error messages
+        from validate_config_dict instead of trying to join them as a list.
+        """
+        from sboxmgr.config.generate import validate_temp_config_dict
+        
+        # Invalid config that will trigger validation error (missing required outbounds field)
+        invalid_config = {"invalid": "config"}
+        
+        # Should raise ValueError with proper error message (not joined string)
+        with pytest.raises(ValueError) as exc_info:
+            validate_temp_config_dict(invalid_config)
+        
+        error_message = str(exc_info.value)
+        assert "Configuration validation failed:" in error_message
+        assert "outbounds: Field required" in error_message
+        # Should not contain artifacts from joining a string character by character
+        assert not any(char in error_message for char in ["o; u; t; b; o; u; n; d; s"])
