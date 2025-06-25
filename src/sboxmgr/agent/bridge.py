@@ -15,6 +15,7 @@ from .protocol import (
     ValidationResponse, InstallResponse, CheckResponse,
     ClientType, AgentCommand, AnyRequest, AnyResponse
 )
+from ..events import emit_event, EventType, EventPriority
 
 
 def _get_logger():
@@ -125,6 +126,18 @@ class AgentBridge:
         if not self.is_available():
             raise AgentNotAvailableError("sboxagent is not available")
         
+        # Emit validation start event
+        emit_event(
+            EventType.AGENT_VALIDATION_STARTED,
+            {
+                "config_path": str(config_path),
+                "client_type": client_type.value if client_type else None,
+                "strict": strict
+            },
+            source="agent.bridge",
+            priority=EventPriority.NORMAL
+        )
+        
         request = ValidationRequest(
             config_path=str(config_path),
             client_type=client_type,
@@ -134,8 +147,36 @@ class AgentBridge:
         
         try:
             response_data = self._call_agent(request.model_dump())
-            return ValidationResponse(**response_data)
+            response = ValidationResponse(**response_data)
+            
+            # Emit validation completion event
+            emit_event(
+                EventType.AGENT_VALIDATION_COMPLETED,
+                {
+                    "success": response.success,
+                    "errors": response.errors,
+                    "client_detected": response.client_detected.value if response.client_detected else None,
+                    "client_version": response.client_version
+                },
+                source="agent.bridge",
+                priority=EventPriority.NORMAL
+            )
+            
+            return response
+            
         except Exception as e:
+            # Emit error event
+            emit_event(
+                EventType.ERROR_OCCURRED,
+                {
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "component": "agent.validation"
+                },
+                source="agent.bridge",
+                priority=EventPriority.HIGH
+            )
+            
             _get_logger().error(f"Agent validation failed: {e}", extra={"trace_id": _get_trace_id()})
             raise AgentError(f"Validation failed: {e}") from e
     
@@ -158,6 +199,18 @@ class AgentBridge:
         if not self.is_available():
             raise AgentNotAvailableError("sboxagent is not available")
         
+        # Emit installation start event
+        emit_event(
+            EventType.AGENT_INSTALLATION_STARTED,
+            {
+                "client_type": client_type.value,
+                "version": version,
+                "force": force
+            },
+            source="agent.bridge",
+            priority=EventPriority.NORMAL
+        )
+        
         request = InstallRequest(
             client_type=client_type,
             version=version,
@@ -167,8 +220,36 @@ class AgentBridge:
         
         try:
             response_data = self._call_agent(request.model_dump())
-            return InstallResponse(**response_data)
+            response = InstallResponse(**response_data)
+            
+            # Emit installation completion event
+            emit_event(
+                EventType.AGENT_INSTALLATION_COMPLETED,
+                {
+                    "success": response.success,
+                    "client_type": response.client_type.value if response.client_type else None,
+                    "version": response.version,
+                    "binary_path": response.binary_path
+                },
+                source="agent.bridge",
+                priority=EventPriority.NORMAL
+            )
+            
+            return response
+            
         except Exception as e:
+            # Emit error event
+            emit_event(
+                EventType.ERROR_OCCURRED,
+                {
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "component": "agent.installation"
+                },
+                source="agent.bridge",
+                priority=EventPriority.HIGH
+            )
+            
             _get_logger().error(f"Agent installation failed: {e}", extra={"trace_id": _get_trace_id()})
             raise AgentError(f"Installation failed: {e}") from e
     
@@ -195,8 +276,35 @@ class AgentBridge:
         
         try:
             response_data = self._call_agent(request.model_dump())
-            return CheckResponse(**response_data)
+            response = CheckResponse(**response_data)
+            
+            # Emit check completion event
+            emit_event(
+                EventType.AGENT_CHECK_COMPLETED,
+                {
+                    "success": response.success,
+                    "clients": response.clients,
+                    "checked_client": client_type.value if client_type else None
+                },
+                source="agent.bridge",
+                priority=EventPriority.NORMAL
+            )
+            
+            return response
+            
         except Exception as e:
+            # Emit error event
+            emit_event(
+                EventType.ERROR_OCCURRED,
+                {
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "component": "agent.check"
+                },
+                source="agent.bridge",
+                priority=EventPriority.HIGH
+            )
+            
             _get_logger().error(f"Agent check failed: {e}", extra={"trace_id": _get_trace_id()})
             raise AgentError(f"Check failed: {e}") from e
     
