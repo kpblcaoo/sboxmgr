@@ -8,6 +8,7 @@ transformations before final export.
 from abc import ABC, abstractmethod
 from .models import ParsedServer, PipelineContext
 from typing import List
+import inspect
 
 class BasePostProcessor(ABC):
     """Abstract base class for subscription data postprocessors.
@@ -18,7 +19,7 @@ class BasePostProcessor(ABC):
     """
     plugin_type = "postprocessor"
     @abstractmethod
-    def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
+    def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
         """Process and transform parsed server data.
         
         Args:
@@ -34,7 +35,7 @@ class BasePostProcessor(ABC):
         pass
 
 class DedupPostProcessor(BasePostProcessor):
-    def process(self, servers: List[ParsedServer]) -> List[ParsedServer]:
+    def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
         seen = set()
         result = []
         for s in servers:
@@ -57,15 +58,20 @@ class PostProcessorChain(BasePostProcessor):
     def __init__(self, processors: list):
         self.processors = processors
 
-    def process(self, servers: List[ParsedServer]) -> List[ParsedServer]:
+    def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
         """Применить все postprocessor-плагины по очереди к списку серверов.
 
         Args:
             servers (List[ParsedServer]): Входной список серверов.
+            context: Pipeline context containing processing configuration.
 
         Returns:
             List[ParsedServer]: Результат после применения всех postprocessor-плагинов.
         """
         for proc in self.processors:
-            servers = proc.process(servers)
+            sig = inspect.signature(proc.process)
+            if context is not None and len(sig.parameters) >= 3:
+                servers = proc.process(servers, context)
+            else:
+                servers = proc.process(servers)
         return servers 

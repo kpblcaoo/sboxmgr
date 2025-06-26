@@ -138,8 +138,6 @@ class LanguageLoader:
         if en:
             return en, "en"
         return key, "fallback"
-        
-        return local or en
 
     def get_with_fallback(self, key: str) -> str:
         """Get translated string with fallback behavior (compatibility method).
