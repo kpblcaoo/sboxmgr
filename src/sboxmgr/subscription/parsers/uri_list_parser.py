@@ -1,10 +1,11 @@
-"""URI list subscription parser implementation.
+"""URI list parser for subscription data.
 
-This module provides the URIListParser class for parsing subscription data
-in URI list format. This format consists of newline-separated proxy URIs
-(vless://, vmess://, trojan://, ss://, etc.) commonly used by various
-proxy clients and subscription services.
+This module provides parsing functionality for URI-based subscription formats
+that contain multiple server URIs in a single file. It supports various
+protocols including Shadowsocks, VLess, VMess, and Trojan with proper
+error handling and validation.
 """
+
 import base64
 import binascii
 import json

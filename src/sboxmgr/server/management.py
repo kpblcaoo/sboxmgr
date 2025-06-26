@@ -47,7 +47,7 @@ def save_selected_config(selected):
     Args:
         selected: Dictionary containing selected server configuration data.
     """
-    selected["last_modified"] = datetime.datetime.now(datetime.UTC).isoformat().replace("+00:00", "Z")
+    selected["last_modified"] = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
     atomic_handle_temp_file(selected, SELECTED_CONFIG_FILE, lambda x: True)  # Add proper validation
 
 
