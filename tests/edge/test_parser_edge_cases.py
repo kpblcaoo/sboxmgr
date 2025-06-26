@@ -372,7 +372,7 @@ def test_parsed_validator_required_fields():
     # assert any("missing type" in e.message or "missing address" in e.message or "invalid port" in e.message for e in result.errors)
     # strict mode — должен сразу падать
     context_strict = PipelineContext(mode="strict")
-    result_strict = mgr.get_servers(context=context_strict)
+    result_strict = mgr.get_servers(context=context_strict, mode="strict")
     # print(f"[DEBUG TEST] result_strict.config={result_strict.config}, errors={result_strict.errors}, success={result_strict.success}")
     # В текущей реализации ParsedValidator не фильтрует невалидные сервера,
     # а только добавляет ошибки в контекст. Проверяем что валидация работает

@@ -310,14 +310,17 @@ class SubscriptionManager:
             if debug_level >= 2:
                 print(f"[DEBUG] ParsedValidator valid_servers: {getattr(parsed_result, 'valid_servers', None)} errors: {parsed_result.errors}")
             
-            validated_servers = getattr(parsed_result, 'valid_servers', servers)
+            # В strict режиме возвращаем все сервера (включая невалидные) с ошибками
+            # В tolerant режиме возвращаем только валидные сервера
+            if context.mode == 'strict':
+                validated_servers = servers  # Возвращаем все сервера
+            else:
+                validated_servers = getattr(parsed_result, 'valid_servers', servers)
             
             if debug_level >= 2:
                 print(f"[DEBUG] servers after validation: {validated_servers}")
             
             if not validated_servers:
-                if debug_level >= 2:
-                    print("[DEBUG] No valid servers after validation, returning empty config and success=False")
                 err = self._create_pipeline_error(
                     ErrorType.VALIDATION,
                     "parsed_validate",
@@ -325,7 +328,15 @@ class SubscriptionManager:
                     {"source_type": self.fetcher.source.source_type}
                 )
                 context.metadata['errors'].append(err)
-                return [], False
+                if context.mode == 'strict':
+                    # В strict режиме возвращаем все сервера (даже если они невалидны), success=True, ошибки в errors
+                    if servers:
+                        return servers, True
+                    else:
+                        return [], False
+                else:
+                    # В tolerant режиме — если нет валидных серверов, это ошибка
+                    return [], False
             
             if parsed_result.errors:
                 err = self._create_pipeline_error(
@@ -445,6 +456,8 @@ class SubscriptionManager:
         """
         # Initialize context and parameters
         context = context or PipelineContext()
+        if mode is not None:
+            context.mode = mode
         if 'errors' not in context.metadata:
             context.metadata['errors'] = []
         
@@ -481,7 +494,9 @@ class SubscriptionManager:
             # Stage 3: Validate parsed servers
             servers, success = self._validate_parsed_servers(servers, context)
             if not success:
-                return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
+                if context.mode == 'strict':
+                    return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
+                # В tolerant режиме продолжаем с пустым списком серверов, но success=True
             
             # Stage 4: Process middleware
             servers, success = self._process_middleware(servers, context)
