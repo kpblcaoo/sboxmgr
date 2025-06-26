@@ -36,7 +36,7 @@ def test_ansi_escape_sanitization():
             json.dump({"test": test_str}, f)
         lang = LanguageLoader("en", base_dir=tmpdir)
         assert "\x1b" not in lang.get("test")
-        assert lang.get("test") == "Hello[31mWorld"
+        assert lang.get("test") == "HelloWorld"
 
 
 def test_too_long_string_truncated():

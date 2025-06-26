@@ -1,3 +1,11 @@
+"""Export manager for converting server configurations to various formats.
+
+This module provides the ExportManager class which handles the conversion of
+parsed server configurations to different client formats (sing-box, Clash,
+v2ray, etc.). It manages format-specific exporters, routing rule generation,
+and version compatibility checks for target clients.
+"""
+
 from typing import List, Dict, Any, Optional
 from sboxmgr.subscription.models import ParsedServer, ClientProfile
 from .routing.default_router import DefaultRouter

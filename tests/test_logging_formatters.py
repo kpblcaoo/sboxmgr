@@ -118,7 +118,6 @@ class TestHumanFormatter:
         )
         record.created = 1640995200.0
         
-        # Mock the trace module's get_trace_id function that's called in _add_structured_fields
         with patch('sboxmgr.logging.formatters.get_trace_id', return_value='test123'):
             formatted = formatter.format(record)
         
@@ -136,7 +135,7 @@ class TestHumanFormatter:
         )
         record.created = 1640995200.0
         
-        with patch('sboxmgr.logging.trace.get_trace_id', return_value='test123'):
+        with patch('sboxmgr.logging.formatters.get_trace_id', return_value='test123'):
             formatted = formatter.format(record)
         
         # Should not include trace ID

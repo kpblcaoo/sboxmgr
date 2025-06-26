@@ -1,3 +1,10 @@
+"""Protocol-specific configuration handling.
+
+This module contains protocol-specific utilities for handling different VPN
+protocol configurations (VMess, VLESS, Trojan, Shadowsocks, etc.). It provides
+normalization, validation, and conversion functions for protocol parameters
+and connection details.
+"""
 from logging import error
 
 def validate_protocol(config, supported_protocols):

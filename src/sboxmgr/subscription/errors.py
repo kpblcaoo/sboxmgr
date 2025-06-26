@@ -1,3 +1,11 @@
+"""Subscription-related exception classes and error handling.
+
+This module defines custom exception classes for subscription processing
+errors including fetch failures, parse errors, validation failures, and
+export errors. These exceptions provide structured error information for
+better error handling and debugging throughout the subscription pipeline.
+"""
+
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime

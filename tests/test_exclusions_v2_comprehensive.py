@@ -1,14 +1,14 @@
 """
 Comprehensive tests for exclusions_v2.py CLI commands.
 
-Tests cover all major functionality including:
+Test coverage:
 - Add exclusions by index, wildcard patterns
 - Remove exclusions by index and ID
-- View, clear, list-servers commands
-- Interactive mode
-- Error handling and edge cases
-- JSON output format
-- Business logic validation
+- View exclusions and list servers
+- JSON output format for all operations
+- Error handling for fetch failures and invalid data
+- Interactive mode operations
+- Helper function unit tests
 """
 
 import json
@@ -18,6 +18,7 @@ from unittest.mock import Mock, patch, MagicMock, call
 from typer.testing import CliRunner
 from rich.console import Console
 from rich.table import Table
+from click.exceptions import Exit
 
 from sboxmgr.cli.commands.exclusions_v2 import (
     exclusions_v2,
@@ -84,20 +85,25 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_no_action_shows_help(self, mock_manager, mock_json_data):
         """Test that no action specified shows usage help."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data), \
              patch('sboxmgr.cli.commands.exclusions_v2._show_usage_help') as mock_help:
             
-            result = runner.invoke(app, ["exclusions", "--url", "http://test.com"])
+            mock_class.default.return_value = mock_manager
+            result = runner.invoke(app, ["exclusions-v2", "--url", "http://test.com"])
             mock_help.assert_called_once()
 
     def test_exclusions_v2_add_by_indices(self, mock_manager, mock_json_data):
         """Test adding exclusions by server indices."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        mock_manager._servers_cache = {'servers': mock_json_data['servers'], 'supported_protocols': ['vless', 'vmess']}
+        mock_manager.add_by_index.return_value = ['server1_id', 'server2_id']
+        
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", 
+                "exclusions-v2", "--url", "http://test.com", 
                 "--add", "0,1", "--reason", "Test reason"
             ])
             
@@ -106,11 +112,15 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_add_by_wildcard(self, mock_manager, mock_json_data):
         """Test adding exclusions by wildcard patterns."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        mock_manager._servers_cache = {'servers': mock_json_data['servers'], 'supported_protocols': ['vless', 'vmess']}
+        mock_manager.add_by_wildcard.return_value = ['server1_id', 'server2_id']
+        
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", 
+                "exclusions-v2", "--url", "http://test.com", 
                 "--add", "server-*,test-*", "--reason", "Wildcard test"
             ])
             
@@ -119,11 +129,15 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_remove_by_indices(self, mock_manager, mock_json_data):
         """Test removing exclusions by server indices."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        mock_manager._servers_cache = {'servers': mock_json_data['servers'], 'supported_protocols': ['vless', 'vmess']}
+        mock_manager.remove_by_index.return_value = ['server1_id', 'server2_id']
+        
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", 
+                "exclusions-v2", "--url", "http://test.com", 
                 "--remove", "0,1"
             ])
             
@@ -132,11 +146,15 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_remove_by_ids(self, mock_manager, mock_json_data):
         """Test removing exclusions by server IDs."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        mock_manager._servers_cache = {'servers': mock_json_data['servers'], 'supported_protocols': ['vless', 'vmess']}
+        mock_manager.remove.return_value = True
+        
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", 
+                "exclusions-v2", "--url", "http://test.com", 
                 "--remove", "server123abc"
             ])
             
@@ -145,11 +163,14 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_view_command(self, mock_manager, mock_json_data):
         """Test view exclusions command."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        mock_manager.list_all.return_value = []
+        
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", "--view"
+                "exclusions-v2", "--url", "http://test.com", "--view"
             ])
             
             assert result.exit_code == 0
@@ -157,12 +178,15 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_clear_command_confirmed(self, mock_manager, mock_json_data):
         """Test clear exclusions command with confirmation."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        mock_manager.clear.return_value = 5
+        
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data), \
              patch('rich.prompt.Confirm.ask', return_value=True):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", "--clear"
+                "exclusions-v2", "--url", "http://test.com", "--clear"
             ])
             
             assert result.exit_code == 0
@@ -170,12 +194,13 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_clear_command_cancelled(self, mock_manager, mock_json_data):
         """Test clear exclusions command cancelled by user."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data), \
              patch('rich.prompt.Confirm.ask', return_value=False):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", "--clear"
+                "exclusions-v2", "--url", "http://test.com", "--clear"
             ])
             
             assert result.exit_code == 0
@@ -183,11 +208,15 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_list_servers_command(self, mock_manager, mock_json_data):
         """Test list servers command."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        mock_manager._servers_cache = {'servers': mock_json_data['servers'], 'supported_protocols': ['vless', 'vmess']}
+        mock_manager.list_servers.return_value = []
+        
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", "--list-servers"
+                "exclusions-v2", "--url", "http://test.com", "--list-servers"
             ])
             
             assert result.exit_code == 0
@@ -195,12 +224,15 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_json_output_format(self, mock_manager, mock_json_data):
         """Test JSON output format for all commands."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        mock_manager.list_all.return_value = []
+        
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data):
             
+            mock_class.default.return_value = mock_manager
             # Test view with JSON
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", "--view", "--json"
+                "exclusions-v2", "--url", "http://test.com", "--view", "--json"
             ])
             assert result.exit_code == 0
             # Should contain valid JSON
@@ -211,22 +243,24 @@ class TestExclusionsV2CLI:
 
     def test_exclusions_v2_fetch_failure(self, mock_manager):
         """Test handling of subscription fetch failures."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=None):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://invalid.com", "--view"
+                "exclusions-v2", "--url", "http://invalid.com", "--list-servers"
             ])
             
             assert result.exit_code == 1
 
     def test_exclusions_v2_fetch_exception(self, mock_manager):
         """Test handling of subscription fetch exceptions."""
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', side_effect=Exception("Network error")):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://error.com", "--view"
+                "exclusions-v2", "--url", "http://error.com", "--list-servers"
             ])
             
             assert result.exit_code == 1
@@ -235,11 +269,12 @@ class TestExclusionsV2CLI:
         """Test handling of server data caching errors."""
         mock_manager.set_servers_cache.side_effect = Exception("Invalid format")
         
-        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager', return_value=mock_manager), \
+        with patch('sboxmgr.cli.commands.exclusions_v2.ExclusionManager') as mock_class, \
              patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=mock_json_data):
             
+            mock_class.default.return_value = mock_manager
             result = runner.invoke(app, [
-                "exclusions", "--url", "http://test.com", "--view"
+                "exclusions-v2", "--url", "http://test.com", "--list-servers"
             ])
             
             assert result.exit_code == 1
@@ -294,14 +329,14 @@ class TestExclusionsV2HelperFunctions:
     def test_fetch_and_validate_subscription_none_result(self):
         """Test subscription fetch returning None."""
         with patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=None), \
-             pytest.raises(SystemExit):
+             pytest.raises(Exit):
             
             _fetch_and_validate_subscription("http://test.com", False)
 
     def test_fetch_and_validate_subscription_exception(self):
         """Test subscription fetch raising exception."""
         with patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', side_effect=Exception("Error")), \
-             pytest.raises(SystemExit):
+             pytest.raises(Exit):
             
             _fetch_and_validate_subscription("http://test.com", False)
 
@@ -309,7 +344,7 @@ class TestExclusionsV2HelperFunctions:
         """Test subscription fetch with JSON error output."""
         with patch('sboxmgr.cli.commands.exclusions_v2.fetch_json', return_value=None), \
              patch('builtins.print') as mock_print, \
-             pytest.raises(SystemExit):
+             pytest.raises(Exit):
             
             _fetch_and_validate_subscription("http://test.com", True)
             mock_print.assert_called_once()
@@ -332,7 +367,7 @@ class TestExclusionsV2HelperFunctions:
         mock_manager = Mock()
         mock_manager.set_servers_cache.side_effect = Exception("Invalid format")
         
-        with pytest.raises(SystemExit):
+        with pytest.raises(Exit):
             _cache_server_data(mock_manager, {}, False)
 
     def test_cache_server_data_exception_json_output(self):
@@ -341,7 +376,7 @@ class TestExclusionsV2HelperFunctions:
         mock_manager.set_servers_cache.side_effect = Exception("Invalid format")
         
         with patch('builtins.print') as mock_print, \
-             pytest.raises(SystemExit):
+             pytest.raises(Exit):
             
             _cache_server_data(mock_manager, {}, True)
             mock_print.assert_called_once()

@@ -1,3 +1,10 @@
+"""Geographic validation for subscription servers.
+
+This module provides validators for geographic data associated with
+subscription servers. It validates country codes, region information,
+geographic coordinates, and ensures geographic metadata consistency
+for location-based server filtering and routing.
+"""
 from ..validators.base import BaseValidator
 
 

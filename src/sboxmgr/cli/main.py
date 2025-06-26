@@ -1,3 +1,9 @@
+"""Main CLI entry point for sboxctl command-line interface.
+
+This module defines the root Typer application and registers all CLI command
+groups (subscription, exclusions, lang, etc.). It serves as the primary entry
+point for the `sboxctl` console script defined in pyproject.toml.
+"""
 import typer
 import os
 from dotenv import load_dotenv
@@ -124,7 +130,7 @@ def clear_exclusions(
 
 @app.command("lang")
 def lang_cmd(
-    set_lang: str = typer.Option(None, "--set", "-s", help=lang.get_with_fallback("cli.lang.set.help")),
+    set_lang: str = typer.Option(None, "--set", "-s", help=lang.get("cli.lang.set.help")),
 ):
     """Manage CLI internationalization language settings.
     

@@ -1,3 +1,10 @@
+"""Local file system subscription fetcher implementation.
+
+This module provides the FileFetcher class for reading subscription data
+from local files. It supports various file formats and provides caching
+mechanisms for improved performance when processing multiple subscriptions
+from the same file sources.
+"""
 from pathlib import Path
 from ..models import SubscriptionSource
 from ..base_fetcher import BaseFetcher
@@ -6,6 +13,17 @@ import threading
 
 @register("file")
 class FileFetcher(BaseFetcher):
+    """Fetcher for reading subscription data from local files.
+    
+    This fetcher handles local file system access with proper error handling,
+    caching, and security validation. It supports reading from various file
+    formats and provides thread-safe caching for improved performance.
+    
+    Attributes:
+        SUPPORTED_SCHEMES: Tuple of supported URL schemes ("file",).
+        _cache_lock: Thread lock for cache synchronization.
+        _fetch_cache: Cache dictionary for storing fetched file contents.
+    """
     SUPPORTED_SCHEMES = ("file",)
     _cache_lock = threading.Lock()
     _fetch_cache = {}

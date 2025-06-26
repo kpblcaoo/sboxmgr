@@ -1,3 +1,10 @@
+"""Base selector interface for server selection logic.
+
+This module defines the abstract base class for selectors that implement
+server selection algorithms. Selectors choose which servers from a parsed
+subscription should be included in the final configuration based on various
+criteria like performance, geography, user preferences, etc.
+"""
 from abc import ABC, abstractmethod
 from .models import ParsedServer
 from typing import List, Optional

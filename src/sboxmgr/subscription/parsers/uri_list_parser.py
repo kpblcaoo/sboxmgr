@@ -1,4 +1,13 @@
+"""URI list subscription parser implementation.
+
+This module provides the URIListParser class for parsing subscription data
+in URI list format. This format consists of newline-separated proxy URIs
+(vless://, vmess://, trojan://, ss://, etc.) commonly used by various
+proxy clients and subscription services.
+"""
 import base64
+import binascii
+import json
 import logging
 import re
 from typing import List
@@ -12,7 +21,26 @@ logger = logging.getLogger(__name__)
 
 @register("parser_uri_list")
 class URIListParser(BaseParser):
+    """Parser for URI list format subscription data.
+    
+    This parser handles subscription data consisting of newline-separated
+    proxy URIs. Each URI represents a single server configuration in a
+    standardized URI format (vless://, vmess://, trojan://, ss://, etc.).
+    """
+    
     def parse(self, raw: bytes) -> List[ParsedServer]:
+        """Parse URI list subscription data into ParsedServer objects.
+        
+        Args:
+            raw: Raw bytes containing newline-separated proxy URIs.
+            
+        Returns:
+            List[ParsedServer]: List of parsed server configurations.
+            
+        Raises:
+            ValueError: If URI format is invalid or unsupported.
+            UnicodeDecodeError: If raw data cannot be decoded as UTF-8.
+        """
         lines = raw.decode("utf-8").splitlines()
         servers = []
         debug_level = get_debug_level()
@@ -77,7 +105,8 @@ class URIListParser(BaseParser):
                 
             return self._create_ss_server(method, password, host, port, tag, query)
             
-        except Exception:
+        except (ValueError, AttributeError, IndexError) as e:
+            # Fallback to regex parsing if structured parsing fails
             return self._parse_ss_with_regex(uri, tag, query, line)
 
     def _extract_ss_components(self, uri: str, line: str) -> tuple[str, str]:
@@ -89,14 +118,14 @@ class URIListParser(BaseParser):
             b64, after = uri.split('@', 1)
             try:
                 decoded = base64.urlsafe_b64decode(b64 + '=' * (-len(b64) % 4)).decode('utf-8')
-            except Exception:
+            except (binascii.Error, UnicodeDecodeError):
                 decoded = b64  # fallback: not base64
             return decoded, after
         else:
             # Whole string is base64 or plain
             try:
                 decoded = base64.urlsafe_b64decode(uri + '=' * (-len(uri) % 4)).decode('utf-8')
-            except Exception:
+            except (binascii.Error, UnicodeDecodeError):
                 decoded = uri  # fallback: not base64
             
             if '@' in decoded:
@@ -223,7 +252,6 @@ class URIListParser(BaseParser):
         b64 = line[8:]
         try:
             decoded = base64.urlsafe_b64decode(b64 + '=' * (-len(b64) % 4)).decode('utf-8')
-            import json
             data = json.loads(decoded)
             return ParsedServer(
                 type="vmess",
@@ -232,5 +260,5 @@ class URIListParser(BaseParser):
                 security=data.get("security"),
                 meta=data
             )
-        except CosmicRayTestingException:
-            return ParsedServer(type="vmess", address="invalid", port=0, meta={"error": "base64/json decode failed"}) 
+        except (binascii.Error, UnicodeDecodeError, json.JSONDecodeError, ValueError, KeyError) as e:
+            return ParsedServer(type="vmess", address="invalid", port=0, meta={"error": f"decode failed: {type(e).__name__}"}) 

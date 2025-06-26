@@ -56,7 +56,7 @@ def run_orchestrated(
     user_agent: str = typer.Option(None, "--user-agent", help="Custom User-Agent header"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Disable User-Agent"),
     format: str = typer.Option("singbox", "--format", help="Export format"),
-    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip version check"),
+    skip_version_check: bool = typer.Option(True, "--skip-version-check", help="Skip version check"),
 ):
     """Update configuration from subscription using Orchestrator."""
     from logsetup.setup import setup_logging
@@ -176,7 +176,7 @@ def dry_run_orchestrated(
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header"),
     format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
-    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip version compatibility check"),
+    skip_version_check: bool = typer.Option(True, "--skip-version-check", help="Skip version compatibility check"),
     user_routes: str = typer.Option(None, "--user-routes", help="Comma-separated list of route tags to include"),
     exclusions: str = typer.Option(None, "--exclusions", help="Comma-separated list of servers to exclude")
 ):

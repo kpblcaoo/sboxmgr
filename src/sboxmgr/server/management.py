@@ -1,3 +1,11 @@
+"""Server management and configuration persistence.
+
+This module handles server configuration management including saving selected
+configurations, managing server state, and providing utilities for server
+lifecycle management. It includes atomic file operations for safe configuration
+updates.
+"""
+
 import json
 import os
 import datetime
@@ -31,6 +39,14 @@ def load_selected_config():
 
 
 def save_selected_config(selected):
+    """Save selected server configuration to persistent storage.
+    
+    Saves the selected server configuration with a timestamp and performs
+    atomic file operations to ensure data integrity during writes.
+    
+    Args:
+        selected: Dictionary containing selected server configuration data.
+    """
     selected["last_modified"] = datetime.datetime.now(datetime.UTC).isoformat().replace("+00:00", "Z")
     atomic_handle_temp_file(selected, SELECTED_CONFIG_FILE, lambda x: True)  # Add proper validation
 
