@@ -88,11 +88,18 @@ class LanguageLoader:
         Returns:
             Sanitized dictionary with cleaned translation values.
         """
-        # Remove ANSI escape sequences but keep bracket content with 'm'
+        # Remove ANSI escape sequences completely
         def clean_value(v):
             if isinstance(v, str):
-                # Remove ANSI escape character but keep bracket content
-                cleaned = re.sub(r'\x1b\[', '[', v)
+                # Remove all ANSI escape sequences: \x1b[ followed by any characters until a letter
+                # This covers: \x1b[31m, \x1b[1;33m, \x1b(B, \x1b)P, etc.
+                cleaned = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', v)
+                # Also remove other ANSI sequences like \x1b(, \x1b), \x1bP, etc.
+                cleaned = re.sub(r'\x1b[()P]', '', cleaned)
+                # Remove incomplete ANSI sequences (like \x1b[31 without ending letter)
+                cleaned = re.sub(r'\x1b\[[0-9;]*$', '', cleaned)
+                # Remove any remaining \x1b characters
+                cleaned = re.sub(r'\x1b', '', cleaned)
                 # Limit length to 500 characters
                 return cleaned[:500]
             return str(v)[:500]

@@ -70,7 +70,9 @@ class PostProcessorChain(BasePostProcessor):
         """
         for proc in self.processors:
             sig = inspect.signature(proc.process)
-            if context is not None and len(sig.parameters) >= 3:
+            # Check if the processor accepts context parameter specifically
+            has_context_param = 'context' in sig.parameters
+            if context is not None and has_context_param:
                 servers = proc.process(servers, context)
             else:
                 servers = proc.process(servers)
