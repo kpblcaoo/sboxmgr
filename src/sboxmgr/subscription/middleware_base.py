@@ -12,14 +12,14 @@ import hashlib
 import warnings
 
 class BaseMiddleware(ABC):
-    """Базовый интерфейс middleware для обработки списка ParsedServer.
+    """Base middleware interface for processing ParsedServer list.
 
     Args:
-        servers (List[ParsedServer]): Список серверов.
-        context (PipelineContext): Контекст пайплайна.
+        servers (List[ParsedServer]): Server list.
+        context (PipelineContext): Pipeline context.
 
     Returns:
-        List[ParsedServer]: Результат обработки.
+        List[ParsedServer]: Processing result.
     """
     @abstractmethod
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
@@ -37,7 +37,7 @@ class BaseMiddleware(ABC):
         """
 
 class MiddlewareChain(BaseMiddleware):
-    """Цепочка middleware, вызываемых по порядку для обработки списка ParsedServer."""
+    """Chain of middleware called sequentially to process ParsedServer list."""
     def __init__(self, middlewares: list):
         self.middlewares = middlewares
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
@@ -51,7 +51,7 @@ class MiddlewareChain(BaseMiddleware):
             List[ParsedServer]: Servers after processing through all middleware.
         """
         for mw in self.middlewares:
-            servers = mw.process(servers, context)
+            servers = mw.process(servers, context=context)
         return servers
 
 class LoggingMiddleware(BaseMiddleware):
@@ -85,7 +85,7 @@ class LoggingMiddleware(BaseMiddleware):
 MIDDLEWARE_REGISTRY = {}
 
 def register_middleware(cls):
-    """Регистрирует middleware с sandbox/audit: проверка интерфейса, логирование."""
+    """Register middleware with sandbox/audit: interface validation, logging."""
     if not issubclass(cls, BaseMiddleware):
         raise TypeError(f"{cls.__name__} must inherit from BaseMiddleware")
     if not cls.__doc__ or 'Google' not in (cls.__doc__ or ''):
@@ -95,10 +95,10 @@ def register_middleware(cls):
     return cls
 
 class TagFilterMiddleware(BaseMiddleware):
-    """Фильтрует серверы по тегу из context.tag_filters (список тегов)."""
+    """Filter servers by tag from context.tag_filters (tag list)."""
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
         tags = getattr(context, 'tag_filters', None)
-        # Базовая валидация user input (SEC-MW-05)
+        # Basic user input validation (SEC-MW-05)
         if tags is not None:
             if not isinstance(tags, list):
                 raise ValueError("tag_filters must be a list of strings")
@@ -110,9 +110,9 @@ class TagFilterMiddleware(BaseMiddleware):
         return [s for s in servers if getattr(s, 'meta', {}).get('tag') in tags]
 
 class EnrichMiddleware(BaseMiddleware):
-    """Обогащает ParsedServer: добавляет country='??' в meta (stub).
+    """Enrich ParsedServer: add country='??' to meta (stub).
     
-    WARNING: Не реализует внешний lookup! Если потребуется enrichment через внешние сервисы — обязательно реализовать таймаут, sandbox, SEC-аудит (см. SEC-MW-04).
+    WARNING: Does not implement external lookup! If enrichment through external services is required — implement timeout, sandbox, SEC-audit (see SEC-MW-04).
     """
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
         for s in servers:

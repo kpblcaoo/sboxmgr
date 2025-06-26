@@ -15,7 +15,7 @@ class GeoFilterPostProcessorPostprocessor(BasePostProcessor):
 
 Example:
     pp = GeoFilterPostProcessorPostprocessor()
-    servers = pp.process(servers, context)"""
+    servers = pp.process(servers, context=context)"""
     def process(self, servers, context):
         """Post-process parsed servers.
 

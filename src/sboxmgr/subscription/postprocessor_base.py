@@ -46,12 +46,12 @@ class DedupPostProcessor(BasePostProcessor):
         return result 
 
 class PostProcessorChain(BasePostProcessor):
-    """Цепочка postprocessor-плагинов, вызываемых по порядку для обработки списка ParsedServer.
+    """Chain of postprocessor plugins called in sequence to process ParsedServer list.
 
     Args:
-        processors (list[BasePostProcessor]): Список postprocessor-плагинов, применяемых по очереди.
+        processors (list[BasePostProcessor]): List of postprocessor plugins applied sequentially.
 
-    Пример:
+    Example:
         chain = PostProcessorChain([DedupPostProcessor(), GeoPostProcessor()])
         servers = chain.process(servers)
     """
@@ -59,21 +59,21 @@ class PostProcessorChain(BasePostProcessor):
         self.processors = processors
 
     def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
-        """Применить все postprocessor-плагины по очереди к списку серверов.
+        """Apply all postprocessor plugins sequentially to the server list.
 
         Args:
-            servers (List[ParsedServer]): Входной список серверов.
+            servers (List[ParsedServer]): Input server list.
             context: Pipeline context containing processing configuration.
 
         Returns:
-            List[ParsedServer]: Результат после применения всех postprocessor-плагинов.
+            List[ParsedServer]: Result after applying all postprocessor plugins.
         """
         for proc in self.processors:
             sig = inspect.signature(proc.process)
             # Check if the processor accepts context parameter specifically
             has_context_param = 'context' in sig.parameters
             if context is not None and has_context_param:
-                servers = proc.process(servers, context)
+                servers = proc.process(servers, context=context)
             else:
                 servers = proc.process(servers)
         return servers 

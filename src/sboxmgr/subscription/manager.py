@@ -365,7 +365,7 @@ class SubscriptionManager:
         try:
             debug_level = getattr(context, 'debug_level', 0)
             
-            processed_servers = self.middleware_chain.process(servers, context)
+            processed_servers = self.middleware_chain.process(servers, context=context)
             
             if debug_level >= 2:
                 print(f"[debug] servers after middleware: {processed_servers[:2]}{' ...' if len(processed_servers) > 3 else ''}")
