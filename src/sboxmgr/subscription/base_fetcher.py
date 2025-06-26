@@ -1,3 +1,10 @@
+"""Base fetcher interface for subscription data retrieval.
+
+This module defines the abstract base class for fetchers that retrieve
+subscription data from various sources (HTTP URLs, local files, APIs, etc.).
+All concrete fetchers must implement the BaseFetcher interface and register
+themselves using the @register decorator for automatic discovery.
+"""
 from abc import ABC, abstractmethod
 from .models import SubscriptionSource
 import os

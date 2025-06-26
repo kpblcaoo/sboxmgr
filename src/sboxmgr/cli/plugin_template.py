@@ -1,3 +1,11 @@
+"""Plugin template generator for sboxmgr extensions.
+
+This module provides utilities for generating boilerplate code for custom
+sboxmgr plugins such as parsers, exporters, validators, and middleware. It
+helps developers create properly structured plugin classes that integrate
+with the sboxmgr plugin registry system.
+"""
+
 import typer
 import os
 
@@ -192,7 +200,7 @@ def plugin_template(
 
     Example:
         processor = {class_name}()
-        processed_servers = processor.process(servers, context)
+        processed_servers = processor.process(servers, context=context)
     """
         body = """    def process(self, servers: list[ParsedServer], context) -> list[ParsedServer]:
         \"\"\"Post-process parsed server configurations.

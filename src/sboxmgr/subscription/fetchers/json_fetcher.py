@@ -1,3 +1,9 @@
+"""JSON-based subscription fetcher implementation.
+
+This module provides the JSONFetcher class for retrieving subscription data
+from JSON API endpoints. It handles JSON parsing, validation, and provides
+caching mechanisms for improved performance and reduced API load.
+"""
 import requests
 from ..base_fetcher import BaseFetcher
 from ..registry import register
@@ -5,6 +11,16 @@ import threading
 
 @register("url_json")
 class JSONFetcher(BaseFetcher):
+    """Fetcher for JSON-based subscription APIs.
+    
+    This fetcher specializes in handling JSON API endpoints with proper
+    content-type validation, JSON parsing, and error handling. It provides
+    thread-safe caching and supports various JSON subscription formats.
+    
+    Attributes:
+        _cache_lock: Thread lock for cache synchronization.
+        _fetch_cache: Cache dictionary for storing fetched JSON data.
+    """
     _cache_lock = threading.Lock()
     _fetch_cache = {}
 

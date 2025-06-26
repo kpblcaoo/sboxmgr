@@ -1,3 +1,10 @@
+"""Sing-box configuration exporter implementation.
+
+This module provides comprehensive sing-box configuration export functionality
+including server conversion, routing rule generation, and version compatibility
+handling. It supports both modern and legacy sing-box syntax for maximum
+compatibility across different sing-box versions.
+"""
 import json
 import logging
 from typing import List, Optional, Dict, Any
@@ -9,6 +16,19 @@ from ...utils.version import should_use_legacy_outbounds
 logger = logging.getLogger(__name__)
 
 def kebab_to_snake(d):
+    """Convert kebab-case keys to snake_case recursively in dictionaries.
+    
+    Transforms dictionary keys from kebab-case (hyphen-separated) to snake_case
+    (underscore-separated) format. This is useful for normalizing configuration
+    data between different naming conventions.
+    
+    Args:
+        d: Dictionary, list, or other data structure to process.
+        
+    Returns:
+        Processed data structure with kebab-case keys converted to snake_case.
+        Non-dictionary types are returned unchanged.
+    """
     if not isinstance(d, dict):
         return d
     return {k.replace('-', '_'): kebab_to_snake(v) for k, v in d.items()}

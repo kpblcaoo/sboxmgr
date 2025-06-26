@@ -1,3 +1,10 @@
+"""CLI commands for managing server exclusions (`sboxctl exclusions`).
+
+This module provides Typer command handlers for adding, removing, listing, and
+clearing exclusions of subscription servers. Exclusions are stored in a JSON
+file and applied during the subscription processing pipeline to filter out
+unwanted servers.
+"""
 import typer
 from sboxmgr.config.fetch import fetch_json
 from sboxmgr.server.exclusions import exclude_servers, remove_exclusions, view_exclusions

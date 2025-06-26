@@ -1,3 +1,10 @@
+"""Base parser interface for subscription data parsing.
+
+This module defines the abstract base class for parsers that process raw
+subscription data into structured ParsedServer objects. Parsers handle
+different subscription formats (base64, JSON, YAML, URI lists, etc.) and
+must register themselves for automatic format detection and processing.
+"""
 from abc import ABC, abstractmethod
 from .models import ParsedServer
 from typing import List

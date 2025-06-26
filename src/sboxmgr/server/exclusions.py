@@ -1,3 +1,11 @@
+"""Server exclusions management utilities.
+
+This module provides functions for managing server exclusions - servers that
+should be filtered out during subscription processing. Exclusions are stored
+in JSON format and applied during the pipeline to remove unwanted servers
+based on various criteria.
+"""
+
 import json
 import datetime
 import fnmatch

@@ -1,3 +1,10 @@
+"""Service management utilities for sing-box daemon.
+
+This module provides functions for managing the sing-box system service,
+including starting, stopping, restarting, and checking the status of the
+sing-box daemon. It integrates with systemd on Linux systems and provides
+fallback mechanisms for other platforms.
+"""
 import shutil
 import subprocess
 from logging import error, info

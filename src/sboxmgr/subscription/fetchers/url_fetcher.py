@@ -1,3 +1,10 @@
+"""HTTP/HTTPS URL fetcher with caching and compression support.
+
+This module provides the URLFetcher class for retrieving subscription data
+from HTTP/HTTPS URLs and local file:// URLs. It includes support for gzip
+decompression, response caching, custom headers, user agents, and size limits
+for secure and efficient subscription data fetching.
+"""
 import requests
 import gzip
 from ..models import SubscriptionSource
@@ -10,6 +17,16 @@ from sboxmgr.utils.env import get_fetch_timeout
 @register("url_base64")
 @register("uri_list")
 class URLFetcher(BaseFetcher):
+    """HTTP/HTTPS URL fetcher with caching and compression support.
+    
+    This fetcher handles HTTP/HTTPS URLs and local file:// URLs with support
+    for gzip decompression, response caching, custom headers, and user agents.
+    It provides thread-safe caching and respects size limits for security.
+    
+    Attributes:
+        _cache_lock: Thread lock for cache synchronization.
+        _fetch_cache: Cache dictionary for storing fetched data.
+    """
     _cache_lock = threading.Lock()
     _fetch_cache = {}
 

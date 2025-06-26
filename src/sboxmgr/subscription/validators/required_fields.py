@@ -1,10 +1,29 @@
+"""Required fields validator for parsed servers.
+
+This module provides validation for essential server configuration fields.
+It ensures that all parsed servers have the minimum required fields (type,
+address, port) and validates field values for consistency and security
+before configuration export.
+"""
 from .base import BaseParsedValidator, register_parsed_validator, ValidationResult
 from sboxmgr.subscription.models import PipelineContext
 
 @register_parsed_validator("required_fields")
 class RequiredFieldsValidator(BaseParsedValidator):
-    """Проверяет обязательные поля ParsedServer: type, address, port, допустимость значений. Возвращает errors и список валидных серверов."""
+    """Validates required fields for ParsedServer: type, address, port, and value acceptability. Returns errors and list of valid servers."""
     def validate(self, servers: list, context: PipelineContext) -> ValidationResult:
+        """Validate that servers have all required fields with valid values.
+        
+        Checks each server for required fields (type, address, port) and validates
+        that field values are within acceptable ranges and formats.
+        
+        Args:
+            servers: List of ParsedServer objects to validate.
+            context: Pipeline context containing validation settings.
+            
+        Returns:
+            ValidationResult: Contains validation errors and list of valid servers.
+        """
         errors = []
         valid_servers = []
         for idx, s in enumerate(servers):

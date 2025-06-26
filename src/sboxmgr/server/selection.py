@@ -1,3 +1,10 @@
+"""Server selection utilities and algorithms.
+
+This module provides functions for selecting servers from parsed subscription
+data based on various criteria such as performance, availability, geographic
+location, and user preferences. It implements selection algorithms used during
+the subscription processing pipeline.
+"""
 from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.utils.id import generate_server_id
 import logging

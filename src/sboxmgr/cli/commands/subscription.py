@@ -1,3 +1,12 @@
+"""CLI commands for subscription processing (`sboxctl subscription`).
+
+This module contains Typer command handlers that fetch subscription data,
+process it through the sboxmgr pipeline, and update or validate sing-box
+configuration files.  Version compatibility checks for sing-box are **disabled
+by default** via the ``--skip-version-check`` flag (default *True*); this logic
+is considered legacy and will be migrated to *sboxagent*, after which the
+related code will be removed.
+"""
 import typer
 import os
 from sboxmgr.subscription.manager import SubscriptionManager
@@ -72,7 +81,7 @@ def run(
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all"),
     format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
-    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check"),
+    skip_version_check: bool = typer.Option(True, "--skip-version-check", help="Skip sing-box version compatibility check"),
     with_agent_check: bool = typer.Option(False, "--with-agent-check", help="Use sboxagent for external validation and client detection")
 ):
     """Update sing-box configuration from subscription with comprehensive pipeline.
@@ -194,7 +203,7 @@ def dry_run(
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all"),
     format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
-    skip_version_check: bool = typer.Option(False, "--skip-version-check", help="Skip sing-box version compatibility check"),
+    skip_version_check: bool = typer.Option(True, "--skip-version-check", help="Skip sing-box version compatibility check"),
     with_agent_check: bool = typer.Option(False, "--with-agent-check", help="Use sboxagent for external validation and client detection")
 ):
     """Validate subscription configuration without making changes.

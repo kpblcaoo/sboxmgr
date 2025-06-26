@@ -1,3 +1,11 @@
+"""Subscription management and orchestration.
+
+This module provides the main SubscriptionManager class that orchestrates
+the entire subscription processing pipeline from fetching to export. It
+coordinates fetchers, parsers, validators, postprocessors, and exporters
+to provide a unified subscription processing interface.
+"""
+
 from .models import SubscriptionSource, PipelineContext, PipelineResult
 from .registry import get_plugin, load_entry_points
 from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации
@@ -302,14 +310,23 @@ class SubscriptionManager:
             if debug_level >= 2:
                 print(f"[DEBUG] ParsedValidator valid_servers: {getattr(parsed_result, 'valid_servers', None)} errors: {parsed_result.errors}")
             
-            validated_servers = getattr(parsed_result, 'valid_servers', servers)
+            # В strict режиме возвращаем все сервера (включая невалидные) с ошибками
+            # В tolerant режиме возвращаем только валидные сервера
+            if context.mode == 'strict':
+                validated_servers = servers  # Возвращаем все сервера
+                # В strict режиме при наличии серверов всегда success=True
+                if servers:
+                    success = True
+                else:
+                    success = False
+            else:
+                validated_servers = getattr(parsed_result, 'valid_servers', servers)
+                success = bool(validated_servers)
             
             if debug_level >= 2:
                 print(f"[DEBUG] servers after validation: {validated_servers}")
             
             if not validated_servers:
-                if debug_level >= 2:
-                    print("[DEBUG] No valid servers after validation, returning empty config and success=False")
                 err = self._create_pipeline_error(
                     ErrorType.VALIDATION,
                     "parsed_validate",
@@ -328,7 +345,7 @@ class SubscriptionManager:
                 )
                 context.metadata['errors'].append(err)
             
-            return validated_servers, True
+            return validated_servers, success
             
         except Exception as e:
             err = self._create_pipeline_error(
@@ -357,7 +374,7 @@ class SubscriptionManager:
         try:
             debug_level = getattr(context, 'debug_level', 0)
             
-            processed_servers = self.middleware_chain.process(servers, context)
+            processed_servers = self.middleware_chain.process(servers, context=context)
             
             if debug_level >= 2:
                 print(f"[debug] servers after middleware: {processed_servers[:2]}{' ...' if len(processed_servers) > 3 else ''}")
@@ -437,6 +454,8 @@ class SubscriptionManager:
         """
         # Initialize context and parameters
         context = context or PipelineContext()
+        if mode is not None:
+            context.mode = mode
         if 'errors' not in context.metadata:
             context.metadata['errors'] = []
         

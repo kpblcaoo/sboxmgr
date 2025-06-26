@@ -25,5 +25,6 @@
   "cli.exclusions.help": "Manage exclusions: add, remove, view.",
   "cli.clear_exclusions.help": "Clear all exclusions.",
   "cli.lang.help": "Manage CLI language (i18n): show current, list available, set and persist language.",
-  "cli.lang.bilingual_notice": "Bilingual mode (en + system) is used only when language is not explicitly set. When you set a language explicitly, only that language will be shown."
+  "cli.lang.bilingual_notice": "Bilingual mode (en + system) is used only when language is not explicitly set. When you set a language explicitly, only that language will be shown.",
+  "cli.lang.set.help": "Set CLI language code (e.g., en, ru)."
 }

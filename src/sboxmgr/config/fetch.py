@@ -1,3 +1,11 @@
+"""Configuration fetching and loading utilities.
+
+This module provides functions for loading configuration data from various
+sources including JSON files, TOML files, and remote URLs. It handles
+validation, error recovery, and format detection for configuration inputs
+used throughout the sboxmgr system.
+"""
+
 import requests
 import json
 from logging import error

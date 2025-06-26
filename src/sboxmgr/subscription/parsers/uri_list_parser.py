@@ -1,3 +1,11 @@
+"""URI list parser for subscription data.
+
+This module provides parsing functionality for URI-based subscription formats
+that contain multiple server URIs in a single file. It supports various
+protocols including Shadowsocks, VLess, VMess, and Trojan with proper
+error handling and validation.
+"""
+
 import base64
 import binascii
 import json
@@ -14,7 +22,26 @@ logger = logging.getLogger(__name__)
 
 @register("parser_uri_list")
 class URIListParser(BaseParser):
+    """Parser for URI list format subscription data.
+    
+    This parser handles subscription data consisting of newline-separated
+    proxy URIs. Each URI represents a single server configuration in a
+    standardized URI format (vless://, vmess://, trojan://, ss://, etc.).
+    """
+    
     def parse(self, raw: bytes) -> List[ParsedServer]:
+        """Parse URI list subscription data into ParsedServer objects.
+        
+        Args:
+            raw: Raw bytes containing newline-separated proxy URIs.
+            
+        Returns:
+            List[ParsedServer]: List of parsed server configurations.
+            
+        Raises:
+            ValueError: If URI format is invalid or unsupported.
+            UnicodeDecodeError: If raw data cannot be decoded as UTF-8.
+        """
         lines = raw.decode("utf-8").splitlines()
         servers = []
         debug_level = get_debug_level()

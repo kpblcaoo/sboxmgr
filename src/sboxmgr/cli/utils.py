@@ -1,3 +1,10 @@
+"""CLI utility functions and helpers.
+
+This module contains shared utility functions used across multiple CLI command
+modules, including common formatting, validation, and error handling routines
+that help maintain consistency in the command-line interface.
+"""
+
 import json
 import os
 from pathlib import Path

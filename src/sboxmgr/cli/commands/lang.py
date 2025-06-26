@@ -1,3 +1,10 @@
+"""CLI commands for language management (`sboxctl lang`).
+
+This module provides commands for listing available languages, getting the
+current language setting, and setting a new language preference for the
+sboxmgr CLI interface. Language settings are managed through environment
+variables and the i18n system.
+"""
 import typer
 from pathlib import Path
 from sboxmgr.i18n.loader import LanguageLoader
@@ -21,7 +28,7 @@ LANG_NAMES = {
 }
 
 def lang_cmd(
-    set_lang: str = typer.Option(None, "--set", "-s", help=lang.get_with_fallback("cli.lang.set.help")),
+    set_lang: str = typer.Option(None, "--set", "-s", help=lang.get("cli.lang.set.help")),
 ):
     """Manage CLI internationalization language settings.
     
