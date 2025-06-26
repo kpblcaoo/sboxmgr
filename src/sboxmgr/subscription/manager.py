@@ -314,8 +314,14 @@ class SubscriptionManager:
             # В tolerant режиме возвращаем только валидные сервера
             if context.mode == 'strict':
                 validated_servers = servers  # Возвращаем все сервера
+                # В strict режиме при наличии серверов всегда success=True
+                if servers:
+                    success = True
+                else:
+                    success = False
             else:
                 validated_servers = getattr(parsed_result, 'valid_servers', servers)
+                success = bool(validated_servers)
             
             if debug_level >= 2:
                 print(f"[DEBUG] servers after validation: {validated_servers}")
@@ -328,15 +334,7 @@ class SubscriptionManager:
                     {"source_type": self.fetcher.source.source_type}
                 )
                 context.metadata['errors'].append(err)
-                if context.mode == 'strict':
-                    # В strict режиме возвращаем все сервера (даже если они невалидны), success=True, ошибки в errors
-                    if servers:
-                        return servers, True
-                    else:
-                        return [], False
-                else:
-                    # В tolerant режиме — если нет валидных серверов, это ошибка
-                    return [], False
+                return [], False
             
             if parsed_result.errors:
                 err = self._create_pipeline_error(
@@ -347,7 +345,7 @@ class SubscriptionManager:
                 )
                 context.metadata['errors'].append(err)
             
-            return validated_servers, True
+            return validated_servers, success
             
         except Exception as e:
             err = self._create_pipeline_error(
@@ -494,9 +492,7 @@ class SubscriptionManager:
             # Stage 3: Validate parsed servers
             servers, success = self._validate_parsed_servers(servers, context)
             if not success:
-                if context.mode == 'strict':
-                    return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
-                # В tolerant режиме продолжаем с пустым списком серверов, но success=True
+                return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
             
             # Stage 4: Process middleware
             servers, success = self._process_middleware(servers, context)

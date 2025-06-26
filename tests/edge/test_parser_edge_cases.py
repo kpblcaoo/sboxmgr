@@ -421,3 +421,84 @@ def test_ss_uri_without_port(caplog):
     # Очищаем переменную окружения после теста
     if 'SBOXMGR_DEBUG' in os.environ:
         del os.environ['SBOXMGR_DEBUG'] 
+
+def test_parsed_validator_strict_tolerant_modes():
+    from sboxmgr.subscription.manager import SubscriptionManager
+    SubscriptionManager._get_servers_cache.clear()
+    """ParsedValidator: проверка исправленной логики strict/tolerant режимов.
+    
+    Этот тест проверяет, что исправленный баг с валидацией не всплывёт снова:
+    - В strict режиме: возвращаются все сервера (включая невалидные) с success=True
+    - В tolerant режиме: возвращаются только валидные сервера, при их отсутствии success=False
+    """
+    from sboxmgr.subscription.models import SubscriptionSource, ParsedServer, PipelineContext
+    
+    # Смешанные сервера: 2 валидных, 2 невалидных
+    servers = [
+        ParsedServer(type="ss", address="1.2.3.4", port=443),  # валидный
+        ParsedServer(type="vmess", address="5.6.7.8", port=8080),  # валидный
+        ParsedServer(type=None, address="9.10.11.12", port=443),  # невалидный: нет type
+        ParsedServer(type="ss", address="13.14.15.16", port=99999),  # невалидный: порт вне диапазона
+    ]
+    
+    class DummyFetcher:
+        def __init__(self, source): self.source = source
+        def fetch(self): return b"dummy"
+    
+    class DummyParser:
+        def parse(self, raw): return servers
+    
+    src = SubscriptionSource(url="file://dummy", source_type="url_base64")
+    mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
+    mgr.fetcher = DummyFetcher(src)
+    
+    # Тест 1: Tolerant режим - должен вернуть только валидные сервера
+    context_tolerant = PipelineContext(mode="tolerant")
+    result_tolerant = mgr.get_servers(context=context_tolerant, mode="tolerant")
+    
+    assert result_tolerant.success, "Tolerant режим должен быть успешным при наличии валидных серверов"
+    assert len(result_tolerant.config) == 2, f"Tolerant режим должен вернуть 2 валидных сервера, получено {len(result_tolerant.config)}"
+    assert any(s.address == "1.2.3.4" for s in result_tolerant.config), "Первый валидный сервер должен быть в результате"
+    assert any(s.address == "5.6.7.8" for s in result_tolerant.config), "Второй валидный сервер должен быть в результате"
+    assert not any(s.address == "9.10.11.12" for s in result_tolerant.config), "Невалидный сервер не должен быть в результате"
+    assert not any(s.address == "13.14.15.16" for s in result_tolerant.config), "Невалидный сервер не должен быть в результате"
+    
+    # Проверяем, что ошибки валидации есть в errors
+    assert len(result_tolerant.errors) > 0, "Ошибки валидации должны быть в errors"
+    assert any("missing type" in e.message for e in result_tolerant.errors), "Должна быть ошибка о missing type"
+    assert any("invalid port" in e.message for e in result_tolerant.errors), "Должна быть ошибка о invalid port"
+    
+    # Тест 2: Strict режим - должен вернуть все сервера (включая невалидные)
+    context_strict = PipelineContext(mode="strict")
+    result_strict = mgr.get_servers(context=context_strict, mode="strict")
+    
+    assert result_strict.success, "Strict режим должен быть успешным даже с невалидными серверами"
+    assert len(result_strict.config) == 4, f"Strict режим должен вернуть все 4 сервера, получено {len(result_strict.config)}"
+    assert any(s.address == "1.2.3.4" for s in result_strict.config), "Первый валидный сервер должен быть в результате"
+    assert any(s.address == "5.6.7.8" for s in result_strict.config), "Второй валидный сервер должен быть в результате"
+    assert any(s.address == "9.10.11.12" for s in result_strict.config), "Первый невалидный сервер должен быть в результате"
+    assert any(s.address == "13.14.15.16" for s in result_strict.config), "Второй невалидный сервер должен быть в результате"
+    
+    # Проверяем, что ошибки валидации есть в errors
+    assert len(result_strict.errors) > 0, "Ошибки валидации должны быть в errors"
+    assert any("missing type" in e.message for e in result_strict.errors), "Должна быть ошибка о missing type"
+    assert any("invalid port" in e.message for e in result_strict.errors), "Должна быть ошибка о invalid port"
+    
+    # Тест 3: Tolerant режим с полностью невалидными серверами
+    all_invalid_servers = [
+        ParsedServer(type=None, address="1.2.3.4", port=443),
+        ParsedServer(type="ss", address=None, port=443),
+        ParsedServer(type="ss", address="5.6.7.8", port=None),
+    ]
+    
+    class DummyParserInvalid:
+        def parse(self, raw): return all_invalid_servers
+    
+    mgr_invalid = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParserInvalid())
+    mgr_invalid.fetcher = DummyFetcher(src)
+    
+    result_invalid = mgr_invalid.get_servers(context=context_tolerant, mode="tolerant", force_reload=True)
+    
+    assert not result_invalid.success, "Tolerant режим должен быть неуспешным при отсутствии валидных серверов"
+    assert len(result_invalid.config) == 0, "Tolerant режим должен вернуть пустой список при отсутствии валидных серверов"
+    assert len(result_invalid.errors) > 0, "Ошибки валидации должны быть в errors" 
