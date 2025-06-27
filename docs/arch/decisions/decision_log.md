@@ -15,6 +15,7 @@ _Часть ADR написана ретроспективно для фикса�
 | ADR-0009  | Configuration System Architecture           | Accepted | 2024-12-19 | Pydantic BaseSettings with hierarchical configuration and service mode detection |
 | ADR-0010  | Logging Core Architecture                   | Accepted | 2024-12-19 | Multi-sink structured logging with trace ID propagation |
 | ADR-0011  | Event System Architecture                   | Accepted | 2024-12-19 | Lightweight EventBus with pydispatch for component decoupling |
+| ADR-0012  | Service Architecture & Dual-Path Support    | Accepted | 2025-01-27 | Three-tier architecture with dual-path support |
 
 ## Summary
 - **Security**: ADR-0001 establishes CLI security foundation
