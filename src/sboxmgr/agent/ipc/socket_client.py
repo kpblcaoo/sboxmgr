@@ -1,11 +1,13 @@
-import sys
-import os
 import socket
 from typing import Optional, Dict, Any
 
-# Add sbox-common to path for FramedJSONProtocol import
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../../sbox-common')))
-from sbox_common.protocols.socket.framed_json import FramedJSONProtocol
+try:
+    from sbox_common.protocols.socket.framed_json import FramedJSONProtocol
+except ImportError:
+    raise ImportError(
+        "sbox_common package not found. Please install it with: "
+        "pip install -e ../sbox-common"
+    )
 
 """
 SocketClient for framed JSON protocol over Unix socket.
@@ -64,20 +66,25 @@ class SocketClient:
             
         Raises:
             RuntimeError: If socket is not connected or connection closed.
+            ConnectionError: If incomplete data received.
         """
         if not self.sock:
             raise RuntimeError("Socket is not connected")
+        
         # Read frame header
         header = self._recv_exact(self.protocol.FRAME_HEADER_SIZE)
-        if not header:
-            raise RuntimeError("No data received (connection closed)")
+        if len(header) != self.protocol.FRAME_HEADER_SIZE:
+            raise ConnectionError(f"Connection closed: incomplete header received ({len(header)}/{self.protocol.FRAME_HEADER_SIZE} bytes)")
+        
         length, version = self._unpack_header(header)
         if version != self.protocol.PROTOCOL_VERSION:
             raise RuntimeError(f"Unsupported protocol version: {version}")
+        
         # Read message body
         body = self._recv_exact(length)
-        if not body:
-            raise RuntimeError("No message body received")
+        if len(body) != length:
+            raise ConnectionError(f"Connection closed: incomplete message body received ({len(body)}/{length} bytes)")
+        
         message, _ = self.protocol.decode_message(header + body)
         return message
 
@@ -88,12 +95,12 @@ class SocketClient:
             n: Number of bytes to receive.
             
         Returns:
-            Received bytes.
+            Received bytes (may be less than n if connection closed).
         """
         buf = b''
         while len(buf) < n:
             chunk = self.sock.recv(n - len(buf))
-            if not chunk:
+            if not chunk:  # Connection closed
                 break
             buf += chunk
         return buf
