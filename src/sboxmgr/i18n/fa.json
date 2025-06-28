@@ -25,5 +25,13 @@
   "cli.clear_exclusions.help": "پاک‌سازی همه استثناها.",
   "cli.lang.help": "مدیریت زبان CLI (i18n): نمایش فعلی، لیست، تنظیم و ذخیره زبان.",
   "cli.lang.bilingual_notice": "حالت دو زبانه (en + system) فقط زمانی استفاده می‌شود که زبان به‌طور صریح تنظیم نشده باشد. با تنظیم صریح زبان، فقط همان زبان نمایش داده می‌شود.",
-  "cli.lang.set.help": "Set CLI language code (e.g., en, ru)."
+  "cli.lang.set.help": "Set CLI language code (e.g., en, ru).",
+  "cli.check_url_connection": "",
+  "cli.clear_exclusions.confirm": "",
+  "cli.exclusions.usage_example": "",
+  "cli.exclusions.usage_hint": "",
+  "cli.operation_cancelled": "",
+  "cli.subscription_format_hint": "",
+  "error.invalid_server_format": "",
+  "error.subscription_fetch_failed": ""
 }

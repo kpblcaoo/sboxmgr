@@ -26,5 +26,13 @@
   "cli.clear_exclusions.help": "Очистить все exclusions.",
   "cli.lang.help": "Управление языком CLI (i18n): показать текущий, список, установить и сохранить язык.",
   "cli.lang.bilingual_notice": "Двуязычный режим (en + system) используется только при неявном выборе языка. При явном выборе будет только один язык.",
-  "cli.lang.set.help": "Установить язык CLI (например, en, ru)."
+  "cli.lang.set.help": "Установить язык CLI (например, en, ru).",
+  "cli.check_url_connection": "",
+  "cli.clear_exclusions.confirm": "",
+  "cli.exclusions.usage_example": "",
+  "cli.exclusions.usage_hint": "",
+  "cli.operation_cancelled": "",
+  "cli.subscription_format_hint": "",
+  "error.invalid_server_format": "",
+  "error.subscription_fetch_failed": ""
 }

@@ -25,5 +25,13 @@
   "cli.clear_exclusions.help": "Effacer toutes les exclusions.",
   "cli.lang.help": "Gérer la langue de la CLI (i18n) : afficher l'actuelle, lister, définir et enregistrer la langue.",
   "cli.lang.bilingual_notice": "Le mode bilingue (en + system) n'est utilisé que lorsque la langue n'est pas explicitement définie. Lorsque vous définissez une langue explicitement, seule cette langue sera affichée.",
-  "cli.lang.set.help": "Set CLI language code (e.g., en, ru)."
+  "cli.lang.set.help": "Set CLI language code (e.g., en, ru).",
+  "cli.check_url_connection": "",
+  "cli.clear_exclusions.confirm": "",
+  "cli.exclusions.usage_example": "",
+  "cli.exclusions.usage_hint": "",
+  "cli.operation_cancelled": "",
+  "cli.subscription_format_hint": "",
+  "error.invalid_server_format": "",
+  "error.subscription_fetch_failed": ""
 }

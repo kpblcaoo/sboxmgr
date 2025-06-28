@@ -26,5 +26,13 @@
   "cli.clear_exclusions.help": "Tüm hariç tutmaları temizle.",
   "cli.lang.help": "CLI dili (i18n) yönetimi: mevcut dili göster, listele, ayarla ve kaydet.",
   "cli.lang.bilingual_notice": "Çift dilli mod (en + sistem) yalnızca dil açıkça ayarlanmadığında kullanılır. Dili açıkça ayarladığınızda yalnızca o dil gösterilecektir.",
-  "cli.lang.set.help": "Set CLI language code (e.g., en, ru)."
+  "cli.lang.set.help": "Set CLI language code (e.g., en, ru).",
+  "cli.check_url_connection": "",
+  "cli.clear_exclusions.confirm": "",
+  "cli.exclusions.usage_example": "",
+  "cli.exclusions.usage_hint": "",
+  "cli.operation_cancelled": "",
+  "cli.subscription_format_hint": "",
+  "error.invalid_server_format": "",
+  "error.subscription_fetch_failed": ""
 }

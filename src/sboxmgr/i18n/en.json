@@ -24,7 +24,16 @@
   "cli.list_servers.help": "List all available servers from config.",
   "cli.exclusions.help": "Manage exclusions: add, remove, view.",
   "cli.clear_exclusions.help": "Clear all exclusions.",
+  "cli.clear_exclusions.confirm": "Are you sure you want to clear ALL exclusions?",
+  "cli.clear_exclusions.success": "Cleared {count} exclusions.",
   "cli.lang.help": "Manage CLI language (i18n): show current, list available, set and persist language.",
   "cli.lang.bilingual_notice": "Bilingual mode (en + system) is used only when language is not explicitly set. When you set a language explicitly, only that language will be shown.",
-  "cli.lang.set.help": "Set CLI language code (e.g., en, ru)."
+  "cli.lang.set.help": "Set CLI language code (e.g., en, ru).",
+  "cli.check_url_connection": "Check URL and internet connection",
+  "cli.exclusions.usage_example": "Example: sboxmgr exclusions --url URL --add '0,1,server-*' --reason 'Testing'",
+  "cli.exclusions.usage_hint": "Use --add, --remove, --view, --clear, --list-servers, or --interactive",
+  "cli.operation_cancelled": "Operation cancelled.",
+  "cli.subscription_format_hint": "The subscription might not be in the expected format",
+  "error.invalid_server_format": "Invalid server data format",
+  "error.subscription_fetch_failed": "Failed to fetch subscription data"
 }
