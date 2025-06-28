@@ -15,7 +15,17 @@ from ..events import EventType, EventPriority
 from ..logging import get_logger
 
 
-logger = get_logger(__name__)
+def _get_logger():
+    """Get logger with lazy initialization."""
+    try:
+        return get_logger(__name__)
+    except RuntimeError:
+        # Fallback to basic logger if logging not initialized
+        import logging
+        return logging.getLogger(__name__)
+
+
+logger = _get_logger()
 
 
 class EventSenderError(Exception):
@@ -73,14 +83,14 @@ class EventSender:
             self._client.connect()
             self._connected = True
             
-            logger.info("Connected to sboxagent", extra={
+            _get_logger().info("Connected to sboxagent", extra={
                 "socket_path": self.socket_path
             })
             
             return True
             
         except Exception as e:
-            logger.debug(f"Failed to connect to sboxagent: {e}")
+            _get_logger().debug(f"Failed to connect to sboxagent: {e}")
             self._connected = False
             return False
     
@@ -151,28 +161,28 @@ class EventSender:
             if response.get("type") == "response":
                 response_data = response.get("response", {})
                 if response_data.get("status") == "success":
-                    logger.debug("Event sent successfully", extra={
+                    _get_logger().debug("Event sent successfully", extra={
                         "event_type": event_type,
                         "message_id": message["id"]
                     })
                     return True
                 else:
                     error = response_data.get("error", {})
-                    logger.error("Event sending failed", extra={
+                    _get_logger().error("Event sending failed", extra={
                         "event_type": event_type,
                         "error_code": error.get("code"),
                         "error_message": error.get("message")
                     })
                     return False
             else:
-                logger.warning("Unexpected response type", extra={
+                _get_logger().warning("Unexpected response type", extra={
                     "expected": "response",
                     "received": response.get("type")
                 })
                 return False
                 
         except Exception as e:
-            logger.error("Failed to send event", extra={
+            _get_logger().error("Failed to send event", extra={
                 "event_type": event_type,
                 "error": str(e)
             })
@@ -212,19 +222,19 @@ class EventSender:
             response = self._client.recv_message()
             
             if response.get("type") == "heartbeat":
-                logger.debug("Heartbeat exchange successful", extra={
+                _get_logger().debug("Heartbeat exchange successful", extra={
                     "agent_id": agent_id
                 })
                 return True
             else:
-                logger.warning("Unexpected heartbeat response", extra={
+                _get_logger().warning("Unexpected heartbeat response", extra={
                     "expected": "heartbeat",
                     "received": response.get("type")
                 })
                 return False
                 
         except Exception as e:
-            logger.error("Failed to send heartbeat", extra={
+            _get_logger().error("Failed to send heartbeat", extra={
                 "agent_id": agent_id,
                 "error": str(e)
             })
@@ -269,21 +279,21 @@ class EventSender:
                     return response_data.get("data")
                 else:
                     error = response_data.get("error", {})
-                    logger.error("Command failed", extra={
+                    _get_logger().error("Command failed", extra={
                         "command": command,
                         "error_code": error.get("code"),
                         "error_message": error.get("message")
                     })
                     return None
             else:
-                logger.warning("Unexpected command response", extra={
+                _get_logger().warning("Unexpected command response", extra={
                     "expected": "response",
                     "received": response.get("type")
                 })
                 return None
                 
         except Exception as e:
-            logger.error("Failed to send command", extra={
+            _get_logger().error("Failed to send command", extra={
                 "command": command,
                 "error": str(e)
             })
@@ -407,7 +417,7 @@ def send_event(event_type: str,
     try:
         return sender.send_event(event_type, event_data, source, priority)
     except Exception as e:
-        logger.debug(f"Failed to send event: {e}")
+        _get_logger().debug(f"Failed to send event: {e}")
         return False
 
 

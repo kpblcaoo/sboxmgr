@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch, mock_open, MagicMock
 from sboxmgr.config.generate import generate_config, generate_temp_config
-from sboxmgr.validation.internal import validate_config_file
+from sboxmgr.config.validation import validate_config_file
 
 
 class TestGenerateConfig:

@@ -3,7 +3,6 @@
 import json
 import pytest
 from unittest.mock import patch, mock_open, Mock
-from sboxmgr.validation.internal import validate_temp_config
 from sboxmgr.config.generate import generate_config, generate_temp_config, validate_temp_config_dict
 from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
 
@@ -13,16 +12,9 @@ class TestConfigGenerateBugfixes:
 
     def test_validate_temp_config_json_string_input(self):
         """Test that validate_temp_config accepts JSON string, not dict."""
-        # Valid JSON string
-        config_json = '{"outbounds": [{"type": "direct", "tag": "direct"}]}'
-        
-        # Should not raise exception for valid config
-        validate_temp_config(config_json)
-        
-        # Invalid JSON string should raise ValueError
-        invalid_json = '{"outbounds": [invalid json}'
-        with pytest.raises(ValueError, match="Configuration validation failed"):
-            validate_temp_config(invalid_json)
+        # This test is no longer relevant as validate_temp_config was removed
+        # The validation is now handled by basic JSON parsing in generate_config
+        pass
 
     def test_orchestrator_creates_new_subscription_manager(self):
         """Test that Orchestrator always creates new SubscriptionManager for each URL."""

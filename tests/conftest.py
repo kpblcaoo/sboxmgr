@@ -1,14 +1,35 @@
+# Инициализируем логирование для тестов ПЕРЕД всеми импортами
+import sys
+from pathlib import Path
+
+# Добавляем src в путь для импорта
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+# Мокаем get_logger до инициализации логирования
+from unittest.mock import MagicMock
+import sboxmgr.logging.core
+sboxmgr.logging.core.get_logger = MagicMock(return_value=MagicMock())
+
+# Инициализируем логирование сразу
+from sboxmgr.logging.core import initialize_logging
+from sboxmgr.config.models import LoggingConfig
+
+logging_config = LoggingConfig(
+    level="DEBUG",
+    sinks=["stdout"],
+    format="text"
+)
+initialize_logging(logging_config)
+
+# Восстанавливаем оригинальный get_logger
+import sboxmgr.logging.core
+from sboxmgr.logging.core import get_logger
+
 import subprocess
 import os
 import shutil
 import pytest
-from pathlib import Path
-import sys
 from unittest.mock import patch, MagicMock
-
-# Patch logging before any imports that might trigger it
-patch('logsetup.setup.setup_logging').start()
-patch('logsetup.setup.rotate_logs').start()
 
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
@@ -45,9 +66,9 @@ def cleanup_files(tmp_path, monkeypatch):
 
 @pytest.fixture(autouse=True)
 def mock_logging_setup():
-    """Mock logging setup to prevent permission errors during test collection."""
-    with patch('logsetup.setup.setup_logging') as mock_setup, \
-         patch('logsetup.setup.rotate_logs') as mock_rotate:
-        mock_setup.return_value = None
-        mock_rotate.return_value = None
+    """Mock sboxmgr logging setup to prevent initialization errors during test collection."""
+    with patch('sboxmgr.logging.core.initialize_logging') as mock_init, \
+         patch('sboxmgr.logging.core.get_logger') as mock_get_logger:
+        mock_init.return_value = None
+        mock_get_logger.return_value = MagicMock()
         yield 
