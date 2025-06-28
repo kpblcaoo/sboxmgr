@@ -8,7 +8,6 @@ import os
 from pathlib import Path
 from typing import Dict, Any, List
 import toml
-from pydantic import ValidationError
 
 
 class ConfigValidationError(Exception):

@@ -23,8 +23,11 @@ from typing import Dict, Any
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 # Initialize logging first
-from sboxmgr.logging import initialize_logging
+from sboxmgr.logging import initialize_logging, get_logger
 from sboxmgr.config.models import LoggingConfig
+from sboxmgr.agent.bridge import AgentBridge, AgentNotAvailableError
+from sboxmgr.agent.event_sender import EventSender, ping_agent, send_event
+from sboxmgr.agent.ipc.socket_client import SocketClient
 
 # Create minimal logging config for testing
 logging_config = LoggingConfig(
@@ -33,11 +36,6 @@ logging_config = LoggingConfig(
     sinks=["stdout"]
 )
 initialize_logging(logging_config)
-
-from sboxmgr.agent.bridge import AgentBridge, AgentNotAvailableError
-from sboxmgr.agent.event_sender import EventSender, ping_agent, send_event
-from sboxmgr.agent.ipc.socket_client import SocketClient
-from sboxmgr.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -289,7 +287,7 @@ class MVPEcosystemTest:
                     
                     try:
                         # This will likely fail, but we test the integration
-                        response = bridge.validate(temp_path)
+                        bridge.validate(temp_path)
                         print("✅ Bridge validation call successful")
                     except AgentNotAvailableError:
                         print("⚠️  Agent not available for validation")

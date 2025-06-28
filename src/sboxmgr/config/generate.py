@@ -12,7 +12,6 @@ import tempfile
 from typing import List
 import copy
 
-from .validation import validate_config_file
 from ..events import emit_event, EventType, EventPriority
 
 def generate_config(outbounds, template_file, config_file, backup_file, excluded_ips):

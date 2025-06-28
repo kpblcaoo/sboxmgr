@@ -106,7 +106,7 @@ class URIListParser(BaseParser):
                 
             return self._create_ss_server(method, password, host, port, tag, query)
             
-        except (ValueError, AttributeError, IndexError) as e:
+        except (ValueError, AttributeError, IndexError):
             # Fallback to regex parsing if structured parsing fails
             return self._parse_ss_with_regex(uri, tag, query, line)
 

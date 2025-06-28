@@ -6,9 +6,7 @@ Tests cover the unsupported format handling bug fix and return type annotations.
 import pytest
 import json
 import yaml
-from unittest.mock import patch, Mock
 from typer.testing import CliRunner
-import typer
 
 from sboxmgr.cli.commands.config import config_app, _output_env_format
 
@@ -217,7 +215,7 @@ class TestOutputEnvFormat:
         
         # BUG FIX: Function should have -> None return type annotation
         sig = inspect.signature(_output_env_format)
-        assert sig.return_annotation == type(None) or sig.return_annotation is None
+        assert sig.return_annotation is None
     
     def test_output_env_format_basic_data(self, capsys):
         """Test environment variable format output."""

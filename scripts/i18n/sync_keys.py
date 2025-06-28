@@ -11,7 +11,7 @@ from collections import defaultdict
 DEFAULT_LANG_DIR = "src/sboxmgr/i18n"
 TEMPLATE_FILE = ".template.json"
 PY_FILE_PATTERN = re.compile(r"\.(py|pyi)$")
-KEY_PATTERN = re.compile(r"(?:t|lang\.get)\(\s*['\"]([a-zA-Z0-9_.-]+)['\"]\s*\)")
+KEY_PATTERN = re.compile(r"(?:t|lang\.get)\(\s*['\"]([a-zA-Z0-9_.-]+)['\"]\s*(?:,|\))")
 I18N_PREFIXES = ("cli.", "error.", "wizard.")
 
 # --- UTILS ---

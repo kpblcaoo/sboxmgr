@@ -10,10 +10,13 @@ import logging
 import logging.handlers
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, TYPE_CHECKING
 import subprocess
 
 from ..config.detection import detect_systemd_environment
+
+if TYPE_CHECKING:
+    from ..config.models import LoggingConfig
 
 
 class LogSink(Enum):
@@ -204,7 +207,7 @@ def _create_journald_handler(config: 'LoggingConfig', level: Optional[str] = Non
                             stdin=subprocess.PIPE,
                             text=True
                         )
-                    except (OSError, subprocess.SubprocessError) as e:
+                    except (OSError, subprocess.SubprocessError):
                         # Failed to start systemd-cat, silently ignore
                         self.process = None
                         return

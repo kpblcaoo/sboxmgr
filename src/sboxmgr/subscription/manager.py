@@ -420,7 +420,7 @@ class SubscriptionManager:
             
             return selected_servers, True
             
-        except Exception as e:
+        except Exception:
             # Post-processing errors are not critical - return original servers
             return servers, True
 

@@ -7,8 +7,6 @@ TODO: Реализовать подключение к Unix socket, отправ
 """
 
 import socket
-import struct
-import json
 from typing import Optional, Dict, Any
 
 SOCKET_PATH = "/var/run/sboxagent.sock"  # TODO: sync with agent config

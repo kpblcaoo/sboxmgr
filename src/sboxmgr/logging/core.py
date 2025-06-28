@@ -6,13 +6,12 @@ structured logging, and trace ID propagation.
 
 import logging
 import logging.config
-import sys
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
 from ..config.models import LoggingConfig
 from .sinks import LogSink, create_handler, detect_available_sinks
-from .formatters import create_formatter, get_default_formatter
-from .trace import get_trace_id, set_trace_id, with_trace_id
+from .formatters import create_formatter
+from .trace import get_trace_id
 
 
 class LoggingCore:

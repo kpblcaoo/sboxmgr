@@ -1,7 +1,6 @@
 import pytest
 from typer.testing import CliRunner
 from sboxmgr.cli.main import app
-import os
 import json
 
 runner = CliRunner()

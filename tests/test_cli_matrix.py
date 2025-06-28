@@ -3,13 +3,12 @@ import subprocess
 import sys
 import os
 from dotenv import load_dotenv
-from pathlib import Path
 
 load_dotenv()
 TEST_URL = os.getenv("TEST_URL") or os.getenv("SINGBOX_URL") or "https://example.com/config"
 
 # Для tolerant-поиска сообщений
-EXCLUDE_MSGS = ["Excluding server", "already excluded", "[Info] Server already excluded"]
+EXCLUDE_MSGS = ["Excluded server by index", "Added", "exclusions", "CLI operation"]
 REMOVE_MSGS = ["Removed exclusion", "Exclusions cleared", "очищен"]
 DRYRUN_MSGS = ["Dry run: config is valid", "dry-run", "конфиг валиден"]
 
@@ -63,7 +62,7 @@ def test_cli_matrix(args, description, expected_exit, expected_files, expected_s
             for text in expected_stdout_contains
             for s in ([text] if isinstance(text, str) else text)
         ):
-            print(f"\n==== CLI MATRIX DIAGNOSTICS ====")
+            print("\n==== CLI MATRIX DIAGNOSTICS ====")
             print(f"Args: {args}")
             print(f"Return code: {result.returncode}")
             print(f"STDOUT:\n{result.stdout}")
@@ -73,7 +72,7 @@ def test_cli_matrix(args, description, expected_exit, expected_files, expected_s
             print(f"TYPES: text={type(text)}, output={type(output)}")
             print("===============================\n")
             assert False, f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе"
-    except AssertionError as e:
+    except AssertionError:
         print("\n==== CLI MATRIX DIAGNOSTICS ====")
         print(f"Args: {args}")
         print(f"Return code: {result.returncode}")

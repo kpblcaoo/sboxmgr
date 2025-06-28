@@ -12,13 +12,11 @@ import os
 from sboxmgr.subscription.manager import SubscriptionManager
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
 from sboxmgr.server.exclusions import load_exclusions
-from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_template_file, get_config_file, get_backup_file
 from sboxmgr.export.export_manager import ExportManager
 from sboxmgr.agent import AgentBridge, AgentNotAvailableError, ClientType
-
-lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
+from sboxmgr.config.validation import validate_config_file
 
 
 def _run_agent_check(config_file: str, with_agent_check: bool) -> None:
@@ -137,7 +135,7 @@ def run(
             typer.echo("ERROR: No servers parsed from subscription, config not updated.", err=True)
             raise typer.Exit(1)
     except Exception as e:
-        typer.echo(f"{lang.get('error.subscription_failed')}: {e}", err=True)
+        typer.echo(f"{t('error.subscription_failed')}: {e}", err=True)
         raise typer.Exit(1)
 
     template_file = template_file or get_template_file()
@@ -148,24 +146,23 @@ def run(
     config_json = json.dumps(config.config, indent=2, ensure_ascii=False)
 
     if dry_run:
-        from sboxmgr.validation.internal import validate_config_file
         import tempfile
-        typer.echo(lang.get("cli.dry_run_mode"))
+        typer.echo(t("cli.dry_run_mode"))
         with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
             temp_path = tmp.name
             tmp.write(config_json)
         valid, output = validate_config_file(temp_path)
         if valid:
-            typer.echo(lang.get("cli.dry_run_valid"))
+            typer.echo(t("cli.dry_run_valid"))
         else:
-            typer.echo(f"{lang.get('cli.config_invalid')}\n{output}", err=True)
+            typer.echo(f"{t('cli.config_invalid')}\n{output}", err=True)
         
         # Run agent check in dry-run mode
         if with_agent_check:
             _run_agent_check(temp_path, with_agent_check)
             
         os.unlink(temp_path)
-        typer.echo(lang.get("cli.temp_file_deleted"))
+        typer.echo(t("cli.temp_file_deleted"))
         raise typer.Exit(0 if valid else 1)
 
     try:
@@ -182,14 +179,14 @@ def run(
             from sboxmgr.service.manage import manage_service
             manage_service()
             if debug >= 1:
-                typer.echo(lang.get("cli.service_restart_completed"))
+                typer.echo(t("cli.service_restart_completed"))
         except Exception as e:
             typer.echo(f"[WARN] Failed to restart sing-box.service: {e}", err=True)
     except Exception as e:
-        typer.echo(f"{lang.get('cli.error_config_update')}: {e}", err=True)
+        typer.echo(f"{t('cli.error_config_update')}: {e}", err=True)
         raise typer.Exit(1)
 
-    typer.echo(lang.get("cli.update_completed"))
+    typer.echo(t("cli.update_completed"))
 
 
 def dry_run(
@@ -248,29 +245,29 @@ def dry_run(
             typer.echo("ERROR: No servers parsed from subscription, nothing to validate.", err=True)
             raise typer.Exit(1)
     except Exception as e:
-        typer.echo(f"{lang.get('error.subscription_failed')}: {e}", err=True)
+        typer.echo(f"{t('error.subscription_failed')}: {e}", err=True)
         raise typer.Exit(1)
 
     import json
     config_json = json.dumps(config.config, indent=2, ensure_ascii=False)
-    from sboxmgr.validation.internal import validate_config_file
+    from sbox_common.validation import validate_config_file
     import tempfile
-    typer.echo(lang.get("cli.dry_run_mode"))
+    typer.echo(t("cli.dry_run_mode"))
     with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
         temp_path = tmp.name
         tmp.write(config_json)
     valid, output = validate_config_file(temp_path)
     if valid:
-        typer.echo(lang.get("cli.dry_run_valid"))
+        typer.echo(t("cli.dry_run_valid"))
     else:
-        typer.echo(f"{lang.get('cli.config_invalid')}\n{output}", err=True)
+        typer.echo(f"{t('cli.config_invalid')}\n{output}", err=True)
         
     # Run agent check in dry-run mode
     if with_agent_check:
         _run_agent_check(temp_path, with_agent_check)
         
     os.unlink(temp_path)
-    typer.echo(lang.get("cli.temp_file_deleted"))
+    typer.echo(t("cli.temp_file_deleted"))
     raise typer.Exit(0 if valid else 1)
 
 
@@ -317,5 +314,5 @@ def list_servers(
         for i, s in enumerate(servers):
             typer.echo(f"[{i}] {s.get('tag', s.get('server', ''))} ({s.get('type', '')}:{s.get('server_port', '')})")
     except Exception as e:
-        typer.echo(f"{lang.get('error.subscription_failed')}: {e}", err=True)
+        typer.echo(f"{t('error.subscription_failed')}: {e}", err=True)
         raise typer.Exit(1) 

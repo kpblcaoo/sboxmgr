@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch
 
-from src.sboxmgr.agent import AgentBridge, AgentError, AgentNotAvailableError, ValidationRequest, ClientType, AgentCommand
+from src.sboxmgr.agent import AgentBridge, AgentNotAvailableError, ValidationRequest, ClientType, AgentCommand
 
 
 class TestAgentBridge:

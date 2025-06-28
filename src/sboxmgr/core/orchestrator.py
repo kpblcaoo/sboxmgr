@@ -6,7 +6,7 @@ to enable proper testing and architectural separation while providing a
 unified interface for CLI and other consumers.
 """
 
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 import logging
 from dataclasses import dataclass
 

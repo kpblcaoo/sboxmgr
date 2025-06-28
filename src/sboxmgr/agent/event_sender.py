@@ -4,14 +4,11 @@ This module implements the EventSender class that sends events from sboxmgr
 to sboxagent via Unix socket using the framed JSON protocol.
 """
 
-import json
 import uuid
 from datetime import datetime
 from typing import Optional, Dict, Any
-from pathlib import Path
 
 from .ipc.socket_client import SocketClient
-from ..events import EventType, EventPriority
 from ..logging import get_logger
 
 

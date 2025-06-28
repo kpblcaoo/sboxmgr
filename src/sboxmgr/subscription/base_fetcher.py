@@ -7,7 +7,6 @@ themselves using the @register decorator for automatic discovery.
 """
 from abc import ABC, abstractmethod
 from .models import SubscriptionSource
-import os
 from urllib.parse import urlparse
 from sboxmgr.utils.env import get_fetch_size_limit
 

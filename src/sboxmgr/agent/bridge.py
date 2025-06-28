@@ -13,7 +13,7 @@ from pathlib import Path
 from .protocol import (
     ValidationRequest, InstallRequest, CheckRequest,
     ValidationResponse, InstallResponse, CheckResponse,
-    ClientType, AgentCommand, AnyRequest, AnyResponse
+    ClientType
 )
 from .event_sender import send_event, ping_agent
 from ..events import emit_event, EventType, EventPriority

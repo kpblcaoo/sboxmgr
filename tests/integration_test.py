@@ -9,8 +9,6 @@ This test verifies that the Phase 2 integration works correctly:
 
 import sys
 import time
-import json
-import tempfile
 from pathlib import Path
 
 # Add src to path

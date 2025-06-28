@@ -19,69 +19,33 @@ from rich import print as rprint
 from sboxmgr.core.exclusions import ExclusionManager
 from sboxmgr.config.fetch import fetch_json
 from sboxmgr.utils.id import generate_server_id
-from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t
 
 # SUPPORTED_PROTOCOLS defined locally
 SUPPORTED_PROTOCOLS = ["vless", "shadowsocks", "vmess", "trojan", "tuic", "hysteria2"]
 
 console = Console()
-lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
 
 def exclusions(
     url: str = typer.Option(
         ..., "-u", "--url", help=t("cli.url.help"),
         envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"]
     ),
-    add: Optional[str] = typer.Option(None, "--add", help="Add exclusions (indices, names, or wildcards)"),
-    remove: Optional[str] = typer.Option(None, "--remove", help="Remove exclusions (indices or IDs)"),
-    view: bool = typer.Option(False, "--view", help="View current exclusions"),
-    clear: bool = typer.Option(False, "--clear", help="Clear all exclusions"),
-    list_servers: bool = typer.Option(False, "--list-servers", help="List available servers with indices"),
-    interactive: bool = typer.Option(False, "-i", "--interactive", help="Interactive server selection"),
-    reason: str = typer.Option("CLI operation", "--reason", help="Reason for exclusion"),
-    json_output: bool = typer.Option(False, "--json", help="Output in JSON format"),
-    show_excluded: bool = typer.Option(True, "--show-excluded/--hide-excluded", help="Show excluded servers in list"),
+    add: Optional[str] = typer.Option(None, "--add", help=t("cli.add.help")),
+    remove: Optional[str] = typer.Option(None, "--remove", help=t("cli.remove.help")),
+    view: bool = typer.Option(False, "--view", help=t("cli.view.help")),
+    clear: bool = typer.Option(False, "--clear", help=t("cli.clear_exclusions.help")),
+    list_servers: bool = typer.Option(False, "--list-servers", help=t("cli.list_servers.help")),
+    interactive: bool = typer.Option(False, "-i", "--interactive", help=t("cli.interactive.help")),
+    reason: str = typer.Option("CLI operation", "--reason", help=t("cli.reason.help")),
+    json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
+    show_excluded: bool = typer.Option(True, "--show-excluded/--hide-excluded", help=t("cli.show_excluded.help")),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
 ):
-    """Управление exclusions: добавить, удалить, показать, интерактив и расширенный UX.
+    """Manage server exclusions for subscription-based proxy configurations.
     
-    (ex-v2, теперь основная команда exclusions)
-    
-    Provides comprehensive server exclusion management for subscription-based
-    proxy configurations. Supports multiple input methods including indices,
-    server names, wildcard patterns, and interactive selection. Features
-    rich console output, JSON export, and persistent exclusion storage.
-    
-    Supported operations:
-    - Add exclusions by index, name, or wildcard pattern
-    - Remove exclusions by index or server ID
-    - View current exclusions with details
-    - List all available servers with exclusion status
-    - Interactive mode for convenient server selection
-    - Clear all exclusions with confirmation
-    
-    Args:
-        url: Subscription URL to fetch server list from.
-        add: Comma-separated list of servers to exclude (indices, names, or wildcards).
-        remove: Comma-separated list of exclusions to remove (indices or IDs).
-        view: Display current exclusions without fetching subscription.
-        clear: Remove all exclusions with interactive confirmation.
-        list_servers: Display all servers with indices and exclusion status.
-        interactive: Enter interactive mode for server selection.
-        reason: Reason text to record with new exclusions.
-        json_output: Output results in JSON format instead of rich console.
-        show_excluded: Include excluded servers in server listings.
-        debug: Debug verbosity level (0-2).
-        
-    Raises:
-        typer.Exit: On subscription fetch failure, invalid server data, or user cancellation.
-        
-    Examples:
-        sboxmgr exclusions -u URL --add "0,1,2" --reason "Slow servers"
-        sboxmgr exclusions -u URL --add "server-*,*tokyo*" --reason "Geo filtering"
-        sboxmgr exclusions --view --json
-        sboxmgr exclusions -u URL --interactive
+    Supports adding, removing, viewing exclusions with interactive selection,
+    wildcard patterns, and JSON export capabilities.
     """
     
     manager = ExclusionManager.default()
@@ -121,15 +85,15 @@ def exclusions(
 
 def _handle_clear_operation(manager: ExclusionManager, json_output: bool) -> None:
     """Handle the clear exclusions operation with confirmation."""
-    if not Confirm.ask(f"[bold red]{lang.get('cli.clear_exclusions.confirm')}[/bold red]"):
-        rprint(f"[yellow]{lang.get('cli.operation_cancelled')}[/yellow]")
+    if not Confirm.ask(f"[bold red]{t('cli.clear_exclusions.confirm')}[/bold red]"):
+        rprint(f"[yellow]{t('cli.operation_cancelled')}[/yellow]")
         return
     
     count = manager.clear()
     if json_output:
         print(json.dumps({"action": "clear", "removed_count": count}))
     else:
-        rprint(f"[green]✅ {lang.get('cli.clear_exclusions.success').format(count=count)}[/green]")
+        rprint(f"[green]✅ {t('cli.clear_exclusions.success').format(count=count)}[/green]")
 
 def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
     """Fetch and validate subscription data from URL.
@@ -147,20 +111,20 @@ def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
     try:
         json_data = fetch_json(url)
         if json_data is None:
-            error_msg = lang.get('error.subscription_fetch_failed')
+            error_msg = t('error.subscription_fetch_failed')
             if json_output:
                 print(json.dumps({"error": error_msg, "url": url}))
             else:
                 rprint(f"[red]❌ {error_msg}:[/red]")
                 rprint(f"[dim]   {url}[/dim]")
-                rprint(f"[yellow]💡 {lang.get('cli.check_url_connection')}[/yellow]")
+                rprint(f"[yellow]💡 {t('cli.check_url_connection')}[/yellow]")
             raise typer.Exit(1)
         return json_data
     except Exception as e:
         if json_output:
             print(json.dumps({"error": str(e), "url": url}))
         else:
-            rprint(f"[red]❌ {lang.get('error.config_load_failed')}: {e}[/red]")
+            rprint(f"[red]❌ {t('error.config_load_failed')}: {e}[/red]")
             rprint(f"[dim]URL: {url}[/dim]")
         raise typer.Exit(1)
 
@@ -178,18 +142,18 @@ def _cache_server_data(manager: ExclusionManager, json_data: dict, json_output: 
     try:
         manager.set_servers_cache(json_data, SUPPORTED_PROTOCOLS)
     except Exception as e:
-        error_msg = f"{lang.get('error.invalid_server_format')}: {e}"
+        error_msg = f"{t('error.invalid_server_format')}: {e}"
         if json_output:
             print(json.dumps({"error": error_msg}))
         else:
             rprint(f"[red]❌ {error_msg}[/red]")
-            rprint(f"[yellow]💡 {lang.get('cli.subscription_format_hint')}[/yellow]")
+            rprint(f"[yellow]💡 {t('cli.subscription_format_hint')}[/yellow]")
         raise typer.Exit(1)
 
 def _show_usage_help() -> None:
     """Display usage help when no action is specified."""
-    rprint(f"[yellow]💡 {lang.get('cli.exclusions.usage_hint')}[/yellow]")
-    rprint(f"[dim]{lang.get('cli.exclusions.usage_example')}[/dim]")
+    rprint(f"[yellow]💡 {t('cli.exclusions.usage_hint')}[/yellow]")
+    rprint(f"[dim]{t('cli.exclusions.usage_example')}[/dim]")
 
 def _view_exclusions(manager: ExclusionManager, json_output: bool) -> None:
     """Display current exclusions in table or JSON format.

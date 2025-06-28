@@ -8,10 +8,9 @@ variables and the i18n system.
 import typer
 from pathlib import Path
 from sboxmgr.i18n.loader import LanguageLoader
+from sboxmgr.i18n.t import t
 from ..utils import is_ai_lang, detect_lang_source
 import os
-
-lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
 
 LANG_NAMES = {
     "en": "English",
@@ -28,7 +27,7 @@ LANG_NAMES = {
 }
 
 def lang_cmd(
-    set_lang: str = typer.Option(None, "--set", "-s", help=lang.get("cli.lang.set.help")),
+    set_lang: str = typer.Option(None, "--set", "-s", help=t("cli.lang.set.help")),
 ):
     """Manage CLI internationalization language settings.
     

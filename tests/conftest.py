@@ -1,35 +1,29 @@
 # Инициализируем логирование для тестов ПЕРЕД всеми импортами
 import sys
+import subprocess
+import os
+import pytest
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 # Добавляем src в путь для импорта
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-# Мокаем get_logger до инициализации логирования
-from unittest.mock import MagicMock
+# Импорты sboxmgr
+from sboxmgr.logging.core import initialize_logging
+from sboxmgr.config.models import LoggingConfig
 import sboxmgr.logging.core
+
+# Мокаем get_logger до инициализации логирования
 sboxmgr.logging.core.get_logger = MagicMock(return_value=MagicMock())
 
 # Инициализируем логирование сразу
-from sboxmgr.logging.core import initialize_logging
-from sboxmgr.config.models import LoggingConfig
-
 logging_config = LoggingConfig(
     level="DEBUG",
     sinks=["stdout"],
     format="text"
 )
 initialize_logging(logging_config)
-
-# Восстанавливаем оригинальный get_logger
-import sboxmgr.logging.core
-from sboxmgr.logging.core import get_logger
-
-import subprocess
-import os
-import shutil
-import pytest
-from unittest.mock import patch, MagicMock
 
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
