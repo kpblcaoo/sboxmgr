@@ -9,8 +9,8 @@ import os
 from dotenv import load_dotenv
 from sboxmgr.config.fetch import fetch_json
 from sboxmgr.server.exclusions import exclude_servers, remove_exclusions, view_exclusions
-from logsetup.setup import setup_logging
-from sboxmgr.utils.env import get_log_file, get_max_log_size, get_debug_level
+from sboxmgr.logging import initialize_logging
+from sboxmgr.config.models import LoggingConfig
 from sboxmgr.i18n.loader import LanguageLoader
 from pathlib import Path
 import locale
@@ -20,13 +20,15 @@ from sboxmgr.cli.commands.config import config_app
 
 load_dotenv()
 
-lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
+# Initialize logging for CLI
+logging_config = LoggingConfig(
+    level="INFO",
+    format="text",
+    sinks=["stdout"]
+)
+initialize_logging(logging_config)
 
-# Централизованное логирование для всех CLI-команд
-LOG_FILE = get_log_file()
-MAX_LOG_SIZE = get_max_log_size()
-DEBUG_LEVEL = get_debug_level()
-setup_logging(DEBUG_LEVEL, LOG_FILE, MAX_LOG_SIZE)
+lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
 
 app = typer.Typer(help=lang.get("cli.help"))
 
@@ -243,6 +245,10 @@ app.command("exclusions-v2")(exclusions_v2)
 
 # Регистрируем config команды
 app.add_typer(config_app)
+
+# Регистрируем команду экспорта
+from sboxmgr.cli.commands.export import app as export_app
+app.add_typer(export_app, name="export", help="Export configurations in standardized formats")
 
 if __name__ == "__main__":
     app() 
