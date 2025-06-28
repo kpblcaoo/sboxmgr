@@ -7,7 +7,7 @@ from typing import List, Dict, Optional, Any, Tuple, Union
 import threading
 import fnmatch
 
-from .interface import ExclusionManagerInterface
+from ..interfaces import ExclusionManagerInterface
 from .models import ExclusionEntry, ExclusionList
 from sboxmgr.utils.file import atomic_write_json, file_exists, read_json
 from sboxmgr.utils.env import get_exclusion_file
