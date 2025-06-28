@@ -1,248 +1,306 @@
-# STAGE 4: Security Framework & Integration
+# STAGE 4: JSON Integration & CLI Enhancement (АКТУАЛИЗИРОВАНО ПОД ADR-0001 sbox-common)
 
 ## 📊 Статус
 
-**Дата начала:** 2025-01-27  
-**Ветка:** `feature/stage4-security-framework`  
+**Дата актуализации:** 2025-06-28  
+**Ветка:** `feature/stage4-json-integration`  
 **Статус:** 🔄 **ПЛАНИРОВАНИЕ**
 
-## 🎯 ЦЕЛИ STAGE 4 (ОБНОВЛЕНО)
+## 🎯 ЦЕЛИ STAGE 4 (АКТУАЛИЗИРОВАНО ПОД ADR-0001)
 
-### 1. Security Framework (Основная цель)
-- **Plugin Sandbox** - изоляция plugin'ов
-- **Audit System** - логирование security events
-- **Access Control** - управление доступом к API
-- **Input Validation** - усиленная валидация входных данных
+### 1. JSON Export Framework (Основная цель)
+- **JSON Output Standardization** - стандартизованный JSON output для sboxagent
+- **Schema Compliance** - соответствие sbox-common протоколам  
+- **Metadata Generation** - генерация метаданных конфигураций
+- **Multi-Format Support** - JSON + legacy форматы
 
-### 2. Event System Integration
-- **Security Events** - audit, access control, validation events
-- **Integration Events** - события для sboxagent
-- **Event Handlers** - обработчики security событий
-- **Event Middleware** - security middleware для событий
+### 2. Enhanced CLI for Agent Integration
+- **JSON CLI Commands** - команды с JSON output
+- **Agent-Ready Interface** - CLI готовый для exec() вызовов
+- **Improved Argument Parsing** - лучший парсинг аргументов
+- **Error Handling Enhancement** - улучшенная обработка ошибок
 
-### 3. CLI Integration with sboxagent
-- **Agent Management Commands** - управление sboxagent через CLI
-- **HTTP Client** - клиент для sboxagent API
-- **Event Sender** - отправка событий в sboxagent
-- **Configuration Sync** - синхронизация конфигураций
+### 3. Multi-Client Configuration Support  
+- **Clash Exporter Implementation** - полная реализация Clash экспорта
+- **Xray Exporter Implementation** - реализация Xray экспорта
+- **Mihomo Exporter Implementation** - реализация Mihomo экспорта
+- **Client Detection & Validation** - автоопределение клиентов
 
-### 4. Code Quality Improvements
-- **GitHub Copilot Fixes** - исправление выявленных проблем
-- **Performance Optimizations** - оптимизация производительности
-- **Documentation** - обновление документации
+### 4. Configuration Validation Framework
+- **Schema Validation** - валидация против sbox-common схем
+- **Client-Specific Validation** - валидация под конкретные клиенты
+- **Configuration Testing** - тестирование сгенерированных конфигов
+- **Error Reporting** - детальная отчетность об ошибках
 
-## 🔧 GITHUB COPILOT FIXES (Stage 4)
+## 🔧 СООТВЕТСТВИЕ ADR-0001
 
-### Критические исправления (выполнены в Stage 3):
-- ✅ `datetime.UTC` → `datetime.timezone.utc` в `server/management.py`
-- ✅ Добавлен импорт `get_debug_level` в `uri_list_parser.py`
-- ✅ Добавлен импорт `required_fields` в `validators/__init__.py`
-- ✅ Переведен русский docstring в `required_fields.py`
+### ✅ **sboxmgr Роль: GENERATOR**
+- Генерирует конфигурации для всех subbox клиентов
+- Выводит JSON в стандартизованном формате
+- Остается CLI-only инструментом
+- Никаких daemon функций
 
-### Исправления для Stage 4:
+### ✅ **JSON Interface Protocol**
+- Все output в JSON формате для sboxagent
+- Соответствие sbox-common схемам
+- Метаданные для валидации и отслеживания
+- Обратная совместимость с legacy форматами
 
-#### 1. Shadowing built-in names
-- **Файл:** `src/sboxmgr/cli/commands/subscription_orchestrated.py:58`
-- **Проблема:** `format` перекрывает built-in функцию
-- **Решение:** Переименовать в `output_format`
-- **Приоритет:** Средний
+### ✅ **License Compatibility**  
+- Чистая Apache-2.0 лицензия
+- Никаких GPL компонентов
+- JSON граница с sboxagent (GPL)
 
-#### 2. Performance optimization
-- **Файл:** `src/sboxmgr/subscription/postprocessor_base.py:72`
-- **Проблема:** `inspect.signature` вызывается в цикле
-- **Решение:** Кэшировать сигнатуры в `__init__`
-- **Приоритет:** Средний
+## 🏗️ АРХИТЕКТУРА STAGE 4 (АКТУАЛИЗИРОВАНО)
 
-#### 3. File naming consistency
-- **Файл:** `src/sboxmgr/subscription/postprocessors/geofilterpostprocessorpostprocessor.py`
-- **Проблема:** Дублирование "postprocessor" в имени
-- **Решение:** Переименовать в `extended_geofilter_postprocessor.py`
-- **Приоритет:** Низкий
-
-## 🏗️ АРХИТЕКТУРА STAGE 4 (ОБНОВЛЕНО)
-
-### Security Architecture:
+### JSON Export Architecture:
 ```
-src/sboxmgr/security/
-├── __init__.py          # Security package exports
-├── sandbox.py           # Plugin sandbox implementation
-├── audit.py            # Audit logging system
-├── access.py           # Access control
-└── validation.py       # Enhanced input validation
-```
-
-### Event System Integration:
-```
-src/sboxmgr/events/
-├── handlers/
-│   ├── audit.py        # Audit event handlers
-│   ├── security.py     # Security event handlers
-│   └── integration.py  # Integration events for sboxagent
-└── middleware/
-    ├── security.py     # Security middleware
-    └── tracing.py      # Enhanced tracing
+src/sboxmgr/export/
+├── json/
+│   ├── __init__.py          # JSON export package
+│   ├── exporter.py          # JSON exporter framework
+│   ├── metadata.py          # Metadata generation
+│   └── validator.py         # JSON schema validation
+├── clients/
+│   ├── clash_exporter.py    # Clash configuration export
+│   ├── xray_exporter.py     # Xray configuration export
+│   └── mihomo_exporter.py   # Mihomo configuration export
+└── validation/
+    ├── schema_validator.py  # Schema compliance validation
+    └── client_validator.py  # Client-specific validation
 ```
 
-### CLI Integration Architecture:
+### Enhanced CLI Architecture:
 ```
 src/sboxmgr/cli/
 ├── commands/
-│   ├── agent.py        # Agent management commands
-│   └── integration.py  # Integration commands
+│   ├── generate.py          # Enhanced generate command
+│   ├── validate.py          # Validation commands
+│   └── export.py            # Export commands
+├── json/
+│   ├── __init__.py          # JSON CLI support
+│   ├── formatter.py         # JSON output formatting
+│   └── parser.py            # JSON argument parsing
 └── utils/
-    ├── agent_client.py # HTTP client for sboxagent
-    └── event_sender.py # Event sender to sboxagent
+    ├── client_detection.py  # Client detection utilities
+    └── error_handling.py    # Enhanced error handling
 ```
 
-## 📋 ДЕТАЛЬНЫЙ ПЛАН (ОБНОВЛЕНО)
+## 📋 ДЕТАЛЬНЫЙ ПЛАН (АКТУАЛИЗИРОВАНО)
 
-### Phase 1: Security Framework Foundation (3-4 дня)
+### Phase 1: JSON Export Framework (3-4 дня)
 
-#### 1.1 Plugin Sandbox
-- [ ] Создать `src/sboxmgr/security/sandbox.py`
-- [ ] Изоляция plugin execution
-- [ ] Resource limits и quotas
-- [ ] Security policy enforcement
+#### 1.1 JSON Exporter Implementation
+- [ ] Создать `src/sboxmgr/export/json/exporter.py`
+- [ ] Стандартизованный JSON output format
+- [ ] Metadata generation (source, timestamp, checksum)
+- [ ] Schema compliance validation
 
-#### 1.2 Audit System
-- [ ] Создать `src/sboxmgr/security/audit.py`
-- [ ] Audit event handlers
-- [ ] Security event logging
-- [ ] Compliance reporting
+#### 1.2 Multi-Client JSON Support
+- [ ] JSON wrapper для всех экспортеров
+- [ ] Client-specific metadata
+- [ ] Unified JSON structure
+- [ ] Version compatibility tracking
 
-#### 1.3 Access Control
-- [ ] Создать `src/sboxmgr/security/access.py`
-- [ ] CLI access control
-- [ ] Role-based permissions
-- [ ] Authentication integration
+#### 1.3 Schema Integration
+- [ ] Интеграция с sbox-common схемами
+- [ ] JSON schema validation
+- [ ] Error reporting enhancement
+- [ ] Compliance checking
 
-### Phase 2: Event System Integration (2-3 дня)
+### Phase 2: Enhanced CLI Commands (2-3 дня)
 
-#### 2.1 Security Events
-- [ ] Создать security event types
-- [ ] Audit event handlers
-- [ ] Security event middleware
-- [ ] Event validation
+#### 2.1 JSON CLI Commands
+- [ ] `sboxmgr generate --output json` command
+- [ ] `sboxmgr validate --schema` command
+- [ ] `sboxmgr export --client [sing-box|clash|xray|mihomo]` command
+- [ ] JSON output formatting options
 
-#### 2.2 Integration Events
-- [ ] Создать integration event types
-- [ ] Event sender to sboxagent
-- [ ] Event validation
-- [ ] Event queuing
+#### 2.2 Agent-Ready Interface
+- [ ] Structured JSON output for all commands
+- [ ] Exit codes standardization
+- [ ] Error JSON format
+- [ ] Success JSON format
 
-### Phase 3: CLI Integration (2-3 дня)
+### Phase 3: Multi-Client Exporters (3-4 дня)
 
-#### 3.1 Agent Management Commands
-- [ ] Создать `src/sboxmgr/cli/commands/agent.py`
-- [ ] `sboxmgr agent status` - статус агента
-- [ ] `sboxmgr agent start/stop/restart` - управление агентом
-- [ ] `sboxmgr agent logs` - просмотр логов
+#### 3.1 Clash Exporter Enhancement
+- [ ] Полная реализация `ClashExporter`
+- [ ] Clash-specific configuration generation
+- [ ] Proxy groups и rules generation
+- [ ] YAML output support
 
-#### 3.2 HTTP Client
-- [ ] Создать `src/sboxmgr/cli/utils/agent_client.py`
-- [ ] HTTP клиент для sboxagent API
-- [ ] Authentication и error handling
-- [ ] Retry logic
+#### 3.2 Xray Exporter Implementation
+- [ ] Создать `XrayExporter` class
+- [ ] Xray-specific configuration
+- [ ] Protocol compatibility
+- [ ] JSON configuration format
 
-#### 3.3 Event Sender
-- [ ] Создать `src/sboxmgr/cli/utils/event_sender.py`
-- [ ] Отправка событий в sboxagent
-- [ ] Event validation и queuing
-- [ ] Event retry
+#### 3.3 Mihomo Exporter Implementation
+- [ ] Создать `MihomoExporter` class
+- [ ] Mihomo-specific features
+- [ ] Clash compatibility mode
+- [ ] Enhanced features support
 
-### Phase 4: Configuration & Validation (2 дня)
+### Phase 4: Validation Framework (2 дня)
 
-#### 4.1 Enhanced Input Validation
-- [ ] Создать `src/sboxmgr/security/validation.py`
-- [ ] Усиленная валидация входных данных
-- [ ] Schema validation
-- [ ] Security validation
+#### 4.1 Configuration Validation
+- [ ] Schema-based validation
+- [ ] Client-specific validation rules
+- [ ] Configuration testing
+- [ ] Validation reporting
 
-#### 4.2 Configuration Sync
-- [ ] Синхронизация конфигураций с sboxagent
-- [ ] Configuration validation
-- [ ] Hot-reload support
-- [ ] Rollback mechanisms
+#### 4.2 Integration Testing
+- [ ] End-to-end JSON pipeline testing
+- [ ] Multi-client export testing
+- [ ] CLI integration testing
+- [ ] Error handling testing
 
-### Phase 5: Code Quality & Optimization (2 дня)
+## 🔧 ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ
 
-#### 5.1 GitHub Copilot Fixes
-- [ ] Исправить shadowing `format` → `output_format`
-- [ ] Оптимизировать `inspect.signature` кэшированием
-- [ ] Переименовать дублирующий файл
-- [ ] Проверить все остальные warnings
+### JSON Export Framework
+```python
+# src/sboxmgr/export/json/exporter.py
+class JSONExporter:
+    def __init__(self):
+        self.validator = SchemaValidator()
+        self.metadata_generator = MetadataGenerator()
+    
+    def export_config(self, client_type: str, config_data: dict, 
+                     subscription_url: str = None) -> dict:
+        """Export configuration in sbox-common format"""
+        exported = {
+            "client": client_type,
+            "version": self._get_client_version(client_type),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "config": config_data,
+            "metadata": self._generate_metadata(subscription_url)
+        }
+        
+        # Validate against sbox-common schema
+        self.validator.validate(exported, f"{client_type}.schema.json")
+        return exported
+```
 
-#### 5.2 Performance Optimizations
-- [ ] Профилирование критических путей
-- [ ] Оптимизация memory usage
-- [ ] Async/await improvements
-- [ ] Caching strategies
+### Enhanced CLI Commands
+```python
+# src/sboxmgr/cli/commands/generate.py
+@app.command()
+def generate(
+    subscription_url: str,
+    client: str = typer.Option("sing-box", help="Target client"),
+    output_format: str = typer.Option("json", help="Output format"),
+    validate_schema: bool = typer.Option(True, help="Validate against schema")
+):
+    """Generate configuration with JSON export"""
+    try:
+        # Generate configuration
+        config_data = generator.generate_config(subscription_url, client)
+        
+        if output_format == "json":
+            # Export as JSON with metadata
+            result = json_exporter.export_config(client, config_data, subscription_url)
+            
+            if validate_schema:
+                validation = validator.validate_config(result, client)
+                if not validation.success:
+                    raise ValidationError(validation.errors)
+            
+            print(json.dumps(result, indent=2))
+        else:
+            # Legacy format support
+            print(legacy_exporter.export(config_data, output_format))
+            
+    except Exception as e:
+        error_response = {
+            "status": "error",
+            "message": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        print(json.dumps(error_response), file=sys.stderr)
+        raise typer.Exit(1)
+```
+
+### Multi-Client Support
+```python
+# src/sboxmgr/export/clients/client_factory.py
+class ClientExporterFactory:
+    def __init__(self):
+        self.exporters = {
+            "sing-box": SingBoxExporter(),
+            "clash": ClashExporter(), 
+            "xray": XrayExporter(),
+            "mihomo": MihomoExporter()
+        }
+    
+    def get_exporter(self, client_type: str) -> BaseExporter:
+        if client_type not in self.exporters:
+            raise UnsupportedClientError(f"Unsupported client: {client_type}")
+        return self.exporters[client_type]
+    
+    def get_supported_clients(self) -> List[str]:
+        return list(self.exporters.keys())
+```
 
 ## 🧪 ТЕСТИРОВАНИЕ
 
-### Security Framework Tests:
-- [ ] Plugin sandbox isolation
-- [ ] Audit event logging
-- [ ] Access control enforcement
-- [ ] Input validation
+### JSON Export Tests:
+- [ ] JSON format validation
+- [ ] Schema compliance testing
+- [ ] Metadata generation testing
+- [ ] Multi-client JSON output
 
-### Integration Tests:
-- [ ] CLI commands with sboxagent
-- [ ] Event sending to sboxagent
-- [ ] Configuration synchronization
-- [ ] End-to-end integration
+### CLI Enhancement Tests:
+- [ ] JSON command output testing
+- [ ] Error handling testing
+- [ ] Agent integration testing
+- [ ] Backward compatibility testing
 
-### Code Quality Tests:
-- [ ] All GitHub Copilot fixes
-- [ ] Performance benchmarks
-- [ ] Security tests
-- [ ] Integration tests
+### Multi-Client Tests:
+- [ ] Clash exporter testing
+- [ ] Xray exporter testing  
+- [ ] Mihomo exporter testing
+- [ ] Cross-client compatibility
 
-## 📊 КРИТЕРИИ ГОТОВНОСТИ
+## 🔄 ИНТЕГРАЦИЯ С PHASE 2
 
-### Технические критерии:
-- [ ] Security framework функционирует
-- [ ] Event system интегрирован
-- [ ] CLI integration работает
-- [ ] Configuration sync работает
+### Подготовка к sboxagent Integration:
+- ✅ **JSON Output Ready** - стандартизованный JSON для sboxagent
+- ✅ **CLI Exec Ready** - CLI готов для exec() вызовов
+- ✅ **Multi-Client Support** - поддержка всех subbox клиентов
+- ✅ **Schema Compliance** - соответствие sbox-common протоколам
 
-### Архитектурные критерии:
-- [ ] Security framework готов
-- [ ] Event system готов
-- [ ] CLI integration готов
-- [ ] Все GitHub Copilot проблемы исправлены
+### Connection to Phase 2:
+- **sboxagent** будет вызывать `sboxmgr generate --output json`
+- **JSON response** будет парситься sboxagent
+- **Error handling** через JSON error responses
+- **Multi-client** поддержка готова
 
-### UX критерии:
-- [ ] CLI команды интуитивны
-- [ ] Security events логируются
-- [ ] Интеграция с sboxagent работает
-- [ ] Ошибки понятны и actionable
+## 📝 ПРИМЕЧАНИЯ
+
+- Stage 4 фокусируется на подготовке sboxmgr к интеграции с sboxagent
+- Все изменения сохраняют CLI-only архитектуру sboxmgr
+- JSON interface соответствует ADR-0001
+- Подготовка к параллельной реализации Phase 2
 
 ## 🎯 ETA: 10-12 дней
 
 **Stage 4 планируется на 10-12 дней** с учетом:
-- Security framework foundation (4 дня)
-- Event system integration (3 дня)
-- CLI integration (3 дня)
-- Code quality & optimization (2 дня)
+- JSON Export Framework (4 дня)
+- Enhanced CLI Commands (3 дня)
+- Multi-Client Exporters (4 дня)
+- Validation Framework (2 дня)
 
-## 🔗 СВЯЗЬ С ПЛАНОМ ИНТЕГРАЦИИ
+## 🔗 СВЯЗЬ С ADR-0001
 
-### INTEGRATION-01: Foundation
-- ✅ Security Framework → CLI Integration
-- ✅ Event System → Event Protocol
-- ✅ Configuration Sync → Configuration Schemas
-
-### INTEGRATION-02: Runtime
-- 🔄 Event Sender → Event Generation
-- 🔄 Configuration Sync → Configuration Synchronization
-
-### INTEGRATION-03: Advanced
-- 🔄 Plugin Integration → Plugin Integration
-- 🔄 Security Events → Metrics & Observability
+### INTEGRATION PATH B: sboxagent → exec(sboxmgr CLI) → JSON
+- ✅ JSON Export Framework → Стандартизованный JSON output
+- ✅ Enhanced CLI → Agent-ready interface
+- ✅ Multi-Client Support → Все subbox клиенты
+- ✅ Schema Compliance → sbox-common integration
 
 ---
 
-**Статус**: 🔄 **ПЛАНИРОВАНИЕ**  
+**Статус**: 🔄 **ПЛАНИРОВАНИЕ АКТУАЛИЗИРОВАНО ПОД ADR-0001**  
 **Прогресс**: 0%, планирование завершено  
-**Следующий шаг**: Создать ветку feature/stage4-security-framework 
+**Следующий шаг**: Создать ветку feature/stage4-json-integration 
