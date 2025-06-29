@@ -35,4 +35,85 @@ class DefaultRouter(BaseRoutingPlugin):
         debug_level = getattr(context, 'debug_level', 0) if context else 0
         if debug_level >= 2:
             print(f"[DefaultRouter] context={context}, exclusions={exclusions}, user_routes={user_routes}")
-        return [] 
+        
+        rules = []
+        
+        # 1. DNS hijacking rule (высокий приоритет)
+        rules.append({
+            "protocol": "dns",
+            "action": "hijack-dns"
+        })
+        
+        # 2. Private IP addresses should go direct
+        rules.append({
+            "ip_is_private": True,
+            "outbound": "direct"
+        })
+        
+        # 3. Process exclusions - excluded IPs should go direct
+        if exclusions:
+            # Convert exclusions to CIDR if they are IP addresses
+            excluded_cidrs = []
+            excluded_domains = []
+            
+            for exclusion in exclusions:
+                # Try to determine if it's an IP or domain
+                if self._is_ip_address(exclusion):
+                    excluded_cidrs.append(f"{exclusion}/32")
+                else:
+                    excluded_domains.append(exclusion)
+            
+            # Add rules for excluded IPs
+            if excluded_cidrs:
+                rules.append({
+                    "ip_cidr": excluded_cidrs,
+                    "outbound": "direct"
+                })
+            
+            # Add rules for excluded domains
+            if excluded_domains:
+                rules.append({
+                    "domain": excluded_domains,
+                    "outbound": "direct"
+                })
+        
+        # 4. Add user-defined routes (as-is, user knows what they're doing)
+        if user_routes:
+            for route in user_routes:
+                if isinstance(route, dict):
+                    rules.append(route)
+        
+        # 5. Default fallback - if we have servers, route to first one
+        # Otherwise route to direct
+        if servers and len(servers) > 0:
+            first_server = servers[0]
+            server_tag = getattr(first_server, 'meta', {}).get('tag') or getattr(first_server, 'tag', None)
+            if not server_tag:
+                # Generate tag from server properties
+                server_type = getattr(first_server, 'type', 'proxy')
+                server_address = getattr(first_server, 'address', 'unknown')
+                server_tag = f"{server_type}-{server_address}"
+            
+            # No explicit rule - just let it fall through to final outbound
+            # The final outbound should be set by ExportManager or sing-box config
+        
+        if debug_level >= 1:
+            print(f"[DefaultRouter] Generated {len(rules)} routing rules")
+        
+        return rules
+    
+    def _is_ip_address(self, address: str) -> bool:
+        """Check if string is an IP address.
+        
+        Args:
+            address: String to check.
+            
+        Returns:
+            True if it looks like an IP address.
+        """
+        try:
+            import ipaddress
+            ipaddress.ip_address(address)
+            return True
+        except ValueError:
+            return False 

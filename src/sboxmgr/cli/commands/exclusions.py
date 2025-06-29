@@ -40,6 +40,7 @@ def exclusions(
     reason: str = typer.Option("CLI operation", "--reason", help=t("cli.reason.help")),
     json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
     show_excluded: bool = typer.Option(True, "--show-excluded/--hide-excluded", help=t("cli.show_excluded.help")),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompts"),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
 ):
     """Manage server exclusions for subscription-based proxy configurations.
@@ -56,7 +57,7 @@ def exclusions(
         return
     
     if clear:
-        _handle_clear_operation(manager, json_output)
+        _handle_clear_operation(manager, json_output, yes)
         return
     
     # For operations requiring server data, fetch and cache it
@@ -83,9 +84,9 @@ def exclusions(
     if not any([add, remove, view, clear, list_servers, interactive]):
         _show_usage_help()
 
-def _handle_clear_operation(manager: ExclusionManager, json_output: bool) -> None:
+def _handle_clear_operation(manager: ExclusionManager, json_output: bool, yes: bool) -> None:
     """Handle the clear exclusions operation with confirmation."""
-    if not Confirm.ask(f"[bold red]{t('cli.clear_exclusions.confirm')}[/bold red]"):
+    if not yes and not Confirm.ask(f"[bold red]{t('cli.clear_exclusions.confirm')}[/bold red]"):
         rprint(f"[yellow]{t('cli.operation_cancelled')}[/yellow]")
         return
     

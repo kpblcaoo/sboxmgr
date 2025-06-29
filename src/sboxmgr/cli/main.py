@@ -16,10 +16,10 @@ from sboxmgr.i18n.t import t
 from sboxmgr.cli import plugin_template
 from sboxmgr.cli.commands.config import config_app
 
-# Import commands for registration
-from sboxmgr.cli.commands.subscription import run as subscription_run, dry_run as subscription_dry_run, list_servers as subscription_list_servers
+# Import commands for registration  
+from sboxmgr.cli.commands.subscription import list_servers as subscription_list_servers
 from sboxmgr.cli.commands.exclusions import exclusions
-from sboxmgr.cli.commands.export import app as export_app
+from sboxmgr.cli.commands.export import export
 
 load_dotenv()
 
@@ -168,8 +168,6 @@ def lang_cmd(
 app.command("plugin-template")(plugin_template.plugin_template)
 
 # Регистрируем команды из commands/subscription.py
-app.command("run", help=t("cli.run.help"))(subscription_run)
-app.command()(subscription_dry_run) 
 app.command("list-servers", help=t("cli.list_servers.help"))(subscription_list_servers)
 
 # Регистрируем exclusions (импортированную из commands/exclusions.py)
@@ -179,7 +177,7 @@ app.command("exclusions")(exclusions)
 app.add_typer(config_app)
 
 # Регистрируем команду экспорта
-app.add_typer(export_app, name="export", help="Export configurations in standardized formats")
+app.command("export", help="Export configurations in standardized formats")(export)
 
 if __name__ == "__main__":
     app() 

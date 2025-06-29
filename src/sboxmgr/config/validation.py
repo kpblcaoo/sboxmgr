@@ -26,7 +26,7 @@ def validate_config_file(file_path: str) -> None:
     
     Args:
         file_path: Path to configuration file
-        
+    
     Raises:
         ConfigValidationError: If file is invalid
     """
@@ -44,14 +44,32 @@ def validate_config_file(file_path: str) -> None:
     if not os.access(path, os.R_OK):
         raise ConfigValidationError(f"Configuration file is not readable: {file_path}")
     
-    # Validate TOML syntax
+    # Determine file format and validate syntax
     try:
         with open(file_path, 'r') as f:
-            toml.load(f)
-    except toml.TomlDecodeError as e:
-        raise ConfigValidationError(f"Invalid TOML syntax in {file_path}: {e}")
+            content = f.read().strip()
+            
+        # Try to parse as JSON first (most common for sing-box configs)
+        try:
+            import json
+            json.loads(content)
+            return  # JSON is valid
+        except json.JSONDecodeError:
+            # Not JSON, try TOML
+            try:
+                import toml
+                toml.loads(content)
+                return  # TOML is valid
+            except toml.TomlDecodeError as e:
+                raise ConfigValidationError(f"Invalid TOML syntax in {file_path}: {e}")
+            except ImportError:
+                raise ConfigValidationError(f"TOML parser not available for {file_path}")
+                
     except Exception as e:
-        raise ConfigValidationError(f"Error reading configuration file {file_path}: {e}")
+        if "JSONDecodeError" in str(type(e)):
+            raise ConfigValidationError(f"Invalid JSON syntax in {file_path}: {e}")
+        else:
+            raise ConfigValidationError(f"Error reading configuration file {file_path}: {e}")
 
 
 def validate_log_level(level: str) -> str:

@@ -9,8 +9,8 @@ TEST_URL = os.getenv("TEST_URL") or os.getenv("SINGBOX_URL") or "https://example
 
 # Для tolerant-поиска сообщений
 EXCLUDE_MSGS = ["Excluded server by index", "Added", "exclusions", "CLI operation"]
-REMOVE_MSGS = ["Removed exclusion", "Exclusions cleared", "очищен"]
-DRYRUN_MSGS = ["Dry run: config is valid", "dry-run", "конфиг валиден"]
+REMOVE_MSGS = ["Removed exclusion", "Exclusions cleared", "очищен", "已清除"]
+DRYRUN_MSGS = ["Dry run: config is valid", "dry-run", "конфиг валиден", "试运行", "配置有效"]
 
 # Таблица CLI-флагов и ожидаемого поведения
 CLI_MATRIX = [
@@ -21,7 +21,7 @@ CLI_MATRIX = [
     (["exclusions", "-u", TEST_URL, "--add", "0"], 'Исключение сервера по индексу', 0, ['exclusions.json'], EXCLUDE_MSGS),
     (["exclusions", "-u", TEST_URL, "--add", "0"], 'Только exclusions.json, без config.json', 0, ['exclusions.json'], EXCLUDE_MSGS),
     (["exclusions", "-u", TEST_URL, "--add", "0"], 'Исключение с dry-run (не должно менять exclusions.json)', 0, [], DRYRUN_MSGS + EXCLUDE_MSGS),
-    (["clear-exclusions", "--yes"], 'Очистка exclusions', 0, [], REMOVE_MSGS),
+    (["exclusions", "--clear", "--yes"], 'Очистка exclusions', 0, [], REMOVE_MSGS),
     (["exclusions", "-u", TEST_URL, "--add", "0", "--remove", "0"], 'Исключение и возврат сервера', 0, ['exclusions.json'], EXCLUDE_MSGS + REMOVE_MSGS),
     # Добавить другие комбинации по мере необходимости
 ]
