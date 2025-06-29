@@ -94,8 +94,15 @@ class DefaultRouter(BaseRoutingPlugin):
                 server_address = getattr(first_server, 'address', 'unknown')
                 server_tag = f"{server_type}-{server_address}"
             
-            # No explicit rule - just let it fall through to final outbound
-            # The final outbound should be set by ExportManager or sing-box config
+            # Add default proxy rule - route all other traffic through first server
+            rules.append({
+                "outbound": server_tag
+            })
+        else:
+            # No servers available - route everything to direct
+            rules.append({
+                "outbound": "direct"
+            })
         
         if debug_level >= 1:
             print(f"[DefaultRouter] Generated {len(rules)} routing rules")
