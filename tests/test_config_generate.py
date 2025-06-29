@@ -27,8 +27,8 @@ class TestGenerateConfig:
     def sample_outbounds(self):
         """Sample outbounds for testing."""
         return [
-            {"type": "vless", "tag": "vless-1", "server": "test1.com"},
-            {"type": "vmess", "tag": "vmess-1", "server": "test2.com"}
+            {'server': 'test1.com', 'tag': 'vless-1', 'type': 'vless'},
+            {'server': 'test2.com', 'tag': 'vmess-1', 'type': 'vmess', 'uuid': '12345678-1234-1234-1234-123456789abc'}
         ]
     
     def test_generate_config_template_not_found(self, tmp_path):

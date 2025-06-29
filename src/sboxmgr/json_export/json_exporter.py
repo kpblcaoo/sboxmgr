@@ -11,8 +11,9 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 
-from ..utils.logging import get_logger
-from sbox_common.validation import SchemaValidator, ValidationError
+from ..logging import get_logger
+from ..config.validation import ConfigValidationError
+from ..config.config_validator import validate_temp_config_json
 
 logger = get_logger(__name__)
 
@@ -23,7 +24,7 @@ class JSONExporter:
     def __init__(self, validate: bool = True):
         self.version = self._get_version()
         self.logger = logger
-        self.validator = SchemaValidator() if validate else None
+        self.validate = validate
     
     def export_config(self, 
                      client_type: str, 
@@ -58,13 +59,13 @@ class JSONExporter:
             exported["metadata"]["checksum"] = self._calculate_checksum(exported)
             
             # Validate if requested
-            should_validate = validate if validate is not None else (self.validator is not None)
-            if should_validate and self.validator:
+            should_validate = validate if validate is not None else self.validate
+            if should_validate:
                 try:
-                    self.validator.validate_export(exported)
-                    self.validator.validate_client_config(client_type, config_data)
+                    self._validate_export(exported)
+                    self._validate_client_config(client_type, config_data)
                     self.logger.info(f"Configuration validation passed for {client_type}")
-                except ValidationError as e:
+                except ConfigValidationError as e:
                     self.logger.error(f"Configuration validation failed: {e}")
                     raise
             
@@ -190,11 +191,11 @@ class JSONExporter:
         return f"sha256:{hashlib.sha256(json_str.encode('utf-8')).hexdigest()}"
     
     def _get_version(self) -> str:
-        """Get sboxmgr version"""
+        """Get sboxmgr version from package metadata."""
         try:
             from sboxmgr import __version__
             return __version__
-        except ImportError:
+        except Exception:
             return "unknown"
     
     def _get_client_version(self, client_type: str) -> str:
@@ -207,6 +208,53 @@ class JSONExporter:
             "mihomo": "1.8.0"
         }
         return client_versions.get(client_type, "unknown")
+    
+    def _validate_export(self, exported: Dict[str, Any]) -> None:
+        """Validate exported configuration structure.
+        
+        Args:
+            exported: Exported configuration dictionary
+            
+        Raises:
+            ConfigValidationError: If validation fails
+        """
+        required_fields = ["client", "version", "created_at", "config", "metadata"]
+        for field in required_fields:
+            if field not in exported:
+                raise ConfigValidationError(f"Exported configuration missing required field: {field}")
+        
+        if not isinstance(exported["client"], str):
+            raise ConfigValidationError("'client' field must be a string")
+        
+        if not isinstance(exported["config"], dict):
+            raise ConfigValidationError("'config' field must be a dictionary")
+        
+        if not isinstance(exported["metadata"], dict):
+            raise ConfigValidationError("'metadata' field must be a dictionary")
+    
+    def _validate_client_config(self, client_type: str, config_data: Dict[str, Any]) -> None:
+        """Validate client-specific configuration.
+        
+        Args:
+            client_type: Type of client
+            config_data: Configuration data
+            
+        Raises:
+            ConfigValidationError: If validation fails
+        """
+        if client_type == "sing-box":
+            # Use internal sing-box validator
+            try:
+                config_json = json.dumps(config_data)
+                validate_temp_config_json(config_json)
+            except Exception as e:
+                raise ConfigValidationError(f"Sing-box configuration validation failed: {e}")
+        elif client_type in ["clash", "xray", "mihomo"]:
+            # Basic validation for other clients
+            if not isinstance(config_data, dict):
+                raise ConfigValidationError(f"{client_type} configuration must be a dictionary")
+        else:
+            raise ConfigValidationError(f"Unsupported client type: {client_type}")
 
 
 class JSONExporterFactory:
