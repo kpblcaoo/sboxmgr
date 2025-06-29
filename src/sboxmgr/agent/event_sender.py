@@ -363,7 +363,7 @@ class EventSender:
                                  status: str,
                                  version: Optional[str] = None) -> Dict[str, Any]:
         """Create a heartbeat message."""
-        message = {
+        message: Dict[str, Any] = {
             "id": str(uuid.uuid4()),
             "type": "heartbeat",
             "timestamp": datetime.utcnow().isoformat() + "Z",

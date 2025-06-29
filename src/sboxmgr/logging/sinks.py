@@ -10,7 +10,7 @@ import logging
 import logging.handlers
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING, Union, Tuple
 import subprocess
 
 from ..config.detection import detect_systemd_environment
@@ -269,13 +269,16 @@ def _create_syslog_handler(config: 'LoggingConfig', level: Optional[str] = None)
         logging.Handler: Syslog handler
     """
     # Try different syslog addresses
-    addresses = [
+    addresses: List[Union[str, Tuple[str, int]]] = [
         "/dev/log",
         ("localhost", 514)
     ]
     
     for address in addresses:
         try:
+            # Convert list to tuple if needed for type compatibility
+            if isinstance(address, list):
+                address = tuple(address)
             handler = logging.handlers.SysLogHandler(address=address)
             handler.setLevel(level or config.level)
             return handler

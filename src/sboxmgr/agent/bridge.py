@@ -76,7 +76,7 @@ class AgentBridge:
         """
         self.agent_path = agent_path or self._find_agent()
         self.timeout = timeout
-        self._available = None  # Cache availability check
+        self._available: Optional[bool] = None  # Cache availability check
     
     def _find_agent(self) -> Optional[str]:
         """Find sboxagent executable in PATH.

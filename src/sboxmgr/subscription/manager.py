@@ -10,7 +10,7 @@ from .models import SubscriptionSource, PipelineContext, PipelineResult
 from .registry import get_plugin, load_entry_points
 from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации
 
-from typing import Optional, Any, Dict, Tuple
+from typing import Optional, Any, Dict, Tuple, List, Literal, Protocol
 from sboxmgr.export.export_manager import ExportManager
 from .base_selector import DefaultSelector
 from .postprocessor_base import DedupPostProcessor, PostProcessorChain
@@ -20,7 +20,14 @@ from .middleware_base import MiddlewareChain
 
 import threading
 
-def detect_parser(raw: bytes, source_type: str) -> Optional[object]:
+class ParserProtocol(Protocol):
+    """Protocol for parser objects that can parse subscription data."""
+    
+    def parse(self, raw: bytes) -> List[Any]:
+        """Parse raw subscription data into server configurations."""
+        ...
+
+def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
     """Auto-detect appropriate parser based on data content.
     
     Args:
