@@ -408,10 +408,13 @@ def _export_wireguard(s: ParsedServer) -> dict:
     }
     if getattr(s, "pre_shared_key", None):
         out["pre_shared_key"] = s.pre_shared_key
-    if s.meta.get("mtu") is not None:
-        out["mtu"] = s.meta["mtu"]
-    if s.meta.get("keepalive") is not None:
-        out["keepalive"] = s.meta["keepalive"]
+    
+    # Безопасная проверка meta на None
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("mtu") is not None:
+        out["mtu"] = meta["mtu"]
+    if meta.get("keepalive") is not None:
+        out["keepalive"] = meta["keepalive"]
     if s.tag:
         out["tag"] = s.tag
     return out
@@ -438,8 +441,11 @@ def _export_tuic(s: ParsedServer) -> dict:
         out["congestion_control"] = s.congestion_control
     if not s.alpn:
         out["alpn"] = s.alpn
-    if s.meta.get("udp_relay_mode") is not None:
-        out["udp_relay_mode"] = s.meta["udp_relay_mode"]
+    
+    # Безопасная проверка meta на None
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("udp_relay_mode") is not None:
+        out["udp_relay_mode"] = meta["udp_relay_mode"]
     if s.tls:
         out["tls"] = s.tls
     if s.tag:

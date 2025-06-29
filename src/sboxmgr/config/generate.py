@@ -13,6 +13,8 @@ from typing import List
 import copy
 
 from ..events import emit_event, EventType, EventPriority
+from .config_validator import validate_temp_config_json
+from .validation import ConfigValidationError
 
 def generate_config(outbounds, template_file, config_file, backup_file, excluded_ips):
     """Generate sing-box configuration from template."""
@@ -77,10 +79,10 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
     info(f"Temporary configuration written to {temp_config_file}")
 
     try:
-        # Simple validation - just check it's valid JSON
-        json.loads(config)
+        # Comprehensive validation - check JSON syntax and sing-box semantics
+        validate_temp_config_json(config)
         info("Temporary configuration validated successfully")
-    except ValueError as e:
+    except (ValueError, ConfigValidationError) as e:
         error(f"Temporary configuration is invalid: {e}")
         os.unlink(temp_config_file)
         raise
