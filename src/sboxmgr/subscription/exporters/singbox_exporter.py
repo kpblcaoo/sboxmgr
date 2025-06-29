@@ -7,7 +7,7 @@ compatibility across different sing-box versions.
 """
 import json
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Callable
 from ..models import ParsedServer, ClientProfile
 from ..base_exporter import BaseExporter
 from ..registry import register
@@ -57,11 +57,11 @@ def generate_inbounds(profile: ClientProfile) -> list:
     return inbounds
 
 
-def _get_protocol_dispatcher() -> Dict[str, callable]:
+def _get_protocol_dispatcher() -> Dict[str, Callable]:
     """Возвращает словарь диспетчеров для специальных протоколов.
     
     Returns:
-        Dict[str, callable]: Маппинг протокол -> функция экспорта.
+        Dict[str, Callable]: Маппинг протокол -> функция экспорта.
     """
     return {
         "wireguard": _export_wireguard,

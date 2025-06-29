@@ -5,6 +5,7 @@ and displays available server configurations. This is the only remaining
 command in this module after the CLI reorganization.
 """
 import typer
+from typing import List
 from sboxmgr.subscription.manager import SubscriptionManager
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
 from sboxmgr.server.exclusions import load_exclusions
@@ -54,7 +55,7 @@ def list_servers(
         mgr = SubscriptionManager(source)
         exclusions = load_exclusions(dry_run=True)
         context = PipelineContext(mode="default", debug_level=debug)
-        user_routes = []
+        user_routes: List[str] = []
         config = mgr.export_config(exclusions=exclusions, user_routes=user_routes, context=context)
         if not config.config or not isinstance(config.config, dict):
             typer.echo("[Error] No valid config generated from subscription.", err=True)

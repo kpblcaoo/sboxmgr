@@ -12,7 +12,7 @@ import os
 import json
 import tempfile
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from sboxmgr.subscription.manager import SubscriptionManager
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
@@ -172,7 +172,7 @@ def _generate_config_from_subscription(
         mgr = SubscriptionManager(source)
         exclusions = load_exclusions(dry_run=True)
         context = PipelineContext(mode="default", debug_level=debug)
-        user_routes = []
+        user_routes: List[str] = []
         
         # Create ExportManager with selected format
         export_mgr = ExportManager(export_format=format)

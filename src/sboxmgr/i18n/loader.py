@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import locale
 import re
+from typing import Dict, List, Optional, Tuple
 
 class LanguageLoader:
     """Language loader for internationalization support.
@@ -39,8 +40,8 @@ class LanguageLoader:
             lang, _ = self.get_preferred_lang_with_source()
         
         self.lang = lang or "en"
-        self.translations = {}
-        self.en_translations = {}
+        self.translations: Dict[str, str] = {}
+        self.en_translations: Dict[str, str] = {}
         
         self.load()
 
