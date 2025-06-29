@@ -68,7 +68,7 @@ class ParsedServer(BaseModel):
     address: str
     port: int
     security: Optional[str] = None
-    meta: Dict[str, str] = Field(default_factory=dict)
+    meta: Dict[str, Any] = Field(default_factory=dict)
     # Новые поля для поддержки всех протоколов
     uuid: Optional[str] = None
     password: Optional[str] = None

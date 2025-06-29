@@ -4,6 +4,7 @@ import pytest
 from unittest.mock import patch, Mock
 from sboxmgr.config.generate import generate_temp_config, validate_temp_config_dict
 from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
+from sboxmgr.subscription.models import PipelineResult, PipelineContext
 
 
 class TestConfigGenerateBugfixes:
@@ -26,7 +27,7 @@ class TestConfigGenerateBugfixes:
         # Mock the SubscriptionManager constructor to track calls
         with patch("sboxmgr.subscription.manager.SubscriptionManager") as mock_manager_class:
             mock_manager_instance = Mock()
-            mock_result = PipelineResult(config=[], context=Mock(), errors=[], success=True)
+            mock_result = PipelineResult(config=[], context=PipelineContext(), errors=[], success=True)
             mock_manager_instance.get_servers.return_value = mock_result
             mock_manager_class.return_value = mock_manager_instance
             

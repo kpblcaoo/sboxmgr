@@ -12,13 +12,26 @@ from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.i18n.t import t
 
 
-
-
-
-
-
-
-
+def _is_service_outbound(outbound: dict) -> bool:
+    """Проверяет, является ли outbound служебным (direct, block, dns-out).
+    
+    Args:
+        outbound: Outbound конфигурация
+        
+    Returns:
+        bool: True если это служебный outbound
+    """
+    if not outbound or not isinstance(outbound, dict):
+        return False
+        
+    outbound_type = outbound.get("type", "")
+    tag = outbound.get("tag", "")
+    
+    # Служебные outbounds
+    service_types = {"direct", "block", "dns"}
+    service_tags = {"direct", "block", "dns-out"}
+    
+    return outbound_type in service_types or tag in service_tags
 
 
 def list_servers(
@@ -28,7 +41,8 @@ def list_servers(
     ),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
-    no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all")
+    no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all"),
+    format: str = typer.Option(None, "--format", help="Force specific format: auto, base64, json, uri_list, clash")
 ):
     """List all available servers from subscription.
     
@@ -42,6 +56,7 @@ def list_servers(
         debug: Debug verbosity level (0-2).
         user_agent: Custom User-Agent header for subscription requests.
         no_user_agent: Disable User-Agent header completely.
+        format: Force specific format detection (auto, base64, json, uri_list, clash).
         
     Raises:
         typer.Exit: On subscription fetch failure or parsing errors.
@@ -51,7 +66,21 @@ def list_servers(
             ua = ""
         else:
             ua = user_agent
-        source = SubscriptionSource(url=url, source_type="url_base64", user_agent=ua)
+            
+        # Определяем source_type на основе формата
+        if format == "base64":
+            source_type = "url_base64"
+        elif format == "json":
+            source_type = "url_json"
+        elif format == "uri_list":
+            source_type = "uri_list"
+        elif format == "clash":
+            source_type = "url"  # Используем универсальный fetcher для clash
+        else:
+            # Автоопределение - используем универсальный fetcher
+            source_type = "url"
+            
+        source = SubscriptionSource(url=url, source_type=source_type, user_agent=ua)
         mgr = SubscriptionManager(source)
         exclusions = load_exclusions(dry_run=True)
         context = PipelineContext(mode="default", debug_level=debug)
@@ -60,7 +89,11 @@ def list_servers(
         if not config.config or not isinstance(config.config, dict):
             typer.echo("[Error] No valid config generated from subscription.", err=True)
             raise typer.Exit(1)
-        servers = config.config.get("outbounds", [])
+        
+        # Получаем все outbounds и фильтруем служебные
+        all_outbounds = config.config.get("outbounds", [])
+        servers = [s for s in all_outbounds if not _is_service_outbound(s)]
+        
         for i, s in enumerate(servers):
             typer.echo(f"[{i}] {s.get('tag', s.get('server', ''))} ({s.get('type', '')}:{s.get('server_port', '')})")
     except Exception as e:

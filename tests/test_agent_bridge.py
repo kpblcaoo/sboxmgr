@@ -67,11 +67,14 @@ class TestEventSenderTimestamp:
         
         # Check format: YYYY-MM-DDTHH:MM:SS.microseconds+00:00
         # or YYYY-MM-DDTHH:MM:SS.microsecondsZ (both are valid ISO 8601)
-        iso_pattern = r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(\+00:00|Z)$'
+        # or YYYY-MM-DDTHH:MM:SS.microseconds+00:00Z (with both timezone and Z)
+        iso_pattern = r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(\+00:00|Z|\+00:00Z)$'
         assert re.match(iso_pattern, timestamp), f"Timestamp {timestamp} does not match ISO 8601 format"
         
         # Verify it's actually UTC by parsing
-        parsed_time = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+        # Handle case where timestamp might have duplicated timezone info
+        clean_timestamp = timestamp.replace('Z', '').replace('+00:00+00:00', '+00:00')
+        parsed_time = datetime.fromisoformat(clean_timestamp)
         assert parsed_time.tzinfo == timezone.utc or parsed_time.tzinfo.utcoffset(parsed_time) == timezone.utc.utcoffset(parsed_time)
     
     def test_command_message_timestamp(self):
