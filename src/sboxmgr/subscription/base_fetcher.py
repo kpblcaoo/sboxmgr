@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from .models import SubscriptionSource
 from urllib.parse import urlparse
 from sboxmgr.utils.env import get_fetch_size_limit
+from typing import Tuple
 
 class BaseAuthHandler(ABC):
     """Interface for generating authentication headers/tokens for protected APIs.
@@ -71,7 +72,7 @@ class BaseFetcher(ABC):
     """
     
     plugin_type = "fetcher"
-    SUPPORTED_SCHEMES = ("http", "https", "file")
+    SUPPORTED_SCHEMES: Tuple[str, ...] = ("http", "https", "file")
 
     def __init__(self, source: SubscriptionSource):
         """Initialize the fetcher with a subscription source.

@@ -62,9 +62,6 @@ def is_ai_lang(code):
             return False
     return False
 
-
-    typer.echo("All exclusions cleared.")
-
 @app.command("lang")
 def lang_cmd(
     set_lang: str = typer.Option(None, "--set", "-s", help=lang.get("cli.lang.set.help")),

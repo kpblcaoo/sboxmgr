@@ -85,4 +85,15 @@ class TestMainModuleIntegration:
             mock_path.return_value.parent.parent = tmp_path
             with patch('builtins.open', side_effect=IOError("Permission denied")):
                 result = is_ai_lang("de")
-                assert result is False 
+                assert result is False
+
+    def test_import_main_no_output(self, capsys):
+        """Smoke test: importing cli.main should not print anything to stdout/stderr."""
+        import importlib
+        import sys
+        # Remove from sys.modules to force re-import
+        sys.modules.pop("sboxmgr.cli.main", None)
+        importlib.import_module("sboxmgr.cli.main")
+        captured = capsys.readouterr()
+        assert captured.out == ""
+        assert captured.err == "" 

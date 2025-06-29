@@ -320,17 +320,13 @@ def _add_special_outbounds(outbounds: List[Dict[str, Any]], use_legacy: bool) ->
         outbounds (List[Dict[str, Any]]): Список outbounds для модификации.
         use_legacy (bool): Использовать ли legacy режим.
     """
-    tags = {o["tag"] for o in outbounds}
-    
+    tags = {o.get("tag") for o in outbounds}
     if "direct" not in tags:
         outbounds.append({"type": "direct", "tag": "direct"})
-    
-    # Добавляем legacy special outbounds для совместимости с sing-box < 1.11.0
-    if use_legacy:
-        if "block" not in tags:
-            outbounds.append({"type": "block", "tag": "block"})
-        if "dns-out" not in tags:
-            outbounds.append({"type": "dns", "tag": "dns-out"})
+    if "block" not in tags:
+        outbounds.append({"type": "block", "tag": "block"})
+    if "dns-out" not in tags:
+        outbounds.append({"type": "dns", "tag": "dns-out"})
 
 
 def singbox_export(
@@ -442,7 +438,7 @@ def _export_tuic(s: ParsedServer) -> dict:
         out["congestion_control"] = s.congestion_control
     if not s.alpn:
         out["alpn"] = s.alpn
-    if s.meta.get("udp_relay_mode"):
+    if s.meta.get("udp_relay_mode") is not None:
         out["udp_relay_mode"] = s.meta["udp_relay_mode"]
     if s.tls:
         out["tls"] = s.tls

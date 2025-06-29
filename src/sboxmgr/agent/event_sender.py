@@ -5,11 +5,12 @@ to sboxagent via Unix socket using the framed JSON protocol.
 """
 
 import uuid
-from datetime import datetime
-from typing import Optional, Dict, Any
+import json
+from datetime import datetime, timezone
+from typing import Dict, Any, Optional
 
 from .ipc.socket_client import SocketClient
-from ..logging import get_logger
+from sboxmgr.logging import get_logger
 
 
 def _get_logger():
@@ -324,7 +325,7 @@ class EventSender:
         message = {
             "id": str(uuid.uuid4()),
             "type": "event",
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
             "event": {
                 "event_type": event_type,
                 "source": source,
@@ -346,7 +347,7 @@ class EventSender:
         message = {
             "id": str(uuid.uuid4()),
             "type": "command",
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
             "command": {
                 "command": command,
                 "params": params
@@ -366,7 +367,7 @@ class EventSender:
         message: Dict[str, Any] = {
             "id": str(uuid.uuid4()),
             "type": "heartbeat",
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
             "heartbeat": {
                 "agent_id": agent_id,
                 "status": status
