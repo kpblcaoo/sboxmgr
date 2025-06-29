@@ -173,28 +173,28 @@ class TestExclusionModels:
     """Test exclusion data models."""
     
     def test_exclusion_entry(self):
-        """Test ExclusionEntry model."""
+        """Test ExclusionEntry model with Pydantic."""
         entry = ExclusionEntry(
             id="test-123",
             name="Test Server",
             reason="Testing"
         )
         
-        # Test serialization
-        data = entry.to_dict()
+        # Test serialization with Pydantic
+        data = entry.model_dump(mode='json')
         assert data["id"] == "test-123"
         assert data["name"] == "Test Server"
         assert data["reason"] == "Testing"
         assert "timestamp" in data
         
-        # Test deserialization
-        entry2 = ExclusionEntry.from_dict(data)
+        # Test deserialization with Pydantic
+        entry2 = ExclusionEntry.model_validate(data)
         assert entry2.id == entry.id
         assert entry2.name == entry.name
         assert entry2.reason == entry.reason
     
     def test_exclusion_list(self):
-        """Test ExclusionList model."""
+        """Test ExclusionList model with Pydantic."""
         exclusion_list = ExclusionList()
         
         entry1 = ExclusionEntry(id="server-1", name="Server 1")
@@ -213,12 +213,12 @@ class TestExclusionModels:
         ids = exclusion_list.get_ids()
         assert ids == {"server-1", "server-2"}
         
-        # Test serialization
-        data = exclusion_list.to_dict()
+        # Test serialization with Pydantic
+        data = exclusion_list.model_dump(mode='json')
         assert len(data["exclusions"]) == 2
         assert "last_modified" in data
         
-        # Test deserialization
-        exclusion_list2 = ExclusionList.from_dict(data)
+        # Test deserialization with Pydantic
+        exclusion_list2 = ExclusionList.model_validate(data)
         assert len(exclusion_list2.exclusions) == 2
         assert exclusion_list2.contains("server-1") 
