@@ -6,13 +6,11 @@ PipelineContext, and other data structures that represent subscription
 configuration and processing state.
 """
 
-from dataclasses import dataclass, field
 from typing import Optional, Dict, List, Any, Literal
 import uuid
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
-@dataclass
-class SubscriptionSource:
+class SubscriptionSource(BaseModel):
     """Configuration for a subscription data source.
     
     Defines the source of subscription data including URL, type, headers,
@@ -26,14 +24,15 @@ class SubscriptionSource:
         user_agent: Optional custom User-Agent string.
     """
     
+    model_config = ConfigDict(extra='forbid')
+    
     url: str
     source_type: str  # url_base64, url_json, file_json, uri_list, ...
     headers: Optional[Dict[str, str]] = None
     label: Optional[str] = None
     user_agent: Optional[str] = None
 
-@dataclass
-class ParsedServer:
+class ParsedServer(BaseModel):
     """Universal server model for subscription pipeline processing.
     
     This class represents a parsed server configuration that can handle
@@ -63,11 +62,13 @@ class ParsedServer:
         tag: Server tag/label.
     """
     
+    model_config = ConfigDict(extra='allow')  # Allow extra fields for protocol-specific params
+    
     type: str
     address: str
     port: int
     security: Optional[str] = None
-    meta: Dict[str, str] = field(default_factory=dict)
+    meta: Dict[str, str] = Field(default_factory=dict)
     # Новые поля для поддержки всех протоколов
     uuid: Optional[str] = None
     password: Optional[str] = None
@@ -85,8 +86,7 @@ class ParsedServer:
     congestion_control: Optional[str] = None
     tag: Optional[str] = None
 
-@dataclass
-class PipelineContext:
+class PipelineContext(BaseModel):
     """Execution context for subscription processing pipeline.
     
     Contains configuration and state information that flows through
@@ -103,16 +103,17 @@ class PipelineContext:
         metadata: Additional metadata dictionary.
     """
     
-    trace_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    model_config = ConfigDict(extra='allow')
+    
+    trace_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     source: Optional[str] = None
     mode: str = "tolerant"  # 'strict' or 'tolerant'
-    user_routes: List[Any] = field(default_factory=list)
-    exclusions: List[Any] = field(default_factory=list)
+    user_routes: List[Any] = Field(default_factory=list)
+    exclusions: List[Any] = Field(default_factory=list)
     debug_level: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
-@dataclass
-class PipelineResult:
+class PipelineResult(BaseModel):
     """Result of subscription pipeline execution.
     
     Contains the output of the pipeline processing including the final
@@ -125,6 +126,8 @@ class PipelineResult:
         errors: List of errors encountered during processing.
         success: Whether the pipeline executed successfully.
     """
+    
+    model_config = ConfigDict(extra='allow', arbitrary_types_allowed=True)
     
     config: Any  # результат экспорта (например, JSON-конфиг)
     context: PipelineContext

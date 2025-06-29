@@ -3,7 +3,7 @@
 from enum import Enum, IntEnum
 from typing import Any, Dict, Optional, Union, Callable
 from datetime import datetime
-from dataclasses import dataclass
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class EventType(str, Enum):
@@ -65,13 +65,14 @@ class EventPriority(IntEnum):
     DEBUG = 10
 
 
-@dataclass
-class EventData:
+class EventData(BaseModel):
     """Container for event data and metadata.
     
     This class holds all information related to an event, including
     the event payload, source information, and timing data.
     """
+    
+    model_config = ConfigDict(extra='allow')
     
     event_type: EventType
     payload: Dict[str, Any]
@@ -101,22 +102,6 @@ class EventData:
             value: Value to set
         """
         self.payload[key] = value
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert event data to dictionary.
-        
-        Returns:
-            Dictionary representation of event data
-        """
-        return {
-            'event_type': self.event_type.value,
-            'payload': self.payload,
-            'source': self.source,
-            'timestamp': self.timestamp.isoformat(),
-            'priority': self.priority.value,
-            'trace_id': self.trace_id,
-            'session_id': self.session_id,
-        }
 
 
 # Type aliases for convenience

@@ -8,7 +8,7 @@ unified interface for CLI and other consumers.
 
 from typing import Dict, List, Optional, Any
 import logging
-from dataclasses import dataclass
+from pydantic import BaseModel, ConfigDict
 
 from .interfaces import (
     SubscriptionManagerInterface, 
@@ -18,8 +18,7 @@ from .interfaces import (
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext, PipelineResult
 
 
-@dataclass
-class OrchestratorConfig:
+class OrchestratorConfig(BaseModel):
     """Configuration for Orchestrator operations.
     
     Centralizes configuration management for consistent behavior
@@ -32,6 +31,9 @@ class OrchestratorConfig:
         timeout_seconds: Default timeout for operations.
         fail_safe: Whether to use fail-safe error handling.
     """
+    
+    model_config = ConfigDict(extra='forbid')
+    
     default_mode: str = "tolerant"
     debug_level: int = 0
     cache_enabled: bool = True

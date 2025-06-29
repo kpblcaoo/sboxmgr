@@ -4,7 +4,7 @@ import asyncio
 import threading
 from typing import Any, List, Optional
 from datetime import datetime
-from dataclasses import dataclass, field
+from pydantic import BaseModel, Field, ConfigDict
 from abc import ABC, abstractmethod
 
 from .types import EventType, EventPriority, EventData, EventPayload
@@ -70,19 +70,20 @@ class EventHandler(ABC):
         return asyncio.iscoroutinefunction(self.handle)
 
 
-@dataclass
-class Event:
+class Event(BaseModel):
     """Event container with data and metadata.
     
     This class wraps EventData and provides additional functionality
     for event processing, including cancellation and result tracking.
     """
     
+    model_config = ConfigDict(extra='allow', arbitrary_types_allowed=True)
+    
     data: EventData
     cancelled: bool = False
     processed: bool = False
-    results: List[Any] = field(default_factory=list)
-    errors: List[Exception] = field(default_factory=list)
+    results: List[Any] = Field(default_factory=list)
+    errors: List[Exception] = Field(default_factory=list)
     
     def cancel(self) -> None:
         """Cancel event processing."""

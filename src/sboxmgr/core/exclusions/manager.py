@@ -73,7 +73,7 @@ class ExclusionManager(ExclusionManagerInterface):
             if file_exists(str(self.file_path)):
                 try:
                     data = read_json(str(self.file_path))
-                    self._exclusions = ExclusionList.from_dict(data)
+                    self._exclusions = ExclusionList.model_validate(data)
                     self.logger.debug(f"Loaded {len(self._exclusions.exclusions)} exclusions from {self.file_path}")
                 except (json.JSONDecodeError, KeyError, ValueError) as e:
                     # Fail-safe: corrupted file -> empty list + restore file
@@ -103,7 +103,7 @@ class ExclusionManager(ExclusionManagerInterface):
             return
         
         try:
-            data = self._exclusions.to_dict()
+            data = self._exclusions.model_dump(mode='json')
             atomic_write_json(data, str(self.file_path))
         except Exception as e:
             logging.error(f"Failed to save exclusions to {self.file_path}: {e}")
@@ -176,7 +176,7 @@ class ExclusionManager(ExclusionManagerInterface):
     def list_all(self) -> List[Dict]:
         """List all exclusions."""
         exclusions = self._load()
-        return [ex.to_dict() for ex in exclusions.exclusions]
+        return [ex.model_dump(mode='json') for ex in exclusions.exclusions]
     
     def clear(self) -> int:
         """Clear all exclusions."""
