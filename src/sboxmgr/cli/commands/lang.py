@@ -6,11 +6,11 @@ sboxmgr CLI interface. Language settings are managed through environment
 variables and the i18n system.
 """
 import typer
+import os
 from pathlib import Path
 from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t
-from ..utils import is_ai_lang, detect_lang_source
-import os
+from sboxmgr.cli.utils import is_ai_lang, detect_lang_source
 
 LANG_NAMES = {
     "en": "English",

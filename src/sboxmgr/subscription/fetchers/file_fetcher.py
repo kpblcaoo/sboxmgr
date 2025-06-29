@@ -25,7 +25,7 @@ class FileFetcher(BaseFetcher):
         _cache_lock: Thread lock for cache synchronization.
         _fetch_cache: Cache dictionary for storing fetched file contents.
     """
-    SUPPORTED_SCHEMES: Tuple[str, ...] = ("file",)
+    SUPPORTED_SCHEMES: Tuple[str, str, str] = ("file", "file", "file")
     _cache_lock = threading.Lock()
     _fetch_cache: Dict[Tuple[str], bytes] = {}
 
