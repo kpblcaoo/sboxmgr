@@ -18,6 +18,9 @@ _Часть ADR написана ретроспективно для фикса�
 | ADR-0012  | Service Architecture & Dual-Path Support    | Accepted | 2025-01-27 | Three-tier architecture with dual-path support |
 | ADR-0015  | Agent-Installer Separation & Installation Strategy | Accepted | 2025-01-27 | Clear separation between agent (runtime) and installer (setup) responsibilities |
 | ADR-0016  | Pydantic as Single Source of Truth for Validation and Schema Generation | Accepted | 2025-01-27 | Standardized approach using Pydantic for validation and automatic schema generation |
+| ADR-0017  | Full Profile Architecture | Accepted | 2025-06-29 | Unified configuration entity covering all pipeline components |
+| ADR-0018  | Subscription Management Architecture | Accepted | 2025-06-29 | Extended subscription management with isolation, auto-switching, and CLI UX |
+| ADR-0019  | Full Profile UX & Runtime Management | Accepted | 2025-06-29 | Production-ready UX and runtime aspects for profiles and subscriptions |
 
 ## Summary
 - **Security**: ADR-0001 establishes CLI security foundation
@@ -32,4 +35,7 @@ _Часть ADR написана ретроспективно для фикса�
 - **Events**: ADR-0011 provides lightweight event system for component decoupling
 - **Services**: ADR-0012 defines three-tier service architecture with dual-path support
 - **Installation**: ADR-0015 separates agent runtime from installer setup responsibilities
-- **Validation**: ADR-0016 standardizes Pydantic as single source of truth for validation and schema generation 
+- **Validation**: ADR-0016 standardizes Pydantic as single source of truth for validation and schema generation
+- **Profiles**: ADR-0017 establishes unified configuration entity for all pipeline components
+- **Subscriptions**: ADR-0018 provides extended subscription management with isolation and auto-switching
+- **UX**: ADR-0019 covers production-ready UX and runtime management for profiles and subscriptions 

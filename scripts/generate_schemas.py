@@ -16,6 +16,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 try:
     from sboxmgr.config.models import AppConfig, LoggingConfig, ServiceConfig, AppSettings
     from sboxmgr.subscription.models import ClientProfile, InboundProfile
+    # New profile models (ADR-0017)
+    from sboxmgr.profiles.models import FullProfile, SubscriptionProfile, FilterProfile, RoutingProfile, ExportProfile, AgentProfile, UIProfile, LegacyProfile
     # Note: ExclusionList and ExclusionRule are dataclasses, not Pydantic models
     # They would need to be converted to Pydantic models to generate schemas
 except ImportError as e:
@@ -31,12 +33,24 @@ def generate_schemas() -> Dict[str, Dict[str, Any]]:
         Dict mapping schema names to JSON schema dictionaries
     """
     schemas = {
-        "sboxmgr-config": AppConfig.schema(),
-        "logging-config": LoggingConfig.schema(),
-        "service-config": ServiceConfig.schema(),
-        "app-settings": AppSettings.schema(),
-        "client-profile": ClientProfile.schema(),
-        "inbound-profile": InboundProfile.schema(),
+        # Existing schemas (fix deprecation warnings)
+        "sboxmgr-config": AppConfig.model_json_schema(),
+        "logging-config": LoggingConfig.model_json_schema(),
+        "service-config": ServiceConfig.model_json_schema(),
+        "app-settings": AppSettings.model_json_schema(),
+        "client-profile": ClientProfile.model_json_schema(),
+        "inbound-profile": InboundProfile.model_json_schema(),
+        
+        # New profile schemas (ADR-0017)
+        "full-profile": FullProfile.model_json_schema(),
+        "subscription-profile": SubscriptionProfile.model_json_schema(),
+        "filter-profile": FilterProfile.model_json_schema(),
+        "routing-profile": RoutingProfile.model_json_schema(),
+        "export-profile": ExportProfile.model_json_schema(),
+        "agent-profile": AgentProfile.model_json_schema(),
+        "ui-profile": UIProfile.model_json_schema(),
+        "legacy-profile": LegacyProfile.model_json_schema(),
+        
         # Note: ExclusionList and ExclusionRule are dataclasses, not Pydantic models
         # They would need to be converted to Pydantic models to generate schemas
     }
