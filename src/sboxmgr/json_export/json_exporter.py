@@ -46,7 +46,7 @@ class JSONExporter:
         """
         try:
             # Create base export structure
-            exported = {
+            exported: Dict[str, Any] = {
                 "client": client_type,
                 "version": self._get_client_version(client_type),
                 "created_at": datetime.now(timezone.utc).isoformat(),

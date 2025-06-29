@@ -234,17 +234,22 @@ def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
     """Get validation summary for configuration.
     
     Args:
-        config_dict: Configuration dictionary
+        config_dict: Configuration dictionary.
         
     Returns:
-        Dict containing validation results and recommendations
+        Dict containing validation results and recommendations.
     """
-    summary = {
+    summary: Dict[str, Any] = {
         "valid": True,
         "warnings": [],
         "recommendations": [],
         "errors": []
     }
+    
+    # Add explicit type annotations for lists
+    warnings: List[str] = summary["warnings"]
+    recommendations: List[str] = summary["recommendations"]
+    errors: List[str] = summary["errors"]
     
     try:
         # Run all validations
@@ -258,31 +263,31 @@ def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
         # Service mode recommendations
         if service_config.get("service_mode", False):
             if logging_config.get("format") == "text":
-                summary["recommendations"].append(
+                recommendations.append(
                     "Consider using JSON log format in service mode for better parsing"
                 )
             
             if logging_config.get("level") == "DEBUG":
-                summary["recommendations"].append(
+                recommendations.append(
                     "Consider using INFO log level in service mode for better performance"
                 )
         
         # Development mode recommendations
         if config_dict.get("debug", False):
             if not logging_config.get("enable_trace_id", True):
-                summary["recommendations"].append(
+                recommendations.append(
                     "Enable trace ID in debug mode for better debugging"
                 )
         
         # File logging recommendations
         if "file" in logging_config.get("sinks", []):
             if not logging_config.get("file_path"):
-                summary["warnings"].append(
+                warnings.append(
                     "File sink specified but no file path configured"
                 )
     
     except ConfigValidationError as e:
         summary["valid"] = False
-        summary["errors"].append(str(e))
+        errors.append(str(e))
     
     return summary 
