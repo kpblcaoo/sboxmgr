@@ -121,7 +121,13 @@ class URIListParser(BaseParser):
                 decoded = base64.urlsafe_b64decode(b64 + '=' * (-len(b64) % 4)).decode('utf-8')
             except (binascii.Error, UnicodeDecodeError):
                 decoded = b64  # fallback: not base64
-            return decoded, after
+            if '@' in decoded:
+                parts = decoded.split('@', 1)
+                return parts[0], parts[1]
+            else:
+                if debug_level > 0:
+                    logger.warning(f"ss:// no host in line: {line}")
+                return "", ""
         else:
             # Whole string is base64 or plain
             try:
@@ -130,7 +136,8 @@ class URIListParser(BaseParser):
                 decoded = uri  # fallback: not base64
             
             if '@' in decoded:
-                return decoded.split('@', 1)
+                parts = decoded.split('@', 1)
+                return parts[0], parts[1]
             else:
                 if debug_level > 0:
                     logger.warning(f"ss:// no host in line: {line}")

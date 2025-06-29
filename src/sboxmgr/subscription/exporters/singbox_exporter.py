@@ -167,7 +167,7 @@ def _process_tls_config(outbound: Dict[str, Any], meta: Dict[str, Any], protocol
         meta (Dict[str, Any]): Метаданные сервера для модификации.
         protocol_type (str): Тип протокола.
     """
-    tls = {}
+    tls: Dict[str, Any] = {}
     
     # Базовая TLS конфигурация
     if meta.get("tls") or meta.get("security") == "tls":
@@ -182,18 +182,26 @@ def _process_tls_config(outbound: Dict[str, Any], meta: Dict[str, Any], protocol
     # Reality конфигурация
     if meta.get("reality-opts"):
         reality = kebab_to_snake(meta.pop("reality-opts"))
-        tls.setdefault("reality", {}).update(reality)
+        if "reality" not in tls:
+            tls["reality"] = {}
+        tls["reality"].update(reality)
     
     if meta.get("pbk"):
-        tls.setdefault("reality", {})["public_key"] = meta.pop("pbk")
+        if "reality" not in tls:
+            tls["reality"] = {}
+        tls["reality"]["public_key"] = meta.pop("pbk")
     
     if meta.get("short_id"):
-        tls.setdefault("reality", {})["short_id"] = meta.pop("short_id")
+        if "reality" not in tls:
+            tls["reality"] = {}
+        tls["reality"]["short_id"] = meta.pop("short_id")
     
     # uTLS конфигурация
     utls_fp = meta.pop("client-fingerprint", None) or meta.pop("fp", None)
     if utls_fp:
-        tls.setdefault("utls", {})["fingerprint"] = utls_fp
+        if "utls" not in tls:
+            tls["utls"] = {}
+        tls["utls"]["fingerprint"] = utls_fp
         tls["utls"]["enabled"] = True
     
     # ALPN
@@ -404,10 +412,10 @@ def _export_wireguard(s: ParsedServer) -> dict:
     }
     if getattr(s, "pre_shared_key", None):
         out["pre_shared_key"] = s.pre_shared_key
-    if getattr(s, "mtu", None) is not None:
-        out["mtu"] = s.mtu
-    if getattr(s, "keepalive", None) is not None:
-        out["keepalive"] = s.keepalive
+    if s.meta.get("mtu") is not None:
+        out["mtu"] = s.meta["mtu"]
+    if s.meta.get("keepalive") is not None:
+        out["keepalive"] = s.meta["keepalive"]
     if s.tag:
         out["tag"] = s.tag
     return out
@@ -434,8 +442,8 @@ def _export_tuic(s: ParsedServer) -> dict:
         out["congestion_control"] = s.congestion_control
     if not s.alpn:
         out["alpn"] = s.alpn
-    if getattr(s, "udp_relay_mode", None):
-        out["udp_relay_mode"] = s.udp_relay_mode
+    if s.meta.get("udp_relay_mode"):
+        out["udp_relay_mode"] = s.meta["udp_relay_mode"]
     if s.tls:
         out["tls"] = s.tls
     if s.tag:

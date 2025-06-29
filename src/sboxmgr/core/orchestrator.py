@@ -359,10 +359,13 @@ class Orchestrator:
                 )
             
             # Export configuration using export manager
+            # Convert user_routes from List[str] to List[Dict] for compatibility
+            user_routes_dicts = [{"tag": route} for route in (user_routes or [])]
+            
             config = self.export_manager.export(
                 servers=servers_result.config,
                 exclusions=exclusions,
-                user_routes=user_routes or [],
+                user_routes=user_routes_dicts,
                 skip_version_check=skip_version_check
             )
             
