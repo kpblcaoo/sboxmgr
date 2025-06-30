@@ -61,3 +61,5 @@ struct_src.json
 
 # Ignore generated LLM index
 struct_src_index.json
+
+custom.json
