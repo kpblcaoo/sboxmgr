@@ -5,7 +5,6 @@
   "cli.dry_run_valid": "试运行：配置有效",
   "cli.config_invalid": "配置无效",
   "cli.temp_file_deleted": "临时文件已删除。主配置未更改，服务未重启。",
-  "cli.service_restart_completed": "服务重启完成。",
   "cli.error_config_update": "配置更新时出错",
   "cli.update_completed": "=== 更新成功完成 ===",
   "error.config_load_failed": "[错误] 加载配置失败",
@@ -34,5 +33,6 @@
   "cli.interactive.help": "交互式服务器选择",
   "cli.json.help": "JSON格式输出",
   "cli.reason.help": "排除原因",
-  "cli.show_excluded.help": "在列表中显示排除的服务器"
+  "cli.show_excluded.help": "在列表中显示排除的服务器",
+  "cli.error.subscription_processing_failed": ""
 }

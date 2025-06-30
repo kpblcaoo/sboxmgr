@@ -5,7 +5,6 @@
   "cli.dry_run_valid": "Test: yapılandırma geçerli",
   "cli.config_invalid": "Yapılandırma geçersiz",
   "cli.temp_file_deleted": "Geçici dosya silindi. Ana yapılandırma değiştirilmedi, hizmet yeniden başlatılmadı.",
-  "cli.service_restart_completed": "Hizmet yeniden başlatma tamamlandı.",
   "cli.error_config_update": "Yapılandırma güncellenirken hata",
   "cli.update_completed": "=== Güncelleme başarıyla tamamlandı ===",
   "error.config_load_failed": "[Hata] Yapılandırma yüklenemedi",
@@ -34,5 +33,6 @@
   "cli.interactive.help": "Etkileşimli sunucu seçimi",
   "cli.json.help": "JSON formatında çıktı",
   "cli.reason.help": "Hariç tutma nedeni",
-  "cli.show_excluded.help": "Listede hariç tutulan sunucuları göster"
+  "cli.show_excluded.help": "Listede hariç tutulan sunucuları göster",
+  "cli.error.subscription_processing_failed": ""
 }

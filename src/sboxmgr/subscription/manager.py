@@ -621,7 +621,7 @@ class SubscriptionManager:
             context.metadata['errors'].append(err)
             return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
 
-    def export_config(self, exclusions=None, user_routes=None, context: PipelineContext = None, routing_plugin=None, export_manager: Optional[ExportManager] = None, skip_version_check: bool = False) -> PipelineResult:
+    def export_config(self, exclusions=None, user_routes=None, context: PipelineContext = None, routing_plugin=None, export_manager: Optional[ExportManager] = None) -> PipelineResult:
         """Export subscription to final configuration format.
 
         Processes the subscription through the complete pipeline and exports
@@ -634,7 +634,6 @@ class SubscriptionManager:
             context: Optional pipeline execution context.
             routing_plugin: Optional custom routing plugin for rule generation.
             export_manager: Optional export manager with target format configuration.
-            skip_version_check: Whether to skip version compatibility checks.
 
         Returns:
             PipelineResult containing:
@@ -662,7 +661,7 @@ class SubscriptionManager:
         # Используем переданный ExportManager или создаём дефолтный
         mgr = export_manager or ExportManager(routing_plugin=routing_plugin)
         try:
-            config = mgr.export(servers_result.config, exclusions, user_routes, context, skip_version_check=skip_version_check)
+            config = mgr.export(servers_result.config, exclusions, user_routes, context)
             return PipelineResult(config=config, context=context, errors=context.metadata['errors'], success=True)
         except Exception as e:
             err = PipelineError(

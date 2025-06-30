@@ -42,8 +42,7 @@ class SubscriptionManagerInterface(ABC):
                      user_routes: Optional[List[str]] = None,
                      context: Optional[PipelineContext] = None,
                      routing_plugin: Optional[Any] = None,
-                     export_manager: Optional[Any] = None,
-                     skip_version_check: bool = False) -> PipelineResult:
+                     export_manager: Optional[Any] = None) -> PipelineResult:
         """Export subscription to configuration format.
         
         Args:
@@ -52,7 +51,6 @@ class SubscriptionManagerInterface(ABC):
             context: Optional pipeline execution context.
             routing_plugin: Optional custom routing plugin.
             export_manager: Optional custom export manager.
-            skip_version_check: Whether to skip version compatibility checks.
             
         Returns:
             PipelineResult containing exported configuration.
@@ -72,8 +70,7 @@ class ExportManagerInterface(ABC):
               exclusions: Optional[List[str]] = None,
               user_routes: Optional[List[Dict]] = None,
               context: Optional[Dict[str, Any]] = None,
-              client_profile: Optional[Any] = None,
-              skip_version_check: bool = False) -> Dict:
+              client_profile: Optional[Any] = None) -> Dict:
         """Export servers to client configuration format.
         
         Args:
@@ -82,7 +79,6 @@ class ExportManagerInterface(ABC):
             user_routes: Optional list of custom routing rules.
             context: Optional context dictionary for export customization.
             client_profile: Optional client profile override.
-            skip_version_check: Whether to skip version compatibility checks.
             
         Returns:
             Dictionary containing the final client configuration.

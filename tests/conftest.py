@@ -4,7 +4,7 @@ import subprocess
 import os
 import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, Mock
 
 # Добавляем src в путь для импорта
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from sboxmgr.logging.core import initialize_logging
 from sboxmgr.config.models import LoggingConfig
 import sboxmgr.logging.core
+from sboxmgr.subscription.models import ParsedServer, PipelineResult, PipelineContext
 
 # Мокаем get_logger до инициализации логирования
 sboxmgr.logging.core.get_logger = MagicMock(return_value=MagicMock())
@@ -66,3 +67,117 @@ def mock_logging_setup():
         mock_init.return_value = None
         mock_get_logger.return_value = MagicMock()
         yield 
+
+@pytest.fixture
+def test_subscription_url():
+    """Get test subscription URL from environment or use mock data.
+    
+    Returns:
+        str: Real subscription URL if TEST_URL is set, otherwise mock URL.
+    """
+    url = os.getenv('TEST_URL')
+    if url and not os.getenv('SKIP_EXTERNAL_TESTS'):
+        return url
+    else:
+        return "mock://test-data"
+
+
+@pytest.fixture
+def real_subscription_available():
+    """Check if real subscription URL is available for testing.
+    
+    Returns:
+        bool: True if TEST_URL is set and external tests are enabled.
+    """
+    return bool(os.getenv('TEST_URL') and not os.getenv('SKIP_EXTERNAL_TESTS'))
+
+
+@pytest.fixture
+def sample_parsed_servers():
+    """Provide sample parsed server objects for unit testing.
+    
+    Returns:
+        list: List of ParsedServer objects with realistic test data.
+    """
+    return [
+        ParsedServer(
+            protocol="vmess",
+            address="1.1.1.1",
+            port=443,
+            uuid="test-uuid-1",
+            security="tls",
+            name="Test VMess Server 1"
+        ),
+        ParsedServer(
+            protocol="vless",
+            address="2.2.2.2", 
+            port=443,
+            uuid="test-uuid-2",
+            security="tls",
+            name="Test VLESS Server 1"
+        ),
+        ParsedServer(
+            protocol="trojan",
+            address="3.3.3.3",
+            port=443,
+            password="test-password",  # pragma: allowlist secret
+            name="Test Trojan Server 1"
+        )
+    ]
+
+
+@pytest.fixture
+def mock_pipeline_result_success(sample_parsed_servers):
+    """Create a mock successful pipeline result.
+    
+    Args:
+        sample_parsed_servers: Fixture providing sample server data.
+        
+    Returns:
+        PipelineResult: Mock successful result with sample servers.
+    """
+    return PipelineResult(
+        config=sample_parsed_servers,
+        context=PipelineContext(mode="test"),
+        errors=[],
+        success=True
+    )
+
+
+@pytest.fixture
+def mock_pipeline_result_failure():
+    """Create a mock failed pipeline result.
+    
+    Returns:
+        PipelineResult: Mock failed result.
+    """
+    return PipelineResult(
+        config=None,
+        context=PipelineContext(mode="test"),
+        errors=["Mock error for testing"],
+        success=False
+    )
+
+
+@pytest.fixture
+def skip_external_tests():
+    """Skip tests that require external resources.
+    
+    This fixture can be used to conditionally skip tests that require
+    external subscription URLs or other external dependencies.
+    """
+    if os.getenv('SKIP_EXTERNAL_TESTS'):
+        pytest.skip("External tests disabled")
+
+
+@pytest.fixture
+def require_external_tests():
+    """Require external tests to be enabled.
+    
+    This fixture will skip the test if external tests are disabled
+    or if TEST_URL is not set.
+    """
+    if not os.getenv('TEST_URL'):
+        pytest.skip("TEST_URL not set")
+    if os.getenv('SKIP_EXTERNAL_TESTS'):
+        pytest.skip("External tests disabled") 

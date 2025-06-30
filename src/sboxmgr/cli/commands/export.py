@@ -162,55 +162,53 @@ def _generate_config_from_subscription(
     user_agent: Optional[str],
     no_user_agent: bool,
     format: str,
-    debug: int,
-    skip_version_check: bool
+    debug: int
 ) -> dict:
     """Generate configuration from subscription URL.
     
     Args:
-        url: Subscription URL
+        url: Subscription URL to fetch from
         user_agent: Custom User-Agent header
         no_user_agent: Disable User-Agent header
-        format: Export format
-        debug: Debug level
-        skip_version_check: Skip version compatibility check
+        format: Output format (singbox, clash, etc.)
+        debug: Debug verbosity level
         
     Returns:
-        Generated configuration dictionary
+        Configuration dictionary
         
     Raises:
-        typer.Exit: If subscription processing fails
+        typer.Exit: On processing errors
     """
+    from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import SubscriptionSource
+    from sboxmgr.export.export_manager import ExportManager
+    
+    # Create subscription source
+    source = SubscriptionSource(
+        url=url,
+        user_agent=user_agent if not no_user_agent else None
+    )
+    
+    # Create managers
+    subscription_manager = SubscriptionManager(source)
+    export_manager = ExportManager(export_format=format)
+    
+    # Process subscription
     try:
-        if no_user_agent:
-            ua = ""
-        else:
-            ua = user_agent
-            
-        source = SubscriptionSource(url=url, source_type="url_base64", user_agent=ua)
-        mgr = SubscriptionManager(source)
-        exclusions = load_exclusions(dry_run=True)
-        context = PipelineContext(mode="default", debug_level=debug)
-        user_routes: List[str] = []
-        
-        # Create ExportManager with selected format
-        export_mgr = ExportManager(export_format=format)
-        config = mgr.export_config(
-            exclusions=exclusions, 
-            user_routes=user_routes, 
-            context=context, 
-            export_manager=export_mgr, 
-            skip_version_check=skip_version_check
+        result = subscription_manager.export_config(
+            export_manager=export_manager
         )
         
-        if not config.success or not config.config or not config.config.get("outbounds"):
-            typer.echo("❌ ERROR: No servers parsed from subscription", err=True)
+        if not result.success:
+            typer.echo(f"❌ {t('cli.error.subscription_processing_failed')}", err=True)
+            for error in result.errors:
+                typer.echo(f"  - {error.message}", err=True)
             raise typer.Exit(1)
-            
-        return config.config
+        
+        return result.config
         
     except Exception as e:
-        typer.echo(f"❌ {t('error.subscription_failed')}: {e}", err=True)
+        typer.echo(f"❌ {t('cli.error.subscription_processing_failed')}: {e}", err=True)
         raise typer.Exit(1)
 
 
@@ -471,7 +469,6 @@ def export(
     backup: bool = typer.Option(False, "--backup", help="Create backup before overwriting existing file"),
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header"),
-    skip_version_check: bool = typer.Option(True, "--skip-version-check", help="Skip sing-box version compatibility check"),
     # Phase 4 enhancements
     profile: str = typer.Option(None, "--profile", help="Profile JSON file for Phase 3 processing configuration"),
     postprocessors: str = typer.Option(None, "--postprocessors", help="Comma-separated list of postprocessors (geo_filter,tag_filter,latency_sort)"),
@@ -501,7 +498,6 @@ def export(
         backup: Create backup before overwriting
         user_agent: Custom User-Agent header
         no_user_agent: Disable User-Agent header
-        skip_version_check: Skip version compatibility check
         profile: Profile JSON file for Phase 3 processing configuration
         postprocessors: Comma-separated list of postprocessors (geo_filter,tag_filter,latency_sort)
         middleware: Comma-separated list of middleware (logging,enrichment)
@@ -596,7 +592,7 @@ def export(
     
     # Generate configuration from subscription
     config_data = _generate_config_from_subscription(
-        url, user_agent, no_user_agent, "singbox", debug, skip_version_check
+        url, user_agent, no_user_agent, "singbox", debug
     )
     
     # Handle dry-run mode

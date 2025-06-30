@@ -320,7 +320,6 @@ class Orchestrator:
                            export_format: str = "singbox",
                            exclusions: Optional[List[str]] = None,
                            user_routes: Optional[List[str]] = None,
-                           skip_version_check: bool = False,
                            **kwargs) -> Dict[str, Any]:
         """Export subscription to client configuration format.
         
@@ -333,7 +332,6 @@ class Orchestrator:
             export_format: Target export format (singbox, clash, etc.).
             exclusions: Optional list of server addresses to exclude.
             user_routes: Optional list of custom routing rules.
-            skip_version_check: Whether to skip version compatibility checks.
             **kwargs: Additional arguments for export customization.
             
         Returns:
@@ -367,8 +365,7 @@ class Orchestrator:
             config = self.export_manager.export(
                 servers=servers_result.config,
                 exclusions=exclusions,
-                user_routes=user_routes_dicts,
-                skip_version_check=skip_version_check
+                user_routes=user_routes_dicts
             )
             
             result = {

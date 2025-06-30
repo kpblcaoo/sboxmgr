@@ -20,7 +20,7 @@ def test_protocol_specific_validator():
         address="example.com",
         port=8388,
         security="aes-256-gcm",
-        meta={"password": "test_password"  # pragma: allowlist secret}  # pragma: allowlist secret
+        meta={"password": "test_password"}  # pragma: allowlist secret
     )
     
     # Test invalid Shadowsocks server (missing password)
@@ -52,7 +52,7 @@ def test_enhanced_required_fields_validator():
         address="example.com",
         port=8388,
         security="aes-256-gcm",
-        meta={"password": "test_password"  # pragma: allowlist secret}  # pragma: allowlist secret
+        meta={"password": "test_password"}  # pragma: allowlist secret
     )
     
     # Test server with missing password
@@ -81,7 +81,7 @@ def test_validate_single_protocol_config():
     valid_config = {
         "server": "example.com",
         "server_port": 8388,
-        "password": "test_password"  # pragma: allowlist secret,
+        "password": "test_password",  # pragma: allowlist secret
         "method": "aes-256-gcm"
     }
     
@@ -122,7 +122,7 @@ def test_protocol_validator_with_real_data():
     # Test with example URI list
     test_data = """
 # Test subscription
-ss://aes-256-gcm:password@example.com:8388#TestSS
+ss://aes-256-gcm:password@example.com:8388#TestSS  # pragma: allowlist secret
 vless://uuid@host:443?encryption=none#TestVLESS
 vmess://eyJ2IjoiMiIsInBzIjoiVGVzdCIsImFkZCI6IjEyNy4wLjAuMSIsInBvcnQiOiI0NDMiLCJpZCI6InV1aWQiLCJhaWQiOiIwIiwibmV0IjoidGNwIiwidHlwZSI6Im5vbmUiLCJob3N0IjoiIiwicGF0aCI6IiIsInRscyI6IiJ9
 """.encode("utf-8")

@@ -61,7 +61,6 @@ def run_orchestrated(
     user_agent: str = typer.Option(None, "--user-agent", help="Custom User-Agent header"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Disable User-Agent"),
     format: str = typer.Option("singbox", "--format", help="Export format"),
-    skip_version_check: bool = typer.Option(True, "--skip-version-check", help="Skip version check"),
     user_routes: str = typer.Option(None, "--user-routes", help="Comma-separated list of route tags to include"),
     exclusions: str = typer.Option(None, "--exclusions", help="Comma-separated list of servers to exclude")
 ):
@@ -76,7 +75,6 @@ def run_orchestrated(
         user_agent: Custom User-Agent header.
         no_user_agent: Disable User-Agent header.
         format: Export format (singbox, clash, v2ray).
-        skip_version_check: Skip version compatibility check.
         user_routes: Comma-separated route tags to include.
         exclusions: Comma-separated servers to exclude.
         
@@ -99,7 +97,6 @@ def run_orchestrated(
             source_url=url,
             source_type="url_base64",
             export_format=format,
-            skip_version_check=skip_version_check,
             user_agent=ua,
             user_routes=user_routes_list,
             exclusions=exclusions_list
@@ -140,14 +137,10 @@ def run_orchestrated(
             import shutil
             shutil.copy2(config_file, backup_file)
         
-        # Restart service
-        try:
-            from sboxmgr.service.manage import manage_service
-            manage_service()
-            if debug >= 1:
-                typer.echo(t("cli.service_restart_completed"))
-        except Exception as e:
-            typer.echo(f"[WARN] Failed to restart service: {e}", err=True)
+        # Note: Service management has been moved to sboxagent
+        # according to ADR-0015. sboxmgr only generates configuration.
+        if debug >= 1:
+            typer.echo("Configuration generated successfully. Use sboxagent to apply and restart service.")
             
     except Exception as e:
         typer.echo(f"{t('cli.error_config_update')}: {e}", err=True)
@@ -206,7 +199,6 @@ def dry_run_orchestrated(
     user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher"),
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header"),
     format: str = typer.Option("singbox", "--format", help="Export format: singbox, clash, v2ray"),
-    skip_version_check: bool = typer.Option(True, "--skip-version-check", help="Skip version compatibility check"),
     user_routes: str = typer.Option(None, "--user-routes", help="Comma-separated list of route tags to include"),
     exclusions: str = typer.Option(None, "--exclusions", help="Comma-separated list of servers to exclude")
 ):
@@ -222,7 +214,6 @@ def dry_run_orchestrated(
         user_agent: Custom User-Agent header.
         no_user_agent: Disable User-Agent header.
         format: Export format for validation.
-        skip_version_check: Skip version compatibility check.
         user_routes: Comma-separated route tags to include.
         exclusions: Comma-separated servers to exclude.
         
@@ -237,7 +228,6 @@ def dry_run_orchestrated(
         user_agent=user_agent,
         no_user_agent=no_user_agent,
         format=format,
-        skip_version_check=skip_version_check,
         user_routes=user_routes,
         exclusions=exclusions
     )

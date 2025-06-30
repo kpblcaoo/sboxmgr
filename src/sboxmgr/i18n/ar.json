@@ -5,7 +5,6 @@
   "cli.dry_run_valid": "اختبار: التكوين صحيح",
   "cli.config_invalid": "التكوين غير صحيح",
   "cli.temp_file_deleted": "تم حذف الملف المؤقت. التكوين الرئيسي لم يتغير، الخدمة لم تعيد التشغيل.",
-  "cli.service_restart_completed": "اكتمل إعادة تشغيل الخدمة.",
   "cli.error_config_update": "خطأ أثناء تحديث التكوين",
   "cli.update_completed": "=== اكتمل التحديث بنجاح ===",
   "error.config_load_failed": "[خطأ] فشل في تحميل التكوين",
@@ -34,5 +33,6 @@
   "cli.interactive.help": "اختيار تفاعلي للخوادم",
   "cli.json.help": "المخرجات بتنسيق JSON",
   "cli.reason.help": "سبب الاستبعاد",
-  "cli.show_excluded.help": "عرض الخوادم المستبعدة في القائمة"
+  "cli.show_excluded.help": "عرض الخوادم المستبعدة في القائمة",
+  "cli.error.subscription_processing_failed": ""
 }

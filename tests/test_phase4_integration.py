@@ -75,8 +75,7 @@ class TestExportManagerPhase4:
             mock_registry.__getitem__ = Mock(return_value=mock_export_func)
             mock_registry.get = Mock(return_value=mock_export_func)
             
-            # Skip version check to avoid sing-box detection issues
-            result = export_mgr.export(SAMPLE_SERVERS, skip_version_check=True)
+            result = export_mgr.export(SAMPLE_SERVERS)
             
             # Verify export was called with filtered servers
             mock_export_func.assert_called_once()
@@ -109,7 +108,7 @@ class TestExportManagerPhase4:
         
         with patch('sboxmgr.export.export_manager.EXPORTER_REGISTRY', {'singbox': mock_singbox_export}):
             context = PipelineContext(mode="test")
-            result = export_mgr.export(SAMPLE_SERVERS, context=context, skip_version_check=True)
+            result = export_mgr.export(SAMPLE_SERVERS, context=context)
 
             # Verify export was called
             mock_singbox_export.assert_called_once()
@@ -141,7 +140,7 @@ class TestExportManagerPhase4:
             
             with patch('sboxmgr.export.export_manager.EXPORTER_REGISTRY', {'singbox': mock_singbox_export}):
                 context = PipelineContext(mode="test")
-                result = export_mgr.export(SAMPLE_SERVERS, context=context, skip_version_check=True)
+                result = export_mgr.export(SAMPLE_SERVERS, context=context)
 
                 # Verify export was called
                 mock_singbox_export.assert_called_once()
@@ -303,7 +302,7 @@ class TestPhase4ErrorHandling:
         
         with patch('sboxmgr.export.export_manager.EXPORTER_REGISTRY', {'singbox': mock_singbox_export}):
             # Should not raise exception, should continue with unprocessed servers
-            result = export_mgr.export(SAMPLE_SERVERS, skip_version_check=True)
+            result = export_mgr.export(SAMPLE_SERVERS)
 
             # Verify export was still called
             mock_singbox_export.assert_called_once()
@@ -333,7 +332,7 @@ class TestPhase4ErrorHandling:
         
         with patch('sboxmgr.export.export_manager.EXPORTER_REGISTRY', {'singbox': mock_singbox_export}):
             # Should not raise exception, should continue processing
-            result = export_mgr.export(SAMPLE_SERVERS, skip_version_check=True)
+            result = export_mgr.export(SAMPLE_SERVERS)
 
             # Verify export was still called
             mock_singbox_export.assert_called_once()
@@ -374,11 +373,133 @@ class TestPhase4EndToEnd:
             
             with patch('sboxmgr.export.export_manager.EXPORTER_REGISTRY', {'singbox': mock_singbox_export}):
                 context = PipelineContext(mode="integration_test")
-                result = export_mgr.export(SAMPLE_SERVERS, context=context, skip_version_check=True)
+                result = export_mgr.export(SAMPLE_SERVERS, context=context)
 
                 # Verify pipeline executed
                 assert result is not None
                 mock_singbox_export.assert_called_once()
                 
         except ImportError:
-            pytest.skip("Full Phase 3 components not available") 
+            pytest.skip("Full Phase 3 components not available")
+
+    def test_export_manager_basic_export():
+        """Test basic export functionality."""
+        export_mgr = ExportManager()
+        
+        result = export_mgr.export(SAMPLE_SERVERS)
+        
+        assert isinstance(result, dict)
+        assert "log" in result
+        assert "inbounds" in result
+        assert "outbounds" in result
+        assert "route" in result
+
+
+    def test_export_manager_with_context():
+        """Test export with pipeline context."""
+        export_mgr = ExportManager()
+        context = PipelineContext(mode="test")
+        
+        result = export_mgr.export(SAMPLE_SERVERS, context=context)
+        
+        assert isinstance(result, dict)
+        assert "log" in result
+        assert "inbounds" in result
+        assert "outbounds" in result
+        assert "route" in result
+
+
+    def test_export_manager_with_client_profile():
+        """Test export with client profile."""
+        export_mgr = ExportManager()
+        context = PipelineContext(mode="test")
+        client_profile = ClientProfile(
+            inbounds=[
+                InboundProfile(
+                    type="tun",
+                    tag="tun-in",
+                    interface_name="tun0",
+                    network="10.0.0.1/30",
+                    mtu=9000
+                )
+            ]
+        )
+        
+        result = export_mgr.export(SAMPLE_SERVERS, context=context, client_profile=client_profile)
+        
+        assert isinstance(result, dict)
+        assert "log" in result
+        assert "inbounds" in result
+        assert "outbounds" in result
+        assert "route" in result
+        
+        # Check that inbounds were generated from client profile
+        inbounds = result["inbounds"]
+        assert len(inbounds) > 0
+        assert any(inb.get("type") == "tun" for inb in inbounds)
+
+
+    def test_export_manager_with_routing_plugin():
+        """Test export with custom routing plugin."""
+        class TestRoutingPlugin(BaseRoutingPlugin):
+            def generate_routes(self, servers, context, client_profile=None):
+                return [
+                    {
+                        "domain": ["example.com"],
+                        "outbound": "direct"
+                    }
+                ]
+        
+        routing_plugin = TestRoutingPlugin()
+        export_mgr = ExportManager(routing_plugin=routing_plugin)
+        
+        result = export_mgr.export(SAMPLE_SERVERS)
+        
+        assert isinstance(result, dict)
+        assert "route" in result
+        assert "rules" in result["route"]
+        
+        # Check that custom routing rules were applied
+        rules = result["route"]["rules"]
+        assert len(rules) > 0
+        assert any(rule.get("domain") == ["example.com"] for rule in rules)
+
+
+    def test_export_manager_with_exclusions():
+        """Test export with server exclusions."""
+        export_mgr = ExportManager()
+        
+        # Exclude servers with specific addresses
+        exclusions = ["1.1.1.1", "2.2.2.2"]
+        
+        result = export_mgr.export(SAMPLE_SERVERS, exclusions=exclusions)
+        
+        assert isinstance(result, dict)
+        assert "outbounds" in result
+        
+        # Check that excluded servers are not in outbounds
+        outbounds = result["outbounds"]
+        for outbound in outbounds:
+            if "server" in outbound:
+                assert outbound["server"] not in exclusions
+
+
+    def test_export_manager_with_user_routes():
+        """Test export with user-defined routing rules."""
+        export_mgr = ExportManager()
+        context = PipelineContext(mode="test")
+        
+        user_routes = [
+            {"domain": ["google.com"], "outbound": "proxy"},
+            {"ip_cidr": ["8.8.8.8/32"], "outbound": "direct"}
+        ]
+        
+        result = export_mgr.export(SAMPLE_SERVERS, user_routes=user_routes, context=context)
+        
+        assert isinstance(result, dict)
+        assert "route" in result
+        assert "rules" in result["route"]
+        
+        # Check that user routes were applied
+        rules = result["route"]["rules"]
+        assert len(rules) >= len(user_routes) 

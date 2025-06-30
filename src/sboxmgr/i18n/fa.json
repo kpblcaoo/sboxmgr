@@ -5,7 +5,6 @@
   "cli.dry_run_valid": "تست: پیکربندی معتبر است",
   "cli.config_invalid": "پیکربندی نامعتبر است",
   "cli.temp_file_deleted": "فایل موقت حذف شد. پیکربندی اصلی تغییر نکرد، سرویس مجدداً راه‌اندازی نشد.",
-  "cli.service_restart_completed": "راه‌اندازی مجدد سرویس تکمیل شد.",
   "cli.error_config_update": "خطا در به‌روزرسانی پیکربندی",
   "cli.update_completed": "=== به‌روزرسانی با موفقیت تکمیل شد ===",
   "error.config_load_failed": "[خطا] بارگذاری پیکربندی ناموفق بود",
@@ -34,5 +33,6 @@
   "cli.interactive.help": "انتخاب تعاملی سرور",
   "cli.json.help": "خروجی در فرمت JSON",
   "cli.reason.help": "دلیل استثنا",
-  "cli.show_excluded.help": "نمایش سرورهای مستثنی در فهرست"
+  "cli.show_excluded.help": "نمایش سرورهای مستثنی در فهرست",
+  "cli.error.subscription_processing_failed": ""
 }

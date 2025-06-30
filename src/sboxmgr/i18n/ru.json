@@ -5,7 +5,6 @@
   "cli.dry_run_valid": "Проверка: конфиг корректен",
   "cli.config_invalid": "Конфиг некорректен",
   "cli.temp_file_deleted": "Временный файл удален. Основной конфиг не изменен, сервис не перезапущен.",
-  "cli.service_restart_completed": "Перезапуск сервиса завершен.",
   "cli.error_config_update": "Ошибка при обновлении конфига",
   "cli.update_completed": "=== Обновление успешно завершено ===",
   "error.config_load_failed": "[Ошибка] Не удалось загрузить конфиг",
@@ -46,5 +45,6 @@
   "cli.success.postprocessor_added": "Добавлен постпроцессор: {name}",
   "cli.success.middleware_added": "Добавлено middleware: {name}",
   "cli.success.profile_loaded": "Профиль загружен: {path}",
-  "cli.success.profile_generated": "Профиль создан: {path}"
+  "cli.success.profile_generated": "Профиль создан: {path}",
+  "cli.error.subscription_processing_failed": ""
 }

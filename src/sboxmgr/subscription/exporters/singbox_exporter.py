@@ -11,7 +11,6 @@ from typing import List, Optional, Dict, Any, Callable
 from ..models import ParsedServer, ClientProfile
 from ..base_exporter import BaseExporter
 from ..registry import register
-from ...utils.version import should_use_legacy_outbounds
 
 logger = logging.getLogger(__name__)
 
@@ -313,12 +312,11 @@ def _process_single_server(server: ParsedServer) -> Optional[Dict[str, Any]]:
     return _process_standard_server(server, protocol_type)
 
 
-def _add_special_outbounds(outbounds: List[Dict[str, Any]], use_legacy: bool) -> None:
+def _add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
     """Добавляет специальные outbounds (direct, block, dns-out).
     
     Args:
         outbounds (List[Dict[str, Any]]): Список outbounds для модификации.
-        use_legacy (bool): Использовать ли legacy режим.
     """
     tags = {o.get("tag") for o in outbounds}
     if "direct" not in tags:
@@ -332,38 +330,23 @@ def _add_special_outbounds(outbounds: List[Dict[str, Any]], use_legacy: bool) ->
 def singbox_export(
     servers: List[ParsedServer],
     routes,
-    client_profile: Optional[ClientProfile] = None,
-    singbox_version: Optional[str] = None,
-    skip_version_check: bool = False
+    client_profile: Optional[ClientProfile] = None
 ) -> dict:
     """Export parsed servers to sing-box configuration format.
     
     Converts a list of parsed server configurations into a complete sing-box
     configuration with outbounds, routing rules, and optional inbound profiles.
-    Supports version compatibility checks and legacy outbound generation.
     
     Args:
         servers: List of ParsedServer objects to export.
         routes: Routing rules configuration.
         client_profile: Optional client profile for inbound generation.
-        singbox_version: Optional sing-box version for compatibility checks.
-        skip_version_check: Whether to skip version compatibility validation.
         
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
-        
-    Note:
-        Automatically adds special outbounds (direct, block, dns-out) based
-        on version compatibility. Supports legacy mode for sing-box < 1.11.0.
     """
     outbounds = []
-    
-    # Определяем нужно ли использовать legacy outbounds
-    use_legacy = False if skip_version_check else should_use_legacy_outbounds(singbox_version)
-    
-    if use_legacy and singbox_version:
-        logger.warning(f"Using legacy outbounds for sing-box {singbox_version} compatibility")
     
     # Обрабатываем каждый сервер
     for server in servers:
@@ -372,7 +355,7 @@ def singbox_export(
             outbounds.append(outbound)
     
     # Добавляем специальные outbounds
-    _add_special_outbounds(outbounds, use_legacy)
+    _add_special_outbounds(outbounds)
     
     # Формируем финальную конфигурацию
     config = {

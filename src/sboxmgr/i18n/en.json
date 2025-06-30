@@ -5,7 +5,6 @@
   "cli.dry_run_valid": "Dry run: config is valid",
   "cli.config_invalid": "Config is invalid",
   "cli.temp_file_deleted": "Temporary file deleted. Main config not changed, service not restarted.",
-  "cli.service_restart_completed": "Service restart completed.",
   "cli.error_config_update": "Error during config update",
   "cli.update_completed": "=== Update completed successfully ===",
   "error.config_load_failed": "[Error] Failed to load config",
@@ -46,5 +45,6 @@
   "cli.success.postprocessor_added": "Added postprocessor: {name}",
   "cli.success.middleware_added": "Added middleware: {name}",
   "cli.success.profile_loaded": "Profile loaded: {path}",
-  "cli.success.profile_generated": "Profile generated: {path}"
+  "cli.success.profile_generated": "Profile generated: {path}",
+  "cli.error.subscription_processing_failed": "cli.error.subscription_processing_failed"
 }

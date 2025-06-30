@@ -5,7 +5,6 @@
   "cli.dry_run_valid": "Dry run : configuration valide",
   "cli.config_invalid": "Configuration invalide",
   "cli.temp_file_deleted": "Fichier temporaire supprimé. Configuration principale non modifiée, service non redémarré.",
-  "cli.service_restart_completed": "Redémarrage du service terminé.",
   "cli.error_config_update": "Erreur lors de la mise à jour de la configuration",
   "cli.update_completed": "=== Mise à jour terminée avec succès ===",
   "error.config_load_failed": "[Erreur] Échec du chargement de la configuration",
@@ -34,5 +33,6 @@
   "cli.interactive.help": "Sélection interactive de serveurs",
   "cli.json.help": "Sortie au format JSON",
   "cli.reason.help": "Raison de l'exclusion",
-  "cli.show_excluded.help": "Afficher les serveurs exclus dans la liste"
+  "cli.show_excluded.help": "Afficher les serveurs exclus dans la liste",
+  "cli.error.subscription_processing_failed": ""
 }

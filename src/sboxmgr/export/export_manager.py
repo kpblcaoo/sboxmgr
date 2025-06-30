@@ -17,11 +17,12 @@ from sboxmgr.subscription.models import ParsedServer, ClientProfile, PipelineCon
 from sboxmgr.profiles.models import FullProfile
 from .routing.default_router import DefaultRouter
 from sboxmgr.subscription.exporters.singbox_exporter import singbox_export
+from sboxmgr.subscription.exporters.clashexporter import clash_export
 
 # Import Phase 3 components
 try:
     from sboxmgr.subscription.postprocessors import PostProcessorChain
-    from sboxmgr.subscription.middleware.base import BaseMiddleware
+    from sboxmgr.subscription.middleware import BaseMiddleware
     PHASE3_AVAILABLE = True
 except ImportError:
     PHASE3_AVAILABLE = False
@@ -30,7 +31,8 @@ except ImportError:
 
 EXPORTER_REGISTRY = {
     "singbox": singbox_export,
-    # В будущем: "clash": clash_export, "v2ray": v2ray_export и т.д.
+    "clash": clash_export,
+    # В будущем: "v2ray": v2ray_export и т.д.
 }
 
 class ExportManager:
@@ -87,134 +89,86 @@ class ExportManager:
                user_routes: List[Dict] = None, 
                context: Union[Dict[str, Any], PipelineContext] = None, 
                client_profile: Optional[ClientProfile] = None, 
-               skip_version_check: bool = False,
                profile: Optional[FullProfile] = None) -> Dict:
-        """Export configuration with Phase 3 processing pipeline integration.
-
-        Processes the server list through middleware enrichment, postprocessor
-        filtering/enhancement, routing rule generation, and format-specific export
-        with client profile customization and version compatibility handling.
-
-        Phase 4 processing pipeline:
-        1. Middleware processing (enrichment, logging)
-        2. Exclusion filtering (backward compatibility)
-        3. PostProcessor chain processing (geo filter, tag filter, latency sort)
-        4. Routing rule generation
-        5. Format-specific export
-
+        """Export servers to configuration format with optional Phase 3 processing.
+        
         Args:
-            servers: List of parsed server configurations to export.
-            exclusions: Optional list of server addresses to exclude.
-            user_routes: Optional list of custom routing rules.
-            context: Optional context dictionary or PipelineContext for export.
-            client_profile: Optional client profile override.
-            skip_version_check: Whether to skip version compatibility checks.
-            profile: Optional FullProfile for profile-based processing.
-
-        Returns:
-            Dictionary containing the final client configuration in the
-            specified export format with Phase 3 enhancements applied.
+            servers: List of server configurations to export.
+            exclusions: List of server identifiers to exclude.
+            user_routes: Optional user-defined routing rules.
+            context: Pipeline context or dictionary with context data.
+            client_profile: Optional client configuration profile.
+            profile: Optional profile for processing.
             
-        Raises:
-            ValueError: If the export format is unknown or unsupported.
+        Returns:
+            Dictionary containing exported configuration.
         """
-        exclusions = exclusions or []
-        user_routes = user_routes or []
-        
-        # Normalize context to PipelineContext
+        # Convert context to PipelineContext if needed
         if isinstance(context, dict):
-            pipeline_context = PipelineContext(
-                mode=context.get("mode", "default"),
-                debug_level=context.get("debug_level", 0),
-                source=context.get("source", "export_manager"),
-                metadata=context
-            )
-        elif isinstance(context, PipelineContext):
-            pipeline_context = context
-        else:
-            pipeline_context = PipelineContext(mode="default")
+            context = PipelineContext(**context)
+        elif context is None:
+            context = PipelineContext(mode="direct_export")
         
-        # Use provided profile or instance profile
+        # Apply exclusions
+        filtered_servers = servers
+        if exclusions:
+            filtered_servers = [s for s in servers if not any(ex in str(s) for ex in exclusions)]
+        
+        # Get routing rules
+        routes = user_routes or []
+        if self.routing_plugin:
+            try:
+                routes = self.routing_plugin.generate_routes(
+                    filtered_servers, 
+                    context, 
+                    client_profile or self.client_profile
+                )
+            except Exception as e:
+                logger.warning(f"Routing plugin failed: {e}")
+                routes = []
+        
+        # Apply Phase 3 processing if available
+        processed_servers = filtered_servers
         active_profile = profile or self.profile
-        client_profile = client_profile or self.client_profile
         
-        # Phase 4 Processing Pipeline
-        processed_servers = servers
-        
-        # Step 1: Middleware Processing (Phase 3 enhancement)
-        if PHASE3_AVAILABLE and self.middleware_chain:
-            for middleware in self.middleware_chain:
+        if PHASE3_AVAILABLE:
+            # Apply middleware
+            if self.middleware_chain:
+                for middleware in self.middleware_chain:
+                    try:
+                        processed_servers = middleware.process(
+                            processed_servers, 
+                            context, 
+                            active_profile
+                        )
+                    except Exception as e:
+                        logger.warning(f"Middleware {middleware.__class__.__name__} failed: {e}")
+            
+            # Apply postprocessor chain
+            if self.postprocessor_chain:
                 try:
-                    processed_servers = middleware.process(
+                    processed_servers = self.postprocessor_chain.process(
                         processed_servers, 
-                        pipeline_context, 
+                        context, 
                         active_profile
                     )
                 except Exception as e:
-                    # Log error but continue processing
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.warning(f"Middleware {middleware.__class__.__name__} failed: {e}")
+                    logger.warning(f"PostProcessor chain failed: {e}")
         
-        # Step 2: Exclusion Filtering (backward compatibility)
-        filtered_servers = [s for s in processed_servers if s.address not in exclusions]
-        
-        # Step 3: PostProcessor Chain Processing (Phase 3 enhancement)
-        if PHASE3_AVAILABLE and self.postprocessor_chain:
-            try:
-                filtered_servers = self.postprocessor_chain.process(
-                    filtered_servers, 
-                    pipeline_context, 
-                    active_profile
-                )
-            except Exception as e:
-                # Log error but continue with unprocessed servers
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.warning(f"PostProcessor chain failed: {e}")
-        
-        # Step 4: Generate routing rules
-        routes = self.routing_plugin.generate_routes(
-            filtered_servers, exclusions, user_routes, pipeline_context.metadata
-        )
-        
-        # Step 5: Format-specific export
-        exporter = EXPORTER_REGISTRY.get(self.export_format)
-        if not exporter:
-            raise ValueError(f"Unknown export format: {self.export_format}")
-        
-        # Export with version compatibility handling
+        # Export with format-specific handling
         if self.export_format == "singbox":
-            # Version checking for sing-box format
-            singbox_version = None
-            if not skip_version_check:
-                from sboxmgr.utils.version import check_version_compatibility, get_version_warning_message
-                import typer
-                
-                is_compatible, singbox_version, message = check_version_compatibility()
-                if singbox_version:
-                    if not is_compatible:
-                        typer.echo(f"⚠️  {get_version_warning_message(singbox_version)}", err=True)
-                        typer.echo("⚠️  Используется режим совместимости с legacy outbounds", err=True)
-                    typer.echo(f"🔧 Detected sing-box version: {singbox_version}")
-                else:
-                    typer.echo("⚠️  Не удалось определить версию sing-box. Продолжаем с современным синтаксисом.", err=True)
-            
-            return exporter(
-                filtered_servers, 
+            return singbox_export(
+                processed_servers, 
                 routes, 
-                client_profile=client_profile, 
-                singbox_version=singbox_version, 
-                skip_version_check=skip_version_check
+                client_profile=client_profile or self.client_profile
             )
         else:
-            return exporter(filtered_servers, routes)
+            return clash_export(processed_servers, routes)
     
     def export_to_singbox(self, 
                          servers: List[ParsedServer], 
                          routes: List[Dict] = None, 
                          client_profile: Optional[ClientProfile] = None, 
-                         singbox_version: Optional[str] = None,
                          apply_phase3_processing: bool = True,
                          context: Optional[PipelineContext] = None,
                          profile: Optional[FullProfile] = None) -> Dict:
@@ -228,7 +182,6 @@ class ExportManager:
             servers: List of server configurations to export.
             routes: Optional pre-prepared routing rules.
             client_profile: Optional client configuration profile.
-            singbox_version: Optional sing-box version for compatibility.
             apply_phase3_processing: Whether to apply Phase 3 processing.
             context: Optional pipeline context.
             profile: Optional profile for processing.
@@ -275,8 +228,7 @@ class ExportManager:
         return singbox_export(
             processed_servers, 
             routes, 
-            client_profile=client_profile, 
-            singbox_version=singbox_version
+            client_profile=client_profile
         )
     
     def configure_from_profile(self, profile: FullProfile) -> 'ExportManager':

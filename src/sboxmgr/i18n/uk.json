@@ -5,7 +5,6 @@
   "cli.dry_run_valid": "Перевірка: конфіг коректний",
   "cli.config_invalid": "Конфіг некоректний",
   "cli.temp_file_deleted": "Тимчасовий файл видалено. Основний конфіг не змінено, сервіс не перезапущено.",
-  "cli.service_restart_completed": "Перезапуск сервісу завершено.",
   "cli.error_config_update": "Помилка при оновленні конфігу",
   "cli.update_completed": "=== Оновлення успішно завершено ===",
   "error.config_load_failed": "[Помилка] Не вдалося завантажити конфіг",
@@ -34,5 +33,6 @@
   "cli.interactive.help": "Інтерактивний вибір серверів",
   "cli.json.help": "Вивід у форматі JSON",
   "cli.reason.help": "Причина виключення",
-  "cli.show_excluded.help": "Показати виключені сервери в списку"
+  "cli.show_excluded.help": "Показати виключені сервери в списку",
+  "cli.error.subscription_processing_failed": ""
 }
