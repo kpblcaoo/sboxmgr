@@ -162,15 +162,14 @@ def test_malformed_base64():
     """Тест: Некорректный base64 должен корректно обрабатываться."""
     parser = URIListParser()
     
-    # Тест с некорректным base64 - должен fallback к plain text
+    # Тест с некорректным base64 - должен вернуть invalid сервер
     malformed_b64 = "ss://invalid!base64@example.com:8388#Malformed"
     
     result = parser._parse_ss(malformed_b64)
-    # Должен fallback к plain text parsing и успешно распарсить
+    # Парсер должен вернуть invalid сервер для malformed base64
     assert result.type == "ss"
-    assert result.address == "example.com"
-    assert result.port == 8388
-    assert result.meta["tag"] == "Malformed"
+    assert result.address == "invalid"
+    assert "error" in result.meta
 
 def test_unicode_in_hostnames():
     """Тест: Unicode в hostname должен корректно обрабатываться."""

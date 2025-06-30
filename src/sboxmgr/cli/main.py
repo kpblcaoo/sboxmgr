@@ -21,6 +21,7 @@ from sboxmgr.cli.commands.subscription import list_servers as subscription_list_
 from sboxmgr.cli.commands.exclusions import exclusions
 from sboxmgr.cli.commands.export import export
 from sboxmgr.cli.commands.profile import app as profile_app
+from sboxmgr.cli.commands.policy import app as policy_app
 
 load_dotenv()
 
@@ -179,6 +180,9 @@ app.command("export", help="Export configurations in standardized formats")(expo
 
 # Регистрируем команды профилей
 app.add_typer(profile_app)
+
+# Регистрируем команды политик
+app.add_typer(policy_app)
 
 if __name__ == "__main__":
     app() 

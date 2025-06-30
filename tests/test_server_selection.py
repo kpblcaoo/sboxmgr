@@ -479,12 +479,12 @@ class TestListServersIntegration:
             assert not any("http" in call for call in echo_calls)
 
         with patch('sboxmgr.server.selection.load_exclusions', return_value={"exclusions": []}), \
-             patch('sboxmgr.server.selection.generate_server_id', return_value="id1"), \
+             patch('sboxmgr.server.selection.generate_server_id') as mock_gen_id, \
              patch('logging.info') as mock_log:
             
             # Test with empty exclusions
             list_servers(json_data, supported_protocols)
             
-            # Should have called generate_server_id for each server
-            assert mock_gen_id.call_count == 2
+            # Should have called generate_server_id for each supported server (3 servers)
+            assert mock_gen_id.call_count == 3
             mock_log.assert_called() 

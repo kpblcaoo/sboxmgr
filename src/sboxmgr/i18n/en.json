@@ -34,5 +34,17 @@
   "cli.interactive.help": "Interactive server selection",
   "cli.json.help": "Output in JSON format",
   "cli.reason.help": "Reason for exclusion",
-  "cli.show_excluded.help": "Show excluded servers in list"
+  "cli.show_excluded.help": "Show excluded servers in list",
+  "cli.error.unknown_postprocessors": "Unknown postprocessors: {invalid}",
+  "cli.error.available_postprocessors": "Available postprocessors: {available}",
+  "cli.error.unknown_middleware": "Unknown middleware: {invalid}",
+  "cli.error.available_middleware": "Available middleware: {available}",
+  "cli.error.profile_not_found": "Profile file not found: {path}",
+  "cli.error.profile_validation_failed": "Profile validation failed",
+  "cli.error.failed_to_load_profile": "Failed to load profile: {error}",
+  "cli.error.subscription_url_required": "Subscription URL is required (use -u/--url)",
+  "cli.success.postprocessor_added": "Added postprocessor: {name}",
+  "cli.success.middleware_added": "Added middleware: {name}",
+  "cli.success.profile_loaded": "Profile loaded: {path}",
+  "cli.success.profile_generated": "Profile generated: {path}"
 }

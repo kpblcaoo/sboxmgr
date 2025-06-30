@@ -7,30 +7,21 @@ def test_list_servers_filters_service_outbounds(monkeypatch):
     """Тестирует, что команда list-servers фильтрует служебные outbounds."""
     runner = CliRunner()
 
-    # Мокаем SubscriptionManager так, чтобы его конструктор возвращал объект с нужным методом
-    class MockConfig:
-        def __init__(self):
-            self.config = {
-                "outbounds": [
-                    # Реальные серверы
-                    {"type": "shadowsocks", "tag": "ss-server", "server": "127.0.0.1", "server_port": 80},
-                    {"type": "vmess", "tag": "vmess-server", "server": "example.com", "server_port": 443},
-                    # Служебные outbounds (должны быть отфильтрованы)
-                    {"type": "direct", "tag": "direct"},
-                    {"type": "block", "tag": "block"},
-                    {"type": "dns", "tag": "dns-out"},
-                ]
-            }
-        def __bool__(self):
-            return True
+    # Мокаем _generate_config_from_subscription в модуле export
+    def mock_generate_config(*args, **kwargs):
+        return {
+            "outbounds": [
+                # Реальные серверы
+                {"type": "shadowsocks", "tag": "ss-server", "server": "127.0.0.1", "server_port": 80},
+                {"type": "vmess", "tag": "vmess-server", "server": "example.com", "server_port": 443},
+                # Служебные outbounds (должны быть отфильтрованы)
+                {"type": "direct", "tag": "direct"},
+                {"type": "block", "tag": "block"},
+                {"type": "dns", "tag": "dns-out"},
+            ]
+        }
 
-    class MockSubscriptionManager:
-        def __init__(self, *args, **kwargs):
-            pass
-        def export_config(self, *args, **kwargs):
-            return MockConfig()
-
-    monkeypatch.setattr("sboxmgr.subscription.manager.SubscriptionManager", MockSubscriptionManager)
+    monkeypatch.setattr("sboxmgr.cli.commands.export._generate_config_from_subscription", mock_generate_config)
 
     # Также мокаем load_exclusions чтобы избежать ошибок
     def mock_load_exclusions(*args, **kwargs):

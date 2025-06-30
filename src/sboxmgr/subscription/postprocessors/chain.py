@@ -88,8 +88,9 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             return servers
         
         # Initialize execution metadata
+        import time
         self._execution_metadata = {
-            'start_time': asyncio.get_event_loop().time() if hasattr(asyncio, 'get_event_loop') else 0,
+            'start_time': time.time(),
             'processors_executed': [],
             'processors_failed': [],
             'processors_skipped': [],
@@ -120,7 +121,8 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                 # Return original servers on error
                 return servers
         finally:
-            self._execution_metadata['end_time'] = asyncio.get_event_loop().time() if hasattr(asyncio, 'get_event_loop') else 0
+            import time
+            self._execution_metadata['end_time'] = time.time()
             self._execution_metadata['duration'] = (
                 self._execution_metadata.get('end_time', 0) - 
                 self._execution_metadata.get('start_time', 0)

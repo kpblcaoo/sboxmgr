@@ -34,5 +34,17 @@
   "cli.interactive.help": "Интерактивный выбор серверов",
   "cli.json.help": "Вывод в формате JSON",
   "cli.reason.help": "Причина исключения",
-  "cli.show_excluded.help": "Показать исключенные серверы в списке"
+  "cli.show_excluded.help": "Показать исключенные серверы в списке",
+  "cli.error.unknown_postprocessors": "Неизвестные постпроцессоры: {invalid}",
+  "cli.error.available_postprocessors": "Доступные постпроцессоры: {available}",
+  "cli.error.unknown_middleware": "Неизвестное middleware: {invalid}",
+  "cli.error.available_middleware": "Доступное middleware: {available}",
+  "cli.error.profile_not_found": "Файл профиля не найден: {path}",
+  "cli.error.profile_validation_failed": "Ошибка валидации профиля",
+  "cli.error.failed_to_load_profile": "Не удалось загрузить профиль: {error}",
+  "cli.error.subscription_url_required": "Требуется URL подписки (используйте -u/--url)",
+  "cli.success.postprocessor_added": "Добавлен постпроцессор: {name}",
+  "cli.success.middleware_added": "Добавлено middleware: {name}",
+  "cli.success.profile_loaded": "Профиль загружен: {path}",
+  "cli.success.profile_generated": "Профиль создан: {path}"
 }

@@ -221,11 +221,12 @@ class TestEnvironmentVariables:
         # Test that when SBOXMGR_LOG_FILE is NOT set, directory logic is called
         with patch.dict(os.environ, {}, clear=True):
             with patch.object(Path, 'home') as mock_home:
-                with patch.object(Path, 'touch'):
-                    with patch.object(Path, 'unlink'):
-                        mock_home.return_value = Path("/home/user")
-                        
-                        get_log_file()
-                        
-                        # mkdir SHOULD be called when env var is not set
-                        mock_mkdir.assert_called_once() 
+                with patch.object(Path, 'mkdir') as mock_mkdir:
+                    with patch.object(Path, 'touch'):
+                        with patch.object(Path, 'unlink'):
+                            mock_home.return_value = Path("/home/user")
+                            
+                            get_log_file()
+                            
+                            # mkdir SHOULD be called when env var is not set
+                            mock_mkdir.assert_called_once() 

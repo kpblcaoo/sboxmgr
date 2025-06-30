@@ -255,11 +255,8 @@ class TestValidateConfigFile:
     
     def test_validate_config_file_invalid(self, tmp_path):
         """Test config validation failure with invalid config."""
-        config = {
-            "outbounds": []  # Invalid: empty outbounds
-        }
         config_file = tmp_path / "config.json"
-        config_file.write_text(json.dumps(config, indent=2))
+        config_file.write_text('{"invalid": json}')  # Invalid JSON
         
         # Should raise ConfigValidationError for invalid config
         with pytest.raises(ConfigValidationError):

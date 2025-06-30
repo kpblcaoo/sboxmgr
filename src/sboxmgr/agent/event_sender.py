@@ -325,7 +325,7 @@ class EventSender:
         message = {
             "id": str(uuid.uuid4()),
             "type": "event",
-            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
             "event": {
                 "event_type": event_type,
                 "source": source,
@@ -347,7 +347,7 @@ class EventSender:
         message = {
             "id": str(uuid.uuid4()),
             "type": "command",
-            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
             "command": {
                 "command": command,
                 "params": params
@@ -367,7 +367,7 @@ class EventSender:
         message: Dict[str, Any] = {
             "id": str(uuid.uuid4()),
             "type": "heartbeat",
-            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
             "heartbeat": {
                 "agent_id": agent_id,
                 "status": status

@@ -39,6 +39,19 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
     """
     # Декодируем данные
     text = raw.decode('utf-8', errors='ignore')
+    
+    # Если source_type явно указан, используем соответствующий парсер
+    if source_type == "url_json" or source_type == "file_json":
+        from .parsers.singbox_parser import SingBoxParser
+        return SingBoxParser()
+    elif source_type == "url_base64" or source_type == "file_base64":
+        from .parsers.base64_parser import Base64Parser
+        return Base64Parser()
+    elif source_type == "uri_list" or source_type == "file_uri_list":
+        from .parsers.uri_list_parser import URIListParser
+        return URIListParser()
+    
+    # Автоопределение по содержимому (fallback)
     # 1. Пробуем JSON (SingBox)
     try:
         from .parsers.singbox_parser import SingBoxParser
@@ -364,6 +377,80 @@ class SubscriptionManager:
             context.metadata['errors'].append(err)
             return servers, False
     
+    def _apply_policies(self, servers: list, context: PipelineContext) -> list:
+        """Apply security and policy engine to each server.
+        
+        Args:
+            servers: List of ParsedServer objects.
+            context: PipelineContext for tracing and audit.
+        Returns:
+            List of servers that passed all DENY policies.
+        """
+        from sboxmgr.policies import policy_registry, PolicyContext as PolCtx, PolicySeverity
+        result = []
+        # Prepare metadata containers
+        context.metadata.setdefault("policy_violations", [])
+        context.metadata.setdefault("policy_warnings", [])
+        context.metadata.setdefault("policy_info", [])
+        
+        for s in servers:
+            pol_ctx = PolCtx(server=s, profile=getattr(context, 'profile', None), user=getattr(context, 'user', None), env=getattr(context, 'env', {}))
+            
+            try:
+                # Use evaluate_all() to get comprehensive results
+                evaluation_result = policy_registry.evaluate_all(pol_ctx)
+                
+                # Get server identifier consistently
+                server_id = pol_ctx.get_server_identifier()
+                
+                # Process all results
+                if evaluation_result.has_denials:
+                    # Server is denied - add all denials to violations
+                    for denial in evaluation_result.denials:
+                        context.metadata["policy_violations"].append({
+                            "server": server_id,
+                            "policy": denial.policy_name,
+                            "reason": denial.reason,
+                            "metadata": denial.metadata
+                        })
+                    continue  # Exclude server
+                
+                # Server is allowed - add warnings and info
+                if evaluation_result.has_warnings:
+                    for warning in evaluation_result.warnings:
+                        context.metadata["policy_warnings"].append({
+                            "server": server_id,
+                            "policy": warning.policy_name,
+                            "reason": warning.reason,
+                            "metadata": warning.metadata
+                        })
+                
+                for info_result in evaluation_result.info_results:
+                    context.metadata["policy_info"].append({
+                        "server": server_id,
+                        "policy": info_result.policy_name,
+                        "reason": info_result.reason,
+                        "metadata": info_result.metadata
+                    })
+                
+                # Add server to result if allowed
+                if evaluation_result.is_allowed:
+                    result.append(s)
+                    
+            except Exception as e:
+                # Fail-secure: treat as DENY
+                from sboxmgr.policies.base import PolicyResult, PolicySeverity
+                server_id = pol_ctx.get_server_identifier()
+                context.metadata["policy_violations"].append({
+                    "server": server_id,
+                    "policy": "system",
+                    "reason": f"Policy evaluation error: {e}",
+                    "metadata": {"error_type": "system_exception"}
+                })
+                continue  # Exclude server
+        
+        return result
+    
     def _process_middleware(self, servers: list, context: PipelineContext) -> tuple[list, bool]:
         """Process servers through middleware chain.
         
@@ -500,7 +587,10 @@ class SubscriptionManager:
             servers, success = self._validate_parsed_servers(servers, context)
             if not success:
                 return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
-            
+
+            # Stage 3.5: Apply policies (security, geo, profile, etc.)
+            servers = self._apply_policies(servers, context)
+
             # Stage 4: Process middleware
             servers, success = self._process_middleware(servers, context)
             if not success:
@@ -511,7 +601,8 @@ class SubscriptionManager:
             # Stage 5: Post-process and select
             servers, success = self._postprocess_and_select(servers, user_routes, exclusions, mode)
             
-            # Create successful result
+            # Create successful result - even if all servers were blocked by policies
+            # This is not a pipeline failure, but a policy decision
             result = PipelineResult(config=servers, context=context, errors=context.metadata['errors'], success=True)
             
             # Cache successful result

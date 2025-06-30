@@ -66,11 +66,12 @@ class TestSocketClient:
     def test_close(self):
         """Test closing connection."""
         client = SocketClient("/tmp/test.sock")
-        client.sock = Mock()
+        mock_sock = Mock()
+        client.sock = mock_sock
         
         client.close()
         
-        client.sock.close.assert_called_once()
+        mock_sock.close.assert_called_once()
         assert client.sock is None
 
     def test_close_no_socket(self):
