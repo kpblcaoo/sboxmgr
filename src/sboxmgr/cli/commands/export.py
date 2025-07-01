@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Optional, List, Any
 
 from sboxmgr.subscription.manager import SubscriptionManager
-from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
+from sboxmgr.subscription.models import SubscriptionSource, PipelineContext, ClientProfile, InboundProfile
 from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_backup_file
@@ -157,24 +157,175 @@ def _run_agent_check(config_file: str, agent_check: bool) -> bool:
         return False
 
 
+def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Optional['ClientProfile']:
+    """Create ClientProfile from FullProfile export settings.
+    
+    Args:
+        profile: FullProfile with export settings
+        
+    Returns:
+        ClientProfile with inbounds configured from profile, or None if no profile
+    """
+    if not profile or not hasattr(profile, 'export') or not profile.export:
+        return None
+    
+    from sboxmgr.subscription.models import ClientProfile, InboundProfile
+    
+    inbounds = []
+    
+    # Create inbound based on profile.inbound_profile
+    if hasattr(profile.export, 'inbound_profile') and profile.export.inbound_profile:
+        inbound_type = profile.export.inbound_profile
+        
+        # Map profile names to actual inbound types with correct sing-box configuration
+        if inbound_type == "tun":
+            inbounds.append(InboundProfile(
+                type="tun",
+                options={
+                    "tag": "tun-in",
+                    "interface_name": "tun0",
+                    "address": ["198.18.0.1/16"],
+                    "mtu": 1500,
+                    "auto_route": True,
+                    "endpoint_independent_nat": True,
+                    "stack": "system",
+                    "sniff": True,
+                    "strict_route": True
+                }
+            ))
+        elif inbound_type == "tproxy":
+            inbounds.append(InboundProfile(
+                type="tproxy",
+                listen="0.0.0.0",
+                port=12345,
+                options={
+                    "tag": "tproxy-in",
+                    "network": ["tcp", "udp"],
+                    "sniff": True
+                }
+            ))
+        elif inbound_type == "socks5":
+            inbounds.append(InboundProfile(
+                type="socks",
+                listen="0.0.0.0",
+                port=1080,
+                options={
+                    "tag": "socks-in",
+                    "sniff": True,
+                    "users": [
+                        {
+                            "username": "user",
+                            "password": "pass"
+                        }
+                    ]
+                }
+            ))
+        elif inbound_type == "http":
+            inbounds.append(InboundProfile(
+                type="http",
+                listen="0.0.0.0",
+                port=8080,
+                options={
+                    "tag": "http-in",
+                    "sniff": True
+                }
+            ))
+        elif inbound_type == "all":
+            # Create all inbound types
+            inbounds.extend([
+                InboundProfile(
+                    type="tun",
+                    options={
+                        "tag": "tun-in",
+                        "interface_name": "tun0",
+                        "address": ["198.18.0.1/16"],
+                        "mtu": 1500,
+                        "auto_route": True,
+                        "endpoint_independent_nat": True,
+                        "stack": "system",
+                        "sniff": True,
+                        "strict_route": True
+                    }
+                ),
+                InboundProfile(
+                    type="tproxy",
+                    listen="0.0.0.0",
+                    port=12345,
+                    options={
+                        "tag": "tproxy-in",
+                        "network": ["tcp", "udp"],
+                        "sniff": True
+                    }
+                ),
+                InboundProfile(
+                    type="socks",
+                    listen="0.0.0.0",
+                    port=1080,
+                    options={
+                        "tag": "socks-in",
+                        "sniff": True,
+                        "users": [
+                            {
+                                "username": "user",
+                                "password": "pass"
+                            }
+                        ]
+                    }
+                ),
+                InboundProfile(
+                    type="http",
+                    listen="0.0.0.0",
+                    port=8080,
+                    options={
+                        "tag": "http-in",
+                        "sniff": True
+                    }
+                )
+            ])
+        else:
+            # Default to tun if unknown
+            inbounds.append(InboundProfile(
+                type="tun",
+                options={
+                    "tag": "tun-in",
+                    "interface_name": "tun0",
+                    "address": ["198.18.0.1/16"],
+                    "mtu": 1500,
+                    "auto_route": True,
+                    "endpoint_independent_nat": True,
+                    "stack": "system",
+                    "sniff": True
+                }
+            ))
+    
+    if inbounds:
+        return ClientProfile(inbounds=inbounds)
+    
+    return None
+
+
 def _generate_config_from_subscription(
     url: str,
     user_agent: Optional[str],
     no_user_agent: bool,
-    format: str,
-    debug: int
+    export_format: str,
+    debug: int,
+    profile: Optional['FullProfile'] = None,
+    client_profile: Optional['ClientProfile'] = None
 ) -> dict:
-    """Generate configuration from subscription URL.
+    """Generate configuration from subscription data.
     
     Args:
-        url: Subscription URL to fetch from
+        url: Subscription URL
         user_agent: Custom User-Agent header
         no_user_agent: Disable User-Agent header
-        format: Output format (singbox, clash, etc.)
-        debug: Debug verbosity level
+        export_format: Export format
+        debug: Debug level
+        profile: Optional FullProfile for configuration
+        client_profile: Optional ClientProfile for inbound configuration
         
     Returns:
-        Configuration dictionary
+        Generated configuration data
         
     Raises:
         typer.Exit: On processing errors
@@ -184,14 +335,27 @@ def _generate_config_from_subscription(
     from sboxmgr.export.export_manager import ExportManager
     
     # Create subscription source
+    # Используем автоопределение как в list-servers, а не жесткое кодирование форматов
+    # source_type должен определяться по содержимому, а не по формату вывода
+    source_type = "file" if url.startswith('file://') else "url"
+    
     source = SubscriptionSource(
         url=url,
+        source_type=source_type,
         user_agent=user_agent if not no_user_agent else None
     )
     
     # Create managers
     subscription_manager = SubscriptionManager(source)
-    export_manager = ExportManager(export_format=format)
+    export_manager = ExportManager(
+        export_format=export_format,
+        client_profile=client_profile,
+        profile=profile
+    )
+    
+    # Create ClientProfile from profile if not provided directly
+    if client_profile is None:
+        client_profile = _create_client_profile_from_profile(profile)
     
     # Process subscription
     try:
@@ -455,6 +619,44 @@ def _create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
     return middleware_instances
 
 
+def _load_client_profile_from_file(client_profile_path: str) -> Optional['ClientProfile']:
+    """Load ClientProfile from JSON file.
+    
+    Args:
+        client_profile_path: Path to client profile JSON file
+        
+    Returns:
+        Loaded ClientProfile or None if failed
+        
+    Raises:
+        typer.Exit: If client profile loading fails
+    """
+    if not os.path.exists(client_profile_path):
+        typer.echo(f"❌ Client profile not found: {client_profile_path}", err=True)
+        raise typer.Exit(1)
+    
+    try:
+        with open(client_profile_path, 'r', encoding='utf-8') as f:
+            client_profile_data = json.load(f)
+        
+        # Create ClientProfile from loaded data with better error handling
+        from pydantic import ValidationError
+        from sboxmgr.subscription.models import ClientProfile
+        client_profile = ClientProfile(**client_profile_data)
+        typer.echo(f"✅ Client profile loaded: {client_profile_path}")
+        return client_profile
+        
+    except ValidationError as ve:
+        typer.echo(f"❌ Client profile validation failed:", err=True)
+        for error in ve.errors():
+            field_path = '.'.join(str(loc) for loc in error['loc'])
+            typer.echo(f"   - {field_path}: {error['msg']}", err=True)
+        raise typer.Exit(1)
+    except Exception as e:
+        typer.echo(f"❌ Failed to load client profile: {e}", err=True)
+        raise typer.Exit(1)
+
+
 def export(
     url: str = typer.Option(
         None, "-u", "--url", help=t("cli.url.help"),
@@ -464,6 +666,7 @@ def export(
     dry_run: bool = typer.Option(False, "--dry-run", help="Validate configuration without saving"),
     output: str = typer.Option("config.json", "--output", help="Output file path (ignored in dry-run and agent-check modes)"),
     format: str = typer.Option("json", "--format", help="Output format: json, toml, auto"),
+    export_format: str = typer.Option("singbox", "--export-format", help="Export format: singbox, clash"),
     validate_only: bool = typer.Option(False, "--validate-only", help="Only validate existing configuration file"),
     agent_check: bool = typer.Option(False, "--agent-check", help="Check configuration via sboxagent without saving"),
     backup: bool = typer.Option(False, "--backup", help="Create backup before overwriting existing file"),
@@ -471,9 +674,29 @@ def export(
     no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header"),
     # Phase 4 enhancements
     profile: str = typer.Option(None, "--profile", help="Profile JSON file for Phase 3 processing configuration"),
+    client_profile: str = typer.Option(None, "--client-profile", help="Client profile JSON file for inbound configuration"),
     postprocessors: str = typer.Option(None, "--postprocessors", help="Comma-separated list of postprocessors (geo_filter,tag_filter,latency_sort)"),
     middleware: str = typer.Option(None, "--middleware", help="Comma-separated list of middleware (logging,enrichment)"),
-    generate_profile: str = typer.Option(None, "--generate-profile", help="Generate profile JSON file from CLI parameters and exit")
+    generate_profile: str = typer.Option(None, "--generate-profile", help="Generate profile JSON file from CLI parameters and exit"),
+    # Inbound CLI parameters
+    inbound_types: str = typer.Option(None, "--inbound-types", help="Comma-separated inbound types (tun,socks,http,tproxy)"),
+    # TUN parameters
+    tun_address: str = typer.Option(None, "--tun-address", help="TUN interface address (default: 198.18.0.1/16)"),
+    tun_mtu: int = typer.Option(None, "--tun-mtu", help="TUN MTU value (default: 1500)"),
+    tun_stack: str = typer.Option(None, "--tun-stack", help="TUN network stack (system,gvisor,mixed, default: mixed)"),
+    # SOCKS parameters
+    socks_port: int = typer.Option(None, "--socks-port", help="SOCKS proxy port (default: 1080)"),
+    socks_listen: str = typer.Option(None, "--socks-listen", help="SOCKS bind address (default: 127.0.0.1)"),
+    socks_auth: str = typer.Option(None, "--socks-auth", help="SOCKS authentication (user:pass)"),
+    # HTTP parameters
+    http_port: int = typer.Option(None, "--http-port", help="HTTP proxy port (default: 8080)"),
+    http_listen: str = typer.Option(None, "--http-listen", help="HTTP bind address (default: 127.0.0.1)"),
+    http_auth: str = typer.Option(None, "--http-auth", help="HTTP authentication (user:pass)"),
+    # TPROXY parameters
+    tproxy_port: int = typer.Option(None, "--tproxy-port", help="TPROXY port (default: 7895)"),
+    tproxy_listen: str = typer.Option(None, "--tproxy-listen", help="TPROXY bind address (default: 0.0.0.0)"),
+    # DNS mode
+    dns_mode: str = typer.Option(None, "--dns-mode", help="DNS resolution mode (system,tunnel,off, default: system)")
 ):
     """Export configuration with various modes.
     
@@ -493,15 +716,30 @@ def export(
         dry_run: Validate configuration without saving
         output: Output file path (default: config.json)
         format: Output format (json, toml, auto)
+        export_format: Export format (singbox, clash)
         validate_only: Only validate existing configuration
         agent_check: Check via sboxagent without applying
         backup: Create backup before overwriting
         user_agent: Custom User-Agent header
         no_user_agent: Disable User-Agent header
         profile: Profile JSON file for Phase 3 processing configuration
+        client_profile: Client profile JSON file for inbound configuration
         postprocessors: Comma-separated list of postprocessors (geo_filter,tag_filter,latency_sort)
         middleware: Comma-separated list of middleware (logging,enrichment)
         generate_profile: Generate profile JSON file from CLI parameters and exit
+        inbound_types: Comma-separated inbound types (tun,socks,http,tproxy)
+        tun_address: TUN interface address (default: 198.18.0.1/16)
+        tun_mtu: TUN MTU value (default: 1500)
+        tun_stack: TUN network stack (system,gvisor,mixed, default: mixed)
+        socks_port: SOCKS proxy port (default: 1080)
+        socks_listen: SOCKS bind address (default: 127.0.0.1)
+        socks_auth: SOCKS authentication (user:pass)
+        http_port: HTTP proxy port (default: 8080)
+        http_listen: HTTP bind address (default: 127.0.0.1)
+        http_auth: HTTP authentication (user:pass)
+        tproxy_port: TPROXY port (default: 7895)
+        tproxy_listen: TPROXY bind address (default: 0.0.0.0)
+        dns_mode: DNS resolution mode (system,tunnel,off, default: system)
         
     Raises:
         typer.Exit: On validation failure or processing errors
@@ -571,6 +809,42 @@ def export(
         except typer.Exit:
             raise  # Re-raise to preserve exit code
     
+    # Load client profile if provided
+    loaded_client_profile = None
+    if client_profile:
+        try:
+            loaded_client_profile = _load_client_profile_from_file(client_profile)
+        except typer.Exit:
+            raise  # Re-raise to preserve exit code
+    
+    # Build client profile from CLI parameters if provided
+    if not loaded_client_profile and inbound_types:
+        try:
+            from sboxmgr.cli.inbound_builder import build_client_profile_from_cli
+            loaded_client_profile = build_client_profile_from_cli(
+                inbound_types=inbound_types,
+                tun_address=tun_address,
+                tun_mtu=tun_mtu,
+                tun_stack=tun_stack,
+                socks_port=socks_port,
+                socks_listen=socks_listen,
+                socks_auth=socks_auth,
+                http_port=http_port,
+                http_listen=http_listen,
+                http_auth=http_auth,
+                tproxy_port=tproxy_port,
+                tproxy_listen=tproxy_listen,
+                dns_mode=dns_mode
+            )
+            if loaded_client_profile:
+                typer.echo("✅ Built client profile from CLI parameters")
+        except ValueError as e:
+            typer.echo(f"❌ Invalid inbound parameters: {e}", err=True)
+            raise typer.Exit(1)
+        except Exception as e:
+            typer.echo(f"❌ Failed to build client profile: {e}", err=True)
+            raise typer.Exit(1)
+    
     # Create postprocessor and middleware chains if provided
     postprocessor_chain = None
     middleware_chain = []
@@ -592,7 +866,7 @@ def export(
     
     # Generate configuration from subscription
     config_data = _generate_config_from_subscription(
-        url, user_agent, no_user_agent, "singbox", debug
+        url, user_agent, no_user_agent, export_format, debug, loaded_profile, loaded_client_profile
     )
     
     # Handle dry-run mode

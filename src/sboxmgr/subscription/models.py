@@ -101,6 +101,7 @@ class PipelineContext(BaseModel):
         exclusions: List of routes to exclude from processing.
         debug_level: Debug verbosity level.
         metadata: Additional metadata dictionary.
+        skip_policies: Whether to skip policy evaluation (for testing).
     """
     
     model_config = ConfigDict(extra='allow')
@@ -112,6 +113,7 @@ class PipelineContext(BaseModel):
     exclusions: List[Any] = Field(default_factory=list)
     debug_level: int = 0
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    skip_policies: bool = False  # Whether to skip policy evaluation (for testing)
 
 class PipelineResult(BaseModel):
     """Result of subscription pipeline execution.
@@ -160,11 +162,12 @@ class InboundProfile(BaseModel):
     options: Optional[dict] = Field(default_factory=dict, description="Дополнительные параметры.")
 
     @field_validator('listen')
-    def validate_listen(cls, v):
+    def validate_listen(cls, v, info):
         """Validate bind address for security.
         
         Args:
             v: The bind address to validate.
+            info: Validation info containing field data.
             
         Returns:
             The validated bind address.
@@ -172,6 +175,11 @@ class InboundProfile(BaseModel):
         Raises:
             ValueError: If bind address is not localhost or private network.
         """
+        # Allow 0.0.0.0 for tproxy and other types that need to listen on all interfaces
+        inbound_type = info.data.get('type') if info.data else None
+        if inbound_type in ['tproxy', 'tun', 'socks', 'http'] and v == "0.0.0.0":
+            return v
+            
         if v not in ("127.0.0.1", "::1") and not v.startswith("192.168."):
             raise ValueError("Bind address must be localhost or private network unless explicitly allowed.")
         return v

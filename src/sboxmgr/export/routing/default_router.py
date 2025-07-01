@@ -86,26 +86,56 @@ class DefaultRouter(BaseRoutingPlugin):
         # 5. Default fallback - if we have servers, route to first one
         # Otherwise route to direct
         if servers and len(servers) > 0:
-            first_server = servers[0]
-            server_tag = getattr(first_server, 'meta', {}).get('tag') or getattr(first_server, 'tag', None)
-            if not server_tag:
-                # Generate tag from server properties
-                server_type = getattr(first_server, 'type', 'proxy')
-                server_address = getattr(first_server, 'address', 'unknown')
-                server_tag = f"{server_type}-{server_address}"
+            # Find first valid server with a tag
+            selected_server = None
+            for server in servers:
+                # Get tag from meta['name'] (where tags are actually stored)
+                server_tag = None
+                if hasattr(server, 'meta') and server.meta:
+                    server_name = server.meta.get('name', '')
+                    if server_name:
+                        server_tag = server_name
+                elif hasattr(server, 'tag') and server.tag:
+                    server_tag = server.tag
+                
+                # Skip servers without tags or with invalid tags
+                if server_tag and server_tag not in ['direct', 'block', 'dns-out']:
+                    selected_server = server
+                    break
             
-            # Add default proxy rule - route all other traffic through first server
-            rules.append({
-                "outbound": server_tag
-            })
+            if selected_server:
+                # Get the actual tag for routing
+                if hasattr(selected_server, 'meta') and selected_server.meta:
+                    server_tag = selected_server.meta.get('name', '')
+                else:
+                    server_tag = getattr(selected_server, 'tag', 'direct')
+                
+                if debug_level >= 1:
+                    print(f"[DefaultRouter] Selected server for default route: {server_tag}")
+                
+                # Add default proxy rule - route all other traffic through selected server
+                rules.append({
+                    "outbound": server_tag
+                })
+            else:
+                # No valid server found - route everything to direct
+                if debug_level >= 1:
+                    print("[DefaultRouter] No valid server found, routing to direct")
+                rules.append({
+                    "outbound": "direct"
+                })
         else:
             # No servers available - route everything to direct
+            if debug_level >= 1:
+                print("[DefaultRouter] No servers available, routing to direct")
             rules.append({
                 "outbound": "direct"
             })
         
         if debug_level >= 1:
             print(f"[DefaultRouter] Generated {len(rules)} routing rules")
+            for i, rule in enumerate(rules):
+                print(f"  Rule {i+1}: {rule}")
         
         return rules
     

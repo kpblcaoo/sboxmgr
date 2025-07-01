@@ -48,11 +48,36 @@ def generate_inbounds(profile: ClientProfile) -> list:
     """
     inbounds = []
     for inbound in profile.inbounds:
-        # pydantic уже валидирует SEC, но можно добавить дополнительные проверки
-        inb = inbound.model_dump(exclude_unset=True)
+        # Создаем базовую структуру inbound
+        inb = {
+            "type": inbound.type,
+            "tag": inbound.options.get("tag", f"{inbound.type}-in") if inbound.options else f"{inbound.type}-in"
+        }
+        
+        # Для tun - особая обработка
+        if inbound.type == "tun":
+            # Добавляем все поля из options в корень для tun
+            if inbound.options:
+                for key, value in inbound.options.items():
+                    if key != "tag":  # tag уже добавлен
+                        inb[key] = value
+        else:
+            # Для остальных типов добавляем listen и listen_port
+            if hasattr(inbound, 'listen') and inbound.listen:
+                inb["listen"] = inbound.listen
+            if hasattr(inbound, 'port') and inbound.port:
+                inb["listen_port"] = inbound.port
+            
+            # Добавляем остальные поля из options
+            if inbound.options:
+                for key, value in inbound.options.items():
+                    if key not in ["tag", "listen", "port"]:  # Эти поля уже обработаны
+                        inb[key] = value
+        
         # Убираем None-поля для компактности
         inb = {k: v for k, v in inb.items() if v is not None}
         inbounds.append(inb)
+    
     return inbounds
 
 
@@ -182,26 +207,25 @@ def _process_tls_config(outbound: Dict[str, Any], meta: Dict[str, Any], protocol
     if meta.get("reality-opts"):
         reality = kebab_to_snake(meta.pop("reality-opts"))
         if "reality" not in tls:
-            tls["reality"] = {}
+            tls["reality"] = {"enabled": True}
         tls["reality"].update(reality)
     
     if meta.get("pbk"):
         if "reality" not in tls:
-            tls["reality"] = {}
+            tls["reality"] = {"enabled": True}
         tls["reality"]["public_key"] = meta.pop("pbk")
     
     if meta.get("short_id"):
         if "reality" not in tls:
-            tls["reality"] = {}
+            tls["reality"] = {"enabled": True}
         tls["reality"]["short_id"] = meta.pop("short_id")
     
     # uTLS конфигурация
     utls_fp = meta.pop("client-fingerprint", None) or meta.pop("fp", None)
     if utls_fp:
         if "utls" not in tls:
-            tls["utls"] = {}
+            tls["utls"] = {"enabled": True}
         tls["utls"]["fingerprint"] = utls_fp
-        tls["utls"]["enabled"] = True
     
     # ALPN
     if meta.get("alpn"):
@@ -347,26 +371,100 @@ def singbox_export(
         routing rules, and optional inbounds section.
     """
     outbounds = []
+    proxy_tags = []
     
     # Обрабатываем каждый сервер
     for server in servers:
         outbound = _process_single_server(server)
         if outbound:
             outbounds.append(outbound)
+            proxy_tags.append(outbound["tag"])
+    
+    # Добавляем urltest outbound если есть прокси серверы
+    if proxy_tags:
+        urltest_outbound = {
+            "type": "urltest",
+            "tag": "auto",
+            "outbounds": proxy_tags,
+            "url": "https://www.gstatic.com/generate_204",
+            "interval": "3m",
+            "tolerance": 50,
+            "idle_timeout": "30m",
+            "interrupt_exist_connections": False
+        }
+        outbounds.insert(0, urltest_outbound)
     
     # Добавляем специальные outbounds
     _add_special_outbounds(outbounds)
     
+    # Создаем улучшенные правила маршрутизации
+    enhanced_rules = _create_enhanced_routing_rules()
+    
     # Формируем финальную конфигурацию
     config = {
         "outbounds": outbounds,
-        "route": {"rules": routes}
+        "route": {
+            "rules": enhanced_rules,
+            "rule_set": [
+                {
+                    "tag": "geoip-ru",
+                    "type": "remote",
+                    "format": "binary",
+                    "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ru.srs",
+                    "download_detour": "direct"
+                }
+            ],
+            "final": "auto" if proxy_tags else "direct"
+        },
+        "experimental": {
+            "cache_file": {
+                "enabled": True
+            }
+        }
     }
     
     if client_profile is not None:
         config["inbounds"] = generate_inbounds(client_profile)
     
     return config
+
+
+def _create_enhanced_routing_rules() -> List[Dict[str, Any]]:
+    """Создает улучшенные правила маршрутизации как в твоем скрипте."""
+    return [
+        {
+            "protocol": "dns",
+            "outbound": "dns-out"
+        },
+        {
+            "ip_is_private": True,
+            "outbound": "direct"
+        },
+        {
+            "rule_set": "geoip-ru",
+            "outbound": "direct"
+        },
+        {
+            "domain_keyword": [
+                "vkontakte",
+                "yandex", 
+                "tinkoff",
+                "gosuslugi",
+                "sberbank"
+            ],
+            "outbound": "direct"
+        },
+        {
+            "domain_suffix": [
+                ".ru",
+                ".рф",
+                "vk.com",
+                "sberbank.ru",
+                "gosuslugi.ru"
+            ],
+            "outbound": "direct"
+        }
+    ]
 
 def _export_wireguard(s: ParsedServer) -> dict:
     """Генерирует outbound-конфиг для WireGuard.
@@ -398,8 +496,15 @@ def _export_wireguard(s: ParsedServer) -> dict:
         out["mtu"] = meta["mtu"]
     if meta.get("keepalive") is not None:
         out["keepalive"] = meta["keepalive"]
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"wireguard-{s.address}"
+    
     return out
 
 def _export_tuic(s: ParsedServer) -> dict:
@@ -431,8 +536,15 @@ def _export_tuic(s: ParsedServer) -> dict:
         out["udp_relay_mode"] = meta["udp_relay_mode"]
     if s.tls:
         out["tls"] = s.tls
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"tuic-{s.address}"
+    
     return out
 
 def _export_shadowtls(s: ParsedServer) -> dict:
@@ -457,8 +569,16 @@ def _export_shadowtls(s: ParsedServer) -> dict:
         out["handshake"] = s.handshake
     if s.tls:
         out["tls"] = s.tls
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"shadowtls-{s.address}"
+    
     return out
 
 def _export_anytls(s: ParsedServer) -> dict:
@@ -480,8 +600,16 @@ def _export_anytls(s: ParsedServer) -> dict:
     }
     if s.tls:
         out["tls"] = s.tls
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"anytls-{s.address}"
+    
     return out
 
 def _export_tor(s: ParsedServer) -> dict:
@@ -500,8 +628,16 @@ def _export_tor(s: ParsedServer) -> dict:
         "server": s.address,
         "server_port": s.port,
     }
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"tor-{s.address}"
+    
     return out
 
 def _export_ssh(s: ParsedServer) -> dict:
@@ -527,22 +663,47 @@ def _export_ssh(s: ParsedServer) -> dict:
         out["private_key"] = s.private_key
     if s.tls:
         out["tls"] = s.tls
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"ssh-{s.address}"
+    
     return out
 
 def _export_hysteria2(server):
+    """Генерирует outbound-конфиг для Hysteria2.
+    Args:
+        server (ParsedServer): Сервер типа hysteria2.
+    Returns:
+        dict: Outbound-конфиг для sing-box или None (если не хватает обязательных полей).
+    """
     required = [server.address, server.port, server.password]
     if not all(required):
         logger.warning(f"Incomplete hysteria2 fields, skipping: {server.address}:{server.port}")
         return None
-    return {
+    
+    out = {
         "type": "hysteria2",
         "server": server.address,
-        "port": server.port,
+        "server_port": server.port,
         "password": server.password,
-        "tag": getattr(server, "tag", server.address),
     }
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(server, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif server.tag:
+        out["tag"] = server.tag
+    else:
+        out["tag"] = f"hysteria2-{server.address}"
+    
+    return out
 
 @register("singbox")
 class SingboxExporter(BaseExporter):

@@ -50,12 +50,25 @@ def run_cli(args, env=None, cwd=None):
 def cleanup_files(tmp_path, monkeypatch):
     """Фикстура: каждый тест работает в своём tmp_path, файлы очищаются автоматически."""
     monkeypatch.chdir(tmp_path)
-    for fname in ["exclusions.json", "selected_config.json"]:
+    
+    # Список файлов для очистки
+    cleanup_files = [
+        "exclusions.json", 
+        "selected_config.json",
+        "config.json",
+        "test_config.json",
+        "test.log"
+    ]
+    
+    # Очистка до теста
+    for fname in cleanup_files:
         if os.path.exists(fname):
             os.remove(fname)
+    
     yield
-    # После теста — ещё раз чистим
-    for fname in ["exclusions.json", "selected_config.json"]:
+    
+    # Очистка после теста
+    for fname in cleanup_files:
         if os.path.exists(fname):
             os.remove(fname)
 
@@ -66,7 +79,32 @@ def mock_logging_setup():
          patch('sboxmgr.logging.core.get_logger') as mock_get_logger:
         mock_init.return_value = None
         mock_get_logger.return_value = MagicMock()
-        yield 
+        yield
+
+@pytest.fixture(autouse=True)
+def cleanup_project_root():
+    """Очистка файлов в корне проекта после каждого теста."""
+    # Список файлов для очистки в корне проекта
+    root_cleanup_files = [
+        "config.json",
+        "test_config.json",
+        "exclusions.json",
+        "selected_config.json",
+        "backup.json",
+        "test.log"
+    ]
+    
+    yield
+    
+    # Очистка после теста
+    for fname in root_cleanup_files:
+        file_path = PROJECT_ROOT / fname
+        if file_path.exists():
+            try:
+                file_path.unlink()
+                print(f"Cleaned up: {file_path}")
+            except Exception as e:
+                print(f"Failed to clean up {file_path}: {e}") 
 
 @pytest.fixture
 def test_subscription_url():

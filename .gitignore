@@ -38,6 +38,7 @@ struct.json
 exclusions.json
 selected_config.json
 backup.json
+config.json
 __pycache__
 build/
 *.egg-info/

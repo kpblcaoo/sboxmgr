@@ -342,7 +342,8 @@ def test_cli_with_backup(test_subscription_url, require_external_tests, tmp_path
     
     # Create a dummy config file first
     dummy_config = '{"test": "config"}'
-    with open("test_config.json", "w") as f:
+    test_config_path = tmp_path / "test_config.json"
+    with open(test_config_path, "w") as f:
         f.write(dummy_config)
     
     # Run export with backup

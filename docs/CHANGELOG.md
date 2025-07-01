@@ -3,6 +3,43 @@
 ## Other languages / Другие языки
 - [Русский (ru/CHANGELOG.md)](ru/CHANGELOG.md)
 
+# 1.5.0 (2025-07-01)
+
+## Added
+- **CLI Inbound Parameters**: Added comprehensive CLI parameters for inbound configuration in export command
+  - `--inbound-types`: Specify inbound types (tun, socks, http, tproxy)
+  - `--tun-address`, `--tun-mtu`, `--tun-stack`: TUN interface configuration
+  - `--socks-port`, `--socks-listen`, `--socks-auth`: SOCKS proxy configuration
+  - `--http-port`, `--http-listen`, `--http-auth`: HTTP proxy configuration
+  - `--tproxy-port`, `--tproxy-listen`: TPROXY configuration
+  - `--dns-mode`: DNS resolution mode (system, tunnel, off)
+- **InboundBuilder Class**: Dynamic ClientProfile creation from CLI parameters
+- **Enhanced Validation**: Port range validation, address validation, format validation
+- **Improved UX**: No need to create JSON profiles manually for simple inbound configurations
+
+## Changed
+- **Export Command**: Enhanced with inbound parameter support while maintaining backward compatibility
+- **SingBox Exporter**: Updated to use `listen_port` field instead of `port` for better compatibility
+- **Test Coverage**: Added 41 new tests (25 unit + 16 integration) for inbound functionality
+
+## Fixed
+- **Edge Case Tests**: Fixed compatibility issues with new inbound field names
+- **Validation**: Proper error handling for invalid inbound types and parameters
+- **Security**: Address validation prevents unsafe bind configurations
+
+## Technical Details
+- **Architecture**: Clean separation between CLI parameters and core logic
+- **Backward Compatibility**: Existing JSON profiles continue to work
+- **Performance**: No significant impact on export performance
+- **Documentation**: Comprehensive examples and architecture documentation
+
+## Migration Notes
+- Existing workflows continue to work unchanged
+- New CLI parameters are optional and additive
+- JSON profiles can be gradually migrated to CLI parameters
+
+---
+
 # 1.4.0 (2025-06-20)
 
 ## Added
