@@ -16,22 +16,43 @@
 - **InboundBuilder Class**: Dynamic ClientProfile creation from CLI parameters
 - **Enhanced Validation**: Port range validation, address validation, format validation
 - **Improved UX**: No need to create JSON profiles manually for simple inbound configurations
+- **Agent-Installer Separation**: ADR-0015 implementation for clean separation of concerns
+- **Pydantic Schema Generation**: ADR-0016 implementation for automatic schema generation
+- **Type Annotation Audit**: Complete type safety improvements across all modules
+- **CLI Matrix Testing**: Comprehensive CLI behavior testing with real data
+- **Event System**: Comprehensive event system for sboxmgr operations
+- **Agent Bridge**: IPC protocol implementation for future sboxagent integration
 
 ## Changed
 - **Export Command**: Enhanced with inbound parameter support while maintaining backward compatibility
 - **SingBox Exporter**: Updated to use `listen_port` field instead of `port` for better compatibility
 - **Test Coverage**: Added 41 new tests (25 unit + 16 integration) for inbound functionality
+- **CLI Reorganization**: Complete CLI refactoring with new export command structure
+- **DefaultRouter Implementation**: Enhanced routing with fallback rules and improved logic
+- **Exclusion Management**: Robust error handling and file recovery mechanisms
+- **Logging System**: Improved initialization and error handling
+- **Configuration System**: Enhanced validation and error handling
 
 ## Fixed
 - **Edge Case Tests**: Fixed compatibility issues with new inbound field names
 - **Validation**: Proper error handling for invalid inbound types and parameters
 - **Security**: Address validation prevents unsafe bind configurations
+- **Critical Type Issues**: Resolved all type annotation errors across codebase
+- **Dead Code Removal**: Eliminated unused code and improved code quality
+- **Context Argument Bugs**: Fixed postprocessor chain context handling
+- **Validation Bypass**: Resolved critical Pydantic validation bypass issues
+- **CLI Error Handling**: Improved error messages and exception handling
+- **Test Stability**: Fixed 23 test regressions after Event System integration
 
 ## Technical Details
 - **Architecture**: Clean separation between CLI parameters and core logic
 - **Backward Compatibility**: Existing JSON profiles continue to work
 - **Performance**: No significant impact on export performance
 - **Documentation**: Comprehensive examples and architecture documentation
+- **Type Safety**: 100% type annotation coverage with mypy compliance
+- **Event System**: Comprehensive event handling with middleware support
+- **IPC Protocol**: Robust socket-based communication for agent integration
+- **Test Infrastructure**: Comprehensive CLI matrix testing with real data
 
 ## Migration Notes
 - Existing workflows continue to work unchanged
