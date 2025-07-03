@@ -185,7 +185,7 @@
 - Full test isolation and CLI matrix ensure robust coverage.
 - Documenting lessons and architecture helps future contributors.
 
-## [1.3.1] — 2025-06-18
+## [1.3.1] — 2025-05-15
 
 ### Added
 - Full automation of CLI testing: exclusions, clear-exclusions, idempotency, error handling, user-friendly messages, dry-run, selected_config.json, --list-servers, excluded selection.

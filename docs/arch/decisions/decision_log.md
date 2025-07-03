@@ -12,9 +12,9 @@ _Часть ADR написана ретроспективно для фикса�
 | ADR-0006  | Internationalization (i18n) Architecture | Accepted   | 2025-06-22 | Multilingual support with security focus |
 | ADR-0007  | Validator Architecture and Pipeline Context | Proposed | 2025-06-22 | Comprehensive validation pipeline with context tracking and fail-tolerance |
 | ADR-0008  | Defaults and Fail-tolerance Architecture    | Accepted | 2025-06-22 | Default value management and graceful degradation patterns |
-| ADR-0009  | Configuration System Architecture           | Accepted | 2024-12-19 | Pydantic BaseSettings with hierarchical configuration and service mode detection |
-| ADR-0010  | Logging Core Architecture                   | Accepted | 2024-12-19 | Multi-sink structured logging with trace ID propagation |
-| ADR-0011  | Event System Architecture                   | Accepted | 2024-12-19 | Lightweight EventBus with pydispatch for component decoupling |
+| ADR-0009  | Configuration System Architecture           | Accepted | 2025-06-15 | Pydantic BaseSettings with hierarchical configuration and service mode detection |
+| ADR-0010  | Logging Core Architecture                   | Accepted | 2025-06-15 | Multi-sink structured logging with trace ID propagation |
+| ADR-0011  | Event System Architecture                   | Accepted | 2025-06-15 | Lightweight EventBus with pydispatch for component decoupling |
 | ADR-0012  | Service Architecture & Dual-Path Support    | Accepted | 2025-07-03 | Three-tier architecture with dual-path support |
 | ADR-0015  | Agent-Installer Separation & Installation Strategy | Accepted | 2025-07-03 | Clear separation between agent (runtime) and installer (setup) responsibilities |
 | ADR-0016  | Pydantic as Single Source of Truth for Validation and Schema Generation | Accepted | 2025-07-03 | Standardized approach using Pydantic for validation and automatic schema generation |
