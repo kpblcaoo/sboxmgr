@@ -19,7 +19,8 @@ from sboxmgr.subscription.models import SubscriptionSource, ClientProfile, Inbou
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_backup_file
 from sboxmgr.export.export_manager import ExportManager
-from sboxmgr.agent import AgentBridge, AgentNotAvailableError, ClientType
+# Temporarily disabled agent functionality due to missing sbox_common dependency
+# from sboxmgr.agent import AgentBridge, AgentNotAvailableError, ClientType
 from sboxmgr.config.validation import validate_config_file
 
 # Import Phase 3 components
@@ -126,34 +127,9 @@ def _run_agent_check(config_file: str, agent_check: bool) -> bool:
     if not agent_check:
         return True
         
-    try:
-        bridge = AgentBridge()
-        if not bridge.is_available():
-            typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
-            return True
-            
-        # Validate config with agent
-        response = bridge.validate(Path(config_file), client_type=ClientType.SING_BOX)
-        
-        if response.success:
-            typer.echo("✅ External validation passed")
-            if response.client_detected:
-                typer.echo(f"   Detected client: {response.client_detected}")
-            if response.client_version:
-                typer.echo(f"   Client version: {response.client_version}")
-            return True
-        else:
-            typer.echo("❌ External validation failed:", err=True)
-            for error in response.errors:
-                typer.echo(f"   • {error}", err=True)
-            return False
-                
-    except AgentNotAvailableError:
-        typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
-        return True
-    except Exception as e:
-        typer.echo(f"⚠️  Agent check failed: {e}", err=True)
-        return False
+    # Temporarily disabled due to missing sbox_common dependency
+    typer.echo("ℹ️  Agent validation temporarily disabled - sbox_common dependency not available", err=True)
+    return True
 
 
 def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Optional['ClientProfile']:
