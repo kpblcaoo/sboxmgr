@@ -359,8 +359,17 @@ class Orchestrator:
                 )
             
             # Export configuration using export manager
-            # Convert user_routes from List[str] to List[Dict] for compatibility
-            user_routes_dicts = [{"tag": route} for route in (user_routes or [])]
+            # user_routes should be List[Dict] with proper routing rule structure
+            # DefaultRouter expects full routing rule dicts, not just {"tag": route}
+            user_routes_dicts = []
+            if user_routes:
+                for route in user_routes:
+                    if isinstance(route, str):
+                        # Convert string to proper routing rule
+                        user_routes_dicts.append({"outbound": route})
+                    elif isinstance(route, dict):
+                        # Already a routing rule dict
+                        user_routes_dicts.append(route)
             
             config = self.export_manager.export(
                 servers=servers_result.config,
