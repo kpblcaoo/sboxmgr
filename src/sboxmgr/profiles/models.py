@@ -5,7 +5,7 @@ This module defines the core models for profile-based configuration,
 including subscriptions, filters, routing, export settings, agent config, and UI preferences.
 """
 
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from enum import Enum
 

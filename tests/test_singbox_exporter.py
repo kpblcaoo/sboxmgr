@@ -1,7 +1,6 @@
 from sboxmgr.subscription.exporters.singbox_exporter import singbox_export
 from sboxmgr.subscription.models import ParsedServer
 import json
-import pytest
 from sboxmgr.subscription.exporters.singbox_exporter import _export_wireguard, _export_tuic
 
 def test_singbox_exporter():

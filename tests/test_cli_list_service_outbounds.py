@@ -1,27 +1,31 @@
-import pytest
 from typer.testing import CliRunner
 from sboxmgr.cli.main import app
-from sboxmgr.cli.commands.subscription import _is_service_outbound
 
 def test_list_servers_filters_service_outbounds(monkeypatch):
     """Тестирует, что команда list-servers фильтрует служебные outbounds."""
     runner = CliRunner()
 
-    # Мокаем _generate_config_from_subscription в модуле export
-    def mock_generate_config(*args, **kwargs):
-        return {
-            "outbounds": [
-                # Реальные серверы
-                {"type": "shadowsocks", "tag": "ss-server", "server": "127.0.0.1", "server_port": 80},
-                {"type": "vmess", "tag": "vmess-server", "server": "example.com", "server_port": 443},
-                # Служебные outbounds (должны быть отфильтрованы)
-                {"type": "direct", "tag": "direct"},
-                {"type": "block", "tag": "block"},
-                {"type": "dns", "tag": "dns-out"},
-            ]
-        }
+    # Мокаем SubscriptionManager.export_config в модуле subscription
+    def mock_export_config(*args, **kwargs):
+        from sboxmgr.subscription.models import PipelineResult, PipelineContext
+        return PipelineResult(
+            config={
+                "outbounds": [
+                    # Реальные серверы
+                    {"type": "shadowsocks", "tag": "ss-server", "server": "127.0.0.1", "server_port": 80},
+                    {"type": "vmess", "tag": "vmess-server", "server": "example.com", "server_port": 443},
+                    # Служебные outbounds (должны быть отфильтрованы)
+                    {"type": "direct", "tag": "direct"},
+                    {"type": "block", "tag": "block"},
+                    {"type": "dns", "tag": "dns-out"},
+                ]
+            },
+            context=PipelineContext(mode="test"),
+            errors=[],
+            success=True
+        )
 
-    monkeypatch.setattr("sboxmgr.cli.commands.export._generate_config_from_subscription", mock_generate_config)
+    monkeypatch.setattr("sboxmgr.subscription.manager.SubscriptionManager.export_config", mock_export_config)
 
     # Также мокаем load_exclusions чтобы избежать ошибок
     def mock_load_exclusions(*args, **kwargs):

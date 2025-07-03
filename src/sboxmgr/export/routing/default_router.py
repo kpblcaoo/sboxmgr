@@ -6,7 +6,7 @@ that direct traffic through the configured proxy servers with basic fallback
 handling.
 """
 from .base_router import BaseRoutingPlugin
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any
 
 class DefaultRouter(BaseRoutingPlugin):
     """Default implementation of routing rule generation.
@@ -89,14 +89,16 @@ class DefaultRouter(BaseRoutingPlugin):
             # Find first valid server with a tag
             selected_server = None
             for server in servers:
-                # Get tag from meta['name'] (where tags are actually stored)
+                # Get tag from meta['tag'] or meta['name'] or server.tag
                 server_tag = None
                 if hasattr(server, 'meta') and server.meta:
-                    server_name = server.meta.get('name', '')
-                    if server_name:
-                        server_tag = server_name
+                    server_tag = server.meta.get('tag') or server.meta.get('name', '')
                 elif hasattr(server, 'tag') and server.tag:
                     server_tag = server.tag
+                
+                # Generate tag if none found
+                if not server_tag:
+                    server_tag = f"{server.type}-{server.address}" if hasattr(server, 'type') and hasattr(server, 'address') else None
                 
                 # Skip servers without tags or with invalid tags
                 if server_tag and server_tag not in ['direct', 'block', 'dns-out']:
@@ -105,10 +107,15 @@ class DefaultRouter(BaseRoutingPlugin):
             
             if selected_server:
                 # Get the actual tag for routing
+                server_tag = None
                 if hasattr(selected_server, 'meta') and selected_server.meta:
-                    server_tag = selected_server.meta.get('name', '')
-                else:
-                    server_tag = getattr(selected_server, 'tag', 'direct')
+                    server_tag = selected_server.meta.get('tag') or selected_server.meta.get('name', '')
+                elif hasattr(selected_server, 'tag') and selected_server.tag:
+                    server_tag = selected_server.tag
+                
+                # Generate tag if none found
+                if not server_tag:
+                    server_tag = f"{selected_server.type}-{selected_server.address}" if hasattr(selected_server, 'type') and hasattr(selected_server, 'address') else 'direct'
                 
                 if debug_level >= 1:
                     print(f"[DefaultRouter] Selected server for default route: {server_tag}")

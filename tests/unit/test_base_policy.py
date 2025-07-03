@@ -1,6 +1,5 @@
 """Unit tests for base policy classes."""
 
-import pytest
 from src.sboxmgr.policies.base import BasePolicy, PolicyContext, PolicyResult
 from src.sboxmgr.policies.engine import PolicyEngine
 

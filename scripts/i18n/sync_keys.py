@@ -5,7 +5,6 @@ import sys
 import json
 import re
 from pathlib import Path
-from collections import defaultdict
 
 # --- CONFIG ---
 DEFAULT_LANG_DIR = "src/sboxmgr/i18n"
@@ -128,7 +127,7 @@ def main():
             for k in missing:
                 d.setdefault(k, "")
             save_json(path, d)
-        print(f"[INFO] Missing keys added to en.json and other languages.")
+        print("[INFO] Missing keys added to en.json and other languages.")
     
     # --- EXIT CODE ---
     fail = False

@@ -4,12 +4,11 @@ These tests verify that validation and parsing components work
 correctly with real subscription data from various sources.
 """
 
-import os
 import pytest
 import base64
 from sboxmgr.subscription.validators import ProtocolSpecificValidator, GeoValidator
 from sboxmgr.subscription.parsers import Base64Parser, URIListParser
-from sboxmgr.subscription.models import ParsedServer, PipelineContext
+from sboxmgr.subscription.models import PipelineContext
 
 
 @pytest.mark.integration
@@ -338,11 +337,11 @@ def test_validation_error_details_with_real_data(test_subscription_url, require_
                     
                     # Check what fields are missing or invalid
                     if not hasattr(server, 'type') or not server.type:
-                        print(f"  - Missing or invalid type")
+                        print("  - Missing or invalid type")
                     if not hasattr(server, 'address') or not server.address:
-                        print(f"  - Missing or invalid address")
+                        print("  - Missing or invalid address")
                     if not hasattr(server, 'port') or not server.port:
-                        print(f"  - Missing or invalid port")
+                        print("  - Missing or invalid port")
             except Exception as e:
                 print(f"Server {i} ({server.address}) validation error: {e}")
     else:

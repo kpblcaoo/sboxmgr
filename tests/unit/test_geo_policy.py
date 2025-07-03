@@ -1,6 +1,5 @@
 """Unit tests for geographic policies."""
 
-import pytest
 from src.sboxmgr.policies.geo_policy import CountryPolicy, ASNPolicy
 from src.sboxmgr.policies.base import PolicyContext
 

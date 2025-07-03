@@ -1,6 +1,5 @@
 """Unit tests for security policies."""
 
-import pytest
 from src.sboxmgr.policies.security_policy import ProtocolPolicy, EncryptionPolicy, AuthenticationPolicy
 from src.sboxmgr.policies.base import PolicyContext
 

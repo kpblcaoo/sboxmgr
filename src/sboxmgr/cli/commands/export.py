@@ -15,8 +15,7 @@ from pathlib import Path
 from typing import Optional, List, Any
 
 from sboxmgr.subscription.manager import SubscriptionManager
-from sboxmgr.subscription.models import SubscriptionSource, PipelineContext, ClientProfile, InboundProfile
-from sboxmgr.server.exclusions import load_exclusions
+from sboxmgr.subscription.models import SubscriptionSource, ClientProfile, InboundProfile
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_backup_file
 from sboxmgr.export.export_manager import ExportManager
@@ -169,7 +168,7 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
     if not profile or not hasattr(profile, 'export') or not profile.export:
         return None
     
-    from sboxmgr.subscription.models import ClientProfile, InboundProfile
+    from sboxmgr.subscription.models import ClientProfile
     
     inbounds = []
     
@@ -214,8 +213,8 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
                     "sniff": True,
                     "users": [
                         {
-                            "username": "user",
-                            "password": "pass"
+                            "username": "test_user",
+                            "password": "test_pass"
                         }
                     ]
                 }
@@ -266,8 +265,8 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
                         "sniff": True,
                         "users": [
                             {
-                                "username": "user",
-                                "password": "pass"
+                                "username": "test_user",
+                                "password": "test_pass"
                             }
                         ]
                     }
@@ -330,9 +329,6 @@ def _generate_config_from_subscription(
     Raises:
         typer.Exit: On processing errors
     """
-    from sboxmgr.subscription.manager import SubscriptionManager
-    from sboxmgr.subscription.models import SubscriptionSource
-    from sboxmgr.export.export_manager import ExportManager
     
     # Create subscription source
     # Используем автоопределение как в list-servers, а не жесткое кодирование форматов
@@ -647,7 +643,7 @@ def _load_client_profile_from_file(client_profile_path: str) -> Optional['Client
         return client_profile
         
     except ValidationError as ve:
-        typer.echo(f"❌ Client profile validation failed:", err=True)
+        typer.echo("❌ Client profile validation failed:", err=True)
         for error in ve.errors():
             field_path = '.'.join(str(loc) for loc in error['loc'])
             typer.echo(f"   - {field_path}: {error['msg']}", err=True)

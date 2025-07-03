@@ -4,7 +4,7 @@ This module provides policies for validating profile security including
 integrity checks, permission validation, and resource limits.
 """
 
-from typing import Dict, Any, Optional
+from typing import Optional
 from .base import BasePolicy, PolicyContext, PolicyResult
 
 

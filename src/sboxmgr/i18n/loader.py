@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 import locale
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 
 class LanguageLoader:
     """Language loader for internationalization support.

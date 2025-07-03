@@ -15,9 +15,13 @@ _Часть ADR написана ретроспективно для фикса�
 | ADR-0009  | Configuration System Architecture           | Accepted | 2024-12-19 | Pydantic BaseSettings with hierarchical configuration and service mode detection |
 | ADR-0010  | Logging Core Architecture                   | Accepted | 2024-12-19 | Multi-sink structured logging with trace ID propagation |
 | ADR-0011  | Event System Architecture                   | Accepted | 2024-12-19 | Lightweight EventBus with pydispatch for component decoupling |
-| ADR-0012  | Service Architecture & Dual-Path Support    | Accepted | 2025-01-27 | Three-tier architecture with dual-path support |
-| ADR-0015  | Agent-Installer Separation & Installation Strategy | Accepted | 2025-01-27 | Clear separation between agent (runtime) and installer (setup) responsibilities |
-| ADR-0016  | Pydantic as Single Source of Truth for Validation and Schema Generation | Accepted | 2025-01-27 | Standardized approach using Pydantic for validation and automatic schema generation |
+| ADR-0012  | Service Architecture & Dual-Path Support    | Accepted | 2025-07-03 | Three-tier architecture with dual-path support |
+| ADR-0015  | Agent-Installer Separation & Installation Strategy | Accepted | 2025-07-03 | Clear separation between agent (runtime) and installer (setup) responsibilities |
+| ADR-0016  | Pydantic as Single Source of Truth for Validation and Schema Generation | Accepted | 2025-07-03 | Standardized approach using Pydantic for validation and automatic schema generation |
+| ADR-0017  | Full Profile Architecture                    | Accepted | 2025-06-29 | Unified configuration entity covering all configurable components |
+| ADR-0018  | Subscription Management Architecture         | Accepted | 2025-06-29 | Subscription lifecycle, validation, and management patterns |
+| ADR-0019  | Full Profile UX & Runtime Management         | Accepted | 2025-06-29 | Production-ready UX and runtime aspects for profiles and subscriptions |
+| ADR-0020  | Profile Runtime Semantics & Outbound Management | In Progress | 2025-07-01 | Runtime semantics, outbound policies, caching, and versioning |
 | ADR-0017  | Full Profile Architecture | Accepted | 2025-06-29 | Unified configuration entity covering all pipeline components |
 | ADR-0018  | Subscription Management Architecture | Accepted | 2025-06-29 | Extended subscription management with isolation, auto-switching, and CLI UX |
 | ADR-0019  | Full Profile UX & Runtime Management | Accepted | 2025-06-29 | Production-ready UX and runtime aspects for profiles and subscriptions |

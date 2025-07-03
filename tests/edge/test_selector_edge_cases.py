@@ -60,9 +60,9 @@ def test_custom_selector_in_subscription_manager():
             return b'test_selector_data'
     mgr.fetcher = DummyFetcher(source)
     mgr.detect_parser = lambda raw, t: type('P', (), { 'parse': lambda self, raw: [
-        ParsedServer(type="ss", address="1.2.3.4", port=443, meta={"tag": "A"}),
-        ParsedServer(type="ss", address="2.2.2.2", port=1234, meta={"tag": "B"}),
-        ParsedServer(type="ss", address="3.3.3.3", port=2000, meta={"tag": "C"}),
+        ParsedServer(type="ss", address="1.2.3.4", port=443, meta={"tag": "A", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="2.2.2.2", port=1234, meta={"tag": "B", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="3.3.3.3", port=1080, meta={"tag": "C", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
     ] })()
     result = mgr.get_servers(force_reload=True)  # принудительно обновляем кеш
     tags = [s.meta.get("tag") for s in result.config]

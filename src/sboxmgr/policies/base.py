@@ -9,7 +9,6 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from datetime import datetime, UTC
 from enum import Enum
-import unittest.mock
 
 class PolicySeverity(Enum):
     """Policy severity levels."""

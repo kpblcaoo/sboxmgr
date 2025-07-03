@@ -12,7 +12,7 @@ import json
 import logging
 import re
 from typing import List, Optional, Tuple
-from urllib.parse import urlparse, parse_qs, unquote, quote
+from urllib.parse import urlparse, parse_qs, unquote
 from ..models import ParsedServer
 from ..base_parser import BaseParser
 from sboxmgr.utils.env import get_debug_level

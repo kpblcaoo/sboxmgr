@@ -397,14 +397,17 @@ def singbox_export(
     # Добавляем специальные outbounds
     _add_special_outbounds(outbounds)
     
-    # Создаем улучшенные правила маршрутизации
-    enhanced_rules = _create_enhanced_routing_rules()
+    # Используем переданные правила маршрутизации или создаем улучшенные по умолчанию
+    if routes:
+        routing_rules = routes
+    else:
+        routing_rules = _create_enhanced_routing_rules()
     
     # Формируем финальную конфигурацию
     config = {
         "outbounds": outbounds,
         "route": {
-            "rules": enhanced_rules,
+            "rules": routing_rules,
             "rule_set": [
                 {
                     "tag": "geoip-ru",

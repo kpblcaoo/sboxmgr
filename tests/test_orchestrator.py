@@ -256,8 +256,8 @@ class TestOrchestrator:
         
         orchestrator = Orchestrator(exclusion_manager=exclusion_mgr)
         
-        # Patch SubscriptionManager constructor to return our mock
-        with patch("sboxmgr.core.factory.create_default_subscription_manager", return_value=mock_sub_mgr):
+        # Patch SubscriptionManager constructor directly
+        with patch("sboxmgr.subscription.manager.SubscriptionManager", return_value=mock_sub_mgr):
             result = orchestrator.get_subscription_servers(url="https://example.com/sub")
         
         assert result.success is True
@@ -282,8 +282,8 @@ class TestOrchestrator:
         
         orchestrator = Orchestrator(exclusion_manager=exclusion_mgr)
         
-        # Patch SubscriptionManager constructor to return our mock
-        with patch("sboxmgr.core.factory.create_default_subscription_manager", return_value=mock_sub_mgr):
+        # Patch SubscriptionManager constructor directly
+        with patch("sboxmgr.subscription.manager.SubscriptionManager", return_value=mock_sub_mgr):
             result = orchestrator.get_subscription_servers(url="https://example.com/sub")
         
         # Should have filtered out server1
@@ -294,7 +294,7 @@ class TestOrchestrator:
     def test_get_subscription_servers_fail_safe_mode(self):
         """Test fail-safe mode for subscription errors."""
         mock_sub_mgr = MockSubscriptionManager(PipelineResult(
-            config=None,
+            config=[],
             context=PipelineContext(),
             errors=["Mock error"],
             success=False
@@ -303,12 +303,12 @@ class TestOrchestrator:
         config = OrchestratorConfig(fail_safe=True)
         orchestrator = Orchestrator(config=config)
         
-        # Patch SubscriptionManager constructor to return our mock
-        with patch("sboxmgr.core.factory.create_default_subscription_manager", return_value=mock_sub_mgr):
+        # Patch SubscriptionManager constructor directly
+        with patch("sboxmgr.subscription.manager.SubscriptionManager", return_value=mock_sub_mgr):
             result = orchestrator.get_subscription_servers(url="https://example.com/sub")
         
         assert result.success is False
-        assert result.config is None
+        assert result.config == []
         assert "Mock error" in result.errors
     
     def test_get_subscription_servers_strict_mode(self):
@@ -319,8 +319,8 @@ class TestOrchestrator:
         config = OrchestratorConfig(fail_safe=False)
         orchestrator = Orchestrator(config=config)
         
-        # Patch SubscriptionManager constructor to return our mock
-        with patch("sboxmgr.core.factory.create_default_subscription_manager", return_value=mock_sub_mgr):
+        # Patch SubscriptionManager constructor directly
+        with patch("sboxmgr.subscription.manager.SubscriptionManager", return_value=mock_sub_mgr):
             with pytest.raises(OrchestratorError) as exc_info:
                 orchestrator.get_subscription_servers(url="https://example.com/sub")
         

@@ -5,9 +5,6 @@ from unittest.mock import MagicMock
 sys.modules['src.sboxmgr.logging.core'] = MagicMock()
 
 import json
-import tempfile
-from pathlib import Path
-import pytest
 from typer.testing import CliRunner
 from unittest.mock import patch
 

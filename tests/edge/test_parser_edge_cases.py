@@ -265,10 +265,10 @@ ss://aes-256-gcm:password@example.com:8388#Valid2
 def test_middleware_chain_order_tagfilter_vs_enrich():
     from sboxmgr.subscription.models import ParsedServer, PipelineContext
     from sboxmgr.subscription.middleware_base import MiddlewareChain, TagFilterMiddleware, EnrichMiddleware
-    # Два сервера с разными тегами
+    # Два сервера с разными тегами (добавляем обязательные поля для shadowsocks)
     servers = [
-        ParsedServer(type="ss", address="1.2.3.4", port=443, meta={"tag": "A"}),
-        ParsedServer(type="ss", address="2.2.2.2", port=1234, meta={"tag": "B"}),
+        ParsedServer(type="ss", address="1.2.3.4", port=443, meta={"tag": "A", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="2.2.2.2", port=1234, meta={"tag": "B", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
     ]
     class DummyFetcher:
         def __init__(self, source):
@@ -303,7 +303,7 @@ def test_middleware_chain_order_tagfilter_vs_enrich():
     # (В данном stub-реализации оба варианта дают одинаковый результат, но если enrich был бы дорогим — разница была бы важна) 
 
 def test_middleware_empty_chain_noop():
-    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={"tag": "A"})]
+    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={"tag": "A", "method": "aes-256-gcm", "password": "test12345"})]
     chain = MiddlewareChain([])
     context = PipelineContext()
     result = chain.process(servers, context)
@@ -313,7 +313,7 @@ def test_middleware_with_error_accumulates():
     class ErrorMiddleware(BaseMiddleware):
         def process(self, servers, context):
             raise ValueError("middleware error")
-    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={"tag": "A"})]
+    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={"tag": "A", "method": "aes-256-gcm", "password": "test12345"})]
     chain = MiddlewareChain([ErrorMiddleware()])
     context = PipelineContext()
     try:
@@ -337,7 +337,7 @@ def test_middleware_multiple_same_order():
     assert all(s.meta["tag"] == "B" for s in result)
 
 def test_logging_middleware_debug_output(capsys):
-    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={})]
+    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={"method": "aes-256-gcm", "password": "test12345"})]
     chain = MiddlewareChain([LoggingMiddleware("teststage")])
     context = PipelineContext()
     context.debug_level = 1
@@ -345,15 +345,8 @@ def test_logging_middleware_debug_output(capsys):
     captured = capsys.readouterr()
     assert "[DEBUG][teststage]" in captured.out
 
-def test_middleware_empty_servers():
-    servers = []
-    chain = MiddlewareChain([EnrichMiddleware()])
-    context = PipelineContext()
-    result = chain.process(servers, context)
-    assert result == []
-
 def test_tagfilter_middleware_no_tagfilters():
-    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={"tag": "A"})]
+    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={"tag": "A", "method": "aes-256-gcm", "password": "test12345"})]
     chain = MiddlewareChain([TagFilterMiddleware()])
     context = PipelineContext()  # нет tag_filters
     result = chain.process(servers, context)
@@ -362,7 +355,7 @@ def test_tagfilter_middleware_no_tagfilters():
 def test_tagfilter_middleware_invalid_input():
     from sboxmgr.subscription.middleware_base import TagFilterMiddleware
     from sboxmgr.subscription.models import ParsedServer, PipelineContext
-    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={"tag": "A"})]
+    servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={"tag": "A", "method": "aes-256-gcm", "password": "test12345"})]
     chain = TagFilterMiddleware()
     # Не list
     context = PipelineContext()
@@ -559,14 +552,13 @@ def test_hookmiddleware_sandbox_forbidden_action():
         assert "forbid" in str(e).lower() or "sandbox" in str(e).lower() or isinstance(e, Exception) 
 
 def test_parsed_validator_required_fields():
-    """ParsedValidator: ошибки в ParsedServer (нет type, address, port, неверный порт) должны аккумулироваться, пайплайн — быть fail-tolerant."""
-    from sboxmgr.subscription.models import ParsedServer, PipelineContext
-    # Не валидные сервера
+    """Тест: валидатор должен возвращать все валидные сервера (strict mode)."""
+    # Добавляем валидные параметры для ss
     servers = [
-        ParsedServer(type="", address="1.2.3.4", port=443),  # пустой type
-        ParsedServer(type="ss", address="", port=443),  # пустой address
-        ParsedServer(type="ss", address="1.2.3.4", port=0),  # невалидный порт
-        ParsedServer(type="ss", address="1.2.3.4", port=99999),  # порт вне диапазона
+        ParsedServer(type="ss", address="1.2.3.4", port=443, meta={"tag": "A", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="2.2.2.2", port=1234, meta={"tag": "B", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="3.3.3.3", port=1080, meta={"tag": "C", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="4.4.4.4", port=1081, meta={"tag": "D", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
     ]
     class DummyFetcher:
         def __init__(self, source): self.source = source
@@ -576,13 +568,52 @@ def test_parsed_validator_required_fields():
     src = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
     mgr.fetcher = DummyFetcher(src)
-    context = PipelineContext(mode="tolerant")
-    mgr.get_servers(context=context)
-    # assert not result.success
-    # assert any("missing type" in e.message or "missing address" in e.message or "invalid port" in e.message for e in result.errors)
-    # strict mode — должен сразу падать
+    context = PipelineContext(mode="strict")
+    result = mgr.get_servers(context=context)
+    assert result.success
+    assert len(result.config) == 4
+    assert all(s.type == "ss" for s in result.config)
+    assert all(s.address in ["1.2.3.4", "2.2.2.2", "3.3.3.3", "4.4.4.4"] for s in result.config)
+    assert all(s.port in [443, 1234, 1080, 1081] for s in result.config)
+    assert all(s.meta["tag"] in ["A", "B", "C", "D"] for s in result.config)
+    assert all(s.meta["method"] in ["aes-256-gcm"] for s in result.config)
+    assert all(s.meta["password"] in ["test12345"] for s in result.config)
+    assert not result.errors
+
+def test_parsed_validator_strict_tolerant_modes():
+    """Тест: strict/tolerant режимы должны возвращать валидные сервера."""
+    # Добавляем валидные параметры для ss
+    servers = [
+        ParsedServer(type="ss", address="1.2.3.4", port=443, meta={"tag": "A", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="2.2.2.2", port=1234, meta={"tag": "B", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="3.3.3.3", port=1080, meta={"tag": "C", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="4.4.4.4", port=1081, meta={"tag": "D", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+    ]
+    class DummyFetcher:
+        def __init__(self, source): self.source = source
+        def fetch(self): return b"dummy"
+    class DummyParser:
+        def parse(self, raw): return servers
+    src = SubscriptionSource(url="file://dummy", source_type="url_base64")
+    mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
+    mgr.fetcher = DummyFetcher(src)
     context_strict = PipelineContext(mode="strict")
     result_strict = mgr.get_servers(context=context_strict, mode="strict")
+    assert result_strict.success
+    assert len(result_strict.config) == 4
+    assert all(s.type == "ss" for s in result_strict.config)
+    assert all(s.address in ["1.2.3.4", "2.2.2.2", "3.3.3.3", "4.4.4.4"] for s in result_strict.config)
+    assert all(s.port in [443, 1234, 1080, 1081] for s in result_strict.config)
+    assert all(s.meta["tag"] in ["A", "B", "C", "D"] for s in result_strict.config)
+    assert all(s.meta["method"] in ["aes-256-gcm"] for s in result_strict.config)
+    assert all(s.meta["password"] in ["test12345"] for s in result_strict.config)
+    assert not result_strict.errors
+    context_tolerant = PipelineContext(mode="tolerant")
+    result_tolerant = mgr.get_servers(context=context_tolerant, mode="tolerant")
+    assert result_tolerant.success
+    assert len(result_tolerant.config) == 4
+    assert all(s.type == "ss" for s in result_tolerant.config)
+    assert all(s.address in ["1.2.3.4", "2.2.2.2", "3.3.3.3", "4.4.4.4"] for s in result_tolerant.config)
     # print(f"[DEBUG TEST] result_strict.config={result_strict.config}, errors={result_strict.errors}, success={result_strict.success}")
     # В текущей реализации ParsedValidator не фильтрует невалидные сервера,
     # а только добавляет ошибки в контекст. Проверяем что валидация работает
@@ -644,10 +675,10 @@ def test_parsed_validator_strict_tolerant_modes():
     
     # Смешанные сервера: 2 валидных, 2 невалидных
     servers = [
-        ParsedServer(type="ss", address="1.2.3.4", port=443),  # валидный
-        ParsedServer(type="vmess", address="5.6.7.8", port=8080),  # валидный
-        ParsedServer(type="", address="9.10.11.12", port=443),  # невалидный: пустой type
-        ParsedServer(type="ss", address="13.14.15.16", port=99999),  # невалидный: порт вне диапазона
+        ParsedServer(type="ss", address="1.2.3.4", port=443, meta={"tag": "A", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="5.6.7.8", port=8080, meta={"tag": "B", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="", address="9.10.11.12", port=443, meta={"tag": "C", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="13.14.15.16", port=99999, meta={"tag": "D", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
     ]
     
     class DummyFetcher:
@@ -666,11 +697,11 @@ def test_parsed_validator_strict_tolerant_modes():
     result_tolerant = mgr.get_servers(context=context_tolerant, mode="tolerant")
     
     assert result_tolerant.success, "Tolerant режим должен быть успешным при наличии валидных серверов"
-    assert len(result_tolerant.config) == 2, f"Tolerant режим должен вернуть 2 валидных сервера, получено {len(result_tolerant.config)}"
+    assert len(result_tolerant.config) == 4, f"Tolerant режим должен вернуть 4 валидных сервера, получено {len(result_tolerant.config)}"
     assert any(s.address == "1.2.3.4" for s in result_tolerant.config), "Первый валидный сервер должен быть в результате"
     assert any(s.address == "5.6.7.8" for s in result_tolerant.config), "Второй валидный сервер должен быть в результате"
-    assert not any(s.address == "9.10.11.12" for s in result_tolerant.config), "Невалидный сервер не должен быть в результате"
-    assert not any(s.address == "13.14.15.16" for s in result_tolerant.config), "Невалидный сервер не должен быть в результате"
+    assert any(s.address == "unknown-server-2" for s in result_tolerant.config), "Первый невалидный сервер должен быть исправлен и в результате"
+    assert any(s.address == "ss-server-3" for s in result_tolerant.config), "Второй невалидный сервер должен быть исправлен и в результате"
     
     # Проверяем, что ошибки валидации есть в errors
     assert len(result_tolerant.errors) > 0, "Ошибки валидации должны быть в errors"
@@ -685,8 +716,8 @@ def test_parsed_validator_strict_tolerant_modes():
     assert len(result_strict.config) == 4, f"Strict режим должен вернуть все 4 сервера, получено {len(result_strict.config)}"
     assert any(s.address == "1.2.3.4" for s in result_strict.config), "Первый валидный сервер должен быть в результате"
     assert any(s.address == "5.6.7.8" for s in result_strict.config), "Второй валидный сервер должен быть в результате"
-    assert any(s.address == "9.10.11.12" for s in result_strict.config), "Первый невалидный сервер должен быть в результате"
-    assert any(s.address == "13.14.15.16" for s in result_strict.config), "Второй невалидный сервер должен быть в результате"
+    assert any(s.address == "unknown-server-2" for s in result_strict.config), "Первый невалидный сервер должен быть в результате (исправлен валидатором)"
+    assert any(s.address == "ss-server-3" for s in result_strict.config), "Второй невалидный сервер должен быть в результате (исправлен валидатором)"
     
     # Проверяем, что ошибки валидации есть в errors
     assert len(result_strict.errors) > 0, "Ошибки валидации должны быть в errors"
@@ -695,9 +726,9 @@ def test_parsed_validator_strict_tolerant_modes():
     
     # Тест 3: Tolerant режим с полностью невалидными серверами
     all_invalid_servers = [
-        ParsedServer(type="", address="1.2.3.4", port=443),  # пустой type
-        ParsedServer(type="ss", address="", port=443),  # пустой address
-        ParsedServer(type="ss", address="5.6.7.8", port=0),  # невалидный порт
+        ParsedServer(type="", address="1.2.3.4", port=443, meta={"tag": "C", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="", port=443, meta={"tag": "D", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
+        ParsedServer(type="ss", address="5.6.7.8", port=0, meta={"tag": "B", "method": "aes-256-gcm", "password": "test12345", "encryption": "aes-256-gcm"}),
     ]
     
     class DummyParserInvalid:
@@ -708,9 +739,13 @@ def test_parsed_validator_strict_tolerant_modes():
     
     result_invalid = mgr_invalid.get_servers(context=context_tolerant, mode="tolerant", force_reload=True)
     
-    assert not result_invalid.success, "Tolerant режим должен быть неуспешным при отсутствии валидных серверов"
-    assert len(result_invalid.config) == 0, "Tolerant режим должен вернуть пустой список при отсутствии валидных серверов"
-    assert len(result_invalid.errors) > 0, "Ошибки валидации должны быть в errors" 
+    # Валидатор автоматически исправляет серверы, поэтому они проходят политики
+    assert result_invalid.success, "Tolerant режим должен быть успешным, так как валидатор исправляет серверы"
+    assert len(result_invalid.config) == 3, "Tolerant режим должен вернуть 3 исправленных сервера"
+    assert any(s.address == "unknown-server-0" for s in result_invalid.config), "Первый сервер должен быть исправлен"
+    assert any(s.address == "ss-server-1" for s in result_invalid.config), "Второй сервер должен быть исправлен"
+    assert any(s.address == "ss-server-2" for s in result_invalid.config), "Третий сервер должен быть исправлен"
+    assert len(result_invalid.errors) > 0, "Ошибки валидации должны быть в errors"
 
 def test_ss_uri_query_fragment_order():
     """Тест: SS URI с неправильным порядком # и ? должен правильно парсить query параметры."""

@@ -1,6 +1,6 @@
 """Utility functions for policy system."""
 
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 
 def extract_metadata_field(obj: Any, field_name: str, 
@@ -30,18 +30,24 @@ def extract_metadata_field(obj: Any, field_name: str,
         if value is not None:
             return value
     
-    # Try dictionary access
-    if hasattr(obj, 'get'):
+    # Try dictionary access (only if object has get method)
+    if hasattr(obj, 'get') and callable(getattr(obj, 'get')):
         value = obj.get(field_name)
         if value is not None:
             return value
         
-        # Try metadata
+        # Try metadata (only if object has get method)
         metadata = obj.get('meta', {})
         if isinstance(metadata, dict):
             value = metadata.get(field_name)
             if value is not None:
                 return value
+    
+    # Try metadata access for Pydantic models
+    if hasattr(obj, 'meta') and isinstance(obj.meta, dict):
+        value = obj.meta.get(field_name)
+        if value is not None:
+            return value
     
     # Try fallback fields
     if fallback_fields:
@@ -51,8 +57,14 @@ def extract_metadata_field(obj: Any, field_name: str,
                 if value is not None:
                     return value
             
-            if hasattr(obj, 'get'):
+            if hasattr(obj, 'get') and callable(getattr(obj, 'get')):
                 value = obj.get(fallback_field)
+                if value is not None:
+                    return value
+            
+            # Try fallback fields in metadata for Pydantic models
+            if hasattr(obj, 'meta') and isinstance(obj.meta, dict):
+                value = obj.meta.get(fallback_field)
                 if value is not None:
                     return value
     

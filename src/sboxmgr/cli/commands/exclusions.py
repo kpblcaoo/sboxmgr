@@ -8,7 +8,6 @@ rich console output, JSON export, and persistent exclusion storage.
 
 import typer
 import json
-import os
 from typing import Optional
 from rich.console import Console
 from rich.table import Table

@@ -4,7 +4,7 @@ This module provides policies for geographic restrictions including
 country-based and ASN-based filtering.
 """
 
-from typing import Dict, Any, Optional, List, Set
+from typing import Any, Optional, List
 from .base import BasePolicy, PolicyContext, PolicyResult
 from .utils import extract_metadata_field, validate_mode
 

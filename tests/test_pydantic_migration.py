@@ -1,14 +1,13 @@
 """Tests for Pydantic migration - basic functionality check."""
 
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 import tempfile
-import json
 
 from src.sboxmgr.core.exclusions.models import ExclusionEntry, ExclusionList
 from src.sboxmgr.core.exclusions.manager import ExclusionManager
-from src.sboxmgr.subscription.models import SubscriptionSource, ParsedServer, PipelineContext, PipelineResult
+from src.sboxmgr.subscription.models import SubscriptionSource, ParsedServer, PipelineContext
 from src.sboxmgr.subscription.errors import ErrorType, PipelineError
 from src.sboxmgr.events.types import EventType, EventPriority, EventData
 from src.sboxmgr.events.core import Event

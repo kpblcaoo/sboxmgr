@@ -6,11 +6,9 @@ with @pytest.mark.integration and @pytest.mark.external to distinguish
 them from unit tests.
 """
 
-import os
 import pytest
 import time
 from sboxmgr.core.orchestrator import Orchestrator, OrchestratorConfig
-from sboxmgr.subscription.models import PipelineResult, PipelineContext
 
 
 @pytest.mark.integration

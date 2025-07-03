@@ -1,9 +1,7 @@
 """Tests for OutboundModel and related functionality."""
 
 import pytest
-from pydantic import ValidationError
 from src.sboxmgr.subscription.validators.protocol_models import (
-    OutboundModel,
     validate_outbound_config,
     generate_outbound_schema,
     convert_protocol_to_outbound,
@@ -12,8 +10,7 @@ from src.sboxmgr.subscription.validators.protocol_models import (
     VmessConfig,
     VmessSettings,
     VmessUser,
-    StreamSettings,
-    TlsConfig
+    StreamSettings
 )
 
 

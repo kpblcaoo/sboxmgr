@@ -4,7 +4,7 @@ This module provides policies for security validation including
 protocol security, encryption requirements, and authentication checks.
 """
 
-from typing import Dict, Any, Optional, List, Set
+from typing import Any, Optional, List
 from .base import BasePolicy, PolicyContext, PolicyResult
 from .utils import extract_metadata_field, validate_mode
 

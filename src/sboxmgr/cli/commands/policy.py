@@ -2,9 +2,9 @@
 
 import typer
 import json
-from typing import Optional, List
+from typing import Optional
 from pathlib import Path
-from sboxmgr.policies import policy_registry, PolicyContext, PolicySeverity, PolicyEvaluationResult
+from sboxmgr.policies import policy_registry, PolicyContext
 from sboxmgr.i18n.t import t
 
 app = typer.Typer(name="policy", help=t("Policy management commands"))

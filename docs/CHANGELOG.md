@@ -3,7 +3,7 @@
 ## Other languages / Другие языки
 - [Русский (ru/CHANGELOG.md)](ru/CHANGELOG.md)
 
-# pre-mvp0.1.0 (2025-01-27)
+# pre-mvp0.1.0 (2025-07-03)
 
 ## Added
 - **Full Profile Architecture**: Complete profile system with Pydantic models (ADR-0017)
@@ -185,7 +185,7 @@
 - Full test isolation and CLI matrix ensure robust coverage.
 - Documenting lessons and architecture helps future contributors.
 
-## [1.3.1] — 2024-06-18
+## [1.3.1] — 2025-06-18
 
 ### Added
 - Full automation of CLI testing: exclusions, clear-exclusions, idempotency, error handling, user-friendly messages, dry-run, selected_config.json, --list-servers, excluded selection.

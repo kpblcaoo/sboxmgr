@@ -5,7 +5,7 @@ ClientProfile objects from CLI parameters, eliminating the need for manual
 JSON profile creation while maintaining architectural integrity.
 """
 
-from typing import Dict, List, Optional, Any, Union
+from typing import List, Optional, Union
 import typer
 from sboxmgr.subscription.models import ClientProfile, InboundProfile
 
@@ -209,7 +209,7 @@ class InboundBuilder:
             raise ValueError(f"Port must be between 1024 and 65535, got: {port}")
             
         if listen is None:
-            listen = "0.0.0.0"  # TPROXY typically needs to bind to all interfaces
+            listen = "127.0.0.1"  # TPROXY default to localhost for security
             
         if network is None:
             network = "tcp"

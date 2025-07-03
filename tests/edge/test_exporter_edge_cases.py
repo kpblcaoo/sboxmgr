@@ -175,13 +175,18 @@ def test_inbounds_valid_profile():
     config = mgr.export([], [])
     assert "inbounds" in config
     assert config["inbounds"][0]["listen"] == "127.0.0.1"
-    assert config["inbounds"][0]["port"] == 10808
+    assert config["inbounds"][0]["listen_port"] == 10808
 
 
 def test_inbounds_invalid_bind():
-    """Тест: SEC — bind-to-all (0.0.0.0) должен вызывать ошибку валидации."""
+    """Тест: SEC — bind-to-all (0.0.0.0) должен вызывать ошибку валидации для неразрешенных типов."""
+    # socks разрешен для 0.0.0.0, поэтому не должен вызывать ошибку
+    inbound = InboundProfile(type="socks", listen="0.0.0.0", port=10808)
+    assert inbound.listen == "0.0.0.0"
+    
+    # dns НЕ разрешен для 0.0.0.0, должен вызывать ошибку
     with pytest.raises(ValueError):
-        InboundProfile(type="socks", listen="0.0.0.0", port=10808)
+        InboundProfile(type="dns", listen="0.0.0.0", port=53)
 
 
 def test_inbounds_port_conflict():
@@ -192,7 +197,7 @@ def test_inbounds_port_conflict():
     ])
     mgr = ExportManager(client_profile=profile)
     config = mgr.export([], [])
-    ports = [inb["port"] for inb in config["inbounds"]]
+    ports = [inb["listen_port"] for inb in config["inbounds"]]
     assert ports.count(10808) == 2  # Пока допускается, но edge-case зафиксирован
 
 

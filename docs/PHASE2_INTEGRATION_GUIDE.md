@@ -82,7 +82,7 @@ Phase 2 реализует полную интеграцию между трем
 {
   "id": "uuid",
   "type": "event",
-  "timestamp": "2025-01-28T10:00:00Z",
+  "timestamp": "2025-07-03T10:00:00Z",
   "event": {
     "event_type": "subscription_updated",
     "source": "sboxmgr",
@@ -100,7 +100,7 @@ Phase 2 реализует полную интеграцию между трем
 {
   "id": "uuid",
   "type": "command",
-  "timestamp": "2025-01-28T10:00:00Z",
+  "timestamp": "2025-07-03T10:00:00Z",
   "command": {
     "command": "ping",
     "params": {}
@@ -113,7 +113,7 @@ Phase 2 реализует полную интеграцию между трем
 {
   "id": "uuid",
   "type": "response",
-  "timestamp": "2025-01-28T10:00:00Z",
+  "timestamp": "2025-07-03T10:00:00Z",
   "response": {
     "status": "success",
     "request_id": "original-uuid",
@@ -129,7 +129,7 @@ Phase 2 реализует полную интеграцию между трем
 {
   "id": "uuid",
   "type": "heartbeat",
-  "timestamp": "2025-01-28T10:00:00Z",
+  "timestamp": "2025-07-03T10:00:00Z",
   "heartbeat": {
     "agent_id": "sboxmgr",
     "status": "healthy",
@@ -246,7 +246,7 @@ SBOXAGENT_AGENT_LOG_LEVEL=debug go run cmd/agent/main.go
 ls -la /tmp/sboxagent.sock
 
 # Тест подключения
-echo '{"id":"test","type":"command","timestamp":"2025-01-28T10:00:00Z","command":{"command":"ping","params":{}}}' | nc -U /tmp/sboxagent.sock
+echo '{"id":"test","type":"command","timestamp":"2025-07-03T10:00:00Z","command":{"command":"ping","params":{}}}' | nc -U /tmp/sboxagent.sock
 ```
 
 ### Мониторинг событий
@@ -254,7 +254,7 @@ echo '{"id":"test","type":"command","timestamp":"2025-01-28T10:00:00Z","command"
 sboxagent логирует все получаемые события:
 
 ```
-INFO[2025-01-28T10:00:00Z] Received event client_id=client_123 event_type=subscription_updated source=sboxmgr priority=normal
+INFO[2025-07-03T10:00:00Z] Received event client_id=client_123 event_type=subscription_updated source=sboxmgr priority=normal
 ```
 
 ## Устранение неполадок

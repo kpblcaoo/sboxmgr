@@ -19,7 +19,7 @@ class TestConfigGenerateBugfixes:
     def test_orchestrator_creates_new_subscription_manager(self):
         """Test that Orchestrator always creates new SubscriptionManager for each URL."""
         from sboxmgr.core.orchestrator import Orchestrator
-        from sboxmgr.subscription.models import SubscriptionSource, PipelineResult
+        from sboxmgr.subscription.models import SubscriptionSource
         
         # Create orchestrator
         orchestrator = Orchestrator.create_default()

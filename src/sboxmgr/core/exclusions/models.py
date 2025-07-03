@@ -1,7 +1,7 @@
 """Data models for exclusion management."""
 
 from datetime import datetime, timezone
-from typing import List, Dict, Optional
+from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 

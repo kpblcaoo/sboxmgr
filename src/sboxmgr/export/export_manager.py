@@ -30,14 +30,16 @@ except ImportError:
     PostProcessorChain = None
     BaseMiddleware = None
 
-    # Get logger for this module
-    logger = get_logger(__name__)
+# Lazy logger initialization to avoid import-time dependency issues
+def _get_logger():
+    """Get logger instance with lazy initialization."""
+    return get_logger(__name__)
 
-    EXPORTER_REGISTRY = {
-        "singbox": singbox_export,
-        "clash": clash_export,
-        # В будущем: "v2ray": v2ray_export и т.д.
-    }
+EXPORTER_REGISTRY = {
+    "singbox": singbox_export,
+    "clash": clash_export,
+    # В будущем: "v2ray": v2ray_export и т.д.
+}
 
 class ExportManager:
     """Manages configuration export for various proxy clients with Phase 3 integration.
@@ -124,11 +126,12 @@ class ExportManager:
             try:
                 routes = self.routing_plugin.generate_routes(
                     filtered_servers, 
-                    context, 
-                    client_profile or self.client_profile
+                    exclusions or [], 
+                    user_routes or [],
+                    context
                 )
             except Exception as e:
-                logger.warning(f"Routing plugin failed: {e}")
+                _get_logger().warning(f"Routing plugin failed: {e}")
                 routes = []
         
         # Apply Phase 3 processing if available
@@ -146,7 +149,7 @@ class ExportManager:
                             active_profile
                         )
                     except Exception as e:
-                        logger.warning(f"Middleware {middleware.__class__.__name__} failed: {e}")
+                        _get_logger().warning(f"Middleware {middleware.__class__.__name__} failed: {e}")
             
             # Apply postprocessor chain
             if self.postprocessor_chain:
@@ -157,17 +160,22 @@ class ExportManager:
                         active_profile
                     )
                 except Exception as e:
-                    logger.warning(f"PostProcessor chain failed: {e}")
+                    _get_logger().warning(f"PostProcessor chain failed: {e}")
         
         # Export with format-specific handling
+        exporter_func = EXPORTER_REGISTRY.get(self.export_format)
+        if not exporter_func:
+            _get_logger().warning(f"Unknown export format: {self.export_format}, falling back to singbox")
+            exporter_func = EXPORTER_REGISTRY.get("singbox", singbox_export)
+        
         if self.export_format == "singbox":
-            return singbox_export(
+            return exporter_func(
                 processed_servers, 
                 routes, 
                 client_profile=client_profile or self.client_profile
             )
         else:
-            return clash_export(processed_servers, routes)
+            return exporter_func(processed_servers, routes)
     
     def export_to_singbox(self, 
                          servers: List[ParsedServer], 
@@ -212,9 +220,7 @@ class ExportManager:
                             active_profile
                         )
                     except Exception as e:
-                        import logging
-                        logger = logging.getLogger(__name__)
-                        logger.warning(f"Middleware {middleware.__class__.__name__} failed: {e}")
+                        _get_logger().warning(f"Middleware {middleware.__class__.__name__} failed: {e}")
             
             # Apply postprocessor chain
             if self.postprocessor_chain:
@@ -225,11 +231,10 @@ class ExportManager:
                         active_profile
                     )
                 except Exception as e:
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.warning(f"PostProcessor chain failed: {e}")
+                    _get_logger().warning(f"PostProcessor chain failed: {e}")
         
-        return singbox_export(
+        exporter_func = EXPORTER_REGISTRY.get("singbox", singbox_export)
+        return exporter_func(
             processed_servers, 
             routes, 
             client_profile=client_profile

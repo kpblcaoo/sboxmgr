@@ -11,17 +11,14 @@ This module provides CLI commands for working with profiles:
 
 import json
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional
 import typer
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich.text import Text
-from rich.syntax import Syntax
 
-from .manager import ProfileManager, ValidationResult
+from .manager import ProfileManager
 from .loader import ProfileLoader
-from ..profiles.models import FullProfile
 from ..logging.core import get_logger
 
 logger = get_logger(__name__)
@@ -35,14 +32,14 @@ def info(profile_path: str):
     loader = ProfileLoader()
     try:
         info = loader.get_profile_info(profile_path)
-        console.print(f"[bold blue]Profile Info:[/bold blue]")
+        console.print("[bold blue]Profile Info:[/bold blue]")
         console.print(f"  [blue]Name:[/blue] {info['name']}")
         console.print(f"  [blue]Path:[/blue] {info['path']}")
         console.print(f"  [blue]Size:[/blue] {info['size']} bytes")
         console.print(f"  [blue]Modified:[/blue] {info['modified']}")
         console.print(f"  [blue]Format:[/blue] {info['format']}")
         console.print(f"  [blue]Sections:[/blue] {', '.join(info['sections'])}")
-        status = "[green]✓ Valid[/green]" if info['valid'] else f"[red]✗ Invalid[/red]"
+        status = "[green]✓ Valid[/green]" if info['valid'] else "[red]✗ Invalid[/red]"
         console.print(f"  [blue]Status:[/blue] {status}")
         if info['error']:
             console.print(f"  [red]Error:[/red] {info['error']}")
@@ -66,24 +63,24 @@ def apply_profile(profile_path: str, dry_run: bool = False) -> None:
         validation_result = manager.validate_profile(profile)
         
         if not validation_result.valid:
-            console.print(f"[red]Profile validation failed:[/red]")
+            console.print("[red]Profile validation failed:[/red]")
             for error in validation_result.errors:
                 console.print(f"  [red]• {error}[/red]")
             raise typer.Exit(1)
         
         if validation_result.warnings:
-            console.print(f"[yellow]Profile warnings:[/yellow]")
+            console.print("[yellow]Profile warnings:[/yellow]")
             for warning in validation_result.warnings:
                 console.print(f"  [yellow]• {warning}[/yellow]")
         
         if dry_run:
-            console.print(f"[green]Profile would be applied (dry run):[/green]")
+            console.print("[green]Profile would be applied (dry run):[/green]")
             console.print(f"  [blue]Name:[/blue] {profile.id}")
             console.print(f"  [blue]Path:[/blue] {profile_path}")
         else:
             # Set as active profile
             manager.set_active_profile(profile)
-            console.print(f"[green]Profile applied successfully:[/green]")
+            console.print("[green]Profile applied successfully:[/green]")
             console.print(f"  [blue]Name:[/blue] {profile.id}")
             console.print(f"  [blue]Path:[/blue] {profile_path}")
         
@@ -111,7 +108,7 @@ def validate(
         info = loader.get_profile_info(profile_path)
         
         if not info['valid'] and not normalize:
-            console.print(f"[red]Profile validation failed:[/red]")
+            console.print("[red]Profile validation failed:[/red]")
             console.print(f"  [red]Error: {info['error']}[/red]")
             raise typer.Exit(1)
         
@@ -120,21 +117,21 @@ def validate(
             raw_data = json.load(f)
         if normalize:
             raw_data = loader.normalize_profile(raw_data)
-            console.print(f"[yellow]Profile normalized before validation[/yellow]")
+            console.print("[yellow]Profile normalized before validation[/yellow]")
         
         profile = loader.load_from_dict(raw_data)
         validation_result = manager.validate_profile(profile)
         
         if not validation_result.valid:
-            console.print(f"[red]Profile validation failed:[/red]")
+            console.print("[red]Profile validation failed:[/red]")
             for error in validation_result.errors:
                 console.print(f"  [red]• {error}[/red]")
             raise typer.Exit(1)
         
-        console.print(f"[green]Profile is valid![/green]")
+        console.print("[green]Profile is valid![/green]")
         
         if verbose:
-            console.print(f"\n[blue]Profile Information:[/blue]")
+            console.print("\n[blue]Profile Information:[/blue]")
             console.print(f"  [blue]Name:[/blue] {info['name']}")
             console.print(f"  [blue]Path:[/blue] {info['path']}")
             console.print(f"  [blue]Size:[/blue] {info['size']} bytes")
@@ -143,7 +140,7 @@ def validate(
             console.print(f"  [blue]Sections:[/blue] {', '.join(info['sections'])}")
         
         if validation_result.warnings:
-            console.print(f"\n[yellow]Warnings:[/yellow]")
+            console.print("\n[yellow]Warnings:[/yellow]")
             for warning in validation_result.warnings:
                 console.print(f"  [yellow]• {warning}[/yellow]")
                 
@@ -256,7 +253,7 @@ def diff_profiles(profile1_path: str, profile2_path: str) -> None:
         dict2 = profile2.model_dump(mode='json')
         
         # Simple comparison - in a real implementation, you'd want a more sophisticated diff
-        console.print(f"[bold blue]Comparing profiles:[/bold blue]")
+        console.print("[bold blue]Comparing profiles:[/bold blue]")
         console.print(f"  [blue]Profile 1:[/blue] {profile1.id} ({profile1_path})")
         console.print(f"  [blue]Profile 2:[/blue] {profile2.id} ({profile2_path})")
         console.print("")
@@ -288,7 +285,7 @@ def diff_profiles(profile1_path: str, profile2_path: str) -> None:
                     console.print(f"  [green]Section '{section}' identical[/green]")
         
         if not only_in_1 and not only_in_2 and all(dict1[section] == dict2[section] for section in common_sections):
-            console.print(f"\n[green]Profiles are identical![/green]")
+            console.print("\n[green]Profiles are identical![/green]")
         
     except FileNotFoundError as e:
         console.print(f"[red]Profile file not found: {e}[/red]")
@@ -322,7 +319,7 @@ def list_profiles(profiles_dir: Optional[str] = None) -> None:
         table.add_column("Status", style="red")
         
         for profile in profiles:
-            status = "[green]✓ Valid[/green]" if profile.valid else f"[red]✗ Invalid[/red]"
+            status = "[green]✓ Valid[/green]" if profile.valid else "[red]✗ Invalid[/red]"
             table.add_row(
                 profile.name,
                 str(profile.path),
@@ -336,7 +333,7 @@ def list_profiles(profiles_dir: Optional[str] = None) -> None:
         # Show invalid profiles details
         invalid_profiles = [p for p in profiles if not p.valid]
         if invalid_profiles:
-            console.print(f"\n[yellow]Invalid profiles:[/yellow]")
+            console.print("\n[yellow]Invalid profiles:[/yellow]")
             for profile in invalid_profiles:
                 console.print(f"  [red]• {profile.name}: {profile.error}[/red]")
         
@@ -381,7 +378,7 @@ def switch_profile(profile_id: str, profiles_dir: Optional[str] = None) -> None:
         
         if not target_profile:
             console.print(f"[red]Profile not found: {profile_id}[/red]")
-            console.print(f"[yellow]Available profiles:[/yellow]")
+            console.print("[yellow]Available profiles:[/yellow]")
             for profile in profiles:
                 if profile.valid:
                     console.print(f"  [blue]• {profile.name}[/blue]")

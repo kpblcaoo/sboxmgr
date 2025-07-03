@@ -1,6 +1,5 @@
 """Unit tests for profile security policies."""
 
-import pytest
 from src.sboxmgr.policies.profile_policy import IntegrityPolicy, PermissionPolicy, LimitPolicy
 from src.sboxmgr.policies.base import PolicyContext
 

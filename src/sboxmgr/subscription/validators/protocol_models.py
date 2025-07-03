@@ -8,8 +8,8 @@ accurate JSON schemas for configuration validation.
 Implements ADR-0016: Pydantic as Single Source of Truth for Validation and Schema Generation.
 """
 
-from pydantic import BaseModel, Field, field_validator, model_validator
-from typing import List, Optional, Dict, Any, Union, Literal, Annotated
+from pydantic import BaseModel, Field, field_validator
+from typing import List, Optional, Dict, Any, Union, Literal
 from enum import Enum
 
 # Common Enums

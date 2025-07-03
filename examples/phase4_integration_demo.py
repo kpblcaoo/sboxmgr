@@ -17,14 +17,11 @@ import typer
 import os
 import json
 import tempfile
-from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Any
 
 from sboxmgr.subscription.manager import SubscriptionManager
-from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
-from sboxmgr.server.exclusions import load_exclusions
+from sboxmgr.subscription.models import SubscriptionSource
 from sboxmgr.i18n.t import t
-from sboxmgr.utils.env import get_template_file, get_config_file, get_backup_file
 from sboxmgr.export.export_manager import ExportManager
 from sboxmgr.agent import AgentBridge, AgentNotAvailableError, ClientType
 from sboxmgr.config.validation import validate_config_file
@@ -276,9 +273,6 @@ def _generate_config_from_subscription(
     Raises:
         typer.Exit: On processing errors
     """
-    from sboxmgr.subscription.manager import SubscriptionManager
-    from sboxmgr.subscription.models import SubscriptionSource
-    from sboxmgr.export.export_manager import ExportManager
     
     # Create subscription source
     source = SubscriptionSource(
@@ -297,7 +291,7 @@ def _generate_config_from_subscription(
         )
         
         if not result.success:
-            typer.echo(f"❌ Subscription processing failed", err=True)
+            typer.echo("❌ Subscription processing failed", err=True)
             for error in result.errors:
                 typer.echo(f"  - {error.message}", err=True)
             raise typer.Exit(1)

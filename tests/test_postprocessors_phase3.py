@@ -6,15 +6,13 @@ collection features introduced in Phase 3.
 """
 
 import pytest
-from unittest.mock import Mock, patch
-from typing import List, Dict, Any
+from unittest.mock import Mock
 
 from src.sboxmgr.subscription.models import ParsedServer, PipelineContext
 from src.sboxmgr.profiles.models import FullProfile, FilterProfile
 from src.sboxmgr.subscription.postprocessors import (
     BasePostProcessor,
     ProfileAwarePostProcessor,
-    ChainablePostProcessor,
     GeoFilterPostProcessor,
     TagFilterPostProcessor,
     LatencySortPostProcessor,

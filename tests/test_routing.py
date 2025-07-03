@@ -30,7 +30,7 @@ def test_export_manager_with_test_router():
     mgr = ExportManager(routing_plugin=router)
     config = mgr.export(servers, exclusions, user_routes, context)
     assert config["route"]["rules"] == [{"test": True}]
-    assert router.last_call["context"]["mode"] == "geo"
+    assert router.last_call["context"].mode == "geo"
     assert router.last_call["user_routes"] == user_routes
     assert router.last_call["servers"] == servers
 

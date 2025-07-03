@@ -9,7 +9,7 @@ Implements Phase 3 architecture with profile integration and advanced features.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Dict, Any, Callable, Union
+from typing import List, Optional, Dict, Any
 from ..models import ParsedServer, PipelineContext
 from ...profiles.models import FullProfile
 

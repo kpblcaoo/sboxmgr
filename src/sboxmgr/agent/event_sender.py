@@ -5,7 +5,6 @@ to sboxagent via Unix socket using the framed JSON protocol.
 """
 
 import uuid
-import json
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 

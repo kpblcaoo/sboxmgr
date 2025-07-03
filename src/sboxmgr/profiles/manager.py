@@ -5,9 +5,8 @@ including creation, loading, validation, and active profile management.
 """
 
 import json
-import os
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 from datetime import datetime
 
 from pydantic import ValidationError
@@ -196,7 +195,7 @@ class ProfileManager:
                 # Validate subscription sources
                 for subscription in profile.subscriptions:
                     if not hasattr(subscription, 'id') or not subscription.id:
-                        errors.append(f"Subscription must have valid ID")
+                        errors.append("Subscription must have valid ID")
             
             if hasattr(profile, 'export') and profile.export:
                 # Validate export settings

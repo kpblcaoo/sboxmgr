@@ -12,7 +12,6 @@ import tempfile
 from typing import Optional
 
 from sboxmgr.core import Orchestrator
-from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_config_file, get_backup_file
 

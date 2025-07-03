@@ -6,7 +6,7 @@ preventing runtime errors from invalid configurations.
 """
 
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 from .validation import ConfigValidationError
 
 

@@ -7,7 +7,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Tuple
 
 
 class CallGraphVisitor(ast.NodeVisitor):
@@ -196,12 +196,12 @@ def main():
         
         f.write("}\n")
     
-    print(f"\n📊 Results saved:")
-    print(f"  📄 callgraph_src.json - Full analysis")
-    print(f"  🔗 callgraph_src.dot - Graphviz DOT file")
-    print(f"  🆔 ast_hashes.txt - AST hashes")
+    print("\n📊 Results saved:")
+    print("  📄 callgraph_src.json - Full analysis")
+    print("  🔗 callgraph_src.dot - Graphviz DOT file")
+    print("  🆔 ast_hashes.txt - AST hashes")
     
-    print(f"\n📈 Statistics:")
+    print("\n📈 Statistics:")
     print(f"  📁 Files: {result['metadata']['total_files']}")
     print(f"  📞 Calls: {result['metadata']['total_calls']}")
     print(f"  📝 Definitions: {result['metadata']['total_definitions']}")

@@ -1,6 +1,5 @@
 """Test with real subscription data."""
 
-import pytest
 from sboxmgr.subscription.manager import SubscriptionManager
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
 from sboxmgr.subscription.validators.protocol_validator import EnhancedRequiredFieldsValidator

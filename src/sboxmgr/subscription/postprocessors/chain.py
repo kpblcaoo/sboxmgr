@@ -8,8 +8,7 @@ and sophisticated error recovery strategies.
 Implements Phase 3 architecture with profile integration.
 """
 
-import asyncio
-from typing import List, Optional, Dict, Any, Union, Callable
+from typing import List, Optional, Dict, Any, Union
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from ..registry import register
 from .base import BasePostProcessor, ProfileAwarePostProcessor

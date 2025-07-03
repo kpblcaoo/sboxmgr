@@ -7,7 +7,6 @@ Implements CONFIG-03 validation from ADR-0009.
 import os
 from pathlib import Path
 from typing import Dict, Any, List
-import toml
 
 
 class ConfigValidationError(Exception):

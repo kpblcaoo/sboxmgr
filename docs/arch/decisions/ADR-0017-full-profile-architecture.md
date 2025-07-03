@@ -116,8 +116,8 @@ sboxmgr apply --profile profiles/home.json --override-subscription https://new-s
   "user_id": "u_123",
   "profile_id": "home-vpn",
   "active": true,
-  "created_at": "2025-01-27T10:00:00Z",
-  "updated_at": "2025-01-27T15:30:00Z",
+  "created_at": "2025-07-03T10:00:00Z",
+"updated_at": "2025-07-03T15:30:00Z",
   "data": { ... } // embedded full profile
 }
 ```

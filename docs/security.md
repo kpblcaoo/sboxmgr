@@ -2,7 +2,7 @@
 
 ## Threats
 
-### Code Quality & Architecture Threats (NEW - 2024-12-24)
+### Code Quality & Architecture Threats (NEW - 2025-06-25)
 - **Critical Code Complexity**: функции с F-E сложностью (singbox_export F-53, run_installation_wizard E-37, prepare_selection E-33) создают риски необнаруженных багов, сложности аудита, maintenance overhead
 - **Security Vulnerabilities**: shell=True в subprocess, MD5 хеширование, HTTP запросы без timeout
 - **Dead Code**: неиспользуемые импорты и переменные могут скрывать уязвимости, создавать confusion при аудите
@@ -86,7 +86,7 @@
 
 See also: sec_checklist.md, docs/tests/edge_cases.md
 
-## SEC-контуры и угрозы по фазам пайплайна (актуализация 2024-12-24)
+## SEC-контуры и угрозы по фазам пайплайна (актуализация 2025-06-25)
 
 | Фаза             | Основные угрозы/риски | Реализовано | Упущения/рекомендации |
 |------------------|----------------------|-------------|-----------------------|

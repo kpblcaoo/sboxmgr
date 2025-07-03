@@ -4,11 +4,6 @@ import sys
 from unittest.mock import MagicMock
 sys.modules['src.sboxmgr.logging.core'] = MagicMock()
 
-import pytest
-import json
-import tempfile
-from pathlib import Path
-from unittest.mock import patch, mock_open
 
 from src.sboxmgr.profiles.loader import (
     ProfileLoader, 

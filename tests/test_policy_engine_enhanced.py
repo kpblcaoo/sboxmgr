@@ -1,9 +1,8 @@
 """Enhanced tests for policy engine with evaluate_all() and PolicyEvaluationResult."""
 
-import pytest
 from unittest.mock import Mock, patch
 from sboxmgr.policies.base import (
-    BasePolicy, PolicyContext, PolicyResult, PolicyEvaluationResult, PolicySeverity
+    BasePolicy, PolicyContext, PolicyResult, PolicyEvaluationResult
 )
 from sboxmgr.policies.engine import PolicyEngine
 

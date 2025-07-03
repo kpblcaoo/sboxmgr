@@ -6,7 +6,6 @@ parameter validation, security defaults, and error handling.
 
 import pytest
 from sboxmgr.cli.inbound_builder import InboundBuilder, build_client_profile_from_cli
-from sboxmgr.subscription.models import ClientProfile, InboundProfile
 
 
 class TestInboundBuilder:
@@ -119,7 +118,7 @@ class TestInboundBuilder:
         
         inbound = profile.inbounds[0]
         assert inbound.type == "tproxy"
-        assert inbound.listen == "0.0.0.0"  # TPROXY needs all interfaces
+        assert inbound.listen == "127.0.0.1"  # TPROXY default binding
         assert inbound.port == 7895
         assert inbound.options["tag"] == "tproxy-in"
         assert inbound.options["network"] == "tcp"

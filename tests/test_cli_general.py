@@ -22,9 +22,12 @@ def test_normal_run_creates_selected_config(tmp_path, monkeypatch):
         print("Return code:", result.returncode)
         # Если подписка не работает, это не означает что CLI сломан
         # Проверяем что хотя бы были попытки обработать подписку
-        assert ("No servers parsed" in result.stderr or 
+        # CLI может показывать i18n ключи или переведенные сообщения
+        assert ("cli.error.subscription_processing_failed" in result.stderr or 
+                "No servers parsed" in result.stderr or 
                 "Failed to process subscription" in result.stderr or
-                "ERROR:" in result.stderr), "CLI должен показать ошибку обработки подписки"
+                "ERROR:" in result.stderr or
+                "❌" in result.stderr), "CLI должен показать ошибку обработки подписки"
         # Тест считается пройденным если CLI корректно обработал ошибку
         return
     

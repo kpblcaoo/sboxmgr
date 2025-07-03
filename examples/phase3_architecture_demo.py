@@ -229,7 +229,7 @@ def demo_postprocessor_chain():
     # Print execution metadata
     metadata = chain.get_metadata()
     exec_meta = metadata.get('execution_metadata', {})
-    print(f"\n   Execution metadata:")
+    print("\n   Execution metadata:")
     print(f"   - Processors executed: {len(exec_meta.get('processors_executed', []))}")
     print(f"   - Processors failed: {len(exec_meta.get('processors_failed', []))}")
     print(f"   - Duration: {exec_meta.get('duration', 0):.3f} seconds")

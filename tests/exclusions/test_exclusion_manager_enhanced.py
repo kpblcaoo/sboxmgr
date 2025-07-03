@@ -6,11 +6,10 @@ import logging
 import threading
 import time
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 import tempfile
 
 from sboxmgr.core.exclusions import ExclusionManager
-from sboxmgr.core.exclusions.models import ExclusionEntry, ExclusionList
 
 
 class TestVersioning:
@@ -469,8 +468,6 @@ class TestExclusionManagerEnhanced:
 
     def test_thread_safety_simulation(self, manager):
         """Test thread safety with concurrent operations."""
-        import threading
-        import time
         
         results = []
         

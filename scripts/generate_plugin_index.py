@@ -13,7 +13,6 @@ import inspect
 from sboxmgr.subscription.registry import PLUGIN_REGISTRY
 
 # SEC: Импортируем только известные модули с плагинами (без динамики)
-from sboxmgr.subscription import fetchers, parsers, exporters, postprocessors, validators
 
 # Собираем плагины по типу
 plugins_by_type = {}

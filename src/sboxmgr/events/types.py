@@ -3,7 +3,7 @@
 from enum import Enum, IntEnum
 from typing import Any, Dict, Optional, Union, Callable
 from datetime import datetime
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 
 class EventType(str, Enum):

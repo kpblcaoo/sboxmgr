@@ -6,7 +6,7 @@ geographic coordinates, and ensures geographic metadata consistency
 for location-based server filtering and routing.
 """
 from typing import Any
-from ..validators.base import BaseValidator, ValidationResult
+from ..validators.base import BaseValidator
 from sboxmgr.subscription.models import PipelineContext
 
 
