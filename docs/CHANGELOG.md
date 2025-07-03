@@ -3,7 +3,7 @@
 ## Other languages / Другие языки
 - [Русский (ru/CHANGELOG.md)](ru/CHANGELOG.md)
 
-# 1.6.0 (2025-01-27)
+# pre-mvp0.1.0 (2025-01-27)
 
 ## Added
 - **Full Profile Architecture**: Complete profile system with Pydantic models (ADR-0017)
