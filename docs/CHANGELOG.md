@@ -3,6 +3,83 @@
 ## Other languages / Другие языки
 - [Русский (ru/CHANGELOG.md)](ru/CHANGELOG.md)
 
+# 1.6.0 (2025-01-27)
+
+## Added
+- **Full Profile Architecture**: Complete profile system with Pydantic models (ADR-0017)
+  - `sboxmgr profile apply/validate/explain/diff/list/switch` commands
+  - FullProfile, SubscriptionProfile, FilterProfile, RoutingProfile models
+  - ExportProfile, AgentProfile, UIProfile, LegacyProfile support
+  - 8 new JSON schemas for profile validation
+  - Example profiles in `examples/profiles/`
+- **Policy & Security Framework**: Comprehensive security policy system (Phase 5)
+  - EncryptionPolicy, ProtocolPolicy, AuthenticationPolicy
+  - GeoTestPolicy, CountryPolicy, ASNPolicy
+  - IntegrityPolicy, PermissionPolicy, LimitPolicy
+  - Policy evaluation with detailed logging and metadata
+- **Agent Cleanup**: Complete agent architecture refactoring (Phase 2-3)
+  - Removed service management from agent (ADR-0015)
+  - Agent-installer separation for clean architecture
+  - Pydantic schema generation (ADR-0016)
+- **Pydantic Migration**: Major type safety improvements (Phase 1)
+  - Extensive type annotation improvements across codebase
+  - Fixed critical type errors in CLI, parsers, and fetchers
+  - Enhanced type safety for core modules and exporters
+- **CLI Enhancements**: Improved user experience and functionality
+  - Auto-detect subscription format in list-servers
+  - Robust SingBoxParser with comprehensive format support
+  - `--format` option for forced format detection
+  - UX improvements: hide service outbounds, better User-Agent logging
+- **Routing Improvements**: Enhanced DefaultRouter with fallback rules
+  - Fixed dead code in DefaultRouter
+  - Added fallback routing rule for remaining traffic
+  - Comprehensive routing tests and validation
+
+## Changed
+- **Profile Management**: New unified configuration approach
+  - Single JSON profile replaces multiple config files
+  - Backward compatibility with existing CLI commands
+  - Gradual migration path from legacy configuration
+- **Security Validation**: Enhanced policy evaluation
+  - Real-time policy evaluation with detailed reporting
+  - Policy violations, warnings, and info tracking
+  - Integration with subscription pipeline
+- **Type System**: Improved type annotations and validation
+  - Better error messages for type validation
+  - Enhanced Pydantic model integration
+  - Improved type safety across all modules
+
+## Fixed
+- **DefaultRouter**: Fixed dead code and improved fallback logic
+  - Server tag computation now properly used in routing
+  - Fallback rules handle edge cases correctly
+  - All routing tests pass with proper rule generation
+- **CLI UX**: Improved user experience issues
+  - Service outbounds (urltest/auto) hidden from list-servers output
+  - Better User-Agent logging (shows actual values instead of [default])
+  - Enhanced error handling and validation
+- **Test Stability**: Fixed integration test issues
+  - Comprehensive test cleanup and config.json pollution prevention
+  - Fixed CLI matrix tests for real data scenarios
+  - Improved test isolation and reliability
+
+## Technical Details
+- **Architecture**: Full profile system with Pydantic validation
+- **Backward Compatibility**: Existing workflows continue to work
+- **Performance**: No significant impact on existing operations
+- **Documentation**: Comprehensive ADR documentation (0017-0019)
+- **Type Safety**: Significant improvements in type annotations
+- **Policy System**: Comprehensive security evaluation framework
+- **Test Coverage**: Enhanced integration and unit test coverage
+
+## Migration Notes
+- Existing CLI commands continue to work unchanged
+- New profile system is optional and additive
+- Gradual migration to profiles recommended for complex configurations
+- Policy system provides enhanced security validation
+
+---
+
 # 1.5.0 (2025-07-01)
 
 ## Added
