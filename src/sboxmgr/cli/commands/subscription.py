@@ -13,7 +13,7 @@ from sboxmgr.i18n.t import t
 
 
 def _is_service_outbound(outbound: dict) -> bool:
-    """Проверяет, является ли outbound служебным (direct, block, dns-out).
+    """Проверяет, является ли outbound служебным (direct, block, dns-out, urltest).
     
     Args:
         outbound: Outbound конфигурация
@@ -28,8 +28,8 @@ def _is_service_outbound(outbound: dict) -> bool:
     tag = outbound.get("tag", "")
     
     # Служебные outbounds
-    service_types = {"direct", "block", "dns"}
-    service_tags = {"direct", "block", "dns-out"}
+    service_types = {"direct", "block", "dns", "urltest"}
+    service_tags = {"direct", "block", "dns-out", "auto"}
     
     return outbound_type in service_types or tag in service_tags
 
@@ -134,7 +134,7 @@ def list_servers(
             
             # Если есть нарушения политик, показываем их независимо от результата конфигурации
             if violations or warnings or info_results:
-                typer.echo(f"\n📊 Policy Evaluation Summary:")
+                typer.echo("\n📊 Policy Evaluation Summary:")
                 typer.echo(f"   Servers denied: {len(set(v['server'] for v in violations))}")
                 typer.echo(f"   Servers with warnings: {len(set(w['server'] for w in warnings))}")
                 typer.echo(f"   Total policy violations: {len(violations)}")
@@ -143,7 +143,7 @@ def list_servers(
                 # Показываем исправления валидации
                 validation_fixes = context.metadata.get("validation_fixes", [])
                 if validation_fixes:
-                    typer.echo(f"\n🔧 Validation Fixes Applied:")
+                    typer.echo("\n🔧 Validation Fixes Applied:")
                     for fix in validation_fixes:
                         severity_icon = "ℹ️" if fix['severity'] == 'info' else "⚠️"
                         typer.echo(f"   {severity_icon} Server {fix['server_identifier']}: {fix['description']}")
@@ -185,7 +185,7 @@ def list_servers(
             warnings = context.metadata.get("policy_warnings", [])
             info_results = context.metadata.get("policy_info", [])
             
-            typer.echo(f"\n📊 Policy Evaluation Summary:")
+            typer.echo("\n📊 Policy Evaluation Summary:")
             typer.echo(f"   Total servers processed: {len(servers)}")
             typer.echo(f"   Servers denied: {len(set(v['server'] for v in violations))}")
             typer.echo(f"   Servers with warnings: {len(set(w['server'] for w in warnings))}")
@@ -195,7 +195,7 @@ def list_servers(
             # Показываем исправления валидации
             validation_fixes = context.metadata.get("validation_fixes", [])
             if validation_fixes:
-                typer.echo(f"\n🔧 Validation Fixes Applied:")
+                typer.echo("\n🔧 Validation Fixes Applied:")
                 for fix in validation_fixes:
                     severity_icon = "ℹ️" if fix['severity'] == 'info' else "⚠️"
                     typer.echo(f"   {severity_icon} Server {fix['server_identifier']}: {fix['description']}")

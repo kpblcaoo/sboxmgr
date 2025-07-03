@@ -15,6 +15,7 @@ Phase 4 enhancements:
 from typing import List, Dict, Any, Optional, Union
 from sboxmgr.subscription.models import ParsedServer, ClientProfile, PipelineContext
 from sboxmgr.profiles.models import FullProfile
+from sboxmgr.logging import get_logger
 from .routing.default_router import DefaultRouter
 from sboxmgr.subscription.exporters.singbox_exporter import singbox_export
 from sboxmgr.subscription.exporters.clashexporter import clash_export
@@ -29,11 +30,14 @@ except ImportError:
     PostProcessorChain = None
     BaseMiddleware = None
 
-EXPORTER_REGISTRY = {
-    "singbox": singbox_export,
-    "clash": clash_export,
-    # В будущем: "v2ray": v2ray_export и т.д.
-}
+    # Get logger for this module
+    logger = get_logger(__name__)
+
+    EXPORTER_REGISTRY = {
+        "singbox": singbox_export,
+        "clash": clash_export,
+        # В будущем: "v2ray": v2ray_export и т.д.
+    }
 
 class ExportManager:
     """Manages configuration export for various proxy clients with Phase 3 integration.

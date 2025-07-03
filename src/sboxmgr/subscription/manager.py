@@ -10,7 +10,7 @@ from .models import SubscriptionSource, PipelineContext, PipelineResult
 from .registry import get_plugin, load_entry_points
 from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации
 
-from typing import Optional, Any, Dict, Tuple, List, Literal, Protocol
+from typing import Optional, Any, Dict, Tuple, List, Protocol
 from sboxmgr.export.export_manager import ExportManager
 from .base_selector import DefaultSelector
 from .postprocessor_base import DedupPostProcessor, PostProcessorChain
@@ -214,10 +214,12 @@ class SubscriptionManager:
             debug_level = getattr(context, 'debug_level', 0)
             if debug_level >= 1:
                 ua = getattr(self.fetcher.source, 'user_agent', None)
-                if ua:
+                if ua == "":
+                    print("[fetcher] Using User-Agent: [none]")
+                elif ua:
                     print(f"[fetcher] Using User-Agent: {ua}")
                 else:
-                    print("[fetcher] Using User-Agent: [default]")
+                    print("[fetcher] Using User-Agent: ClashMeta/1.0")
             
             raw = self.fetcher.fetch()
             
@@ -386,7 +388,7 @@ class SubscriptionManager:
         Returns:
             List of servers that passed all DENY policies.
         """
-        from sboxmgr.policies import policy_registry, PolicyContext as PolCtx, PolicySeverity
+        from sboxmgr.policies import policy_registry, PolicyContext as PolCtx
         result = []
         # Prepare metadata containers
         context.metadata.setdefault("policy_violations", [])
@@ -439,7 +441,6 @@ class SubscriptionManager:
                     
             except Exception as e:
                 # Fail-secure: treat as DENY
-                from sboxmgr.policies.base import PolicyResult, PolicySeverity
                 server_id = pol_ctx.get_server_identifier()
                 context.metadata["policy_violations"].append({
                     "server": server_id,
