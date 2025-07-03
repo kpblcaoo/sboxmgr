@@ -6,9 +6,9 @@ to enable proper testing and architectural separation while providing a
 unified interface for CLI and other consumers.
 """
 
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 import logging
-from dataclasses import dataclass
+from pydantic import BaseModel, ConfigDict
 
 from .interfaces import (
     SubscriptionManagerInterface, 
@@ -18,8 +18,7 @@ from .interfaces import (
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext, PipelineResult
 
 
-@dataclass
-class OrchestratorConfig:
+class OrchestratorConfig(BaseModel):
     """Configuration for Orchestrator operations.
     
     Centralizes configuration management for consistent behavior
@@ -32,6 +31,9 @@ class OrchestratorConfig:
         timeout_seconds: Default timeout for operations.
         fail_safe: Whether to use fail-safe error handling.
     """
+    
+    model_config = ConfigDict(extra='forbid')
+    
     default_mode: str = "tolerant"
     debug_level: int = 0
     cache_enabled: bool = True
@@ -318,7 +320,6 @@ class Orchestrator:
                            export_format: str = "singbox",
                            exclusions: Optional[List[str]] = None,
                            user_routes: Optional[List[str]] = None,
-                           skip_version_check: bool = False,
                            **kwargs) -> Dict[str, Any]:
         """Export subscription to client configuration format.
         
@@ -331,7 +332,6 @@ class Orchestrator:
             export_format: Target export format (singbox, clash, etc.).
             exclusions: Optional list of server addresses to exclude.
             user_routes: Optional list of custom routing rules.
-            skip_version_check: Whether to skip version compatibility checks.
             **kwargs: Additional arguments for export customization.
             
         Returns:
@@ -359,11 +359,22 @@ class Orchestrator:
                 )
             
             # Export configuration using export manager
+            # user_routes should be List[Dict] with proper routing rule structure
+            # DefaultRouter expects full routing rule dicts, not just {"tag": route}
+            user_routes_dicts = []
+            if user_routes:
+                for route in user_routes:
+                    if isinstance(route, str):
+                        # Convert string to proper routing rule
+                        user_routes_dicts.append({"outbound": route})
+                    elif isinstance(route, dict):
+                        # Already a routing rule dict
+                        user_routes_dicts.append(route)
+            
             config = self.export_manager.export(
                 servers=servers_result.config,
                 exclusions=exclusions,
-                user_routes=user_routes or [],
-                skip_version_check=skip_version_check
+                user_routes=user_routes_dicts
             )
             
             result = {

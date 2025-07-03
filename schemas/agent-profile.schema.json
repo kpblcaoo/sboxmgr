@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentProfile",
+  "description": "Profile configuration for agent settings.",
+  "generator": "sboxmgr-schema-generator",
+  "version": "1.0.0",
+  "properties": {
+    "auto_restart": {
+      "default": false,
+      "description": "Auto-restart on failure",
+      "title": "Auto Restart",
+      "type": "boolean"
+    },
+    "monitor_latency": {
+      "default": true,
+      "description": "Monitor server latency",
+      "title": "Monitor Latency",
+      "type": "boolean"
+    },
+    "health_check_interval": {
+      "default": "30s",
+      "description": "Health check interval",
+      "title": "Health Check Interval",
+      "type": "string"
+    },
+    "log_level": {
+      "default": "info",
+      "description": "Logging level",
+      "title": "Log Level",
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

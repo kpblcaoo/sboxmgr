@@ -11,7 +11,7 @@ This installation wizard has been **ARCHIVED** due to significant security vulne
 - **High code complexity**: E-37 complexity rating making security audit difficult
 
 ## 📅 Archive Information
-- **Archived on**: 2024-12-24
+- **Archived on**: 2025-06-25
 - **Original location**: `src/install/`
 - **Reason**: Security risk elimination during refactor/cleanup
 - **Branch**: refactor/cleanup

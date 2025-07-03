@@ -5,11 +5,10 @@
 """
 
 import ast
-import os
 import sys
 from pathlib import Path
-from collections import defaultdict, Counter
-from typing import Dict, List, Set, Tuple, Any
+from collections import defaultdict
+from typing import Dict, List
 import networkx as nx
 import json
 

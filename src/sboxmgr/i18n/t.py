@@ -4,10 +4,8 @@ This module provides convenient functions for accessing translations without
 directly instantiating LanguageLoader. It includes caching mechanisms to
 avoid repeated language file loading.
 """
-from functools import lru_cache
 from .loader import LanguageLoader
 
-@lru_cache()
 def current_lang() -> LanguageLoader:
     """Get cached instance of the current language loader.
     

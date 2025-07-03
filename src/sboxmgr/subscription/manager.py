@@ -10,7 +10,7 @@ from .models import SubscriptionSource, PipelineContext, PipelineResult
 from .registry import get_plugin, load_entry_points
 from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации
 
-from typing import Optional
+from typing import Optional, Any, Dict, Tuple, List, Protocol
 from sboxmgr.export.export_manager import ExportManager
 from .base_selector import DefaultSelector
 from .postprocessor_base import DedupPostProcessor, PostProcessorChain
@@ -20,7 +20,14 @@ from .middleware_base import MiddlewareChain
 
 import threading
 
-def detect_parser(raw: bytes, source_type: str) -> Optional[object]:
+class ParserProtocol(Protocol):
+    """Protocol for parser objects that can parse subscription data."""
+    
+    def parse(self, raw: bytes) -> List[Any]:
+        """Parse raw subscription data into server configurations."""
+        ...
+
+def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
     """Auto-detect appropriate parser based on data content.
     
     Args:
@@ -32,6 +39,19 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[object]:
     """
     # Декодируем данные
     text = raw.decode('utf-8', errors='ignore')
+    
+    # Если source_type явно указан, используем соответствующий парсер
+    if source_type == "url_json" or source_type == "file_json":
+        from .parsers.singbox_parser import SingBoxParser
+        return SingBoxParser()
+    elif source_type == "url_base64" or source_type == "file_base64":
+        from .parsers.base64_parser import Base64Parser
+        return Base64Parser()
+    elif source_type == "uri_list" or source_type == "file_uri_list":
+        from .parsers.uri_list_parser import URIListParser
+        return URIListParser()
+    
+    # Автоопределение по содержимому (fallback)
     # 1. Пробуем JSON (SingBox)
     try:
         from .parsers.singbox_parser import SingBoxParser
@@ -96,7 +116,7 @@ class SubscriptionManager:
     """
     
     _cache_lock = threading.Lock()
-    _get_servers_cache = {}
+    _get_servers_cache: Dict[Tuple, Any] = {}
 
     def __init__(self, source: SubscriptionSource, detect_parser=None, postprocessor_chain=None, middleware_chain=None):
         """Initialize subscription manager with configuration.
@@ -194,10 +214,12 @@ class SubscriptionManager:
             debug_level = getattr(context, 'debug_level', 0)
             if debug_level >= 1:
                 ua = getattr(self.fetcher.source, 'user_agent', None)
-                if ua:
+                if ua == "":
+                    print("[fetcher] Using User-Agent: [none]")
+                elif ua:
                     print(f"[fetcher] Using User-Agent: {ua}")
                 else:
-                    print("[fetcher] Using User-Agent: [default]")
+                    print("[fetcher] Using User-Agent: ClashMeta/1.0")
             
             raw = self.fetcher.fetch()
             
@@ -357,6 +379,79 @@ class SubscriptionManager:
             context.metadata['errors'].append(err)
             return servers, False
     
+    def _apply_policies(self, servers: list, context: PipelineContext) -> list:
+        """Apply security and policy engine to each server.
+        
+        Args:
+            servers: List of ParsedServer objects.
+            context: PipelineContext for tracing and audit.
+        Returns:
+            List of servers that passed all DENY policies.
+        """
+        from sboxmgr.policies import policy_registry, PolicyContext as PolCtx
+        result = []
+        # Prepare metadata containers
+        context.metadata.setdefault("policy_violations", [])
+        context.metadata.setdefault("policy_warnings", [])
+        context.metadata.setdefault("policy_info", [])
+        
+        for s in servers:
+            pol_ctx = PolCtx(server=s, profile=getattr(context, 'profile', None), user=getattr(context, 'user', None), env=getattr(context, 'env', {}))
+            
+            try:
+                # Use evaluate_all() to get comprehensive results
+                evaluation_result = policy_registry.evaluate_all(pol_ctx)
+                
+                # Get server identifier consistently
+                server_id = pol_ctx.get_server_identifier()
+                
+                # Process all results
+                if evaluation_result.has_denials:
+                    # Server is denied - add all denials to violations
+                    for denial in evaluation_result.denials:
+                        context.metadata["policy_violations"].append({
+                            "server": server_id,
+                            "policy": denial.policy_name,
+                            "reason": denial.reason,
+                            "metadata": denial.metadata
+                        })
+                    continue  # Exclude server
+                
+                # Server is allowed - add warnings and info
+                if evaluation_result.has_warnings:
+                    for warning in evaluation_result.warnings:
+                        context.metadata["policy_warnings"].append({
+                            "server": server_id,
+                            "policy": warning.policy_name,
+                            "reason": warning.reason,
+                            "metadata": warning.metadata
+                        })
+                
+                for info_result in evaluation_result.info_results:
+                    context.metadata["policy_info"].append({
+                        "server": server_id,
+                        "policy": info_result.policy_name,
+                        "reason": info_result.reason,
+                        "metadata": info_result.metadata
+                    })
+                
+                # Add server to result if allowed
+                if evaluation_result.is_allowed:
+                    result.append(s)
+                    
+            except Exception as e:
+                # Fail-secure: treat as DENY
+                server_id = pol_ctx.get_server_identifier()
+                context.metadata["policy_violations"].append({
+                    "server": server_id,
+                    "policy": "system",
+                    "reason": f"Policy evaluation error: {e}",
+                    "metadata": {"error_type": "system_exception"}
+                })
+                continue  # Exclude server
+        
+        return result
+    
     def _process_middleware(self, servers: list, context: PipelineContext) -> tuple[list, bool]:
         """Process servers through middleware chain.
         
@@ -420,7 +515,7 @@ class SubscriptionManager:
             
             return selected_servers, True
             
-        except Exception as e:
+        except Exception:
             # Post-processing errors are not critical - return original servers
             return servers, True
 
@@ -493,7 +588,10 @@ class SubscriptionManager:
             servers, success = self._validate_parsed_servers(servers, context)
             if not success:
                 return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
-            
+
+            # Stage 3.5: Apply policies (security, geo, profile, etc.)
+            servers = self._apply_policies(servers, context)
+
             # Stage 4: Process middleware
             servers, success = self._process_middleware(servers, context)
             if not success:
@@ -504,7 +602,8 @@ class SubscriptionManager:
             # Stage 5: Post-process and select
             servers, success = self._postprocess_and_select(servers, user_routes, exclusions, mode)
             
-            # Create successful result
+            # Create successful result - even if all servers were blocked by policies
+            # This is not a pipeline failure, but a policy decision
             result = PipelineResult(config=servers, context=context, errors=context.metadata['errors'], success=True)
             
             # Cache successful result
@@ -523,7 +622,7 @@ class SubscriptionManager:
             context.metadata['errors'].append(err)
             return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
 
-    def export_config(self, exclusions=None, user_routes=None, context: PipelineContext = None, routing_plugin=None, export_manager: Optional[ExportManager] = None, skip_version_check: bool = False) -> PipelineResult:
+    def export_config(self, exclusions=None, user_routes=None, context: PipelineContext = None, routing_plugin=None, export_manager: Optional[ExportManager] = None) -> PipelineResult:
         """Export subscription to final configuration format.
 
         Processes the subscription through the complete pipeline and exports
@@ -536,7 +635,6 @@ class SubscriptionManager:
             context: Optional pipeline execution context.
             routing_plugin: Optional custom routing plugin for rule generation.
             export_manager: Optional export manager with target format configuration.
-            skip_version_check: Whether to skip version compatibility checks.
 
         Returns:
             PipelineResult containing:
@@ -564,7 +662,7 @@ class SubscriptionManager:
         # Используем переданный ExportManager или создаём дефолтный
         mgr = export_manager or ExportManager(routing_plugin=routing_plugin)
         try:
-            config = mgr.export(servers_result.config, exclusions, user_routes, context, skip_version_check=skip_version_check)
+            config = mgr.export(servers_result.config, exclusions, user_routes, context)
             return PipelineResult(config=config, context=context, errors=context.metadata['errors'], success=True)
         except Exception as e:
             err = PipelineError(

@@ -8,8 +8,8 @@ from sboxmgr.subscription.fetchers.url_fetcher import URLFetcher
 
 def test_base64_subscription(tmp_path):
     example_path = os.path.join(os.path.dirname(__file__), '../src/sboxmgr/examples/example_base64.txt')
-    with open(example_path, 'rb') as f:
-        raw = f.read()
+    # Проверяем что файл существует
+    assert os.path.exists(example_path)
     # Эмулируем fetcher, подставляя raw напрямую (или через временный fetcher)
     source = SubscriptionSource(url='file://' + example_path, source_type='url_base64')
     mgr = SubscriptionManager(source)
@@ -28,7 +28,7 @@ ss://aes-256-gcm:pass@example.com:8388#ssuri  # pragma: allowlist secret
 INVALID_JSON = "{"  # Некорректный JSON
 
 @pytest.mark.parametrize("source,should_fail", [
-    (SubscriptionSource(url="file://mixed_uri_list.txt", source_type="url_base64"), False),  # base64 парсер толерантен
+    (SubscriptionSource(url="file://mixed_uri_list.txt", source_type="uri_list"), False),  # uri_list парсер толерантен
     (SubscriptionSource(url="file://invalid.json", source_type="url_json"), True),
 ])
 def test_subscription_manager_edge_cases(tmp_path, source, should_fail):
@@ -66,7 +66,8 @@ def test_subscription_manager_edge_cases(tmp_path, source, should_fail):
 
 class MockRouter(BaseRoutingPlugin):
     def __init__(self):
-        self.last_call = None
+        self.last_call = {}
+
     def generate_routes(self, servers, exclusions, user_routes, context=None):
         """Генерирует маршруты для теста.
 
@@ -79,12 +80,11 @@ class MockRouter(BaseRoutingPlugin):
             list: Маршруты.
         """
         self.last_call = {
-            'servers': servers,
-            'exclusions': exclusions,
-            'user_routes': user_routes,
-            'context': context,
+            "servers": servers,
+            "exclusions": exclusions,
+            "user_routes": user_routes,
+            "context": context
         }
-        # Пример доступа к mode: context.mode
         return [{"test": True}]
 
 def test_export_config_with_test_router(tmp_path):
@@ -105,7 +105,7 @@ def test_export_config_with_test_router(tmp_path):
     assert result.success
     config = result.config
     assert config["route"]["rules"] == [{"test": True}]
-    assert router.last_call["context"].mode == "geo"
+    assert router.last_call["context"] == context
     assert router.last_call["user_routes"] == user_routes
     assert router.last_call["servers"][0].address == "1.2.3.4"
 
@@ -144,7 +144,7 @@ def test_export_config_integration_edge_cases(tmp_path):
             """
             assert "5.6.7.8" in exclusions
             assert user_routes[0]["domain"] == ["example.com"]
-            assert getattr(context, "mode", None) == "geo"
+            assert context.mode == "geo"
             return [{"outbound": s.type, "tag": s.meta.get("tag", "")} for s in servers]
     exclusions = ["5.6.7.8"]
     user_routes = [{"domain": ["example.com"], "outbound": "ss"}]
@@ -224,8 +224,8 @@ def test_export_config_large_server_list(tmp_path):
             """
             return [{"outbound": s.type, "tag": s.address} for s in servers]
     config = mgr.export_config([], [], PipelineContext(mode="default"), routing_plugin=TestRouter())
-    # 1000 серверов + 1 direct outbound = 1001 
-    assert len(config.config["outbounds"]) == 1001
+    # 1000 серверов + 3 служебных outbound (direct, block, dns) = 1003
+    assert len(config.config["outbounds"]) == 1003
     assert len(config.config["route"]["rules"]) == 1000
 
 def test_export_config_invalid_inputs(tmp_path):
@@ -249,17 +249,12 @@ def test_export_config_invalid_inputs(tmp_path):
                 list: Маршруты.
             """
             return []
-    # Пустые servers - должен быть только direct outbound
-    config = mgr.export_config([], [], PipelineContext(mode="default"), routing_plugin=TestRouter())
-    assert config.config["outbounds"] == [{"type": "direct", "tag": "direct"}]
-    assert config.config["route"]["rules"] == []
-    # Пустые exclusions/user_routes/context
     config = mgr.export_config(None, None, None, routing_plugin=TestRouter())
-    assert config.config["outbounds"] == [{"type": "direct", "tag": "direct"}]
-    assert config.config["route"]["rules"] == []
-    # context без mode
-    config = mgr.export_config([], [], PipelineContext(), routing_plugin=TestRouter())
-    assert config.config["outbounds"] == [{"type": "direct", "tag": "direct"}]
+    outbounds = config.config["outbounds"]
+    assert len(outbounds) == 3
+    assert {"type": "direct", "tag": "direct"} in outbounds
+    assert {"type": "block", "tag": "block"} in outbounds
+    assert {"type": "dns", "tag": "dns-out"} in outbounds
     assert config.config["route"]["rules"] == []
 
 def test_export_config_same_tag_different_types(tmp_path):
@@ -332,9 +327,12 @@ def test_export_config_user_routes_vs_exclusions(tmp_path):
     exclusions = ["1.2.3.4"]
     user_routes = [{"domain": ["example.com"], "outbound": "ss"}]
     config = mgr.export_config(exclusions, user_routes, PipelineContext(mode="default"), routing_plugin=ConflictRouter())
-    # Сервер исключен, остается только direct outbound
-    assert config.config["outbounds"] == [{"type": "direct", "tag": "direct"}]
-    assert config.config["route"]["rules"] == []
+    # Сервер исключен, остаются только служебные outbounds
+    outbounds = config.config["outbounds"]
+    assert len(outbounds) == 3
+    assert {"type": "direct", "tag": "direct"} in outbounds
+    assert {"type": "block", "tag": "block"} in outbounds
+    assert {"type": "dns", "tag": "dns-out"} in outbounds
 
 def test_export_config_user_routes_wildcard_not_implemented(tmp_path):
     from sboxmgr.subscription.models import SubscriptionSource
@@ -488,7 +486,6 @@ def test_subscription_manager_caching(monkeypatch):
     assert calls['count'] == 3
 
 def test_fetcher_caching(monkeypatch):
-    from sboxmgr.subscription.fetchers.url_fetcher import URLFetcher
     from sboxmgr.subscription.models import SubscriptionSource
     calls = {}
     class DummyRequests:

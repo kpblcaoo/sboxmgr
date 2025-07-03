@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ExportProfile",
+  "description": "Profile configuration for export settings.",
+  "generator": "sboxmgr-schema-generator",
+  "version": "1.0.0",
+  "$defs": {
+    "ExportFormat": {
+      "description": "Supported export formats.",
+      "enum": [
+        "sing-box",
+        "clash",
+        "json"
+      ],
+      "title": "ExportFormat",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "format": {
+      "$ref": "#/$defs/ExportFormat",
+      "default": "sing-box",
+      "description": "Export format"
+    },
+    "outbound_profile": {
+      "default": "vless-real",
+      "description": "Outbound profile name",
+      "title": "Outbound Profile",
+      "type": "string"
+    },
+    "inbound_profile": {
+      "default": "tun",
+      "description": "Inbound profile name",
+      "title": "Inbound Profile",
+      "type": "string"
+    },
+    "output_file": {
+      "default": "config.json",
+      "description": "Output file path",
+      "title": "Output File",
+      "type": "string"
+    },
+    "template": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Custom template path",
+      "title": "Template"
+    }
+  },
+  "type": "object"
+}

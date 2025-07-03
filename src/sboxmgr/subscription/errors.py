@@ -6,10 +6,10 @@ export errors. These exceptions provide structured error information for
 better error handling and debugging throughout the subscription pipeline.
 """
 
-from dataclasses import dataclass, field
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
+from pydantic import BaseModel, Field, ConfigDict
 
 class ErrorType(Enum):
     """Enumeration of pipeline error types.
@@ -24,8 +24,7 @@ class ErrorType(Enum):
     PLUGIN = "plugin"
     INTERNAL = "internal"
 
-@dataclass
-class PipelineError:
+class PipelineError(BaseModel):
     """Represents an error that occurred during pipeline execution.
     
     This class encapsulates error information including type, stage,
@@ -39,8 +38,10 @@ class PipelineError:
         timestamp: When the error occurred (UTC).
     """
     
+    model_config = ConfigDict(extra='allow')
+    
     type: ErrorType
     stage: str
     message: str
-    context: Dict[str, Any] = field(default_factory=dict)
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    context: Dict[str, Any] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

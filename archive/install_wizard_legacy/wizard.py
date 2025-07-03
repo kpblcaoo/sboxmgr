@@ -8,13 +8,11 @@ import os
 import sys
 import inquirer
 import re
-import shutil
 import logging
 import hashlib
 import importlib.metadata
 from inquirer.render.console import ConsoleRender
 from sboxmgr.server.exclusions import load_exclusions, view_exclusions
-from dotenv import load_dotenv
 
 # Configure basic logging for debugging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -135,7 +133,7 @@ def get_server_list(url):
         )
     except subprocess.CalledProcessError as e:
         logging.error(f"Failed to fetch server list. Return code: {e.returncode}, Output: {e.stderr}")
-        print(f"Error: Failed to fetch server list. Check URL or network connectivity.")
+        print("Error: Failed to fetch server list. Check URL or network connectivity.")
         return []
     lines = result.stdout.splitlines()
     if len(lines) <= 2:
@@ -304,7 +302,7 @@ def run_installation_wizard():
             cmd = ["sudo", "-E", "./sboxctl", "-u", install_link, "-i", ",".join(map(str, selected_indices))]
             try:
                 result = safe_run(cmd, capture_output=True, text=True, check=True)
-                print(f"Configuration applied successfully at /etc/sing-box/config.json")
+                print("Configuration applied successfully at /etc/sing-box/config.json")
                 print("Sing-box service restarted.")
                 logging.info(f"Get Config: Applied configuration with indices {selected_indices}")
                 if result.stdout:

@@ -14,6 +14,7 @@ A Python CLI tool for automating and managing [sing-box](https://sing-box.sagern
 ## ✨ Features
 - Fetch and apply proxy server configs from a URL
 - Supported protocols: VLESS, Shadowsocks, VMess, Trojan, TUIC, Hysteria2
+- **NEW in 1.5.0**: CLI inbound parameters for easy proxy configuration
 - Direct routing for Russian domains and geoip-ru, proxy for other traffic
 - Logging, backup, exclusions, dry-run, and full CLI test coverage
 - All paths and artifacts are configurable via environment variables
@@ -128,6 +129,11 @@ All commands are available via the `sboxctl` CLI (Typer-based):
   ```bash
   sboxctl run -u https://example.com/proxy-config.json --index 1
   # Generates config.json for the selected server
+  ```
+- **Export with CLI inbound parameters (NEW in 1.5.0):**
+  ```bash
+  sboxctl export -u https://example.com/proxy-config.json --inbound-types socks --socks-port 1080
+  # Configure proxy interfaces directly via CLI
   ```
 - **Dry-run (simulate config generation, no file changes):**
   ```bash
