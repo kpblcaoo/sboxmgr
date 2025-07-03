@@ -7,11 +7,10 @@ compatibility across different sing-box versions.
 """
 import json
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Callable
 from ..models import ParsedServer, ClientProfile
 from ..base_exporter import BaseExporter
 from ..registry import register
-from ...utils.version import should_use_legacy_outbounds
 
 logger = logging.getLogger(__name__)
 
@@ -49,19 +48,44 @@ def generate_inbounds(profile: ClientProfile) -> list:
     """
     inbounds = []
     for inbound in profile.inbounds:
-        # pydantic уже валидирует SEC, но можно добавить дополнительные проверки
-        inb = inbound.model_dump(exclude_unset=True)
+        # Создаем базовую структуру inbound
+        inb = {
+            "type": inbound.type,
+            "tag": inbound.options.get("tag", f"{inbound.type}-in") if inbound.options else f"{inbound.type}-in"
+        }
+        
+        # Для tun - особая обработка
+        if inbound.type == "tun":
+            # Добавляем все поля из options в корень для tun
+            if inbound.options:
+                for key, value in inbound.options.items():
+                    if key != "tag":  # tag уже добавлен
+                        inb[key] = value
+        else:
+            # Для остальных типов добавляем listen и listen_port
+            if hasattr(inbound, 'listen') and inbound.listen:
+                inb["listen"] = inbound.listen
+            if hasattr(inbound, 'port') and inbound.port:
+                inb["listen_port"] = inbound.port
+            
+            # Добавляем остальные поля из options
+            if inbound.options:
+                for key, value in inbound.options.items():
+                    if key not in ["tag", "listen", "port"]:  # Эти поля уже обработаны
+                        inb[key] = value
+        
         # Убираем None-поля для компактности
         inb = {k: v for k, v in inb.items() if v is not None}
         inbounds.append(inb)
+    
     return inbounds
 
 
-def _get_protocol_dispatcher() -> Dict[str, callable]:
+def _get_protocol_dispatcher() -> Dict[str, Callable]:
     """Возвращает словарь диспетчеров для специальных протоколов.
     
     Returns:
-        Dict[str, callable]: Маппинг протокол -> функция экспорта.
+        Dict[str, Callable]: Маппинг протокол -> функция экспорта.
     """
     return {
         "wireguard": _export_wireguard,
@@ -167,7 +191,7 @@ def _process_tls_config(outbound: Dict[str, Any], meta: Dict[str, Any], protocol
         meta (Dict[str, Any]): Метаданные сервера для модификации.
         protocol_type (str): Тип протокола.
     """
-    tls = {}
+    tls: Dict[str, Any] = {}
     
     # Базовая TLS конфигурация
     if meta.get("tls") or meta.get("security") == "tls":
@@ -182,19 +206,26 @@ def _process_tls_config(outbound: Dict[str, Any], meta: Dict[str, Any], protocol
     # Reality конфигурация
     if meta.get("reality-opts"):
         reality = kebab_to_snake(meta.pop("reality-opts"))
-        tls.setdefault("reality", {}).update(reality)
+        if "reality" not in tls:
+            tls["reality"] = {"enabled": True}
+        tls["reality"].update(reality)
     
     if meta.get("pbk"):
-        tls.setdefault("reality", {})["public_key"] = meta.pop("pbk")
+        if "reality" not in tls:
+            tls["reality"] = {"enabled": True}
+        tls["reality"]["public_key"] = meta.pop("pbk")
     
     if meta.get("short_id"):
-        tls.setdefault("reality", {})["short_id"] = meta.pop("short_id")
+        if "reality" not in tls:
+            tls["reality"] = {"enabled": True}
+        tls["reality"]["short_id"] = meta.pop("short_id")
     
     # uTLS конфигурация
     utls_fp = meta.pop("client-fingerprint", None) or meta.pop("fp", None)
     if utls_fp:
-        tls.setdefault("utls", {})["fingerprint"] = utls_fp
-        tls["utls"]["enabled"] = True
+        if "utls" not in tls:
+            tls["utls"] = {"enabled": True}
+        tls["utls"]["fingerprint"] = utls_fp
     
     # ALPN
     if meta.get("alpn"):
@@ -305,81 +336,135 @@ def _process_single_server(server: ParsedServer) -> Optional[Dict[str, Any]]:
     return _process_standard_server(server, protocol_type)
 
 
-def _add_special_outbounds(outbounds: List[Dict[str, Any]], use_legacy: bool) -> None:
+def _add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
     """Добавляет специальные outbounds (direct, block, dns-out).
     
     Args:
         outbounds (List[Dict[str, Any]]): Список outbounds для модификации.
-        use_legacy (bool): Использовать ли legacy режим.
     """
-    tags = {o["tag"] for o in outbounds}
-    
+    tags = {o.get("tag") for o in outbounds}
     if "direct" not in tags:
         outbounds.append({"type": "direct", "tag": "direct"})
-    
-    # Добавляем legacy special outbounds для совместимости с sing-box < 1.11.0
-    if use_legacy:
-        if "block" not in tags:
-            outbounds.append({"type": "block", "tag": "block"})
-        if "dns-out" not in tags:
-            outbounds.append({"type": "dns", "tag": "dns-out"})
+    if "block" not in tags:
+        outbounds.append({"type": "block", "tag": "block"})
+    if "dns-out" not in tags:
+        outbounds.append({"type": "dns", "tag": "dns-out"})
 
 
 def singbox_export(
     servers: List[ParsedServer],
     routes,
-    client_profile: Optional[ClientProfile] = None,
-    singbox_version: Optional[str] = None,
-    skip_version_check: bool = False
+    client_profile: Optional[ClientProfile] = None
 ) -> dict:
     """Export parsed servers to sing-box configuration format.
     
     Converts a list of parsed server configurations into a complete sing-box
     configuration with outbounds, routing rules, and optional inbound profiles.
-    Supports version compatibility checks and legacy outbound generation.
     
     Args:
         servers: List of ParsedServer objects to export.
         routes: Routing rules configuration.
         client_profile: Optional client profile for inbound generation.
-        singbox_version: Optional sing-box version for compatibility checks.
-        skip_version_check: Whether to skip version compatibility validation.
         
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
-        
-    Note:
-        Automatically adds special outbounds (direct, block, dns-out) based
-        on version compatibility. Supports legacy mode for sing-box < 1.11.0.
     """
     outbounds = []
-    
-    # Определяем нужно ли использовать legacy outbounds
-    use_legacy = False if skip_version_check else should_use_legacy_outbounds(singbox_version)
-    
-    if use_legacy and singbox_version:
-        logger.warning(f"Using legacy outbounds for sing-box {singbox_version} compatibility")
+    proxy_tags = []
     
     # Обрабатываем каждый сервер
     for server in servers:
         outbound = _process_single_server(server)
         if outbound:
             outbounds.append(outbound)
+            proxy_tags.append(outbound["tag"])
+    
+    # Добавляем urltest outbound если есть прокси серверы
+    if proxy_tags:
+        urltest_outbound = {
+            "type": "urltest",
+            "tag": "auto",
+            "outbounds": proxy_tags,
+            "url": "https://www.gstatic.com/generate_204",
+            "interval": "3m",
+            "tolerance": 50,
+            "idle_timeout": "30m",
+            "interrupt_exist_connections": False
+        }
+        outbounds.insert(0, urltest_outbound)
     
     # Добавляем специальные outbounds
-    _add_special_outbounds(outbounds, use_legacy)
+    _add_special_outbounds(outbounds)
+    
+    # Создаем улучшенные правила маршрутизации
+    enhanced_rules = _create_enhanced_routing_rules()
     
     # Формируем финальную конфигурацию
     config = {
         "outbounds": outbounds,
-        "route": {"rules": routes}
+        "route": {
+            "rules": enhanced_rules,
+            "rule_set": [
+                {
+                    "tag": "geoip-ru",
+                    "type": "remote",
+                    "format": "binary",
+                    "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ru.srs",
+                    "download_detour": "direct"
+                }
+            ],
+            "final": "auto" if proxy_tags else "direct"
+        },
+        "experimental": {
+            "cache_file": {
+                "enabled": True
+            }
+        }
     }
     
     if client_profile is not None:
         config["inbounds"] = generate_inbounds(client_profile)
     
     return config
+
+
+def _create_enhanced_routing_rules() -> List[Dict[str, Any]]:
+    """Создает улучшенные правила маршрутизации как в твоем скрипте."""
+    return [
+        {
+            "protocol": "dns",
+            "outbound": "dns-out"
+        },
+        {
+            "ip_is_private": True,
+            "outbound": "direct"
+        },
+        {
+            "rule_set": "geoip-ru",
+            "outbound": "direct"
+        },
+        {
+            "domain_keyword": [
+                "vkontakte",
+                "yandex", 
+                "tinkoff",
+                "gosuslugi",
+                "sberbank"
+            ],
+            "outbound": "direct"
+        },
+        {
+            "domain_suffix": [
+                ".ru",
+                ".рф",
+                "vk.com",
+                "sberbank.ru",
+                "gosuslugi.ru"
+            ],
+            "outbound": "direct"
+        }
+    ]
 
 def _export_wireguard(s: ParsedServer) -> dict:
     """Генерирует outbound-конфиг для WireGuard.
@@ -404,12 +489,22 @@ def _export_wireguard(s: ParsedServer) -> dict:
     }
     if getattr(s, "pre_shared_key", None):
         out["pre_shared_key"] = s.pre_shared_key
-    if getattr(s, "mtu", None) is not None:
-        out["mtu"] = s.mtu
-    if getattr(s, "keepalive", None) is not None:
-        out["keepalive"] = s.keepalive
-    if s.tag:
+    
+    # Безопасная проверка meta на None
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("mtu") is not None:
+        out["mtu"] = meta["mtu"]
+    if meta.get("keepalive") is not None:
+        out["keepalive"] = meta["keepalive"]
+    
+    # Set tag from meta['name'] or server.tag
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"wireguard-{s.address}"
+    
     return out
 
 def _export_tuic(s: ParsedServer) -> dict:
@@ -434,12 +529,22 @@ def _export_tuic(s: ParsedServer) -> dict:
         out["congestion_control"] = s.congestion_control
     if not s.alpn:
         out["alpn"] = s.alpn
-    if getattr(s, "udp_relay_mode", None):
-        out["udp_relay_mode"] = s.udp_relay_mode
+    
+    # Безопасная проверка meta на None
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("udp_relay_mode") is not None:
+        out["udp_relay_mode"] = meta["udp_relay_mode"]
     if s.tls:
         out["tls"] = s.tls
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"tuic-{s.address}"
+    
     return out
 
 def _export_shadowtls(s: ParsedServer) -> dict:
@@ -464,8 +569,16 @@ def _export_shadowtls(s: ParsedServer) -> dict:
         out["handshake"] = s.handshake
     if s.tls:
         out["tls"] = s.tls
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"shadowtls-{s.address}"
+    
     return out
 
 def _export_anytls(s: ParsedServer) -> dict:
@@ -487,8 +600,16 @@ def _export_anytls(s: ParsedServer) -> dict:
     }
     if s.tls:
         out["tls"] = s.tls
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"anytls-{s.address}"
+    
     return out
 
 def _export_tor(s: ParsedServer) -> dict:
@@ -507,8 +628,16 @@ def _export_tor(s: ParsedServer) -> dict:
         "server": s.address,
         "server_port": s.port,
     }
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"tor-{s.address}"
+    
     return out
 
 def _export_ssh(s: ParsedServer) -> dict:
@@ -534,22 +663,47 @@ def _export_ssh(s: ParsedServer) -> dict:
         out["private_key"] = s.private_key
     if s.tls:
         out["tls"] = s.tls
-    if s.tag:
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(s, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif s.tag:
         out["tag"] = s.tag
+    else:
+        out["tag"] = f"ssh-{s.address}"
+    
     return out
 
 def _export_hysteria2(server):
+    """Генерирует outbound-конфиг для Hysteria2.
+    Args:
+        server (ParsedServer): Сервер типа hysteria2.
+    Returns:
+        dict: Outbound-конфиг для sing-box или None (если не хватает обязательных полей).
+    """
     required = [server.address, server.port, server.password]
     if not all(required):
         logger.warning(f"Incomplete hysteria2 fields, skipping: {server.address}:{server.port}")
         return None
-    return {
+    
+    out = {
         "type": "hysteria2",
         "server": server.address,
-        "port": server.port,
+        "server_port": server.port,
         "password": server.password,
-        "tag": getattr(server, "tag", server.address),
     }
+    
+    # Set tag from meta['name'] or server.tag
+    meta = getattr(server, 'meta', {}) or {}
+    if meta.get("name"):
+        out["tag"] = meta["name"]
+    elif server.tag:
+        out["tag"] = server.tag
+    else:
+        out["tag"] = f"hysteria2-{server.address}"
+    
+    return out
 
 @register("singbox")
 class SingboxExporter(BaseExporter):

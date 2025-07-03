@@ -1,6 +1,5 @@
 import os
-import pytest
-from unittest.mock import patch, mock_open
+from unittest.mock import patch
 from pathlib import Path
 from sboxmgr.utils.env import (
     get_fetch_timeout, 
@@ -148,14 +147,13 @@ class TestEnvironmentVariables:
         """Test fallback when write test fails."""
         with patch.dict(os.environ, {}, clear=True):
             with patch.object(Path, 'home') as mock_home:
-                with patch.object(Path, 'mkdir') as mock_mkdir:
-                    with patch.object(Path, 'touch', side_effect=PermissionError("Cannot write")):
-                        mock_home.return_value = Path("/home/user")
-                        
-                        result = get_log_file()
-                        
-                        # Should fallback to current directory
-                        assert result == "./sboxmgr.log"
+                with patch.object(Path, 'touch', side_effect=PermissionError("Cannot write")):
+                    mock_home.return_value = Path("/home/user")
+                    
+                    result = get_log_file()
+                    
+                    # Should fallback to current directory
+                    assert result == "./sboxmgr.log"
 
     def test_get_url_priority_order(self):
         """Test that get_url respects priority: SBOXMGR_URL > SINGBOX_URL > TEST_URL."""
