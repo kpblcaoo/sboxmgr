@@ -207,15 +207,19 @@ class ClientProfile(BaseModel):
     """Client configuration profile for export operations.
     
     Defines the client-side configuration including inbound interfaces,
-    DNS settings, and additional options for generating proxy client
-    configurations.
+    DNS settings, routing overrides, outbound exclusions, and additional 
+    options for generating proxy client configurations.
     
     Attributes:
         inbounds: List of inbound interface configurations.
         dns_mode: DNS resolution mode (system, tunnel, off).
+        routing: Optional routing configuration overrides.
+        exclude_outbounds: List of outbound types to exclude from export.
         extra: Additional profile parameters.
     """
     
     inbounds: List[InboundProfile] = Field(default_factory=list, description="List of inbound configurations.")
     dns_mode: Optional[str] = Field(default="system", description="DNS resolution mode.")
+    routing: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Routing configuration overrides.")
+    exclude_outbounds: Optional[List[str]] = Field(default_factory=list, description="List of outbound types to exclude.")
     extra: Optional[dict] = Field(default_factory=dict, description="Additional profile parameters.") 

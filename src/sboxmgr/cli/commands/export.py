@@ -19,8 +19,7 @@ from sboxmgr.subscription.models import SubscriptionSource, ClientProfile, Inbou
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_backup_file
 from sboxmgr.export.export_manager import ExportManager
-# Temporarily disabled agent functionality due to missing sbox_common dependency
-# from sboxmgr.agent import AgentBridge, AgentNotAvailableError, ClientType
+from sboxmgr.agent import AgentBridge, AgentNotAvailableError, ClientType
 from sboxmgr.config.validation import validate_config_file
 
 # Import Phase 3 components
@@ -127,9 +126,34 @@ def _run_agent_check(config_file: str, agent_check: bool) -> bool:
     if not agent_check:
         return True
         
-    # Temporarily disabled due to missing sbox_common dependency
-    typer.echo("ℹ️  Agent validation temporarily disabled - sbox_common dependency not available", err=True)
-    return True
+    try:
+        bridge = AgentBridge()
+        if not bridge.is_available():
+            typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
+            return True
+            
+        # Validate config with agent
+        response = bridge.validate(Path(config_file), client_type=ClientType.SING_BOX)
+        
+        if response.success:
+            typer.echo("✅ External validation passed")
+            if response.client_detected:
+                typer.echo(f"   Detected client: {response.client_detected}")
+            if response.client_version:
+                typer.echo(f"   Client version: {response.client_version}")
+            return True
+        else:
+            typer.echo("❌ External validation failed:", err=True)
+            for error in response.errors:
+                typer.echo(f"   • {error}", err=True)
+            return False
+                
+    except AgentNotAvailableError:
+        typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
+        return True
+    except Exception as e:
+        typer.echo(f"⚠️  Agent check failed: {e}", err=True)
+        return False
 
 
 def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Optional['ClientProfile']:
@@ -329,10 +353,15 @@ def _generate_config_from_subscription(
     if client_profile is None:
         client_profile = _create_client_profile_from_profile(profile)
     
+    # Create pipeline context with debug level
+    from sboxmgr.subscription.models import PipelineContext
+    context = PipelineContext(debug_level=debug, source=url)
+    
     # Process subscription
     try:
         result = subscription_manager.export_config(
-            export_manager=export_manager
+            export_manager=export_manager,
+            context=context
         )
         
         if not result.success:
@@ -629,6 +658,63 @@ def _load_client_profile_from_file(client_profile_path: str) -> Optional['Client
         raise typer.Exit(1)
 
 
+def _validate_final_route(final_route: str) -> None:
+    """Validate final route value.
+    
+    Args:
+        final_route: Final route value to validate
+        
+    Raises:
+        typer.Exit: If final route is invalid
+    """
+    valid_routes = ["auto", "direct", "block", "proxy", "dns"]
+    
+    # Check if it's a valid predefined route
+    if final_route in valid_routes:
+        return
+    
+    # Check if it's a valid outbound tag (alphanumeric + hyphen/underscore)
+    import re
+    if re.match(r'^[a-zA-Z0-9_-]+$', final_route):
+        return
+    
+    typer.echo(f"❌ Invalid final route: {final_route}", err=True)
+    typer.echo(f"💡 Valid values: {', '.join(valid_routes)} or a valid outbound tag", err=True)
+    raise typer.Exit(1)
+
+
+def _validate_exclude_outbounds(exclude_outbounds: str) -> None:
+    """Validate exclude outbounds list.
+    
+    Args:
+        exclude_outbounds: Comma-separated list of outbound types to validate
+        
+    Raises:
+        typer.Exit: If exclude outbounds contains invalid values
+    """
+    # Extended list of valid outbound types including all supported protocols
+    valid_types = [
+        # Basic outbound types
+        "direct", "block", "dns", "proxy", "urltest", "selector",
+        # Supported protocol types
+        "vmess", "vless", "trojan", "shadowsocks", "ss", "hysteria2",
+        "wireguard", "tuic", "shadowtls", "anytls", "tor", "ssh",
+        "http", "socks"
+    ]
+    
+    exclude_list = [o.strip() for o in exclude_outbounds.split(',') if o.strip()]
+    
+    invalid_types = []
+    for outbound_type in exclude_list:
+        if outbound_type not in valid_types:
+            invalid_types.append(outbound_type)
+    
+    if invalid_types:
+        typer.echo(f"❌ Invalid outbound types: {', '.join(invalid_types)}", err=True)
+        typer.echo(f"💡 Valid types: {', '.join(valid_types)}", err=True)
+        raise typer.Exit(1)
+
+
 def export(
     url: str = typer.Option(
         None, "-u", "--url", help=t("cli.url.help"),
@@ -668,7 +754,10 @@ def export(
     tproxy_port: int = typer.Option(None, "--tproxy-port", help="TPROXY port (default: 7895)"),
     tproxy_listen: str = typer.Option(None, "--tproxy-listen", help="TPROXY bind address (default: 0.0.0.0)"),
     # DNS mode
-    dns_mode: str = typer.Option(None, "--dns-mode", help="DNS resolution mode (system,tunnel,off, default: system)")
+    dns_mode: str = typer.Option(None, "--dns-mode", help="DNS resolution mode (system,tunnel,off, default: system)"),
+    # Routing and filtering flags
+    final_route: str = typer.Option(None, "--final-route", help="Set final routing destination (e.g., proxy, direct, block)"),
+    exclude_outbounds: str = typer.Option(None, "--exclude-outbounds", help="Comma-separated list of outbound types to exclude (e.g., direct,block,dns)")
 ):
     """Export configuration with various modes.
     
@@ -712,6 +801,8 @@ def export(
         tproxy_port: TPROXY port (default: 7895)
         tproxy_listen: TPROXY bind address (default: 0.0.0.0)
         dns_mode: DNS resolution mode (system,tunnel,off, default: system)
+        final_route: Set final routing destination (e.g., proxy, direct, block)
+        exclude_outbounds: Comma-separated list of outbound types to exclude (e.g., direct,block,dns)
         
     Raises:
         typer.Exit: On validation failure or processing errors
@@ -773,6 +864,19 @@ def export(
             except typer.Exit:
                 raise  # Re-raise to preserve exit code
     
+    # Validate routing and filtering parameters if provided
+    if final_route:
+        try:
+            _validate_final_route(final_route)
+        except typer.Exit:
+            raise  # Re-raise to preserve exit code
+    
+    if exclude_outbounds:
+        try:
+            _validate_exclude_outbounds(exclude_outbounds)
+        except typer.Exit:
+            raise  # Re-raise to preserve exit code
+    
     # Load profile if provided
     loaded_profile = None
     if profile:
@@ -790,7 +894,7 @@ def export(
             raise  # Re-raise to preserve exit code
     
     # Build client profile from CLI parameters if provided
-    if not loaded_client_profile and inbound_types:
+    if inbound_types and not loaded_client_profile:
         try:
             from sboxmgr.cli.inbound_builder import build_client_profile_from_cli
             loaded_client_profile = build_client_profile_from_cli(
@@ -808,14 +912,32 @@ def export(
                 tproxy_listen=tproxy_listen,
                 dns_mode=dns_mode
             )
-            if loaded_client_profile:
-                typer.echo("✅ Built client profile from CLI parameters")
+            typer.echo("✅ Built client profile from CLI parameters")
         except ValueError as e:
-            typer.echo(f"❌ Invalid inbound parameters: {e}", err=True)
+            typer.echo(f"❌ Invalid parameters: {e}", err=True)
             raise typer.Exit(1)
         except Exception as e:
             typer.echo(f"❌ Failed to build client profile: {e}", err=True)
             raise typer.Exit(1)
+    
+    # Apply routing and filtering parameters if provided
+    if final_route or exclude_outbounds:
+        # Use existing client profile or create new one
+        if not loaded_client_profile:
+            loaded_client_profile = ClientProfile()
+        
+        # Set final route if provided
+        if final_route:
+            if not loaded_client_profile.routing:
+                loaded_client_profile.routing = {}
+            loaded_client_profile.routing["final"] = final_route
+        
+        # Set exclude outbounds if provided
+        if exclude_outbounds:
+            exclude_list = [o.strip() for o in exclude_outbounds.split(',') if o.strip()]
+            loaded_client_profile.exclude_outbounds = exclude_list
+        
+        typer.echo("✅ Applied routing and filtering parameters")
     
     # Create postprocessor and middleware chains if provided
     postprocessor_chain = None

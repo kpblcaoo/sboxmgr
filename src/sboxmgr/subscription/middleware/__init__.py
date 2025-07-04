@@ -23,6 +23,8 @@ from .base import (
 )
 from .logging import LoggingMiddleware
 from .enrichment import EnrichmentMiddleware
+from .outbound_filter import OutboundFilterMiddleware
+from .route_config import RouteConfigMiddleware
 
 __all__ = [
     # Base classes
@@ -35,4 +37,6 @@ __all__ = [
     # Concrete middleware
     'LoggingMiddleware',
     'EnrichmentMiddleware',
+    'OutboundFilterMiddleware',
+    'RouteConfigMiddleware',
 ] 

@@ -15,6 +15,7 @@ A Python CLI tool for automating and managing [sing-box](https://sing-box.sagern
 - Fetch and apply proxy server configs from a URL
 - Supported protocols: VLESS, Shadowsocks, VMess, Trojan, TUIC, Hysteria2
 - **NEW in 1.5.0**: CLI inbound parameters for easy proxy configuration
+- **NEW in 1.5.0**: Middleware-based routing and filtering with CLI flags
 - Direct routing for Russian domains and geoip-ru, proxy for other traffic
 - Logging, backup, exclusions, dry-run, and full CLI test coverage
 - All paths and artifacts are configurable via environment variables
@@ -135,6 +136,11 @@ All commands are available via the `sboxctl` CLI (Typer-based):
   sboxctl export -u https://example.com/proxy-config.json --inbound-types socks --socks-port 1080
   # Configure proxy interfaces directly via CLI
   ```
+- **Export with routing and filtering (NEW in 1.5.0):**
+  ```bash
+  sboxctl export -u https://example.com/proxy-config.json --final-route direct --exclude-outbounds block,dns
+  # Set final routing destination and exclude specific outbound types
+  ```
 - **Dry-run (simulate config generation, no file changes):**
   ```bash
   sboxctl dry-run -u https://example.com/proxy-config.json
@@ -224,6 +230,54 @@ All paths are configurable via environment variables:
 You can use a `.env` file in the project root for local development.
 
 **Note on logging:** By default, logs are written to `~/.local/share/sboxmgr/sboxmgr.log` (XDG Base Directory spec). If this directory is not writable, logs fall back to `./sboxmgr.log` in the current directory. For system service deployment, set `SBOXMGR_LOG_FILE=/var/log/sboxmgr.log` explicitly.
+
+---
+
+## 🔧 Middleware Architecture
+
+The export system uses a middleware-based approach for routing and filtering, providing better separation of concerns and extensibility.
+
+### Available Middleware
+
+- **OutboundFilterMiddleware**: Filters outbounds based on `exclude_outbounds` configuration
+- **RouteConfigMiddleware**: Configures routing rules based on `routing.final` configuration
+
+### CLI Integration
+
+New CLI flags provide quick access to middleware functionality:
+
+```bash
+# Set final routing destination
+sboxctl export -u <url> --final-route direct
+
+# Exclude specific outbound types
+sboxctl export -u <url> --exclude-outbounds block,dns
+
+# Combine both
+sboxctl export -u <url> --final-route proxy --exclude-outbounds direct,block
+```
+
+### Programmatic Usage
+
+```python
+from sboxmgr.export.export_manager import ExportManager
+from sboxmgr.subscription.middleware import OutboundFilterMiddleware, RouteConfigMiddleware
+
+# Create export manager with automatic middleware configuration
+export_manager = ExportManager()
+export_manager.export(client_profile)  # Middleware configured automatically
+
+# Or configure middleware manually
+export_manager.add_middleware(OutboundFilterMiddleware(['direct', 'block']))
+export_manager.add_middleware(RouteConfigMiddleware({'final': 'proxy'}))
+```
+
+### Benefits
+
+- **Modular**: Each concern is isolated in separate middleware
+- **Testable**: Components can be tested independently
+- **Extensible**: Easy to add new middleware components
+- **Clean**: No duplicate logic across exporters
 
 ---
 
