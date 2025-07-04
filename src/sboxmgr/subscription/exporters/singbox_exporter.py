@@ -1,4 +1,11 @@
-"""Sing-box configuration exporter implementation.
+"""
+DEPRECATED: Sing-box configuration exporter implementation.
+
+This module is deprecated and will be replaced by the new sing-box exporter
+that uses the modular Pydantic models from src.sboxmgr.models.singbox.
+
+The new exporter provides better validation, type safety, and maintainability.
+Use the new exporter for all new development.
 
 This module provides comprehensive sing-box configuration export functionality
 including server conversion, routing rule generation, and version compatibility
@@ -7,10 +14,37 @@ compatibility across different sing-box versions.
 """
 import json
 import logging
+import warnings
 from typing import List, Optional, Dict, Any, Callable
-from ..models import ParsedServer, ClientProfile
+from ..models import ParsedServer, ClientProfile, PipelineContext
 from ..base_exporter import BaseExporter
 from ..registry import register
+
+# Import new sing-box models (for future use)
+# from sboxmgr.models.singbox import (
+#     SingBoxConfig,
+#     # Inbounds
+#     MixedInbound, SocksInbound, HttpInbound, ShadowsocksInbound,
+#     VmessInbound, VlessInbound, TrojanInbound, Hysteria2Inbound,
+#     WireGuardInbound, TuicInbound, ShadowTlsInbound, DirectInbound,
+#     # Outbounds  
+#     ShadowsocksOutbound, VmessOutbound, VlessOutbound, TrojanOutbound,
+#     Hysteria2Outbound, WireGuardOutbound, HttpOutbound, SocksOutbound,
+#     TuicOutbound, ShadowTlsOutbound, DnsOutbound, DirectOutbound,
+#     BlockOutbound, SelectorOutbound, UrlTestOutbound, HysteriaOutbound,
+#     AnyTlsOutbound, SshOutbound, TorOutbound,
+#     # Common
+#     TlsConfig, TransportConfig, MultiplexConfig,
+#     # Routing
+#     RouteConfig, RouteRule
+# )
+
+warnings.warn(
+    "src.sboxmgr.subscription.exporters.singbox_exporter is deprecated. "
+    "Use the new exporter with modular Pydantic models.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 logger = logging.getLogger(__name__)
 
@@ -258,9 +292,11 @@ def _process_tag_config(outbound: Dict[str, Any], server: ParsedServer, meta: Di
         server (ParsedServer): Исходный сервер.
         meta (Dict[str, Any]): Метаданные сервера для модификации.
     """
-    label = meta.pop("label", None)
-    if label:
-        outbound["tag"] = label
+    # Приоритет: server.tag > meta.label > meta.name > server.address
+    if server.tag:
+        outbound["tag"] = server.tag
+    elif meta.get("label"):
+        outbound["tag"] = meta.pop("label")
     elif meta.get("name"):
         outbound["tag"] = meta.pop("name")
     else:
@@ -339,9 +375,21 @@ def _process_single_server(server: ParsedServer) -> Optional[Dict[str, Any]]:
 def _add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
     """Добавляет специальные outbounds (direct, block, dns-out).
     
+    DEPRECATED: In sing-box 1.11.0, these special outbounds are deprecated
+    and should be replaced with rule actions. This function is kept for
+    backward compatibility but will be removed in future versions.
+    
     Args:
         outbounds (List[Dict[str, Any]]): Список outbounds для модификации.
     """
+    import warnings
+    warnings.warn(
+        "Special outbounds (direct, block, dns) are deprecated in sing-box 1.11.0. "
+        "Use rule actions instead. See: https://sing-box.sagernet.org/migration/#migrate-legacy-special-outbounds-to-rule-actions",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     tags = {o.get("tag") for o in outbounds}
     if "direct" not in tags:
         outbounds.append({"type": "direct", "tag": "direct"})
@@ -353,18 +401,98 @@ def _add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
 
 def singbox_export(
     servers: List[ParsedServer],
-    routes,
+    routes=None,
     client_profile: Optional[ClientProfile] = None
 ) -> dict:
-    """Export parsed servers to sing-box configuration format.
+    """Export parsed servers to sing-box configuration format (modern approach).
     
-    Converts a list of parsed server configurations into a complete sing-box
-    configuration with outbounds, routing rules, and optional inbound profiles.
+    This function exports configuration using the modern sing-box 1.11.0 approach
+    with rule actions instead of legacy special outbounds.
     
     Args:
         servers: List of ParsedServer objects to export.
-        routes: Routing rules configuration.
+        routes: Routing rules configuration (optional, uses modern defaults if None).
         client_profile: Optional client profile for inbound generation.
+        
+    Returns:
+        Dictionary containing complete sing-box configuration with outbounds,
+        routing rules, and optional inbounds section.
+    """
+    outbounds = []
+    proxy_tags = []
+    
+    # Обрабатываем каждый сервер
+    for server in servers:
+        outbound = _process_single_server(server)
+        if outbound:
+            # Проверяем исключения
+            if client_profile and client_profile.exclude_outbounds:
+                outbound_type = outbound.get("type")
+                if outbound_type in client_profile.exclude_outbounds:
+                    continue  # Пропускаем исключенные типы
+            
+            outbounds.append(outbound)
+            proxy_tags.append(outbound["tag"])
+    
+    # Добавляем urltest outbound если есть прокси серверы
+    if proxy_tags:
+        urltest_outbound = {
+            "type": "urltest",
+            "tag": "auto",
+            "outbounds": proxy_tags,
+            "url": "https://www.gstatic.com/generate_204",
+            "interval": "3m",
+            "tolerance": 50,
+            "idle_timeout": "30m",
+            "interrupt_exist_connections": False
+        }
+        outbounds.insert(0, urltest_outbound)
+    
+    # НЕ добавляем специальные outbounds - используем rule actions вместо них
+    
+    # Используем переданные правила маршрутизации или создаем современные по умолчанию
+    if routes:
+        routing_rules = routes
+    else:
+        routing_rules = _create_modern_routing_rules()
+    
+    # Определяем final action
+    final_action = "auto"  # по умолчанию
+    if client_profile and client_profile.routing:
+        final_action = client_profile.routing.get("final", "auto")
+    
+    # Формируем финальную конфигурацию
+    config = {
+        "outbounds": outbounds,
+        "route": {
+            "rules": routing_rules,
+            "final": final_action
+        }
+    }
+    
+    # Добавляем inbounds если есть client_profile
+    if client_profile:
+        config["inbounds"] = generate_inbounds(client_profile)
+    
+    return config
+
+
+def singbox_export_with_middleware(
+    servers: List[ParsedServer],
+    routes=None,
+    client_profile: Optional[ClientProfile] = None,
+    context: Optional[PipelineContext] = None
+) -> dict:
+    """Export parsed servers to sing-box configuration format using middleware.
+    
+    This function exports configuration using middleware for outbound filtering
+    and route configuration, providing better separation of concerns.
+    
+    Args:
+        servers: List of ParsedServer objects to export.
+        routes: Routing rules configuration (optional, uses modern defaults if None).
+        client_profile: Optional client profile for inbound generation.
+        context: Optional pipeline context with middleware metadata.
         
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
@@ -394,42 +522,63 @@ def singbox_export(
         }
         outbounds.insert(0, urltest_outbound)
     
-    # Добавляем специальные outbounds
-    _add_special_outbounds(outbounds)
+    # НЕ добавляем специальные outbounds - используем rule actions вместо них
     
-    # Используем переданные правила маршрутизации или создаем улучшенные по умолчанию
+    # Используем переданные правила маршрутизации или создаем современные по умолчанию
     if routes:
         routing_rules = routes
     else:
-        routing_rules = _create_enhanced_routing_rules()
+        routing_rules = _create_modern_routing_rules()
+    
+    # Определяем final action из context или client_profile
+    final_action = "auto"  # по умолчанию
+    
+    # Приоритет: context > client_profile > default
+    if context and 'routing' in context.metadata:
+        context_final = context.metadata['routing'].get('final_action')
+        if context_final:
+            final_action = context_final
+    elif client_profile and client_profile.routing:
+        final_action = client_profile.routing.get("final", "auto")
     
     # Формируем финальную конфигурацию
     config = {
         "outbounds": outbounds,
         "route": {
             "rules": routing_rules,
-            "rule_set": [
-                {
-                    "tag": "geoip-ru",
-                    "type": "remote",
-                    "format": "binary",
-                    "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ru.srs",
-                    "download_detour": "direct"
-                }
-            ],
-            "final": "auto" if proxy_tags else "direct"
-        },
-        "experimental": {
-            "cache_file": {
-                "enabled": True
-            }
+            "final": final_action
         }
     }
     
-    if client_profile is not None:
+    # Добавляем inbounds если есть client_profile
+    if client_profile:
         config["inbounds"] = generate_inbounds(client_profile)
     
     return config
+
+
+def _create_modern_routing_rules() -> List[Dict[str, Any]]:
+    """Создает современные routing rules с rule actions вместо устаревших special outbounds.
+    
+    This function creates routing rules that use rule actions instead of
+    legacy special outbounds (direct, block, dns) as recommended in sing-box 1.11.0.
+    
+    Returns:
+        List[Dict[str, Any]]: List of routing rules with rule actions
+    """
+    return [
+        {
+            "protocol": "dns",
+            "action": "hijack-dns"
+        },
+        {
+            "ip_is_private": True,
+            "action": "direct"
+        },
+        {
+            "outbound": "auto"
+        }
+    ]
 
 
 def _create_enhanced_routing_rules() -> List[Dict[str, Any]]:
@@ -707,6 +856,172 @@ def _export_hysteria2(server):
         out["tag"] = f"hysteria2-{server.address}"
     
     return out
+
+def singbox_export_legacy(
+    servers: List[ParsedServer],
+    routes,
+    client_profile: Optional[ClientProfile] = None
+) -> dict:
+    """Export parsed servers to sing-box configuration format (legacy approach).
+    
+    DEPRECATED: This function uses legacy special outbounds (direct, block, dns)
+    which are deprecated in sing-box 1.11.0. Use singbox_export() instead.
+    
+    Args:
+        servers: List of ParsedServer objects to export.
+        routes: Routing rules configuration.
+        client_profile: Optional client profile for inbound generation.
+        
+    Returns:
+        Dictionary containing complete sing-box configuration with outbounds,
+        routing rules, and optional inbounds section.
+    """
+    import warnings
+    warnings.warn(
+        "singbox_export_legacy() is deprecated. Use singbox_export() for modern sing-box 1.11.0 compatibility.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    outbounds = []
+    proxy_tags = []
+    
+    # Обрабатываем каждый сервер
+    for server in servers:
+        outbound = _process_single_server(server)
+        if outbound:
+            outbounds.append(outbound)
+            proxy_tags.append(outbound["tag"])
+    
+    # Добавляем urltest outbound если есть прокси серверы
+    if proxy_tags:
+        urltest_outbound = {
+            "type": "urltest",
+            "tag": "auto",
+            "outbounds": proxy_tags,
+            "url": "https://www.gstatic.com/generate_204",
+            "interval": "3m",
+            "tolerance": 50,
+            "idle_timeout": "30m",
+            "interrupt_exist_connections": False
+        }
+        outbounds.insert(0, urltest_outbound)
+    
+    # Добавляем специальные outbounds для обратной совместимости
+    _add_special_outbounds(outbounds)
+    
+    # Используем переданные правила маршрутизации или создаем улучшенные по умолчанию
+    if routes:
+        routing_rules = routes
+    else:
+        routing_rules = _create_enhanced_routing_rules()
+    
+    # Формируем финальную конфигурацию
+    config = {
+        "outbounds": outbounds,
+        "route": {
+            "rules": routing_rules,
+            "rule_set": [
+                {
+                    "tag": "geoip-ru",
+                    "type": "remote",
+                    "format": "binary",
+                    "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ru.srs",
+                    "download_detour": "direct"
+                }
+            ],
+            "final": "auto" if proxy_tags else "direct"
+        },
+        "experimental": {
+            "cache_file": {
+                "enabled": True
+            }
+        }
+    }
+    
+    if client_profile is not None:
+        config["inbounds"] = generate_inbounds(client_profile)
+    
+    return config
+
+def singbox_export_with_middleware(
+    servers: List[ParsedServer],
+    routes=None,
+    client_profile: Optional[ClientProfile] = None,
+    context: Optional[PipelineContext] = None
+) -> dict:
+    """Export parsed servers to sing-box configuration format using middleware.
+    
+    This function exports configuration using middleware for outbound filtering
+    and route configuration, providing better separation of concerns.
+    
+    Args:
+        servers: List of ParsedServer objects to export.
+        routes: Routing rules configuration (optional, uses modern defaults if None).
+        client_profile: Optional client profile for inbound generation.
+        context: Optional pipeline context with middleware metadata.
+        
+    Returns:
+        Dictionary containing complete sing-box configuration with outbounds,
+        routing rules, and optional inbounds section.
+    """
+    outbounds = []
+    proxy_tags = []
+    
+    # Обрабатываем каждый сервер
+    for server in servers:
+        outbound = _process_single_server(server)
+        if outbound:
+            outbounds.append(outbound)
+            proxy_tags.append(outbound["tag"])
+    
+    # Добавляем urltest outbound если есть прокси серверы
+    if proxy_tags:
+        urltest_outbound = {
+            "type": "urltest",
+            "tag": "auto",
+            "outbounds": proxy_tags,
+            "url": "https://www.gstatic.com/generate_204",
+            "interval": "3m",
+            "tolerance": 50,
+            "idle_timeout": "30m",
+            "interrupt_exist_connections": False
+        }
+        outbounds.insert(0, urltest_outbound)
+    
+    # НЕ добавляем специальные outbounds - используем rule actions вместо них
+    
+    # Используем переданные правила маршрутизации или создаем современные по умолчанию
+    if routes:
+        routing_rules = routes
+    else:
+        routing_rules = _create_modern_routing_rules()
+    
+    # Определяем final action из context или client_profile
+    final_action = "auto"  # по умолчанию
+    
+    # Приоритет: context > client_profile > default
+    if context and 'routing' in context.metadata:
+        context_final = context.metadata['routing'].get('final_action')
+        if context_final:
+            final_action = context_final
+    elif client_profile and client_profile.routing:
+        final_action = client_profile.routing.get("final", "auto")
+    
+    # Формируем финальную конфигурацию
+    config = {
+        "outbounds": outbounds,
+        "route": {
+            "rules": routing_rules,
+            "final": final_action
+        }
+    }
+    
+    # Добавляем inbounds если есть client_profile
+    if client_profile:
+        config["inbounds"] = generate_inbounds(client_profile)
+    
+    return config
 
 @register("singbox")
 class SingboxExporter(BaseExporter):

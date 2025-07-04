@@ -88,6 +88,10 @@ class ExportManager:
         self.postprocessor_chain = postprocessor_chain
         self.middleware_chain = middleware_chain or []
         self.profile = profile
+        
+        # Auto-configure middleware from client_profile if available and no manual middleware
+        if client_profile and PHASE3_AVAILABLE and not middleware_chain:
+            self._auto_configure_middleware_from_client_profile(client_profile)
 
     def export(self, 
                servers: List[ParsedServer], 
@@ -169,6 +173,19 @@ class ExportManager:
             exporter_func = EXPORTER_REGISTRY.get("singbox", singbox_export)
         
         if self.export_format == "singbox":
+            # Use middleware-aware export if middleware is configured
+            if self.middleware_chain and PHASE3_AVAILABLE:
+                try:
+                    from sboxmgr.subscription.exporters.singbox_exporter import singbox_export_with_middleware
+                    return singbox_export_with_middleware(
+                        processed_servers, 
+                        routes, 
+                        client_profile=client_profile or self.client_profile,
+                        context=context
+                    )
+                except ImportError:
+                    _get_logger().warning("Middleware-aware export not available, falling back to standard export")
+            
             return exporter_func(
                 processed_servers, 
                 routes, 
@@ -423,4 +440,42 @@ class ExportManager:
         if self.middleware_chain:
             metadata['middleware_types'] = [m.__class__.__name__ for m in self.middleware_chain]
         
-        return metadata 
+        return metadata
+    
+    def _auto_configure_middleware_from_client_profile(self, client_profile: ClientProfile) -> None:
+        """Auto-configure middleware based on client profile settings.
+        
+        Automatically adds OutboundFilterMiddleware and RouteConfigMiddleware
+        if the client profile has exclude_outbounds or routing configuration.
+        
+        Args:
+            client_profile: Client profile with configuration
+        """
+        if not PHASE3_AVAILABLE:
+            return
+        
+        try:
+            from sboxmgr.subscription.middleware import OutboundFilterMiddleware, RouteConfigMiddleware
+            
+            # Add outbound filter middleware if exclude_outbounds is configured
+            if client_profile.exclude_outbounds:
+                outbound_filter = OutboundFilterMiddleware({
+                    'exclude_types': client_profile.exclude_outbounds,
+                    'strict_mode': False,
+                    'preserve_metadata': True
+                })
+                self.middleware_chain.append(outbound_filter)
+            
+            # Add route config middleware if routing is configured
+            if client_profile.routing:
+                route_config = RouteConfigMiddleware({
+                    'final_action': client_profile.routing.get('final', 'auto'),
+                    'override_mode': 'profile_overrides',
+                    'preserve_metadata': True
+                })
+                self.middleware_chain.append(route_config)
+                
+        except ImportError:
+            _get_logger().warning("Phase 3 middleware not available for auto-configuration")
+        except Exception as e:
+            _get_logger().warning(f"Failed to auto-configure middleware: {e}") 
