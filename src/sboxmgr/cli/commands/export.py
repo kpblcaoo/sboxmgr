@@ -353,10 +353,15 @@ def _generate_config_from_subscription(
     if client_profile is None:
         client_profile = _create_client_profile_from_profile(profile)
     
+    # Create pipeline context with debug level
+    from sboxmgr.subscription.models import PipelineContext
+    context = PipelineContext(debug_level=debug, source=url)
+    
     # Process subscription
     try:
         result = subscription_manager.export_config(
-            export_manager=export_manager
+            export_manager=export_manager,
+            context=context
         )
         
         if not result.success:
