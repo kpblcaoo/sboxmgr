@@ -132,14 +132,20 @@ class TestCLIRoutingFlags:
     
     def test_invalid_final_route(self):
         """Test that invalid final route values are handled gracefully."""
-        result = self.runner.invoke(app, [
-            "export", 
-            "--url", "https://example.com/subscription",
-            "--final-route", "invalid_route"
-        ])
+        from unittest.mock import patch
         
-        # Should not crash, but may show a warning or use default
-        assert result.exit_code in [0, 1]  # Could be either success or error
+        with patch('sboxmgr.cli.commands.export._generate_config_from_subscription') as mock_generate:
+            mock_generate.return_value = {"test": "config"}
+            
+            result = self.runner.invoke(app, [
+                "export", 
+                "--url", "https://example.com/subscription",
+                "--final-route", "invalid_route"
+            ])
+            
+            # Should fail with validation error
+            assert result.exit_code == 1
+            assert "Invalid final route" in result.stdout or "Invalid final route" in result.stderr
     
     def test_empty_exclude_outbounds(self):
         """Test that empty exclude_outbounds is handled correctly."""
