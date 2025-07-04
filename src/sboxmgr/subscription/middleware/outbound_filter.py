@@ -130,7 +130,17 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         if hasattr(profile, 'metadata') and 'client_profile' in profile.metadata:
             client_profile_data = profile.metadata['client_profile']
             if isinstance(client_profile_data, dict):
-                client_profile = ClientProfile(**client_profile_data)
+                try:
+                    client_profile = ClientProfile(**client_profile_data)
+                except Exception as e:
+                    # Log error but continue processing with default config
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(
+                        f"Failed to create ClientProfile from metadata: {e}. "
+                        f"Using default exclude configuration."
+                    )
+                    client_profile = None
         
         # If we have a client profile, merge exclude configuration
         if client_profile and client_profile.exclude_outbounds:
