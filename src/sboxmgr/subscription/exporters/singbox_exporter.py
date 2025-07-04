@@ -450,7 +450,7 @@ def singbox_export_with_middleware(
     if routes:
         routing_rules = routes
     else:
-        routing_rules = _create_modern_routing_rules()
+        routing_rules = _create_modern_routing_rules(proxy_tags)
     
     # Определяем final action из context или client_profile
     final_action = "auto"  # по умолчанию
@@ -479,16 +479,88 @@ def singbox_export_with_middleware(
     return config
 
 
-def _create_modern_routing_rules() -> List[Dict[str, Any]]:
+def singbox_export(
+    servers: List[ParsedServer],
+    routes=None,
+    client_profile: Optional[ClientProfile] = None
+) -> dict:
+    """Export parsed servers to sing-box configuration format (modern approach).
+    
+    This function exports configuration using the modern sing-box 1.11.0 approach
+    with rule actions instead of legacy special outbounds.
+    
+    Args:
+        servers: List of ParsedServer objects to export.
+        routes: Routing rules configuration (optional, uses modern defaults if None).
+        client_profile: Optional client profile for inbound generation.
+        
+    Returns:
+        Dictionary containing complete sing-box configuration with outbounds,
+        routing rules, and optional inbounds section.
+    """
+    outbounds = []
+    proxy_tags = []
+    
+    # Обрабатываем каждый сервер
+    for server in servers:
+        outbound = _process_single_server(server)
+        if outbound:
+            outbounds.append(outbound)
+            proxy_tags.append(outbound["tag"])
+    
+    # Добавляем urltest outbound если есть прокси серверы
+    if proxy_tags:
+        urltest_outbound = {
+            "type": "urltest",
+            "tag": "auto",
+            "outbounds": proxy_tags,
+            "url": "https://www.gstatic.com/generate_204",
+            "interval": "3m",
+            "tolerance": 50,
+            "idle_timeout": "30m",
+            "interrupt_exist_connections": False
+        }
+        outbounds.insert(0, urltest_outbound)
+    
+    # НЕ добавляем специальные outbounds - используем rule actions вместо них
+    
+    # Используем переданные правила маршрутизации или создаем современные по умолчанию
+    if routes:
+        routing_rules = routes
+    else:
+        routing_rules = _create_modern_routing_rules(proxy_tags)
+    
+    # Определяем final action
+    final_action = "auto" if proxy_tags else "direct"
+    
+    # Формируем финальную конфигурацию
+    config = {
+        "outbounds": outbounds,
+        "route": {
+            "rules": routing_rules,
+            "final": final_action
+        }
+    }
+    
+    if client_profile is not None:
+        config["inbounds"] = generate_inbounds(client_profile)
+    
+    return config
+
+
+def _create_modern_routing_rules(proxy_tags: Optional[List[str]] = None) -> List[Dict[str, Any]]:
     """Создает современные routing rules с rule actions вместо устаревших special outbounds.
     
     This function creates routing rules that use rule actions instead of
     legacy special outbounds (direct, block, dns) as recommended in sing-box 1.11.0.
     
+    Args:
+        proxy_tags: List of proxy outbound tags to use in routing rules
+        
     Returns:
         List[Dict[str, Any]]: List of routing rules with rule actions
     """
-    return [
+    rules = [
         {
             "protocol": "dns",
             "action": "hijack-dns"
@@ -496,11 +568,21 @@ def _create_modern_routing_rules() -> List[Dict[str, Any]]:
         {
             "ip_is_private": True,
             "action": "direct"
-        },
-        {
-            "outbound": "auto"
         }
     ]
+    
+    # Add proxy rule only if we have proxy outbounds
+    if proxy_tags:
+        rules.append({
+            "outbound": "auto"
+        })
+    else:
+        # If no proxies, route everything to direct
+        rules.append({
+            "action": "direct"
+        })
+    
+    return rules
 
 
 def _create_enhanced_routing_rules() -> List[Dict[str, Any]]:
@@ -887,5 +969,5 @@ class SingboxExporter(BaseExporter):
         Raises:
             ValueError: If server data is invalid or cannot be exported.
         """
-        config = singbox_export_with_middleware(servers, [])
+        config = singbox_export(servers, [])
         return json.dumps(config, indent=2, ensure_ascii=False) 

@@ -687,7 +687,15 @@ def _validate_exclude_outbounds(exclude_outbounds: str) -> None:
     Raises:
         typer.Exit: If exclude outbounds contains invalid values
     """
-    valid_types = ["direct", "block", "dns", "proxy", "urltest", "selector"]
+    # Extended list of valid outbound types including all supported protocols
+    valid_types = [
+        # Basic outbound types
+        "direct", "block", "dns", "proxy", "urltest", "selector",
+        # Supported protocol types
+        "vmess", "vless", "trojan", "shadowsocks", "ss", "hysteria2",
+        "wireguard", "tuic", "shadowtls", "anytls", "tor", "ssh",
+        "http", "socks"
+    ]
     
     exclude_list = [o.strip() for o in exclude_outbounds.split(',') if o.strip()]
     
