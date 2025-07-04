@@ -399,76 +399,6 @@ def _add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
         outbounds.append({"type": "dns", "tag": "dns-out"})
 
 
-def singbox_export(
-    servers: List[ParsedServer],
-    routes=None,
-    client_profile: Optional[ClientProfile] = None
-) -> dict:
-    """Export parsed servers to sing-box configuration format (modern approach).
-    
-    This function exports configuration using the modern sing-box 1.11.0 approach
-    with rule actions instead of legacy special outbounds.
-    
-    Args:
-        servers: List of ParsedServer objects to export.
-        routes: Routing rules configuration (optional, uses modern defaults if None).
-        client_profile: Optional client profile for inbound generation.
-        
-    Returns:
-        Dictionary containing complete sing-box configuration with outbounds,
-        routing rules, and optional inbounds section.
-    """
-    outbounds = []
-    proxy_tags = []
-    
-    # Обрабатываем каждый сервер
-    for server in servers:
-        outbound = _process_single_server(server)
-        if outbound:
-            outbounds.append(outbound)
-            proxy_tags.append(outbound["tag"])
-    
-    # Добавляем urltest outbound если есть прокси серверы
-    if proxy_tags:
-        urltest_outbound = {
-            "type": "urltest",
-            "tag": "auto",
-            "outbounds": proxy_tags,
-            "url": "https://www.gstatic.com/generate_204",
-            "interval": "3m",
-            "tolerance": 50,
-            "idle_timeout": "30m",
-            "interrupt_exist_connections": False
-        }
-        outbounds.insert(0, urltest_outbound)
-    
-    # НЕ добавляем специальные outbounds - используем rule actions вместо них
-    
-    # Используем переданные правила маршрутизации или создаем современные по умолчанию
-    if routes:
-        routing_rules = routes
-    else:
-        routing_rules = _create_modern_routing_rules()
-    
-    # Определяем final action
-    final_action = "auto"  # по умолчанию
-    
-    # Формируем финальную конфигурацию
-    config = {
-        "outbounds": outbounds,
-        "route": {
-            "rules": routing_rules,
-            "final": final_action
-        }
-    }
-    
-    # Добавляем inbounds если есть client_profile
-    if client_profile:
-        config["inbounds"] = generate_inbounds(client_profile)
-    
-    return config
-
-
 def singbox_export_with_middleware(
     servers: List[ParsedServer],
     routes=None,
@@ -936,85 +866,6 @@ def singbox_export_legacy(
     
     return config
 
-def singbox_export_with_middleware(
-    servers: List[ParsedServer],
-    routes=None,
-    client_profile: Optional[ClientProfile] = None,
-    context: Optional[PipelineContext] = None
-) -> dict:
-    """Export parsed servers to sing-box configuration format using middleware.
-    
-    This function exports configuration using middleware for outbound filtering
-    and route configuration, providing better separation of concerns.
-    
-    Args:
-        servers: List of ParsedServer objects to export.
-        routes: Routing rules configuration (optional, uses modern defaults if None).
-        client_profile: Optional client profile for inbound generation.
-        context: Optional pipeline context with middleware metadata.
-        
-    Returns:
-        Dictionary containing complete sing-box configuration with outbounds,
-        routing rules, and optional inbounds section.
-    """
-    outbounds = []
-    proxy_tags = []
-    
-    # Обрабатываем каждый сервер
-    for server in servers:
-        outbound = _process_single_server(server)
-        if outbound:
-            outbounds.append(outbound)
-            proxy_tags.append(outbound["tag"])
-    
-    # Добавляем urltest outbound если есть прокси серверы
-    if proxy_tags:
-        urltest_outbound = {
-            "type": "urltest",
-            "tag": "auto",
-            "outbounds": proxy_tags,
-            "url": "https://www.gstatic.com/generate_204",
-            "interval": "3m",
-            "tolerance": 50,
-            "idle_timeout": "30m",
-            "interrupt_exist_connections": False
-        }
-        outbounds.insert(0, urltest_outbound)
-    
-    # НЕ добавляем специальные outbounds - используем rule actions вместо них
-    
-    # Используем переданные правила маршрутизации или создаем современные по умолчанию
-    if routes:
-        routing_rules = routes
-    else:
-        routing_rules = _create_modern_routing_rules()
-    
-    # Определяем final action из context или client_profile
-    final_action = "auto"  # по умолчанию
-    
-    # Приоритет: context > client_profile > default
-    if context and 'routing' in context.metadata:
-        context_final = context.metadata['routing'].get('final_action')
-        if context_final:
-            final_action = context_final
-    elif client_profile and client_profile.routing:
-        final_action = client_profile.routing.get("final", "auto")
-    
-    # Формируем финальную конфигурацию
-    config = {
-        "outbounds": outbounds,
-        "route": {
-            "rules": routing_rules,
-            "final": final_action
-        }
-    }
-    
-    # Добавляем inbounds если есть client_profile
-    if client_profile:
-        config["inbounds"] = generate_inbounds(client_profile)
-    
-    return config
-
 @register("singbox")
 class SingboxExporter(BaseExporter):
     """Sing-box format configuration exporter.
@@ -1036,5 +887,5 @@ class SingboxExporter(BaseExporter):
         Raises:
             ValueError: If server data is invalid or cannot be exported.
         """
-        config = singbox_export(servers, [])
+        config = singbox_export_with_middleware(servers, [])
         return json.dumps(config, indent=2, ensure_ascii=False) 

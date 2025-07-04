@@ -58,6 +58,6 @@ __all__ = [
     "TuicOutbound", "ShadowTlsOutbound", "DnsOutbound", "DirectOutbound",
     "BlockOutbound", "SelectorOutbound", "UrlTestOutbound", "HysteriaOutbound",
     "AnyTlsOutbound", "SshOutbound", "TorOutbound", "Outbound", "RouteConfig",
-    "Rule", "ExperimentalConfig", "ClashApiConfig", "V2RayApiConfig", "CacheFileConfig",
+    "RouteRule", "ExperimentalConfig", "ClashApiConfig", "V2RayApiConfig", "CacheFileConfig",
     "ObservatoryConfig"
 ] 

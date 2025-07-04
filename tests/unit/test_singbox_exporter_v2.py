@@ -404,4 +404,4 @@ class TestSingboxExporterV2:
         config = json.loads(config_str)
         
         # Should only have default outbounds
-        assert len(config["outbounds"]) == 2  # direct + blockы
+        assert len(config["outbounds"]) == 2  # direct + block

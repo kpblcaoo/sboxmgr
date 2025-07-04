@@ -138,12 +138,13 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         
         return exclude_config
     
-    def can_process(self, servers: List[ParsedServer], context: Optional[PipelineContext] = None) -> bool:
+    def can_process(self, servers: List[ParsedServer], context: Optional[PipelineContext] = None, profile: Optional[FullProfile] = None) -> bool:
         """Check if outbound filtering can be applied.
         
         Args:
             servers: List of servers
             context: Pipeline context
+            profile: Full profile configuration
             
         Returns:
             bool: True if outbound filtering is applicable
@@ -151,13 +152,14 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         if not servers:
             return False
         
-        # Check if we have any exclude types configured
-        if not self.exclude_types:
+        # Use merged exclude_types from config and profile
+        exclude_config = self._extract_exclude_config(profile)
+        if not exclude_config['exclude_types']:
             return False
         
         # Check if any servers have the excluded types
         server_types = {server.type for server in servers}
-        return bool(server_types & self.exclude_types)
+        return bool(server_types & exclude_config['exclude_types'])
     
     def get_metadata(self) -> Dict[str, Any]:
         """Get middleware metadata.
