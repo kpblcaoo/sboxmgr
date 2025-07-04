@@ -425,12 +425,6 @@ def singbox_export(
     for server in servers:
         outbound = _process_single_server(server)
         if outbound:
-            # Проверяем исключения
-            if client_profile and client_profile.exclude_outbounds:
-                outbound_type = outbound.get("type")
-                if outbound_type in client_profile.exclude_outbounds:
-                    continue  # Пропускаем исключенные типы
-            
             outbounds.append(outbound)
             proxy_tags.append(outbound["tag"])
     
@@ -458,8 +452,6 @@ def singbox_export(
     
     # Определяем final action
     final_action = "auto"  # по умолчанию
-    if client_profile and client_profile.routing:
-        final_action = client_profile.routing.get("final", "auto")
     
     # Формируем финальную конфигурацию
     config = {
