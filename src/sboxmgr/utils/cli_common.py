@@ -10,6 +10,7 @@ def load_outbounds(json_data, supported_protocols):
         
     Returns:
         List of outbound objects that match the supported protocols.
+
     """
     if isinstance(json_data, dict) and "outbounds" in json_data:
         return [o for o in json_data["outbounds"] if o.get("type") in supported_protocols]

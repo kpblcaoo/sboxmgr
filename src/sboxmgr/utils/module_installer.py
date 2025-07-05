@@ -19,6 +19,7 @@ def install_dependencies():
     Note:
         This function logs success/failure messages and does not return
         a value. Check logs for installation status.
+
     """
     try:
         subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], check=True)

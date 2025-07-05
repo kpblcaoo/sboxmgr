@@ -25,6 +25,7 @@ class JSONExporter:
         
         Args:
             validate: Whether to validate exported configurations.
+            
         """
         self.version = self._get_version()
         self.logger = logger
@@ -88,7 +89,7 @@ class JSONExporter:
                       metadata: Optional[Dict[str, Any]] = None,
                       pretty: bool = True,
                       validate: Optional[bool] = None) -> Path:
-        """Export configuration to file
+        """Export configuration to file.
         
         Args:
             client_type: Type of client
@@ -129,7 +130,7 @@ class JSONExporter:
                        output_dir: Path,
                        pretty: bool = True,
                        validate: Optional[bool] = None) -> List[Path]:
-        """Export multiple configurations
+        """Export multiple configurations.
         
         Args:
             configs: List of config dicts with keys: client_type, config_data, subscription_url, metadata
@@ -171,7 +172,7 @@ class JSONExporter:
     def _generate_metadata(self, 
                           subscription_url: Optional[str] = None,
                           additional_metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Generate metadata for exported configuration"""
+        """Generate metadata for exported configuration."""
         metadata = {
             "source": subscription_url or "manual",
             "generator": f"sboxmgr-{self.version}",
@@ -185,7 +186,7 @@ class JSONExporter:
         return metadata
     
     def _calculate_checksum(self, data: Dict[str, Any]) -> str:
-        """Calculate SHA256 checksum of configuration data"""
+        """Calculate SHA256 checksum of configuration data."""
         # Create a copy without checksum for consistent hashing
         data_copy = data.copy()
         if "metadata" in data_copy and "checksum" in data_copy["metadata"]:
@@ -203,7 +204,7 @@ class JSONExporter:
             return "unknown"
     
     def _get_client_version(self, client_type: str) -> str:
-        """Get client version if available"""
+        """Get client version if available."""
         # This could be enhanced to detect actual client versions
         client_versions = {
             "sing-box": "1.8.0",
@@ -264,15 +265,15 @@ class JSONExporter:
 
 
 class JSONExporterFactory:
-    """Factory for creating JSON exporters with different configurations"""
+    """Factory for creating JSON exporters with different configurations."""
     
     @staticmethod
     def create_exporter(config: Optional[Dict[str, Any]] = None) -> JSONExporter:
-        """Create JSON exporter with optional configuration"""
+        """Create JSON exporter with optional configuration."""
         validate = config.get("validate", True) if config else True
         return JSONExporter(validate=validate)
     
     @staticmethod
     def create_batch_exporter() -> JSONExporter:
-        """Create exporter optimized for batch operations"""
+        """Create exporter optimized for batch operations."""
         return JSONExporter(validate=True) 

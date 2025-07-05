@@ -12,6 +12,7 @@ def register(source_type: str):
     
     Args:
         source_type: Type of subscription source
+
     """
     def wrapper(cls):
         PLUGIN_REGISTRY[source_type] = cls
@@ -28,6 +29,7 @@ def get_plugin(source_type: str):
         
     Returns:
         Plugin class or None if not found
+
     """
     return PLUGIN_REGISTRY.get(source_type)
 
