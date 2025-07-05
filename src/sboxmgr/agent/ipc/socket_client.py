@@ -1,16 +1,4 @@
-import socket
-from typing import Optional, Dict, Any
-
-try:
-    from sbox_common.protocols.socket.framed_json import FramedJSONProtocol
-except ImportError:
-    raise ImportError(
-        "sbox_common package not found. Please install it with: "
-        "pip install -e ../sbox-common"
-    )
-
-"""
-SocketClient for framed JSON protocol over Unix socket.
+"""SocketClient for framed JSON protocol over Unix socket.
 
 Usage example:
     from sboxmgr.agent.ipc.socket_client import SocketClient
@@ -22,6 +10,17 @@ Usage example:
     print(response)
     client.close()
 """
+
+import socket
+from typing import Optional, Dict, Any
+
+try:
+    from sbox_common.protocols.socket.framed_json import FramedJSONProtocol
+except ImportError:
+    raise ImportError(
+        "sbox_common package not found. Please install it with: "
+        "pip install -e ../sbox-common"
+    )
 
 class SocketClient:
     """Client for framed JSON protocol over Unix socket."""

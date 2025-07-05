@@ -42,6 +42,7 @@ def rotate_logs(log_file, max_log_size):
     Args:
         log_file: Path to log file
         max_log_size: Maximum size in bytes before rotation
+        
     """
     if not os.path.exists(log_file):
         return

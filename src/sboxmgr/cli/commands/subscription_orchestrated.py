@@ -31,7 +31,7 @@ def _create_orchestrator(debug_level: int = 0, fail_safe: bool = False) -> Orche
 
 
 def _setup_user_agent(user_agent: Optional[str], no_user_agent: bool) -> Optional[str]:
-    """Setup User-Agent header."""
+    """Set up User-Agent header."""
     if no_user_agent:
         return ""
     return user_agent

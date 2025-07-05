@@ -432,7 +432,7 @@ def send_event(event_type: str,
 
 
 def send_heartbeat() -> bool:
-    """Convenience function to send a heartbeat.
+    """Send a heartbeat event.
     
     Returns:
         True if sent successfully, False otherwise
@@ -443,7 +443,7 @@ def send_heartbeat() -> bool:
 
 
 def ping_agent() -> bool:
-    """Convenience function to ping the agent.
+    """Ping the agent to check connectivity.
     
     Returns:
         True if ping successful, False otherwise
