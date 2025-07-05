@@ -41,6 +41,7 @@ class ProfileInfo:
             modified: Last modification time
             valid: Whether the profile is valid
             error: Error message if profile is invalid
+            
         """
         self.path = path
         self.name = name
@@ -68,6 +69,7 @@ class ValidationResult:
             valid: Whether the profile is valid
             errors: List of validation errors
             warnings: List of validation warnings
+            
         """
         self.valid = valid
         self.errors = errors or []

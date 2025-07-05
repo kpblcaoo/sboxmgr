@@ -35,6 +35,18 @@ class SubscriptionProfile(BaseModel):
     @field_validator('priority')
     @classmethod
     def validate_priority(cls, v):
+        """Validate priority field.
+        
+        Args:
+            v: Priority value to validate.
+            
+        Returns:
+            Validated priority value.
+            
+        Raises:
+            ValueError: If priority is less than 1.
+            
+        """
         if v < 1:
             raise ValueError('Priority must be >= 1')
         return v
@@ -112,6 +124,18 @@ class FullProfile(BaseModel):
     @field_validator('id')
     @classmethod
     def validate_id(cls, v):
+        """Validate profile ID field.
+        
+        Args:
+            v: Profile ID value to validate.
+            
+        Returns:
+            Validated and stripped profile ID.
+            
+        Raises:
+            ValueError: If profile ID is empty or whitespace only.
+            
+        """
         if not v or not v.strip():
             raise ValueError('Profile ID cannot be empty')
         return v.strip()
