@@ -24,10 +24,30 @@ class ProfileSectionValidator(ABC):
 
     @abstractmethod
     def validate(self, section_data: dict) -> list:
+        """Validate profile section data.
+        
+        Args:
+            section_data: Section data to validate.
+            
+        Returns:
+            List of validation errors.
+            
+        """
         pass
 
 class SubscriptionSectionValidator(ProfileSectionValidator):
+    """Validator for subscription section of profiles."""
+    
     def validate(self, section_data: dict) -> list:
+        """Validate subscription section data.
+        
+        Args:
+            section_data: Subscription section data to validate.
+            
+        Returns:
+            List of validation error messages.
+            
+        """
         errors = []
         if not isinstance(section_data, list):
             errors.append("Subscriptions must be a list")
@@ -43,7 +63,18 @@ class SubscriptionSectionValidator(ProfileSectionValidator):
         return errors
 
 class ExportSectionValidator(ProfileSectionValidator):
+    """Validator for export section of profiles."""
+    
     def validate(self, section_data: dict) -> list:
+        """Validate export section data.
+        
+        Args:
+            section_data: Export section data to validate.
+            
+        Returns:
+            List of validation error messages.
+            
+        """
         errors = []
         if 'format' in section_data:
             if section_data['format'] not in ['sing-box', 'clash', 'json']:
@@ -54,7 +85,18 @@ class ExportSectionValidator(ProfileSectionValidator):
         return errors
 
 class FilterSectionValidator(ProfileSectionValidator):
+    """Validator for filter section of profiles."""
+    
     def validate(self, section_data: dict) -> list:
+        """Validate filter section data.
+        
+        Args:
+            section_data: Filter section data to validate.
+            
+        Returns:
+            List of validation error messages.
+            
+        """
         errors = []
         for key in ('exclude_tags', 'only_tags', 'exclusions'):
             if key in section_data and not isinstance(section_data[key], list):

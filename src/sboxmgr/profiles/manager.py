@@ -32,6 +32,16 @@ class ProfileInfo:
     
     def __init__(self, path: str, name: str, size: int, modified: datetime, 
                  valid: bool = True, error: Optional[str] = None):
+        """Initialize ProfileInfo.
+        
+        Args:
+            path: Path to the profile file
+            name: Profile name (derived from filename)
+            size: File size in bytes
+            modified: Last modification time
+            valid: Whether the profile is valid
+            error: Error message if profile is invalid
+        """
         self.path = path
         self.name = name
         self.size = size
@@ -52,6 +62,13 @@ class ValidationResult:
     
     def __init__(self, valid: bool = True, errors: Optional[List[str]] = None, 
                  warnings: Optional[List[str]] = None):
+        """Initialize ValidationResult.
+        
+        Args:
+            valid: Whether the profile is valid
+            errors: List of validation errors
+            warnings: List of validation warnings
+        """
         self.valid = valid
         self.errors = errors or []
         self.warnings = warnings or []

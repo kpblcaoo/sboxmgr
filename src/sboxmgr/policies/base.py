@@ -281,7 +281,7 @@ class BasePolicy(ABC):
             self.name = self.__class__.__name__
 
     def __repr__(self) -> str:
-        """String representation for CLI display."""
+        """Return string representation for CLI display."""
         status = "enabled" if self.enabled else "disabled"
         return f"{self.name}({self.group}, {status})"
 

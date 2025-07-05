@@ -9,4 +9,13 @@ class GeoTestPolicy(BasePolicy):
     group = "geo"
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
+        """Evaluate policy context and return result.
+        
+        Args:
+            context: Policy evaluation context.
+            
+        Returns:
+            PolicyResult allowing all requests.
+            
+        """
         return PolicyResult.allow("GeoTestPolicy always allows") 
