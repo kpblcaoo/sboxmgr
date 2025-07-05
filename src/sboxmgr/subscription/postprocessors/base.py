@@ -35,6 +35,7 @@ class BasePostProcessor(ABC):
         
         Args:
             config: Optional configuration dictionary for the postprocessor
+
         """
         self.config = config or {}
     
@@ -57,6 +58,7 @@ class BasePostProcessor(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class
+
         """
         pass
     
@@ -69,6 +71,7 @@ class BasePostProcessor(ABC):
             
         Returns:
             bool: True if this postprocessor can handle the servers
+
         """
         return len(servers) > 0
     
@@ -77,6 +80,7 @@ class BasePostProcessor(ABC):
         
         Returns:
             Dict containing postprocessor metadata
+
         """
         return {
             "name": self.__class__.__name__,
@@ -100,6 +104,7 @@ class ProfileAwarePostProcessor(BasePostProcessor):
             
         Returns:
             FilterProfile or None if no profile provided
+
         """
         return profile.filters if profile else None
     
@@ -112,6 +117,7 @@ class ProfileAwarePostProcessor(BasePostProcessor):
             
         Returns:
             bool: True if server should be excluded
+
         """
         if not filter_config:
             return False
@@ -154,6 +160,7 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
             servers: List of servers to be processed
             context: Pipeline context
             profile: Full profile configuration
+
         """
         pass
     
@@ -169,6 +176,7 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
             servers: List of processed servers
             context: Pipeline context
             profile: Full profile configuration
+
         """
         pass
     
@@ -187,6 +195,7 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             List of processed servers
+
         """
         self.pre_process(servers, context, profile)
         result = self._do_process(servers, context, profile)
@@ -209,5 +218,6 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             List of processed servers
+
         """
         pass 

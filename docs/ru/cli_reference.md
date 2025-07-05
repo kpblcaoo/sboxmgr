@@ -1,310 +1,233 @@
-# Справочник CLI команд
+# Справочник CLI
+
+Этот документ содержит полный справочник всех команд и опций CLI SBoxMgr.
 
 ## Обзор
 
-`sboxmgr` - это инструмент для обработки подписок и генерации конфигураций. Согласно ADR-0015, sboxmgr фокусируется на обработке подписок и генерации конфигураций, а управление сервисами (запуск, остановка, перезапуск) выполняется отдельным агентом `sboxagent`.
+SBoxMgr предоставляет командную строку для управления конфигурациями sing-box, подписками и профилями.
 
-### Основные принципы:
-- **sboxmgr**: обработка подписок, генерация конфигураций, валидация
-- **sboxagent**: управление сервисами, мониторинг, автообновления
-- **Инсталлер**: установка системных зависимостей (sing-box, clash, wireguard)
+## Глобальные опции
 
-## Профили (Profiles)
+Все команды поддерживают эти глобальные опции:
 
-### `sboxmgr profile info <path>`
+- `--debug`, `-d <уровень>`: Установить уровень отладки (0-3)
+- `--help`, `-h`: Показать справку
 
-Показать краткую информацию о профиле.
+## Команды
 
-**Аргументы:**
-- `path` - путь к файлу профиля
+### Управление серверами
+
+#### `sboxctl list-servers`
+Вывести список всех серверов из подписки.
+
+**Опции:**
+- `-u, --url <url>`: URL подписки (**обязательно**)
+- `--format <формат>`: Формат вывода (table, json, yaml)
+- `--filter <фильтр>`: Фильтр серверов по критериям
 
 **Пример:**
 ```bash
-sboxmgr profile info /path/to/profile.json
+sboxctl list-servers -u "https://example.com/proxy.json"
 ```
 
-**Вывод:**
-```
-Profile Info:
-  Name: profile-name
-  Path: /path/to/profile.json
-  Size: 1024 bytes
-  Modified: 2025-06-30 12:00:00
-  Format: .json
-  Sections: id, description, subscriptions, filters, routing, export, version
-  Status: ✓ Valid
-```
+### Экспорт конфигурации
 
-### `sboxmgr profile validate <path> [--normalize] [--verbose]`
-
-Валидировать профиль.
-
-**Аргументы:**
-- `path` - путь к файлу профиля
+#### `sboxctl export`
+Экспортировать конфигурацию sing-box.
 
 **Опции:**
-- `--normalize` - автоисправление профиля перед валидацией
-- `--verbose` - подробный вывод
+- `-u, --url <url>`: URL подписки (**обязательно**)
+- `--index <номер>`: Индекс сервера
+- `--remarks <имя>`: Имя/заметка сервера
+- `--dry-run`: Проверить без записи файлов
+- `--inbound-types <типы>`: Типы inbound (tun, socks, http, tproxy)
+- `--socks-port <порт>`: Порт SOCKS-прокси
+- `--socks-listen <адрес>`: Адрес для SOCKS
+- `--socks-auth <пользователь:пароль>`: Аутентификация SOCKS
+- `--http-port <порт>`: Порт HTTP-прокси
+- `--http-listen <адрес>`: Адрес для HTTP
+- `--http-auth <пользователь:пароль>`: Аутентификация HTTP
+- `--tproxy-port <порт>`: Порт TPROXY
+- `--tproxy-listen <адрес>`: Адрес TPROXY
+- `--tun-address <CIDR>`: Адрес интерфейса TUN
+- `--tun-mtu <MTU>`: MTU для TUN
+- `--tun-stack <stack>`: Стек TUN (system, gvisor)
+- `--dns-mode <режим>`: Режим DNS (system, tunnel, off)
+- `--final-route <маршрут>`: Конечный маршрут
+- `--exclude-outbounds <типы>`: Исключить outbound-типы
 
 **Примеры:**
 ```bash
-# Обычная валидация
-sboxmgr profile validate /path/to/profile.json
+# Базовый экспорт
+sboxctl export -u "https://example.com/proxy.json" --index 1
 
-# Валидация с автоисправлением
-sboxmgr profile validate /path/to/profile.json --normalize
+# С кастомным inbound
+sboxctl export -u "https://example.com/proxy.json" --index 1 \
+  --inbound-types socks --socks-port 1080
 
-# Подробная валидация
-sboxmgr profile validate /path/to/profile.json --verbose
+# Dry run
+sboxctl export -u "https://example.com/proxy.json" --index 1 --dry-run
 ```
 
-### `sboxmgr profile apply <path> [--dry-run]`
+### Управление исключениями
 
-Применить профиль.
-
-**Аргументы:**
-- `path` - путь к файлу профиля
+#### `sboxctl exclusions`
+Управление списком исключённых серверов.
 
 **Опции:**
-- `--dry-run` - показать что будет применено без фактического применения
+- `-u, --url <url>`: URL подписки
+- `--add <индекс>`: Добавить сервер в исключения
+- `--remove <индекс>`: Удалить сервер из исключений
+- `--view`: Показать текущие исключения
+- `--clear`: Очистить все исключения
 
 **Примеры:**
 ```bash
-# Применить профиль
-sboxmgr profile apply /path/to/profile.json
+# Добавить сервер в исключения
+sboxctl exclusions -u "https://example.com/proxy.json" --add 3
 
-# Показать что будет применено
-sboxmgr profile apply /path/to/profile.json --dry-run
-```
+# Удалить сервер из исключений
+sboxctl exclusions -u "https://example.com/proxy.json" --remove 3
 
-### `sboxmgr profile explain <path>`
-
-Показать подробное объяснение структуры профиля.
-
-**Аргументы:**
-- `path` - путь к файлу профиля
-
-**Пример:**
-```bash
-sboxmgr profile explain /path/to/profile.json
-```
-
-### `sboxmgr profile diff <path1> <path2>`
-
-Сравнить два профиля.
-
-**Аргументы:**
-- `path1` - путь к первому профилю
-- `path2` - путь ко второму профилю
-
-**Пример:**
-```bash
-sboxmgr profile diff /path/to/profile1.json /path/to/profile2.json
-```
-
-### `sboxmgr profile list [--dir <directory>]`
-
-Показать список доступных профилей.
-
-**Опции:**
-- `--dir` - директория для поиска профилей
-
-**Примеры:**
-```bash
-# Список профилей в директории по умолчанию
-sboxmgr profile list
-
-# Список профилей в указанной директории
-sboxmgr profile list --dir /path/to/profiles
-```
-
-### `sboxmgr profile switch <profile_id> [--dir <directory>]`
-
-Переключиться на другой активный профиль.
-
-**Аргументы:**
-- `profile_id` - ID профиля (имя или путь)
-
-**Опции:**
-- `--dir` - директория для поиска профилей
-
-**Примеры:**
-```bash
-# Переключиться на профиль по имени
-sboxmgr profile switch dev
-
-# Переключиться на профиль по пути
-sboxmgr profile switch /path/to/profile.json
-```
-
-## Подписки (Subscriptions)
-
-### `sboxmgr subscription orchestrated -u <url> [опции]`
-
-Обновить конфигурацию из подписки с использованием Orchestrator.
-
-**Аргументы:**
-- `-u, --url` - URL подписки (обязательно)
-
-**Опции:**
-- `-d, --debug` - уровень отладки (0-2)
-- `--dry-run` - проверить конфигурацию без сохранения
-- `--config-file` - путь к выходному файлу конфигурации
-- `--backup-file` - путь к файлу резервной копии
-- `--user-agent` - пользовательский User-Agent
-- `--no-user-agent` - отключить User-Agent
-- `--format` - формат экспорта (singbox, clash, v2ray)
-- `--user-routes` - теги маршрутов для включения (через запятую)
-- `--exclusions` - серверы для исключения (через запятую)
-
-**Примеры:**
-```bash
-# Базовое обновление
-sboxmgr subscription orchestrated -u https://example.com/subscription
-
-# С проверкой без изменений
-sboxmgr subscription orchestrated -u https://example.com/subscription --dry-run
-
-# С указанием выходного файла
-sboxmgr subscription orchestrated -u https://example.com/subscription --config-file /etc/sing-box/config.json
-```
-
-**Примечание:** Эта команда только генерирует конфигурацию. Для применения изменений и перезапуска сервиса используйте `sboxagent`.
-
-### `sboxmgr subscription list-servers -u <url> [опции]`
-
-Показать список всех доступных серверов из подписки.
-
-**Аргументы:**
-- `-u, --url` - URL подписки (обязательно)
-
-**Опции:**
-- `-d, --debug` - уровень отладки (0-2)
-- `--user-agent` - пользовательский User-Agent
-- `--no-user-agent` - отключить User-Agent
-- `--format` - принудительный формат (auto, base64, json, uri_list, clash)
-- `-P, --policy-details` - показать детали политик для каждого сервера
-
-**Примеры:**
-```bash
-# Список серверов
-sboxmgr subscription list-servers -u https://example.com/subscription
-
-# С деталями политик
-sboxmgr subscription list-servers -u https://example.com/subscription --policy-details
-```
-
-## Экспорт (Export) - Phase 4 Integration
-
-### `sboxmgr export [--profile <path>] [--validate-profile] [--profile-info]`
-
-Экспорт конфигурации с поддержкой профилей.
-
-**Опции:**
-- `--profile` - путь к файлу профиля
-- `--validate-profile` - валидировать профиль перед использованием
-- `--profile-info` - показать информацию о профиле после экспорта
-
-**Примеры:**
-```bash
-# Экспорт с использованием профиля
-sboxmgr export --profile /path/to/profile.json
-
-# Экспорт с валидацией профиля
-sboxmgr export --profile /path/to/profile.json --validate-profile
-
-# Экспорт с информацией о профиле
-sboxmgr export --profile /path/to/profile.json --profile-info
-```
-
-## Исключения (Exclusions)
-
-### `sboxmgr exclusions -u <url> [команды]`
-
-Управление исключениями серверов.
-
-**Аргументы:**
-- `-u, --url` - URL подписки (обязательно)
-
-**Команды:**
-- `--add` - добавить исключения (индексы или имена через запятую)
-- `--remove` - удалить исключения (индексы или имена через запятую)
-- `--view` - просмотр текущих исключений
-- `--clear` - очистить все исключения
-
-**Примеры:**
-```bash
-# Добавить исключения
-sboxmgr exclusions -u https://example.com/subscription --add "0,1,server-*" --reason "Testing"
-
-# Просмотр исключений
-sboxmgr exclusions -u https://example.com/subscription --view
+# Показать исключения
+sboxctl exclusions --view
 
 # Очистить все исключения
-sboxmgr exclusions -u https://example.com/subscription --clear
+sboxctl exclusions --clear --yes
 ```
 
-## Управление агентом
+### Управление конфигурацией
 
-### `sboxmgr agent status`
+#### `sboxctl config`
+Команды для работы с конфигурацией.
 
-Показать статус агента.
+**Подкоманды:**
+- `validate`: Проверить конфигурационный файл
+- `dump`: Вывести разрешённую конфигурацию
+- `schema`: Сгенерировать JSON схему
+- `env-info`: Показать информацию об окружении
 
-### `sboxmgr agent logs`
-
-Показать логи агента.
-
-### `sboxmgr agent config show`
-
-Показать конфигурацию агента.
-
-### `sboxmgr agent start/stop/restart`
-
-Управление агентом.
-
-**Примечание:** Эти команды управляют агентом `sboxagent`, который отвечает за применение конфигураций и управление сервисами.
-
-## Коды возврата
-
-- `0` - успешное выполнение
-- `1` - ошибка (файл не найден, невалидный профиль, etc.)
-- `2` - ошибка синтаксиса командной строки
-
-## Миграция с предыдущих версий
-
-### Изменения в управлении сервисами
-
-В соответствии с ADR-0015, управление сервисами было вынесено в отдельный агент:
-
-**Раньше:**
+**Примеры:**
 ```bash
-sboxmgr subscription orchestrated -u URL  # Автоматически перезапускал сервис
+# Проверить конфиг
+sboxctl config validate config.json
+
+# Вывести конфигурацию
+sboxctl config dump --format json
+
+# Сгенерировать схему
+sboxctl config schema --output schema.json
 ```
 
-**Теперь:**
+### Управление профилями
+
+#### `sboxctl profile`
+Команды для работы с профилями.
+
+**Подкоманды:**
+- `list`: Список доступных профилей
+- `apply`: Применить профиль к конфигурации
+- `validate`: Проверить профиль
+- `explain`: Объяснить настройки профиля
+- `diff`: Показать различия между профилями
+- `switch`: Переключиться на другой профиль
+
+**Примеры:**
 ```bash
-# Генерация конфигурации
-sboxmgr subscription orchestrated -u URL
+# Список профилей
+sboxctl profile list
 
-# Управление сервисом через агент
-sboxmgr agent restart
+# Применить профиль
+sboxctl profile apply profile.json
+
+# Проверить профиль
+sboxctl profile validate profile.json
+
+# Переключить профиль
+sboxctl profile switch work
 ```
 
-### Установка агента
+### Управление политиками
 
-Для полной функциональности установите агент:
+#### `sboxctl policy`
+Команды для работы с политиками.
+
+**Подкоманды:**
+- `list`: Список доступных политик
+- `test`: Проверить политики с контекстом
+- `audit`: Аудит серверов по политикам
+- `enable`: Включить политики
+- `disable`: Отключить политики
+- `info`: Показать информацию о системе политик
+
+**Примеры:**
+```bash
+# Список политик
+sboxctl policy list
+
+# Проверить политики
+sboxctl policy test --profile profile.json
+
+# Аудит серверов
+sboxctl policy audit --servers servers.json
+```
+
+### Управление языками
+
+#### `sboxctl lang`
+Команды для управления языком интерфейса.
+
+**Опции:**
+- `--set <код>`: Установить язык (en, ru, de и др.)
+- `--list`: Показать доступные языки
+
+**Примеры:**
+```bash
+# Установить язык
+sboxctl lang --set ru
+
+# Показать языки
+sboxctl lang --list
+```
+
+### Разработка плагинов
+
+#### `sboxctl plugin-template`
+Генерация шаблона плагина.
+
+**Опции:**
+- `<type>`: Тип плагина (fetcher, parser, exporter, validator)
+- `<ClassName>`: Имя класса (CamelCase)
+- `--output-dir <путь>`: Папка для вывода
+
+**Пример:**
+```bash
+sboxctl plugin-template fetcher MyCustomFetcher --output-dir ./plugins/
+```
+
+## Переменные окружения
+
+SBoxMgr поддерживает настройку через переменные окружения. Создайте файл `.env` в корне проекта:
 
 ```bash
-# Установка через curl
-curl -sSL https://sbox.dev/install.sh | bash
+# Путь к файлу конфигурации (по умолчанию: ./config.json)
+SBOXMGR_CONFIG_FILE=/etc/sing-box/config.json
 
-# Или через sboxmgr
-sboxmgr install agent
+# Путь к лог-файлу
+SBOXMGR_LOG_FILE=./sboxmgr.log
+
+# Файл исключений
+SBOXMGR_EXCLUSION_FILE=./exclusions.json
+
+# Язык (en, ru, de, zh и др.)
+SBOXMGR_LANG=ru
 ```
+
+## Примечания
+- Все команды поддерживают `--help` для вывода справки.
+- Для подробных примеров и сценариев см. [SHOWCASE.md](SHOWCASE.md).
+- Для продвинутых настроек и разработки см. [README.md](README.md) и [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---
 
-**См. также:**
-- [Руководство по управлению профилями](guides/profile_management.md)
-- [ADR-0015: Agent-Installer Separation](../arch/decisions/ADR-0015-agent-installer-separation.md)
-- [Руководство по использованию агента](../AGENT_BRIDGE_USAGE.md) 
+**Последнее обновление:** 2025-07-05 

@@ -1,5 +1,4 @@
-"""
-Pydantic models for Full Profile Architecture (ADR-0017).
+"""Pydantic models for Full Profile Architecture (ADR-0017).
 
 This module defines the core models for profile-based configuration,
 including subscriptions, filters, routing, export settings, agent config, and UI preferences.
@@ -12,6 +11,7 @@ from enum import Enum
 
 class ExportFormat(str, Enum):
     """Supported export formats."""
+
     SINGBOX = "sing-box"
     CLASH = "clash"
     JSON = "json"
@@ -19,6 +19,7 @@ class ExportFormat(str, Enum):
 
 class UIMode(str, Enum):
     """Supported UI modes."""
+
     CLI = "cli"
     TUI = "tui"
     GUI = "gui"
@@ -34,6 +35,18 @@ class SubscriptionProfile(BaseModel):
     @field_validator('priority')
     @classmethod
     def validate_priority(cls, v):
+        """Validate priority field.
+        
+        Args:
+            v: Priority value to validate.
+            
+        Returns:
+            Validated priority value.
+            
+        Raises:
+            ValueError: If priority is less than 1.
+            
+        """
         if v < 1:
             raise ValueError('Priority must be >= 1')
         return v
@@ -111,6 +124,18 @@ class FullProfile(BaseModel):
     @field_validator('id')
     @classmethod
     def validate_id(cls, v):
+        """Validate profile ID field.
+        
+        Args:
+            v: Profile ID value to validate.
+            
+        Returns:
+            Validated and stripped profile ID.
+            
+        Raises:
+            ValueError: If profile ID is empty or whitespace only.
+            
+        """
         if not v or not v.strip():
             raise ValueError('Profile ID cannot be empty')
         return v.strip()

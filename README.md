@@ -1,326 +1,215 @@
-# subbox manager
+# SBoxMgr - Sing-box Configuration Manager
 
 [![Build Status](https://github.com/kpblcaoo/update-singbox/actions/workflows/ci-dev.yml/badge.svg)](https://github.com/kpblcaoo/update-singbox/actions)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/kpblcaoo/update-singbox/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## Other languages / Другие языки
-- [Русский (docs/ru/README.md)](docs/ru/README.md)
+A Python CLI tool for managing [sing-box](https://sing-box.sagernet.org/) proxy configurations. Automatically fetches server lists, applies exclusions, generates configs, and supports advanced routing.
 
-A Python CLI tool for automating and managing [sing-box](https://sing-box.sagernet.org/) proxy configurations. Fetches server lists from a URL, applies exclusions, generates configs, and supports advanced routing and testing.
+## 🚀 Quick Start (3 steps)
 
----
-
-## ✨ Features
-- Fetch and apply proxy server configs from a URL
-- Supported protocols: VLESS, Shadowsocks, VMess, Trojan, TUIC, Hysteria2
-- **NEW in 1.5.0**: CLI inbound parameters for easy proxy configuration
-- **NEW in 1.5.0**: Middleware-based routing and filtering with CLI flags
-- Direct routing for Russian domains and geoip-ru, proxy for other traffic
-- Logging, backup, exclusions, dry-run, and full CLI test coverage
-- All paths and artifacts are configurable via environment variables
-- Modular architecture, fully tested with pytest + Typer.CliRunner
-
-## Pipeline Architecture
-
-The pipeline is built on a modular architecture with plugin support for fetcher, parser, exporter, selector, postprocessor, and middleware. All stages are covered by fail-tolerance, caching, i18n, edge tests, and best practices.
-
-```mermaid
-flowchart TD
-    A[Fetcher] --> B[Raw Validator]
-    B --> C[Parser]
-    C --> D[PostProcessorChain]
-    D --> E[MiddlewareChain]
-    E --> F[Selector]
-    F --> G[Exporter]
-    G --> H[Config Output]
-    
-    subgraph Context
-      X[PipelineContext] 
-    end
-    X -.-> A
-    X -.-> D
-    X -.-> E
-    X -.-> F
-    X -.-> G
-    
-    subgraph ErrorHandling
-      Y[Error Reporter]
-    end
-    Y -.-> A
-    Y -.-> B
-    Y -.-> C
-    Y -.-> D
-    Y -.-> E
-    Y -.-> F
-    Y -.-> G
-    
-    style X fill:#f9f,stroke:#333,stroke-width:2px
-    style Y fill:#ff9,stroke:#333,stroke-width:2px
-    
-    classDef main fill:#bbf,stroke:#333,stroke-width:2px;
-    class A,B,C,D,E,F,G,H main;
-```
-
-- **DX/CLI generator**: plugin template generator (fetcher, parser, exporter, postprocessor, validator) with tests and best practices.
-- **i18n**: multilingual CLI, fallback, sanitization, automated sync_keys.py, edge tests.
-- **Middleware**: extensible middleware chain with edge tests, logging, fail-tolerance.
-- **Caching**: in-memory cache for SubscriptionManager and fetcher, force_reload support.
-- **Fail-tolerance**: partial_success, strict/tolerant modes, Error Reporter, edge test coverage.
-- **Coverage**: >90% test coverage, dedicated edge tests for all pipeline layers.
-- **Best practices**: modular architecture, Google-style docstrings, auto-documentation, SEC checklists, DX utilities.
-- **SEC validation for inbounds**: all inbounds are validated via pydantic (V2): bind only to localhost/private, ports 1024-65535, external bind requires explicit confirmation, edge tests, see cli_security.md for profile example.
-
----
-
-## 🚀 Quick start
-
+### 1. Install
 ```bash
+# Clone and install
+git clone https://github.com/kpblcaoo/update-singbox.git
+cd update-singbox
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install .
-cp .env.example .env  # Edit as needed
-sboxctl run -u https://example.com/proxy-config.json --index 1
 ```
 
-- See `.env.example` for all environment variables you can configure (paths, URLs, debug, etc).
-- **Note:** By default, the config is written to `/etc/sing-box/config.json` (default for sing-box). If your sing-box installation uses a different path, set `SBOXMGR_CONFIG_FILE` accordingly in your `.env`.
-- For development, see DEVELOPMENT.md.
+### 2. Get your proxy URL
+You need a URL that provides sing-box compatible configuration (Clash, sing-box JSON, etc.). Common sources:
+- Your VPN provider's subscription link
+- A Clash configuration URL
+- A sing-box configuration file
 
----
-
-## 🚀 Installation
-
+### 3. Generate config
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install .
-cp .env.example .env  # Edit as needed
+# List available servers
+sboxctl list-servers -u "YOUR_PROXY_URL_HERE"
+
+# Generate config for server #1
+sboxctl export -u "YOUR_PROXY_URL_HERE" --index 1
+
+# Start sing-box with the generated config
+sing-box run -c config.json
 ```
 
-Requirements: Python 3.10+, sing-box, requests[socks], python-dotenv
+That's it! Your sing-box is now running with the selected server.
 
-### Sing-box Version Compatibility
+## ✨ Key Features
 
-**Recommended:** sing-box 1.11.0 or higher
+- **Simple CLI**: One command to generate working sing-box configs
+- **Multiple protocols**: VLESS, Shadowsocks, VMess, Trojan, TUIC, Hysteria2
+- **Smart routing**: Direct routing for Russian domains, proxy for others
+- **Server management**: List, select, and exclude servers
+- **Flexible input**: Supports Clash, sing-box JSON, and other formats
+- **Production ready**: 90%+ test coverage, comprehensive error handling
 
-- **sing-box 1.11.0+**: Full support with modern rule actions syntax
-- **sing-box < 1.11.0**: Automatic compatibility mode with legacy special outbounds (`block`, `dns`)
+## 📖 Common Usage
 
-The tool automatically detects your sing-box version and adapts the configuration format:
-- For newer versions: Uses modern `rule actions` (recommended)
-- For older versions: Falls back to legacy `special outbounds` for compatibility
-
-To skip version checking (not recommended):
+### Basic Operations
 ```bash
-sboxctl run -u <url> --skip-version-check
+# List all available servers
+sboxctl list-servers -u "https://example.com/proxy.json"
+
+# Generate config for specific server
+sboxctl export -u "https://example.com/proxy.json" --index 2
+
+# Generate config for server by name
+sboxctl export -u "https://example.com/proxy.json" --remarks "Fast Server"
+
+# Preview config without saving (dry-run)
+sboxctl export -u "https://example.com/proxy.json" --index 1 --dry-run
 ```
 
-⚠️ **Note**: Legacy special outbounds are deprecated and will be removed in sing-box 1.13.0. Please update to sing-box 1.11.0+ for best experience.
-
----
-
-## ⚙️ Usage
-
-All commands are available via the `sboxctl` CLI (Typer-based):
-
-### Typical scenarios
-
-- **Run with server selection by index:**
-  ```bash
-  sboxctl run -u https://example.com/proxy-config.json --index 1
-  # Generates config.json for the selected server
-  ```
-- **Export with CLI inbound parameters (NEW in 1.5.0):**
-  ```bash
-  sboxctl export -u https://example.com/proxy-config.json --inbound-types socks --socks-port 1080
-  # Configure proxy interfaces directly via CLI
-  ```
-- **Export with routing and filtering (NEW in 1.5.0):**
-  ```bash
-  sboxctl export -u https://example.com/proxy-config.json --final-route direct --exclude-outbounds block,dns
-  # Set final routing destination and exclude specific outbound types
-  ```
-- **Dry-run (simulate config generation, no file changes):**
-  ```bash
-  sboxctl dry-run -u https://example.com/proxy-config.json
-  # Prints config to stdout, does not write files
-  ```
-- **List all available servers:**
-  ```bash
-  sboxctl list-servers -u https://example.com/proxy-config.json
-  # Shows a table of all servers with indices and remarks
-  ```
-- **Add server to exclusions:**
-  ```bash
-  sboxctl exclusions -u https://example.com/proxy-config.json --add 1
-  # Adds server with index 1 to exclusions.json
-  ```
-- **Remove server from exclusions:**
-  ```bash
-  sboxctl exclusions -u https://example.com/proxy-config.json --remove 1
-  # Removes server with index 1 from exclusions.json
-  ```
-- **View current exclusions:**
-  ```bash
-  sboxctl exclusions --view
-  # Prints the current exclusions list
-  ```
-- **Clear all exclusions:**
-  ```bash
-  sboxctl clear-exclusions
-  # Empties exclusions.json
-  ```
-
-### Options
-| Option                  | Description                                      |
-|------------------------|--------------------------------------------------|
-| `-u, --url <URL>`      | Proxy config URL (required)                      |
-| `--index <n>`          | Select server by index                           |
-| `--remarks <name>`     | Select server by remarks                         |
-| `--dry-run`            | Simulate config generation, no file changes      |
-| `--list-servers`       | List all available servers                       |
-| `--exclusions`         | Manage exclusions (add/remove/list)              |
-| `--clear-exclusions`   | Remove all exclusions                            |
-| `-d, --debug <level>`  | Set log verbosity (0=min, 1=info, 2=debug)       |
-
----
-
-## 🛠 CLI architecture
-
-- The CLI is built with [Typer](https://typer.tiangolo.com/), providing modular commands and automatic help.
-- Each scenario (run, dry-run, exclusions, list-servers, clear-exclusions) is implemented as a separate command in the `cli/` package.
-- CLI wrappers are thin: they only orchestrate, all business logic is in core modules (see `core/`, `utils/`).
-- All paths and artifacts (config, log, exclusions, etc.) are controlled via environment variables (see `.env.example`).
-- To add or extend commands, create a new file in `cli/` and register it in the main Typer app.
-- For development and contribution guidelines, see DEVELOPMENT.md.
-
-## 🐞 Known bugs & limitations
-
-- Server indices in `list-servers` may start from a non-zero value if the list is filtered. [Planned: re-index from 0]
-- Removing exclusions by index or ID may not work as expected. Use `sboxctl clear-exclusions --yes` or edit `exclusions.json` as a workaround. [Planned: improve UX]
-- See [TODO.md](./TODO.md) or [plans/struct_refactor_next_steps.md](./plans/struct_refactor_next_steps.md) for the full list of known issues and plans.
-
----
-
-## 🧪 Testing
-
-Run all tests:
+### Server Management
 ```bash
-pytest -v tests/
+# Add server to exclusions (won't be used)
+sboxctl exclusions -u "https://example.com/proxy.json" --add 3
+
+# Remove server from exclusions
+sboxctl exclusions -u "https://example.com/proxy.json" --remove 3
+
+# View current exclusions
+sboxctl exclusions --view
+
+# Clear all exclusions
+sboxctl clear-exclusions
 ```
 
-All CLI logic is covered by tests using Typer.CliRunner and pytest. Artifacts and paths are isolated via environment variables in tests.
-
----
-
-## 🛠 Configuration & Environment
-
-All paths are configurable via environment variables:
-
-| Variable                        | Default Value                |
-|---------------------------------|------------------------------|
-| `SBOXMGR_CONFIG_FILE`           | ./config.json                |
-| `SBOXMGR_TEMPLATE_FILE`         | ./config.template.json       |
-| `SBOXMGR_LOG_FILE`              | ~/.local/share/sboxmgr/sboxmgr.log (or ./sboxmgr.log) |
-| `SBOXMGR_EXCLUSION_FILE`        | ./exclusions.json            |
-| `SBOXMGR_SELECTED_CONFIG_FILE`  | ./selected_config.json       |
-| `SBOXMGR_URL`                   | (no default, must be set)    |
-
-You can use a `.env` file in the project root for local development.
-
-**Note on logging:** By default, logs are written to `~/.local/share/sboxmgr/sboxmgr.log` (XDG Base Directory spec). If this directory is not writable, logs fall back to `./sboxmgr.log` in the current directory. For system service deployment, set `SBOXMGR_LOG_FILE=/var/log/sboxmgr.log` explicitly.
-
----
-
-## 🔧 Middleware Architecture
-
-The export system uses a middleware-based approach for routing and filtering, providing better separation of concerns and extensibility.
-
-### Available Middleware
-
-- **OutboundFilterMiddleware**: Filters outbounds based on `exclude_outbounds` configuration
-- **RouteConfigMiddleware**: Configures routing rules based on `routing.final` configuration
-
-### CLI Integration
-
-New CLI flags provide quick access to middleware functionality:
-
+### Advanced Configuration
 ```bash
-# Set final routing destination
-sboxctl export -u <url> --final-route direct
+# Configure custom inbound (SOCKS proxy on port 1080)
+sboxctl export -u "https://example.com/proxy.json" --index 1 \
+  --inbound-types socks --socks-port 1080
+
+# Set custom routing (all traffic through proxy)
+sboxctl export -u "https://example.com/proxy.json" --index 1 \
+  --final-route proxy
 
 # Exclude specific outbound types
-sboxctl export -u <url> --exclude-outbounds block,dns
-
-# Combine both
-sboxctl export -u <url> --final-route proxy --exclude-outbounds direct,block
+sboxctl export -u "https://example.com/proxy.json" --index 1 \
+  --exclude-outbounds block,dns
 ```
 
-### Programmatic Usage
+## ⚙️ Configuration
 
-```python
-from sboxmgr.export.export_manager import ExportManager
-from sboxmgr.subscription.middleware import OutboundFilterMiddleware, RouteConfigMiddleware
+### Environment Variables
+Create a `.env` file in the project root:
 
-# Create export manager with automatic middleware configuration
-export_manager = ExportManager()
-export_manager.export(client_profile)  # Middleware configured automatically
+```bash
+# Config file location (default: ./config.json)
+SBOXMGR_CONFIG_FILE=/etc/sing-box/config.json
 
-# Or configure middleware manually
-export_manager.add_middleware(OutboundFilterMiddleware(['direct', 'block']))
-export_manager.add_middleware(RouteConfigMiddleware({'final': 'proxy'}))
+# Log file location
+SBOXMGR_LOG_FILE=./sboxmgr.log
+
+# Exclusions file
+SBOXMGR_EXCLUSION_FILE=./exclusions.json
+
+# Language (en, ru, de, zh, etc.)
+SBOXMGR_LANG=en
 ```
 
-### Benefits
+### Default Behavior
+- **Config output**: `./config.json` (or `SBOXMGR_CONFIG_FILE`)
+- **Logging**: `./sboxmgr.log` (or `SBOXMGR_LOG_FILE`)
+- **Exclusions**: `./exclusions.json` (or `SBOXMGR_EXCLUSION_FILE`)
+- **Language**: English (or `SBOXMGR_LANG`)
 
-- **Modular**: Each concern is isolated in separate middleware
-- **Testable**: Components can be tested independently
-- **Extensible**: Easy to add new middleware components
-- **Clean**: No duplicate logic across exporters
+## 🔧 Advanced Features
 
----
+### Plugin System
+Create custom fetchers, parsers, and exporters:
+
+```bash
+# Generate plugin template
+sboxctl plugin-template fetcher MyCustomFetcher --output-dir ./plugins/
+
+# Use custom plugin
+sboxctl export -u "custom://my-data" --fetcher my-custom-fetcher
+```
+
+### Policy Engine
+Configure routing policies:
+
+```bash
+# List available policies
+sboxctl policy list
+
+# Apply geo-based policy
+sboxctl export -u "https://example.com/proxy.json" --index 1 \
+  --policy geo-direct
+```
+
+### Internationalization
+```bash
+# Set language
+sboxctl lang --set ru
+
+# View available languages
+sboxctl lang
+```
+
+## 🛠 Development
+
+### Setup Development Environment
+```bash
+# Install with development dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest -v
+
+# Run linting
+ruff check src/
+
+# Format code
+black src/
+```
+
+### Project Structure
+```
+src/sboxmgr/
+├── cli/          # Command-line interface
+├── core/         # Core business logic
+├── subscription/ # Subscription management
+├── export/       # Configuration export
+├── models/       # Data models
+├── i18n/         # Internationalization
+└── utils/        # Utilities
+```
+
+## 📚 Documentation
+
+- [User Guide](docs/user-guide/) - Detailed usage instructions
+- [CLI Reference](docs/user-guide/cli-reference.md) - Complete command reference
+- [Configuration Guide](docs/getting-started/configuration.md) - Advanced configuration
+- [Security](docs/security.md) - Security considerations
+- [Development](docs/developer/) - Contributing guidelines
 
 ## 🤝 Contributing
 
-Contributions are welcome! Fork, make changes, and submit a Pull Request.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+See [CONTRIBUTING.md](docs/developer/contributing.md) for detailed guidelines.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Related Projects
+
+- [sing-box](https://sing-box.sagernet.org/) - Universal proxy platform
+- [Clash](https://github.com/Dreamacro/clash) - Rule-based proxy
+- [sing-box-common](https://github.com/kpblcaoo/sing-box-common) - Common utilities
 
 ---
 
-## 📜 License
-
-This project is licensed under the terms of the MIT License. See the LICENSE file for details.
-
-## Расширение: плагины и генератор шаблонов
-
-Для быстрого старта новых fetcher, parser, exporter, postprocessor, validator используйте CLI-генератор шаблонов:
-
-- Примеры команд, шаблонов и best practices см. в [docs/plugins/README.md](docs/plugins/README.md)
-- Генератор: `sboxctl plugin-template <type> <ClassName> --output-dir ./src/sboxmgr/subscription/<type>s/`
-
-Это ускоряет разработку, стандартизирует docstring и тесты, облегчает онбординг новых контрибьюторов.
-
-## Edge-case coverage
-
-- Все ключевые edge-cases пайплайна покрыты тестами (см. [docs/tests/edge_cases.md](docs/tests/edge_cases.md)).
-- Для каждого слоя (fetch, parse, postprocess, middleware, export, i18n, DX/CLI) есть отдельные edge-тесты.
-- Критичные SEC edge-cases:
-  - Parser: вредоносный payload (инъекции, DoS, eval)
-  - Fetcher: нестандартные схемы (ftp://, data://, chrome-extension://)
-  - Middleware: unsafe hook/external command (sandbox, privilege escalation)
-  - Postprocessor: внешний enrichment без таймаута/валидации
-- Поведение пайплайна при ошибках: partial_success, fallback, логирование, пайплайн не падает.
-- См. также: sec_checklist.md, tests/edge/README.md
-
-## Best Practices & Security
-
-- The project implements multi-layer SEC validation, fail-tolerant pipeline, and a plugin-based architecture.
-- For details on security, threat model, and checklists, see:
-  - [Security Model](docs/security.md)
-  - [SEC Checklist](docs/sec_checklist.md)
-  - [Architecture](docs/arch/)
-
-
-
-
-
+**Need help?** Check the [troubleshooting guide](docs/user-guide/troubleshooting.md) or open an issue on GitHub.

@@ -22,6 +22,7 @@ def create_default_subscription_manager() -> SubscriptionManagerInterface:
     
     Returns:
         Default subscription manager instance.
+
     """
     # Import here to avoid circular imports
     from sboxmgr.subscription.manager import SubscriptionManager
@@ -38,6 +39,7 @@ def create_default_export_manager() -> ExportManagerInterface:
     
     Returns:
         Default export manager instance with standard configuration.
+
     """
     from sboxmgr.export.export_manager import ExportManager
     return ExportManager()
@@ -48,6 +50,7 @@ def create_default_exclusion_manager() -> ExclusionManagerInterface:
     
     Returns:
         Default exclusion manager instance using standard file storage.
+
     """
     from sboxmgr.core.exclusions.manager import ExclusionManager
     return ExclusionManager.default()
@@ -70,6 +73,7 @@ class ManagerFactory:
             
         Returns:
             Configured subscription manager instance.
+
         """
         from sboxmgr.subscription.manager import SubscriptionManager
         return SubscriptionManager(source, **kwargs)
@@ -84,6 +88,7 @@ class ManagerFactory:
             
         Returns:
             Configured export manager instance.
+
         """
         from sboxmgr.export.export_manager import ExportManager
         return ExportManager(export_format=export_format, **kwargs)
@@ -98,6 +103,7 @@ class ManagerFactory:
             
         Returns:
             Configured exclusion manager instance.
+
         """
         from sboxmgr.core.exclusions.manager import ExclusionManager
         if file_path:

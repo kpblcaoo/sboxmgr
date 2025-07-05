@@ -27,10 +27,22 @@ class ProfileInfo:
         modified: Last modification time
         valid: Whether the profile is valid
         error: Error message if profile is invalid
+
     """
     
     def __init__(self, path: str, name: str, size: int, modified: datetime, 
                  valid: bool = True, error: Optional[str] = None):
+        """Initialize ProfileInfo.
+        
+        Args:
+            path: Path to the profile file
+            name: Profile name (derived from filename)
+            size: File size in bytes
+            modified: Last modification time
+            valid: Whether the profile is valid
+            error: Error message if profile is invalid
+            
+        """
         self.path = path
         self.name = name
         self.size = size
@@ -46,10 +58,19 @@ class ValidationResult:
         valid: Whether the profile is valid
         errors: List of validation errors
         warnings: List of validation warnings
+
     """
     
     def __init__(self, valid: bool = True, errors: Optional[List[str]] = None, 
                  warnings: Optional[List[str]] = None):
+        """Initialize ValidationResult.
+        
+        Args:
+            valid: Whether the profile is valid
+            errors: List of validation errors
+            warnings: List of validation warnings
+            
+        """
         self.valid = valid
         self.errors = errors or []
         self.warnings = warnings or []
@@ -65,6 +86,7 @@ class ProfileManager:
         profiles_dir: Directory for storing profiles
         active_profile: Currently active profile
         profile_cache: Cache of loaded profiles
+
     """
     
     def __init__(self, profiles_dir: Optional[str] = None):
@@ -72,6 +94,7 @@ class ProfileManager:
         
         Args:
             profiles_dir: Directory for storing profiles. If None, uses default.
+
         """
         self.profiles_dir = Path(profiles_dir or "~/.config/sboxmgr/profiles").expanduser()
         self.profiles_dir.mkdir(parents=True, exist_ok=True)
@@ -92,6 +115,7 @@ class ProfileManager:
             
         Raises:
             ValidationError: If profile data is invalid
+
         """
         try:
             profile = FullProfile(**profile_data)
@@ -113,6 +137,7 @@ class ProfileManager:
         Raises:
             FileNotFoundError: If profile file doesn't exist
             ValidationError: If profile data is invalid
+
         """
         path = Path(profile_path).expanduser().resolve()
         
@@ -153,6 +178,7 @@ class ProfileManager:
             
         Raises:
             OSError: If file cannot be written
+
         """
         file_path = Path(path).expanduser().resolve()
         file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -182,6 +208,7 @@ class ProfileManager:
             
         Returns:
             ValidationResult: Validation result with errors and warnings
+
         """
         errors = []
         warnings = []
@@ -219,6 +246,7 @@ class ProfileManager:
         
         Returns:
             FullProfile or None: Active profile if set, None otherwise
+
         """
         return self.active_profile
     
@@ -227,6 +255,7 @@ class ProfileManager:
         
         Args:
             profile: Profile to set as active
+
         """
         self.active_profile = profile
         logger.info(f"Set active profile: {profile.name if hasattr(profile, 'name') else 'unnamed'}")
@@ -236,6 +265,7 @@ class ProfileManager:
         
         Returns:
             List[ProfileInfo]: List of profile information
+
         """
         profiles = []
         

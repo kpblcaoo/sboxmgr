@@ -20,6 +20,7 @@ def extract_metadata_field(obj: Any, field_name: str,
         
     Returns:
         Field value or None if not found
+
     """
     if not obj:
         return None
@@ -83,6 +84,7 @@ def validate_mode(mode: str, allowed_modes: list) -> bool:
         
     Raises:
         ValueError: If mode is not in allowed_modes
+
     """
     if mode not in allowed_modes:
         raise ValueError(f"Mode '{mode}' not allowed. Must be one of: {allowed_modes}")

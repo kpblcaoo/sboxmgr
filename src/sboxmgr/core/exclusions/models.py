@@ -30,6 +30,7 @@ class ExclusionList(BaseModel):
         
         Returns:
             True if added, False if already exists
+
         """
         if any(ex.id == entry.id for ex in self.exclusions):
             return False
@@ -43,6 +44,7 @@ class ExclusionList(BaseModel):
         
         Returns:
             True if removed, False if not found
+
         """
         original_count = len(self.exclusions)
         self.exclusions = [ex for ex in self.exclusions if ex.id != server_id]
@@ -61,6 +63,7 @@ class ExclusionList(BaseModel):
         
         Returns:
             Number of exclusions cleared
+
         """
         count = len(self.exclusions)
         self.exclusions.clear()

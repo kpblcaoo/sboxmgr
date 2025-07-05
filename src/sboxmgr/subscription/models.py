@@ -22,6 +22,7 @@ class SubscriptionSource(BaseModel):
         headers: Optional HTTP headers for requests.
         label: Optional human-readable label for the source.
         user_agent: Optional custom User-Agent string.
+
     """
     
     model_config = ConfigDict(extra='forbid')
@@ -60,6 +61,7 @@ class ParsedServer(BaseModel):
         handshake: Handshake options for shadowtls.
         congestion_control: Congestion control algorithm for tuic.
         tag: Server tag/label.
+
     """
     
     model_config = ConfigDict(extra='allow')  # Allow extra fields for protocol-specific params
@@ -102,6 +104,7 @@ class PipelineContext(BaseModel):
         debug_level: Debug verbosity level.
         metadata: Additional metadata dictionary.
         skip_policies: Whether to skip policy evaluation (for testing).
+
     """
     
     model_config = ConfigDict(extra='allow')
@@ -127,6 +130,7 @@ class PipelineResult(BaseModel):
         context: Pipeline execution context.
         errors: List of errors encountered during processing.
         success: Whether the pipeline executed successfully.
+
     """
     
     model_config = ConfigDict(extra='allow', arbitrary_types_allowed=True)
@@ -154,6 +158,7 @@ class InboundProfile(BaseModel):
         listen: Bind address (defaults to 127.0.0.1 for security).
         port: Port number (defaults to safe values per type).
         options: Additional protocol-specific options.
+
     """
     
     type: Literal['socks', 'http', 'tun', 'tproxy', 'ssh', 'dns', 'reality-inbound', 'shadowtls']
@@ -174,6 +179,7 @@ class InboundProfile(BaseModel):
             
         Raises:
             ValueError: If bind address is not localhost or private network.
+
         """
         # Allow 0.0.0.0 for tproxy and other types that need to listen on all interfaces
         inbound_type = info.data.get('type') if info.data else None
@@ -196,6 +202,7 @@ class InboundProfile(BaseModel):
             
         Raises:
             ValueError: If port is not in valid range.
+
         """
         if v is None:
             return v
@@ -216,6 +223,7 @@ class ClientProfile(BaseModel):
         routing: Optional routing configuration overrides.
         exclude_outbounds: List of outbound types to exclude from export.
         extra: Additional profile parameters.
+
     """
     
     inbounds: List[InboundProfile] = Field(default_factory=list, description="List of inbound configurations.")

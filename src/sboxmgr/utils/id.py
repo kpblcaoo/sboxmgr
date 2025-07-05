@@ -1,4 +1,8 @@
+"""ID generation utilities for SBoxMgr."""
+
 import hashlib
+import json
+from typing import Any, Dict
 
 def generate_server_id(server):
     """Generate a unique identifier for a server configuration.
@@ -17,6 +21,7 @@ def generate_server_id(server):
     Note:
         The identifier is stable across subscription updates as long as
         the server's core attributes (tag, type, port) remain unchanged.
+
     """
     identifier = f"{server.get('tag', '')}{server.get('type', '')}{server.get('server_port', '')}"
     return hashlib.sha256(identifier.encode()).hexdigest() 

@@ -11,6 +11,7 @@ def current_lang() -> LanguageLoader:
     
     Returns:
         LanguageLoader: Cached language loader instance for current language.
+
     """
     return LanguageLoader()
 
@@ -26,5 +27,6 @@ def t(key: str) -> str:
         
     Returns:
         Translated string or the key itself if no translation found.
+
     """
     return current_lang().get(key) 

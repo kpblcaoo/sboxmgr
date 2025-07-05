@@ -30,6 +30,7 @@ class ClashParser(BaseParser):
         Raises:
             yaml.YAMLError: If YAML parsing fails.
             KeyError: If required configuration fields are missing.
+
         """
         try:
             data = yaml.safe_load(raw.decode("utf-8"))

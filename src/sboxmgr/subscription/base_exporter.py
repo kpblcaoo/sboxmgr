@@ -18,6 +18,7 @@ class BaseExporter(ABC):
     
     Attributes:
         plugin_type: Plugin type identifier for auto-discovery and filtering.
+
     """
     
     plugin_type = "exporter"
@@ -35,6 +36,7 @@ class BaseExporter(ABC):
         Raises:
             ValueError: If server data is invalid or cannot be exported.
             NotImplementedError: If called directly on base class.
+
         """
         pass
 

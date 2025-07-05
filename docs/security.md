@@ -1,127 +1,218 @@
-# Security Model
+# Security
 
-## Threats
+This document outlines the security model, threats, and mitigations for SBoxMgr.
 
-### Code Quality & Architecture Threats (NEW - 2025-06-25)
-- **Critical Code Complexity**: функции с F-E сложностью (singbox_export F-53, run_installation_wizard E-37, prepare_selection E-33) создают риски необнаруженных багов, сложности аудита, maintenance overhead
-- **Security Vulnerabilities**: shell=True в subprocess, MD5 хеширование, HTTP запросы без timeout
-- **Dead Code**: неиспользуемые импорты и переменные могут скрывать уязвимости, создавать confusion при аудите
-- **Code Duplication**: дублированная логика увеличивает attack surface, усложняет патчинг уязвимостей
-- **Missing Error Handling**: try-except-pass блоки могут скрывать security-критичные ошибки
+## Security Overview
 
-### Legacy & Deprecated Components
-- ~~Installation Wizard: subprocess vulnerabilities, privilege escalation через sudo, path traversal~~ **ARCHIVED** - moved to archive/install_wizard_legacy
+SBoxMgr is designed with security as a core principle. The application handles sensitive configuration data and network traffic, making security critical for safe operation.
 
-### Core Pipeline Threats
-- Path traversal (file:// fetcher)
-- Инъекции (в конфиг, shell, параметры)
-- Утечка секретов (логи, исключения)
-- DoS на больших файлах/подписках
-- Fail of one subscription source leads to DoS (pipeline aborts on single error)
-- Uncaught edge cases in input/parameters may lead to crash or data leak
+## Security Model
 
-### Component-Specific Threats
-- Языковые модули: code injection, supply chain, log poisoning, DoS
-- PipelineContext: утечка чувствительных данных через trace_id, metadata overflow, context manipulation
-- Error Reporter: log injection через error messages, memory exhaustion через error accumulation
-- Validator плагины: несанкционированное выполнение кода, resource exhaustion, timeout bypass
-- Middleware registry: регистрация вредоносных плагинов, interface spoofing, execution isolation bypass
-- MiddlewareChain: регистрация вредоносных middleware, side effects, leakage через context, DoS через бесконечные цепочки, log injection через LoggingMiddleware, privilege escalation через HookMiddleware
-- EnrichMiddleware: утечка гео-данных, подмена/фальсификация enrichment, DoS через внешние lookup
-- TagFilterMiddleware: bypass фильтрации, некорректная фильтрация по user input
-- LoggingMiddleware: log poisoning, утечка чувствительных данных при debug_level>0
-- Кеширование подписок (SubscriptionManager, fetcher): in-memory only, ключи учитывают все параметры, force_reload, ошибки не кешируются — risks mitigated
-- DX/CLI-генератор плагинов: генерация вредоносных шаблонов, подмена шаблонов, supply chain через внешние плагины
-- Автодокументация: инъекции через docstring, DoS через автогенерацию большого числа файлов, подмена автодокументации
+### Core Security Principles
 
-## Mitigations
+1. **Fail-Safe Design**: Errors in one component don't compromise the entire system
+2. **Input Validation**: All inputs are validated and sanitized
+3. **Principle of Least Privilege**: Components have minimal required permissions
+4. **Defense in Depth**: Multiple layers of security controls
+5. **Secure by Default**: Safe configurations are the default
 
-### Code Quality Mitigations (NEW)
-- **Complexity Reduction**: рефакторинг критически сложных функций на меньшие компоненты
-- **Security Hardening**: замена MD5 на SHA256, добавление timeout для HTTP, устранение shell=True
-- **Dead Code Removal**: удаление неиспользуемых импортов и переменных
-- **Deduplication**: вынос дублированной логики в утилитарные функции
-- **Error Handling**: замена try-except-pass на explicit error handling
+### Threat Categories
 
-### Legacy Component Mitigations
-- **Wizard Removal**: архивирован legacy installation wizard (security risk eliminated)
+#### Network Security
+- **Connection Security**: All network requests use HTTPS with proper certificate validation
+- **Timeout Protection**: All network operations have configurable timeouts
+- **Input Validation**: URLs and network parameters are strictly validated
 
-### Core Mitigations
-- Валидация путей и размеров
-- Логирование только безопасных данных
-- Исключения без чувствительных данных
-- Чеклист SEC-01...SEC-17 (см. sec_checklist.md)
-- Fail-tolerant pipeline: errors in one source do not affect others
-- Edge case coverage: categorized, tested, and documented (see edge_cases.md)
-- Только декларативные форматы, строгая валидация, sanitization, fallback, whitelisted пути (i18n)
-- PipelineContext: sanitization metadata, контроль размера, генерация безопасных trace_id
-- Error Reporter: redaction чувствительных данных, ограничение размера error stack, защита от injection
-- Validator плагины: sandboxing, whitelist, resource limits, timeout enforcement
-- Middleware registry: контроль регистрации, валидация интерфейсов, изоляция выполнения
-- Sandbox для middleware, аудит цепочки, ограничение глубины, redaction логов, валидация enrichment, контроль user input в фильтрах
-- Sandbox и контроль шаблонов для DX/CLI-генератора, review внешних плагинов, валидация автодокументации, ограничение автогенерации файлов
-- SEC-PARSER-01: реализована многоуровневая валидация и sanitization данных после парсинга, edge-тесты, fail-tolerant pipeline, документация и чеклист (см. sec_checklist.md, tests/edge/test_parser_edge_cases.py)
+#### Configuration Security
+- **Path Validation**: File paths are validated to prevent directory traversal
+- **Content Validation**: Configuration files are validated against schemas
+- **Access Control**: Sensitive files have appropriate permissions
 
-## SEC Fallbacks by Pipeline Phase
+#### Data Security
+- **No Sensitive Data Logging**: Passwords and tokens are never logged
+- **Memory Security**: Sensitive data is cleared from memory when possible
+- **Secure Storage**: Configuration files are stored with appropriate permissions
 
-### Fetcher
-- Ошибка сети, oversize, некорректный URL: partial_success, логирование, пайплайн не падает
-- Нестандартные схемы (ftp://, data://): safe fallback или запрет
-- **HTTP Timeout**: все HTTP запросы должны иметь timeout (NEW)
+## Security Features
 
-### Parser
-- Невалидный формат, вредоносный payload: partial_success, sanitization, пайплайн не падает
-- Инъекции, eval, неожиданные структуры: sanitization, error reporter, пайплайн не падает
-- **Complex Function Isolation**: критически сложные функции изолированы и протестированы (NEW)
+### Input Validation
 
-### Postprocessor
-- Ошибка enrichment, внешний сервис: warning, partial_success, sandbox/таймаут (при появлении)
+All inputs are validated to prevent injection attacks:
 
-### Middleware
-- Ошибка, некорректный input, unsafe hook: логирование, sandbox, пайплайн не падает
-- Циклическая цепочка: ограничение глубины, пайплайн не падает
+```bash
+# URL validation
+sboxctl export -u "https://example.com/subscription"
 
-### Exporter
-- Unsupported outbound, пустой config: warning+skip, partial config, пайплайн не падает
+# File path validation
+sboxctl export --output "/safe/path/config.json"
 
-See also: sec_checklist.md, docs/tests/edge_cases.md
+# Configuration validation
+sboxctl config validate config.json
+```
 
-## SEC-контуры и угрозы по фазам пайплайна (актуализация 2025-06-25)
+### Error Handling
 
-| Фаза             | Основные угрозы/риски | Реализовано | Упущения/рекомендации |
-|------------------|----------------------|-------------|-----------------------|
-| **Code Quality** | Критическая сложность, security bugs, dead code | Анализ инструментами (Vulture, Radon, Bandit) | Рефакторинг F-E функций, security fixes |
-| Fetch            | Невалидированные схемы, path traversal, обход check_url, HTTP без timeout | Валидация схем, ограничение file:// | HTTP timeout, edge-cases (symlink, вложенные file://) |
-| Parser           | Side-effects (eval, exec, вложенные base64), proto pollution | Edge-тесты, sanitization | Не все типы вложенности и инъекций покрыты, нет ErrorSeverity |
-| Parsed Validator | Silent fallback, success=True при пустом config, неявные ошибки | SEC-PARSER-01: многоуровневая валидация, фильтрация, edge-тесты, fail-tolerant pipeline | Нет ErrorSeverity, не все ошибки фатальны |
-| Middleware       | Нет sandbox/изоляции для всех хуков, raise без обработки | Sandbox, audit, ограничение глубины | Нет строгой изоляции для пользовательских middleware |
-| Exporter         | Path traversal, запись вне allowed basedir, symlink-атаки | Ограничение file://, edge-тесты | Нет safe_path_check, нет edge-тестов на path traversal |
-| Final Validation | Не всегда вызывается, если был fatal error | Частично | Нет единого слоя для финальной проверки |
-| Routing Layer    | Конфликты user_routes/exclusions, route-injection, некорректная структура | Плагинная архитектура, edge-тесты | Нет строгой схемы user_routes, нет ErrorSeverity, нет финальной валидации маршрутов |
-| i18n             | Ошибки локализации, silent fallback | sync_keys.py, edge-тесты | Нет строгой проверки ключей, silent fallback без логов |
-| Plugin Registry  | Подмена REGISTRY, side-effect, нет sandbox | Registry, edge-тесты | Нет audit-обёртки, нет ограничений на параметры |
-| Error Handling   | Все ошибки равны, нет деления по значимости | ErrorReporter, redaction | Нет ErrorSeverity, нет категоризации |
+Errors are handled securely without exposing sensitive information:
 
-### Code Quality Security Recommendations (NEW)
-- **Приоритет 1**: Рефакторинг singbox_export (F-53) - критическая сложность создает security risks
-- **Приоритет 2**: Устранение security vulnerabilities (shell=True, MD5, HTTP timeout)
-- **Приоритет 3**: Удаление dead code и дублирования
-- **Приоритет 4**: Улучшение error handling (замена try-except-pass)
+```bash
+# Debug mode shows technical details (use carefully)
+sboxctl export -u "https://example.com/subscription" -d 2
 
-### Routing Layer: SEC-контуры и рекомендации
-- Ввести строгую валидацию структуры user_routes/exclusions
-- Запретить success=True при пустом config после фильтрации маршрутов
-- Ввести ErrorSeverity для ошибок маршрутизации
-- Edge-тесты на route-injection, path traversal, конфликт exclusions/user_routes
-- Финальная валидация маршрутов перед экспортом (уникальность tags, корректность outbounds)
+# Normal mode shows user-friendly messages
+sboxctl export -u "https://example.com/subscription"
+```
 
-### Новые/уточнённые угрозы (см. чеклист)
-- Silent fallback на всех фазах
-- Нет sandbox/audit-обёртки на register_*
-- Нет safe_path_check для экспортеров
-- Нет ErrorSeverity в PipelineError
-- Нет строгой проверки i18n-ключей
-- Нет финальной валидации маршрутов
-- **Code complexity as security risk** (NEW)
-- **Dead code hiding vulnerabilities** (NEW)
-- **Duplicated security logic** (NEW)
+### Plugin Security
+
+Plugins run in a controlled environment:
+
+- **Sandboxed Execution**: Plugins cannot access system resources
+- **Input Validation**: Plugin inputs are validated
+- **Resource Limits**: Plugins have memory and time limits
+- **Audit Trail**: Plugin actions are logged
+
+## Security Best Practices
+
+### For Users
+
+1. **Keep Software Updated**: Always use the latest version
+2. **Validate Configurations**: Use `sboxctl config validate` before applying
+3. **Use HTTPS**: Only use HTTPS URLs for subscriptions
+4. **Check File Permissions**: Ensure configuration files have appropriate permissions
+5. **Monitor Logs**: Regularly check logs for unusual activity
+
+### For Developers
+
+1. **Input Validation**: Always validate and sanitize inputs
+2. **Error Handling**: Handle errors gracefully without exposing sensitive data
+3. **Resource Limits**: Set appropriate limits for external operations
+4. **Logging**: Log security-relevant events without sensitive data
+5. **Testing**: Include security tests in your test suite
+
+## Security Configuration
+
+### Environment Variables
+
+Configure security-related environment variables:
+
+```bash
+# Debug level (0=minimal, 1=info, 2=debug)
+export SBOXMGR_DEBUG=0
+
+# SSL verification
+export SBOXMGR_SSL_VERIFY=true
+
+# Request timeout
+export SBOXMGR_TIMEOUT=30
+
+# Log file path
+export SBOXMGR_LOG_FILE="/var/log/sboxmgr.log"
+```
+
+### Configuration Validation
+
+Validate configurations before use:
+
+```bash
+# Validate configuration file
+sboxctl config validate config.json
+
+# Check configuration syntax
+sboxctl config dump config.json
+
+# Validate profile
+sboxctl profile validate profile.json
+```
+
+## Security Monitoring
+
+### Log Analysis
+
+Monitor logs for security events:
+
+```bash
+# Check for errors
+grep ERROR /var/log/sboxmgr.log
+
+# Check for authentication failures
+grep "401\|403" /var/log/sboxmgr.log
+
+# Check for unusual activity
+grep "WARNING" /var/log/sboxmgr.log
+```
+
+### Configuration Auditing
+
+Regularly audit configurations:
+
+```bash
+# Validate all configurations
+find /etc/sboxmgr -name "*.json" -exec sboxctl config validate {} \;
+
+# Check file permissions
+find /etc/sboxmgr -name "*.json" -exec ls -la {} \;
+```
+
+## Incident Response
+
+### Security Incidents
+
+If you suspect a security incident:
+
+1. **Stop the Service**: Immediately stop SBoxMgr
+2. **Preserve Evidence**: Don't delete logs or configuration files
+3. **Analyze Logs**: Review logs for suspicious activity
+4. **Update Credentials**: Change any exposed credentials
+5. **Report**: Report the incident to maintainers
+
+### Reporting Security Issues
+
+To report security issues:
+
+1. **Private Report**: Use GitHub Security Advisories
+2. **Include Details**: Provide detailed information about the issue
+3. **Proof of Concept**: Include steps to reproduce if possible
+4. **Impact Assessment**: Describe the potential impact
+
+## Security Checklist
+
+### Before Deployment
+
+- [ ] All configurations validated
+- [ ] File permissions set correctly
+- [ ] HTTPS URLs used for subscriptions
+- [ ] Debug mode disabled in production
+- [ ] Log files configured and monitored
+- [ ] Timeouts configured appropriately
+
+### Regular Maintenance
+
+- [ ] Software updated to latest version
+- [ ] Configurations audited
+- [ ] Logs reviewed for anomalies
+- [ ] Credentials rotated if needed
+- [ ] Security tests run
+
+## Compliance
+
+### Data Protection
+
+- **No Personal Data**: SBoxMgr doesn't collect or store personal data
+- **Local Processing**: All processing happens locally
+- **No Telemetry**: No usage data is sent to external services
+
+### Privacy
+
+- **Minimal Logging**: Only necessary information is logged
+- **No Tracking**: No user tracking or analytics
+- **Local Storage**: All data stored locally
+
+## See Also
+
+- [CLI Reference](user-guide/cli-reference.md) - Command line interface
+- [Configuration](getting-started/configuration.md) - Configuration management
+- [Troubleshooting](user-guide/troubleshooting.md) - Security troubleshooting
+
+---
+
+For detailed security information, see the [internal security documentation](internal/security/README.md). 

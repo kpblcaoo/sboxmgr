@@ -26,6 +26,7 @@ def validate_temp_config_json(config_json: str) -> None:
     Raises:
         ConfigValidationError: If configuration is semantically invalid
         ValueError: If JSON syntax is invalid
+
     """
     try:
         # First, validate JSON syntax
@@ -45,6 +46,7 @@ def validate_singbox_config_structure(config_data: Dict[str, Any]) -> None:
         
     Raises:
         ConfigValidationError: If configuration structure is invalid
+
     """
     if not isinstance(config_data, dict):
         raise ConfigValidationError("Configuration must be a dictionary")
@@ -89,6 +91,7 @@ def validate_outbound_config(outbound: Dict[str, Any], index: int) -> None:
         
     Raises:
         ConfigValidationError: If outbound configuration is invalid
+
     """
     if not isinstance(outbound, dict):
         raise ConfigValidationError(f"Outbound {index} must be a dictionary")
@@ -117,6 +120,7 @@ def validate_protocol_specific_fields(outbound: Dict[str, Any], index: int) -> N
         
     Raises:
         ConfigValidationError: If protocol-specific fields are invalid
+
     """
     outbound_type = outbound["type"]
     
@@ -160,6 +164,7 @@ def validate_shadowsocks_fields(outbound: Dict[str, Any], index: int) -> None:
         
     Raises:
         ConfigValidationError: If Shadowsocks fields are invalid
+
     """
     required_fields = ["method", "password"]
     for field in required_fields:
@@ -178,6 +183,7 @@ def validate_vmess_fields(outbound: Dict[str, Any], index: int) -> None:
         
     Raises:
         ConfigValidationError: If VMess fields are invalid
+
     """
     if "uuid" not in outbound:
         raise ConfigValidationError(f"VMess outbound {index} must contain 'uuid' field")
@@ -194,6 +200,7 @@ def validate_trojan_fields(outbound: Dict[str, Any], index: int) -> None:
         
     Raises:
         ConfigValidationError: If Trojan fields are invalid
+
     """
     if "password" not in outbound:
         raise ConfigValidationError(f"Trojan outbound {index} must contain 'password' field")
@@ -210,6 +217,7 @@ def validate_wireguard_fields(outbound: Dict[str, Any], index: int) -> None:
         
     Raises:
         ConfigValidationError: If WireGuard fields are invalid
+
     """
     required_fields = ["private_key", "peer_public_key", "local_address"]
     for field in required_fields:
@@ -226,6 +234,7 @@ def validate_hysteria2_fields(outbound: Dict[str, Any], index: int) -> None:
         
     Raises:
         ConfigValidationError: If Hysteria2 fields are invalid
+
     """
     if "password" not in outbound:
         raise ConfigValidationError(f"Hysteria2 outbound {index} must contain 'password' field")
@@ -242,6 +251,7 @@ def validate_tuic_fields(outbound: Dict[str, Any], index: int) -> None:
         
     Raises:
         ConfigValidationError: If TUIC fields are invalid
+
     """
     required_fields = ["uuid", "password"]
     for field in required_fields:
@@ -260,6 +270,7 @@ def validate_inbound_config(inbound: Dict[str, Any], index: int) -> None:
         
     Raises:
         ConfigValidationError: If inbound configuration is invalid
+
     """
     if not isinstance(inbound, dict):
         raise ConfigValidationError(f"Inbound {index} must be a dictionary")
@@ -280,6 +291,7 @@ def validate_route_config(route: Dict[str, Any]) -> None:
         
     Raises:
         ConfigValidationError: If route configuration is invalid
+
     """
     if not isinstance(route, dict):
         raise ConfigValidationError("Route configuration must be a dictionary")
@@ -303,6 +315,7 @@ def validate_route_rule(rule: Dict[str, Any], index: int) -> None:
         
     Raises:
         ConfigValidationError: If route rule is invalid
+
     """
     if not isinstance(rule, dict):
         raise ConfigValidationError(f"Route rule {index} must be a dictionary")

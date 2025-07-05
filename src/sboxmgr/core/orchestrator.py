@@ -30,6 +30,7 @@ class OrchestratorConfig(BaseModel):
         cache_enabled: Whether to enable result caching.
         timeout_seconds: Default timeout for operations.
         fail_safe: Whether to use fail-safe error handling.
+
     """
     
     model_config = ConfigDict(extra='forbid')
@@ -55,6 +56,7 @@ class OrchestratorError(Exception):
             message: Human-readable error description.
             operation: Name of operation that failed.
             cause: Original exception that caused this error.
+
         """
         super().__init__(message)
         self.operation = operation
@@ -79,6 +81,7 @@ class Orchestrator:
         subscription_manager: Injected subscription management service.
         export_manager: Injected configuration export service.
         exclusion_manager: Injected server exclusion service.
+
     """
     
     def __init__(self, 
@@ -95,6 +98,7 @@ class Orchestrator:
             exclusion_manager: Service for exclusion management.
             config: Configuration settings for operations.
             logger: Custom logger instance.
+
         """
         self.config = config or OrchestratorConfig()
         self.logger = logger or logging.getLogger(__name__)
@@ -113,6 +117,7 @@ class Orchestrator:
             
         Raises:
             OrchestratorError: If subscription manager cannot be resolved.
+
         """
         if self._subscription_manager is None:
             from .factory import create_default_subscription_manager
@@ -128,6 +133,7 @@ class Orchestrator:
             
         Raises:
             OrchestratorError: If export manager cannot be resolved.
+
         """
         if self._export_manager is None:
             from .factory import create_default_export_manager
@@ -143,6 +149,7 @@ class Orchestrator:
             
         Raises:
             OrchestratorError: If exclusion manager cannot be resolved.
+
         """
         if self._exclusion_manager is None:
             from .factory import create_default_exclusion_manager
@@ -176,6 +183,7 @@ class Orchestrator:
             
         Raises:
             OrchestratorError: If subscription processing fails critically.
+
         """
         try:
             self.logger.info(f"Processing subscription from {url}")
@@ -245,6 +253,7 @@ class Orchestrator:
             
         Raises:
             OrchestratorError: If exclusion operation fails.
+
         """
         try:
             self.logger.info(f"Managing exclusions: {action}")
@@ -339,6 +348,7 @@ class Orchestrator:
             
         Raises:
             OrchestratorError: If export process fails.
+
         """
         try:
             self.logger.info(f"Exporting configuration from {source_url} to {export_format}")
@@ -407,7 +417,7 @@ class Orchestrator:
     
     @classmethod
     def create_default(cls, **config_overrides) -> 'Orchestrator':
-        """Factory method to create Orchestrator with default dependencies.
+        """Create Orchestrator with default dependencies.
         
         Provides a convenient way to create a fully configured Orchestrator
         instance with default implementations for all dependencies.
@@ -417,6 +427,7 @@ class Orchestrator:
             
         Returns:
             Fully configured Orchestrator instance.
+
         """
         config = OrchestratorConfig(**config_overrides)
         return cls(config=config)
@@ -432,6 +443,7 @@ class Orchestrator:
             
         Returns:
             New Orchestrator instance with custom managers.
+
         """
         return Orchestrator(
             subscription_manager=managers.get('subscription_manager', self._subscription_manager),

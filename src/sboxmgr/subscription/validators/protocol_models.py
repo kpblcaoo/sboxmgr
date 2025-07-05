@@ -15,6 +15,7 @@ from enum import Enum
 # Common Enums
 class LogLevel(str, Enum):
     """Logging levels for clients."""
+
     trace = "trace"
     debug = "debug"
     info = "info"
@@ -25,6 +26,7 @@ class LogLevel(str, Enum):
 
 class DomainStrategy(str, Enum):
     """Domain resolution strategy."""
+
     prefer_ipv4 = "prefer_ipv4"
     prefer_ipv6 = "prefer_ipv6"
     ipv4_only = "ipv4_only"
@@ -32,6 +34,7 @@ class DomainStrategy(str, Enum):
 
 class Network(str, Enum):
     """Network type for connections."""
+
     tcp = "tcp"
     udp = "udp"
     tcp_udp = "tcp,udp"
@@ -39,6 +42,7 @@ class Network(str, Enum):
 # Detailed Obfuscation Models
 class RealityConfig(BaseModel):
     """Reality protocol configuration for SNI protection."""
+
     public_key: str = Field(..., description="Reality public key")
     short_id: Optional[str] = Field(None, description="Reality short ID")
     max_time_difference: Optional[int] = Field(None, ge=0, description="Maximum time difference in seconds")
@@ -49,6 +53,7 @@ class RealityConfig(BaseModel):
 
 class UtlsConfig(BaseModel):
     """uTLS configuration for TLS client emulation."""
+
     enabled: bool = Field(True, description="Enable uTLS")
     fingerprint: Optional[Literal["chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random", "randomized"]] = Field(None, description="Browser fingerprint to emulate")
 
@@ -57,6 +62,7 @@ class UtlsConfig(BaseModel):
 
 class WsConfig(BaseModel):
     """WebSocket transport configuration."""
+
     path: str = Field(..., description="WebSocket path")
     headers: Optional[Dict[str, str]] = Field(None, description="WebSocket headers")
     max_early_data: Optional[int] = Field(None, ge=0, description="Maximum early data size")
@@ -67,6 +73,7 @@ class WsConfig(BaseModel):
 
 class HttpConfig(BaseModel):
     """HTTP/2 transport configuration."""
+
     host: List[str] = Field(..., description="HTTP host list")
     path: str = Field(..., description="HTTP path")
 
@@ -75,6 +82,7 @@ class HttpConfig(BaseModel):
 
 class GrpcConfig(BaseModel):
     """gRPC transport configuration."""
+
     service_name: str = Field(..., description="gRPC service name")
     multi_mode: Optional[bool] = Field(None, description="Enable multi mode")
     idle_timeout: Optional[int] = Field(None, ge=0, description="Idle timeout in seconds")
@@ -87,6 +95,7 @@ class GrpcConfig(BaseModel):
 
 class QuicConfig(BaseModel):
     """QUIC transport configuration."""
+
     security: Literal["none", "tls"] = Field("none", description="QUIC security type")
     key: Optional[str] = Field(None, description="QUIC key")
     certificate: Optional[str] = Field(None, description="QUIC certificate")
@@ -97,6 +106,7 @@ class QuicConfig(BaseModel):
 # Common Models
 class TlsConfig(BaseModel):
     """TLS configuration for protocols with detailed obfuscation models."""
+
     enabled: Optional[bool] = Field(True, description="Enable TLS for connection")
     server_name: Optional[str] = Field(None, description="SNI for TLS connection")
     alpn: Optional[List[str]] = Field(None, description="ALPN protocols list (e.g., h2, http/1.1)")
@@ -116,6 +126,7 @@ class TlsConfig(BaseModel):
 
 class StreamSettings(BaseModel):
     """Transport layer settings with detailed configuration models."""
+
     network: Optional[Literal["tcp", "udp", "ws", "http", "grpc", "quic"]] = Field(None, description="Transport type (TCP, WebSocket, gRPC, etc.)")
     security: Optional[Literal["none", "tls", "reality"]] = Field(None, description="Encryption type (TLS, REALITY or none)")
     tls_settings: Optional[TlsConfig] = Field(None, description="TLS settings for transport")
@@ -129,6 +140,7 @@ class StreamSettings(BaseModel):
 
 class MultiplexConfig(BaseModel):
     """Multiplexing configuration."""
+
     enabled: Optional[bool] = Field(None, description="Enable multiplexing")
     protocol: Optional[Literal["smux", "yamux", "h2mux"]] = Field(None, description="Multiplexing protocol")
     max_connections: Optional[int] = Field(None, ge=1, description="Maximum number of connections")
@@ -142,6 +154,7 @@ class MultiplexConfig(BaseModel):
 # Shadowsocks
 class ShadowsocksConfig(BaseModel):
     """Shadowsocks configuration for SOCKS5 proxy."""
+
     server: str = Field(..., description="Server address (IP or domain)")
     server_port: int = Field(..., ge=1, le=65535, description="Server port")
     local_address: str = Field("127.0.0.1", description="Local address for proxy")
@@ -175,6 +188,7 @@ class ShadowsocksConfig(BaseModel):
 # VMess
 class VmessUser(BaseModel):
     """User for VMess protocol."""
+
     id: str = Field(..., description="User UUID for authentication")
     alterId: int = Field(0, ge=0, le=65535, description="Number of alternative IDs (0-65535)")
     security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = Field("auto", description="Encryption method")
@@ -186,6 +200,7 @@ class VmessUser(BaseModel):
 
 class VmessSettings(BaseModel):
     """VMess protocol settings."""
+
     clients: List[VmessUser] = Field(..., description="List of users for authentication")
     detour: Optional[str] = Field(None, description="Tag for connection redirection")
     disableInsecureEncryption: bool = Field(False, description="Disable insecure encryption methods")
@@ -195,6 +210,7 @@ class VmessSettings(BaseModel):
 
 class VmessConfig(BaseModel):
     """VMess configuration for V2Ray/Xray."""
+
     server: str = Field(..., description="Server address (IP or domain)")
     server_port: int = Field(..., ge=1, le=65535, description="Server port")
     settings: VmessSettings = Field(..., description="User and policy settings")
@@ -208,6 +224,7 @@ class VmessConfig(BaseModel):
 # VLESS
 class VlessUser(BaseModel):
     """User for VLESS protocol."""
+
     id: str = Field(..., description="User UUID for authentication")
     level: int = Field(0, ge=0, description="User level for access policy")
     email: Optional[str] = Field(None, description="Email for log identification")
@@ -218,6 +235,7 @@ class VlessUser(BaseModel):
 
 class VlessSettings(BaseModel):
     """VLESS protocol settings."""
+
     clients: List[VlessUser] = Field(..., description="List of users for authentication")
     decryption: str = Field("none", description="Decryption method (must be 'none')")
     fallbacks: Optional[List[Dict[str, Any]]] = Field(None, description="List of fallback addresses for redirection")
@@ -227,6 +245,7 @@ class VlessSettings(BaseModel):
 
 class VlessConfig(BaseModel):
     """VLESS configuration for Xray."""
+
     server: str = Field(..., description="Server address (IP or domain)")
     server_port: int = Field(..., ge=1, le=65535, description="Server port")
     settings: VlessSettings = Field(..., description="User and fallback settings")
@@ -240,6 +259,7 @@ class VlessConfig(BaseModel):
 # Trojan
 class TrojanUser(BaseModel):
     """User for Trojan protocol."""
+
     password: str = Field(..., description="Authentication password")
 
     class Config:
@@ -247,6 +267,7 @@ class TrojanUser(BaseModel):
 
 class TrojanConfig(BaseModel):
     """Trojan configuration for TLS proxy."""
+
     server: str = Field(..., description="Server address (IP or domain)")
     server_port: int = Field(..., ge=1, le=65535, description="Server port")
     password: str = Field(..., description="Authentication password")
@@ -261,6 +282,7 @@ class TrojanConfig(BaseModel):
 # WireGuard
 class WireGuardPeer(BaseModel):
     """Peer for WireGuard protocol."""
+
     public_key: str = Field(..., description="Peer public key")
     allowed_ips: List[str] = Field(..., description="Allowed IP addresses for routing")
     endpoint: Optional[str] = Field(None, description="Peer address (IP:port)")
@@ -272,6 +294,7 @@ class WireGuardPeer(BaseModel):
 
 class WireGuardInterface(BaseModel):
     """Interface for WireGuard protocol."""
+
     private_key: str = Field(..., description="Interface private key")
     listen_port: Optional[int] = Field(None, ge=1, le=65535, description="Listening port")
     fwmark: Optional[int] = Field(None, ge=0, description="Routing marker")
@@ -284,6 +307,7 @@ class WireGuardInterface(BaseModel):
 
 class WireGuardConfig(BaseModel):
     """WireGuard configuration for VPN."""
+
     interface: WireGuardInterface = Field(..., description="WireGuard interface settings")
     peers: List[WireGuardPeer] = Field(..., description="List of peers for connection")
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
@@ -303,6 +327,7 @@ ProtocolConfig = Union[
 # Outbound Models for Export (sing-box format)
 class OutboundBase(BaseModel):
     """Base outbound configuration for sing-box export."""
+
     type: str = Field(..., description="Outbound type")
     tag: Optional[str] = Field(None, description="Outbound tag")
     server: Optional[str] = Field(None, description="Server address")
@@ -316,6 +341,7 @@ class OutboundBase(BaseModel):
 
 class ShadowsocksOutbound(OutboundBase):
     """Shadowsocks outbound configuration for sing-box."""
+
     type: Literal["shadowsocks"] = "shadowsocks"
     method: str = Field(..., description="Encryption method")
     password: str = Field(..., description="Authentication password")
@@ -324,6 +350,7 @@ class ShadowsocksOutbound(OutboundBase):
 
 class VmessOutbound(OutboundBase):
     """VMess outbound configuration for sing-box."""
+
     type: Literal["vmess"] = "vmess"
     uuid: str = Field(..., description="User UUID")
     security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = Field("auto", description="Encryption method")
@@ -331,6 +358,7 @@ class VmessOutbound(OutboundBase):
 
 class VlessOutbound(OutboundBase):
     """VLESS outbound configuration for sing-box."""
+
     type: Literal["vless"] = "vless"
     uuid: str = Field(..., description="User UUID")
     flow: Optional[Literal["xtls-rprx-vision", "xtls-rprx-direct"]] = Field(None, description="Flow type for XTLS")
@@ -338,12 +366,14 @@ class VlessOutbound(OutboundBase):
 
 class TrojanOutbound(OutboundBase):
     """Trojan outbound configuration for sing-box."""
+
     type: Literal["trojan"] = "trojan"
     password: str = Field(..., description="Authentication password")
     fallback: Optional[Dict[str, Any]] = Field(None, description="Fallback configuration")
 
 class WireguardOutbound(OutboundBase):
     """WireGuard outbound configuration for sing-box."""
+
     type: Literal["wireguard"] = "wireguard"
     private_key: str = Field(..., description="Interface private key")
     peer_public_key: str = Field(..., description="Peer public key")
@@ -354,6 +384,7 @@ class WireguardOutbound(OutboundBase):
 
 class HysteriaOutbound(OutboundBase):
     """Hysteria outbound configuration for sing-box."""
+
     type: Literal["hysteria"] = "hysteria"
     up_mbps: Optional[int] = Field(None, ge=0, description="Upload speed in Mbps")
     down_mbps: Optional[int] = Field(None, ge=0, description="Download speed in Mbps")
@@ -362,6 +393,7 @@ class HysteriaOutbound(OutboundBase):
 
 class TuicOutbound(OutboundBase):
     """TUIC outbound configuration for sing-box."""
+
     type: Literal["tuic"] = "tuic"
     uuid: str = Field(..., description="User UUID")
     password: str = Field(..., description="Authentication password")
@@ -370,6 +402,7 @@ class TuicOutbound(OutboundBase):
 
 class HttpOutbound(OutboundBase):
     """HTTP outbound configuration for sing-box."""
+
     type: Literal["http"] = "http"
     username: Optional[str] = Field(None, description="HTTP username")
     password: Optional[str] = Field(None, description="HTTP password")
@@ -377,6 +410,7 @@ class HttpOutbound(OutboundBase):
 
 class SocksOutbound(OutboundBase):
     """SOCKS outbound configuration for sing-box."""
+
     type: Literal["socks"] = "socks"
     version: Optional[Literal["4", "4a", "5"]] = Field(None, description="SOCKS version")
     username: Optional[str] = Field(None, description="SOCKS username")
@@ -384,16 +418,19 @@ class SocksOutbound(OutboundBase):
 
 class DirectOutbound(OutboundBase):
     """Direct outbound configuration for sing-box."""
+
     type: Literal["direct"] = "direct"
     override_address: Optional[str] = Field(None, description="Override address")
     override_port: Optional[int] = Field(None, ge=0, le=65535, description="Override port")
 
 class BlockOutbound(OutboundBase):
     """Block outbound configuration for sing-box."""
+
     type: Literal["block"] = "block"
 
 class DnsOutbound(OutboundBase):
     """DNS outbound configuration for sing-box."""
+
     type: Literal["dns"] = "dns"
 
 # Unified Outbound Model with Discriminator
@@ -415,6 +452,7 @@ OutboundModel = Union[
 # Create a model that uses the union with discriminator
 class OutboundConfig(BaseModel):
     """Outbound configuration model with discriminator."""
+
     outbound: OutboundModel = Field(..., discriminator="type")
 
     class Config:
@@ -433,6 +471,7 @@ def validate_protocol_config(config: Dict[str, Any], protocol: str) -> ProtocolC
         
     Raises:
         ValueError: If configuration is invalid
+
     """
     protocol_map = {
         "shadowsocks": ShadowsocksConfig,
@@ -458,6 +497,7 @@ def generate_protocol_schema(protocol: str) -> Dict[str, Any]:
         
     Returns:
         JSON schema dictionary
+
     """
     protocol_map = {
         "shadowsocks": ShadowsocksConfig,
@@ -485,6 +525,7 @@ def validate_outbound_config(config: Dict[str, Any]) -> OutboundModel:
         
     Raises:
         ValueError: If configuration is invalid
+
     """
     try:
         # Try to create the appropriate outbound type based on discriminator
@@ -522,6 +563,7 @@ def generate_outbound_schema() -> Dict[str, Any]:
     
     Returns:
         JSON schema dictionary for OutboundModel
+
     """
     return OutboundConfig.model_json_schema()
 
@@ -534,6 +576,7 @@ def convert_protocol_to_outbound(protocol_config: ProtocolConfig, tag: Optional[
         
     Returns:
         Outbound configuration in sing-box format
+
     """
     if isinstance(protocol_config, ShadowsocksConfig):
         return ShadowsocksOutbound(
@@ -612,6 +655,7 @@ def create_outbound_from_dict(config: Dict[str, Any], tag: Optional[str] = None)
         
     Returns:
         Outbound configuration
+
     """
     if tag:
         config = {**config, "tag": tag}

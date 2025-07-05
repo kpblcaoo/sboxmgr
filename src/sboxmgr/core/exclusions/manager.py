@@ -16,6 +16,7 @@ from sboxmgr.utils.id import generate_server_id
 
 class ExclusionLoadError(Exception):
     """Exception raised when exclusion file cannot be loaded."""
+
     pass
 
 
@@ -40,6 +41,7 @@ class ExclusionManager(ExclusionManagerInterface):
             file_path: Path to exclusions file (defaults to env setting)
             auto_load: Whether to load exclusions on init
             logger: Custom logger instance (defaults to module logger)
+
         """
         self.file_path = Path(file_path) if file_path else Path(get_exclusion_file())
         self._exclusions: Optional[ExclusionList] = None
@@ -140,6 +142,7 @@ class ExclusionManager(ExclusionManagerInterface):
             
         Returns:
             True if added, False if already existed
+
         """
         server_id = generate_server_id(server_data)
         name = f"{server_data.get('tag', 'N/A')} ({server_data.get('type', 'N/A')}:{server_data.get('server_port', 'N/A')})"
@@ -196,6 +199,7 @@ class ExclusionManager(ExclusionManagerInterface):
             
         Returns:
             Filtered list without excluded servers
+
         """
         if not servers:
             return servers
@@ -274,6 +278,7 @@ class ExclusionManager(ExclusionManagerInterface):
         
         Returns:
             List of (index, server_data, is_excluded) tuples
+
         """
         if json_data and supported_protocols:
             self.set_servers_cache(json_data, supported_protocols)
@@ -329,9 +334,12 @@ class ExclusionManager(ExclusionManagerInterface):
         Args:
             json_data: Server data (will not re-cache if it's the same as cached)
             indices: Display indices from list_servers output
+            supported_protocols: List of supported protocol types
+            reason: Reason for exclusion
             
         Returns:
             List of added server IDs
+
         """
         # Only re-cache if data is different or cache is empty
         if not self._servers_cache or json_data != self._servers_cache.get('servers'):
@@ -372,6 +380,7 @@ class ExclusionManager(ExclusionManagerInterface):
         
         Returns:
             List of added server IDs
+
         """
         # Only re-cache if data is different or cache is empty
         if not self._servers_cache or json_data != self._servers_cache.get('servers'):
@@ -413,9 +422,11 @@ class ExclusionManager(ExclusionManagerInterface):
         Args:
             json_data: Server data (will not re-cache if it's the same as cached)
             indices: Display indices from list_servers output
+            supported_protocols: List of supported protocol types
             
         Returns:
             List of removed server IDs
+
         """
         # Only re-cache if data is different or cache is empty
         if not self._servers_cache or json_data != self._servers_cache.get('servers'):
@@ -451,6 +462,7 @@ class ExclusionManager(ExclusionManagerInterface):
             
         Returns:
             List of added server IDs
+
         """
         self._load()
         added_ids = []
@@ -473,6 +485,7 @@ class ExclusionManager(ExclusionManagerInterface):
         
         Returns:
             List of removed server IDs
+
         """
         self._load()
         removed_ids = []

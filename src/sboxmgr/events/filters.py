@@ -23,6 +23,7 @@ class EventFilter(ABC):
             
         Returns:
             True if event matches filter criteria
+
         """
         pass
 
@@ -35,6 +36,7 @@ class TypeFilter(EventFilter):
         
         Args:
             *event_types: Event types to match
+
         """
         self.event_types: Set[EventType] = set(event_types)
     
@@ -46,6 +48,7 @@ class TypeFilter(EventFilter):
             
         Returns:
             True if event type is in filter set
+
         """
         return event_data.event_type in self.event_types
 
@@ -59,6 +62,7 @@ class SourceFilter(EventFilter):
         Args:
             source: Source string or pattern to match
             exact_match: Whether to use exact string matching
+
         """
         self.source = source
         self.exact_match = exact_match
@@ -75,6 +79,7 @@ class SourceFilter(EventFilter):
             
         Returns:
             True if source matches filter criteria
+
         """
         if self.exact_match:
             return event_data.source == self.source
@@ -92,6 +97,7 @@ class PayloadFilter(EventFilter):
             key: Payload key to check
             value: Expected value (if None, only checks key existence)
             key_exists: Whether key should exist or not exist
+
         """
         self.key = key
         self.value = value
@@ -105,6 +111,7 @@ class PayloadFilter(EventFilter):
             
         Returns:
             True if payload matches filter criteria
+
         """
         has_key = self.key in event_data.payload
         
@@ -132,6 +139,7 @@ class CompositeFilter(EventFilter):
         Args:
             *filters: Filters to combine
             operation: Logical operation ("AND", "OR", "NOT")
+
         """
         self.filters = list(filters)
         self.operation = operation.upper()
@@ -150,6 +158,7 @@ class CompositeFilter(EventFilter):
             
         Returns:
             True if event matches composite criteria
+
         """
         if not self.filters:
             return True
@@ -173,6 +182,7 @@ class PriorityFilter(EventFilter):
         Args:
             min_priority: Minimum priority level (inclusive)
             max_priority: Maximum priority level (inclusive)
+
         """
         self.min_priority = min_priority
         self.max_priority = max_priority
@@ -185,6 +195,7 @@ class PriorityFilter(EventFilter):
             
         Returns:
             True if priority is within range
+
         """
         priority = event_data.priority.value
         return self.min_priority <= priority <= self.max_priority
@@ -198,6 +209,7 @@ class TraceFilter(EventFilter):
         
         Args:
             trace_id: Trace ID to match
+
         """
         self.trace_id = trace_id
     
@@ -209,5 +221,6 @@ class TraceFilter(EventFilter):
             
         Returns:
             True if trace ID matches
+
         """
         return event_data.trace_id == self.trace_id 

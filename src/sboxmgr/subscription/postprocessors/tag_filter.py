@@ -39,6 +39,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             'case_sensitive': False
         })
         filtered_servers = processor.process(servers, context, profile)
+
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -46,6 +47,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
         
         Args:
             config: Configuration dictionary with filtering options
+
         """
         super().__init__(config)
         self.include_tags = set(self.config.get('include_tags', []))
@@ -64,6 +66,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             List of compiled regex patterns
+
         """
         compiled = []
         flags = 0 if self.case_sensitive else re.IGNORECASE
@@ -92,6 +95,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             List of servers that match tag criteria
+
         """
         if not servers:
             return servers
@@ -115,6 +119,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             Dictionary with tag configuration
+
         """
         tag_config = {
             'include_tags': self.include_tags.copy(),
@@ -171,6 +176,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             bool: True if server should be included
+
         """
         # Extract server tags
         server_tags = self._extract_server_tags(server)
@@ -234,6 +240,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             List of tags for the server
+
         """
         tags = []
         
@@ -277,6 +284,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             bool: True if tag filtering is applicable
+
         """
         if not servers:
             return False
@@ -294,6 +302,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
         
         Returns:
             Dict containing postprocessor metadata
+
         """
         metadata = super().get_metadata()
         metadata.update({

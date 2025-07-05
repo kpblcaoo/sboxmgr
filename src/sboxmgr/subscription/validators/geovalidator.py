@@ -29,6 +29,7 @@ class GeoValidator(BaseValidator):
             
         Raises:
             NotImplementedError: This validator is not yet implemented.
+
         """
         raise NotImplementedError("GeoValidator is not yet implemented")
 

@@ -21,6 +21,7 @@ class SingBoxModelBase(BaseModel):
             
         Returns:
             Dictionary representation suitable for sing-box configuration
+
         """
         data = self.model_dump(exclude_unset=exclude_unset, exclude_none=exclude_none)
         
@@ -40,6 +41,7 @@ class SingBoxModelBase(BaseModel):
             
         Returns:
             Cleaned data dictionary
+
         """
         # Define which protocols support transport
         transport_supported = {

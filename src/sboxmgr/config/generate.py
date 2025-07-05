@@ -108,6 +108,7 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
         
     Raises:
         ValueError: If template is invalid or generation fails
+
     """
     # Emit config generation start event
     emit_event(
@@ -208,6 +209,7 @@ def validate_temp_config_dict(config_data: dict) -> None:
         
     Raises:
         ValueError: If configuration is invalid
+
     """
     # Emit validation start event
     emit_event(

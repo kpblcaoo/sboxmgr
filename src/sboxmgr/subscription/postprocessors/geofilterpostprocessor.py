@@ -18,6 +18,7 @@ class GeoFilterPostProcessor(BasePostProcessor):
     Example:
         pp = GeoFilterPostProcessor()
         servers = pp.process(servers, context=context)
+
     """
 
     def process(self, servers, context: PipelineContext | None = None):
@@ -29,6 +30,7 @@ class GeoFilterPostProcessor(BasePostProcessor):
 
         Returns:
             list[ParsedServer]: Processed servers.
+
         """
         raise NotImplementedError()
 

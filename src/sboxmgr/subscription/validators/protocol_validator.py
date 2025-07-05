@@ -38,6 +38,7 @@ class ProtocolSpecificValidator(BaseParsedValidator):
             
         Returns:
             ValidationResult: Contains validation errors and list of valid servers.
+
         """
         errors = []
         valid_servers = []
@@ -83,6 +84,7 @@ class ProtocolSpecificValidator(BaseParsedValidator):
             
         Returns:
             Dictionary representation suitable for protocol validation.
+
         """
         server_dict = {
             'server': getattr(server, 'address', ''),
@@ -116,6 +118,7 @@ class EnhancedRequiredFieldsValidator(BaseParsedValidator):
             
         Returns:
             ValidationResult: Contains validation errors and list of valid servers.
+
         """
         errors = []
         valid_servers = []
@@ -161,6 +164,7 @@ class EnhancedRequiredFieldsValidator(BaseParsedValidator):
             
         Returns:
             List of validation error messages.
+
         """
         errors = []
         
@@ -200,6 +204,7 @@ def validate_single_protocol_config(config: Dict[str, Any], protocol: str) -> Di
         
     Raises:
         ValueError: If configuration is invalid.
+
     """
     return validate_protocol_config(config, protocol)
 
@@ -214,5 +219,6 @@ def get_protocol_schema(protocol: str) -> Dict[str, Any]:
         
     Raises:
         ValueError: If protocol is not supported.
+
     """
     return generate_protocol_schema(protocol)

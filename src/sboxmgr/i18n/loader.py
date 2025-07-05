@@ -23,6 +23,7 @@ class LanguageLoader:
         base_dir (Path): Directory containing translation JSON files.
         translations (dict): Loaded translations for current language.
         en_translations (dict): English translations for fallback.
+
     """
     
     def __init__(self, lang: str = None, base_dir: Path = None):
@@ -33,6 +34,7 @@ class LanguageLoader:
                   auto-detects from environment and system locale.
             base_dir: Directory containing translation files. If None,
                      uses the directory containing this module.
+
         """
         self.base_dir = Path(base_dir) if base_dir else Path(__file__).parent
         
@@ -88,6 +90,7 @@ class LanguageLoader:
             
         Returns:
             Sanitized dictionary with cleaned translation values.
+
         """
         # Remove ANSI escape sequences completely
         def clean_value(v):
@@ -123,6 +126,7 @@ class LanguageLoader:
             
         Returns:
             Translated string or the key itself if no translation found.
+
         """
         # Сначала ищем в локальном языке, затем в en, иначе возвращаем ключ
         return self.translations.get(key) or self.en_translations.get(key, key)
@@ -137,6 +141,7 @@ class LanguageLoader:
             Tuple of (translated_string, source_language) where source_language
             is the language code that provided the translation ('local', 'en', 
             or 'fallback').
+
         """
         local = self.translations.get(key)
         en = self.en_translations.get(key)
@@ -158,6 +163,7 @@ class LanguageLoader:
             
         Returns:
             Translated string or the key itself if no translation found.
+
         """
         return self.get(key)
 
@@ -169,6 +175,7 @@ class LanguageLoader:
             
         Returns:
             True if translation file exists, False otherwise.
+
         """
         return (self.base_dir / f"{lang_code}.json").exists()
 
@@ -180,6 +187,7 @@ class LanguageLoader:
         
         Returns:
             Sorted list of available language codes.
+
         """
         return sorted([p.stem for p in self.base_dir.glob("*.json")])
 
@@ -193,6 +201,7 @@ class LanguageLoader:
         Returns:
             Tuple of (language_code, source) where source indicates where the
             language preference was detected from ('env', 'locale', or 'default').
+
         """
         # 1. env
         lang = os.environ.get("SBOXMGR_LANG")

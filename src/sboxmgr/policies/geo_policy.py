@@ -15,6 +15,7 @@ class CountryPolicy(BasePolicy):
     Allows or denies servers based on their country code.
     Supports both whitelist and blacklist modes.
     """
+
     name = "CountryPolicy"
     description = "Restricts servers by country code"
     group = "geo"
@@ -31,6 +32,7 @@ class CountryPolicy(BasePolicy):
             
         Raises:
             ValueError: If mode is not 'whitelist' or 'blacklist'
+
         """
         super().__init__()
         validate_mode(mode, ["whitelist", "blacklist"])
@@ -46,6 +48,7 @@ class CountryPolicy(BasePolicy):
             
         Returns:
             PolicyResult indicating if server is allowed
+
         """
         server = context.server
         
@@ -83,6 +86,7 @@ class CountryPolicy(BasePolicy):
             
         Returns:
             Country code or None if not found
+
         """
         country = extract_metadata_field(
             server, 
@@ -98,6 +102,7 @@ class ASNPolicy(BasePolicy):
     Allows or denies servers based on their Autonomous System Number.
     Useful for blocking specific ISPs or network providers.
     """
+
     name = "ASNPolicy"
     description = "Restricts servers by ASN"
     group = "geo"
@@ -114,6 +119,7 @@ class ASNPolicy(BasePolicy):
             
         Raises:
             ValueError: If mode is not 'whitelist' or 'blacklist'
+
         """
         super().__init__()
         validate_mode(mode, ["whitelist", "blacklist"])
@@ -129,6 +135,7 @@ class ASNPolicy(BasePolicy):
             
         Returns:
             PolicyResult indicating if server is allowed
+
         """
         server = context.server
         
@@ -166,6 +173,7 @@ class ASNPolicy(BasePolicy):
             
         Returns:
             ASN number or None if not found
+
         """
         asn = extract_metadata_field(
             server, 

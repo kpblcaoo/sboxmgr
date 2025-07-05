@@ -33,6 +33,7 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
             'override_mode': 'profile_overrides'
         })
         processed_servers = middleware.process(servers, context, profile)
+
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -40,6 +41,7 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
         
         Args:
             config: Configuration dictionary with routing options
+
         """
         super().__init__(config)
         self.final_action = self.config.get('final_action', 'auto')
@@ -61,6 +63,7 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
             
         Returns:
             List of servers (unchanged, but context is updated)
+
         """
         if not context:
             return servers
@@ -96,6 +99,7 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
             
         Returns:
             Dictionary with routing configuration
+
         """
         route_config = {
             'final_action': self.final_action,
@@ -157,6 +161,7 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
             
         Returns:
             bool: True if route configuration is applicable
+
         """
         # This middleware can always process (it just configures context)
         return True
@@ -166,6 +171,7 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
         
         Returns:
             Dictionary with middleware metadata
+
         """
         return {
             'type': 'route_config',

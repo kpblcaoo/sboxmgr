@@ -1,8 +1,11 @@
+"""Common models for sing-box configuration."""
+
 from pydantic import BaseModel, Field
 from typing import List, Literal, Optional, Dict, Any
 
 class TlsConfig(BaseModel):
     """TLS configuration for secure connections."""
+
     enabled: Optional[bool] = Field(default=True, description="Enable TLS for the connection.")
     disable_sni: Optional[bool] = Field(default=False, description="Disable SNI in TLS handshake.")
     server_name: Optional[str] = Field(default=None, description="SNI for TLS connection.")
@@ -21,6 +24,7 @@ class TlsConfig(BaseModel):
 
 class MultiplexConfig(BaseModel):
     """Multiplexing configuration."""
+
     enabled: Optional[bool] = Field(default=None, description="Enable multiplexing.")
     protocol: Optional[Literal["smux", "yamux"]] = Field(default=None, description="Multiplexing protocol.")
     max_connections: Optional[int] = Field(default=None, ge=1, description="Maximum number of connections.")
@@ -32,6 +36,7 @@ class MultiplexConfig(BaseModel):
 
 class TransportConfig(BaseModel):
     """Transport layer settings."""
+
     network: Optional[Literal["tcp", "udp", "ws", "http", "grpc", "httpupgrade", "quic"]] = Field(default=None, description="Transport protocol.")
     ws_opts: Optional[Dict[str, Any]] = Field(default=None, description="WebSocket settings, e.g., {'path': '/ws', 'headers': {'Host': 'example.com'}}.")
     http_opts: Optional[Dict[str, Any]] = Field(default=None, description="HTTP/2 settings, e.g., {'host': 'example.com', 'path': '/http2'}.")

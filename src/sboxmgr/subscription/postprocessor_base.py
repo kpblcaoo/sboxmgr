@@ -17,6 +17,7 @@ class BasePostProcessor(ABC):
     stage. They can add geographic information, apply filtering rules,
     optimize server lists, or perform custom transformations.
     """
+
     plugin_type = "postprocessor"
     @abstractmethod
     def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
@@ -31,11 +32,23 @@ class BasePostProcessor(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class.
+
         """
         pass
 
 class DedupPostProcessor(BasePostProcessor):
+    """Remove duplicate servers based on type, address, port, and tag."""
+    
     def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
+        """Remove duplicate servers from the list.
+        
+        Args:
+            servers: List of ParsedServer objects to deduplicate.
+            context: Pipeline context (unused in this implementation).
+            
+        Returns:
+            List[ParsedServer]: Deduplicated server list.
+        """
         seen = set()
         result = []
         for s in servers:
@@ -54,8 +67,15 @@ class PostProcessorChain(BasePostProcessor):
     Example:
         chain = PostProcessorChain([DedupPostProcessor(), GeoPostProcessor()])
         servers = chain.process(servers)
+
     """
+
     def __init__(self, processors: list):
+        """Initialize postprocessor chain.
+        
+        Args:
+            processors: List of postprocessor instances to chain.
+        """
         self.processors = processors
 
     def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
@@ -67,6 +87,7 @@ class PostProcessorChain(BasePostProcessor):
 
         Returns:
             List[ParsedServer]: Result after applying all postprocessor plugins.
+
         """
         for proc in self.processors:
             sig = inspect.signature(proc.process)

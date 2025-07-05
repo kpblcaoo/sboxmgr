@@ -57,6 +57,7 @@ class ExclusionEntryModel(BaseModel):
         
         Returns:
             Dictionary representation suitable for JSON serialization
+
         """
         return {
             "id": self.id,
@@ -77,6 +78,7 @@ class ExclusionEntryModel(BaseModel):
             
         Raises:
             ValueError: If required fields are missing or invalid
+
         """
         return cls(**data)
 
@@ -143,6 +145,7 @@ class ExclusionListModel(BaseModel):
             
         Returns:
             True if added, False if already exists
+
         """
         if any(ex.id == entry.id for ex in self.exclusions):
             return False
@@ -159,6 +162,7 @@ class ExclusionListModel(BaseModel):
             
         Returns:
             True if removed, False if not found
+
         """
         original_count = len(self.exclusions)
         self.exclusions = [ex for ex in self.exclusions if ex.id != server_id]
@@ -176,6 +180,7 @@ class ExclusionListModel(BaseModel):
             
         Returns:
             True if server is excluded, False otherwise
+
         """
         return any(ex.id == server_id for ex in self.exclusions)
     
@@ -184,6 +189,7 @@ class ExclusionListModel(BaseModel):
         
         Returns:
             Number of exclusions cleared
+
         """
         count = len(self.exclusions)
         self.exclusions.clear()
@@ -196,6 +202,7 @@ class ExclusionListModel(BaseModel):
         
         Returns:
             Set of server IDs that are excluded
+
         """
         return {ex.id for ex in self.exclusions}
     
@@ -204,6 +211,7 @@ class ExclusionListModel(BaseModel):
         
         Returns:
             Dictionary representation suitable for JSON serialization
+
         """
         return {
             "version": self.version,
@@ -223,6 +231,7 @@ class ExclusionListModel(BaseModel):
             
         Raises:
             ValueError: If data is invalid or migration fails
+
         """
         # Handle versioning and migrations
         version = data.get("version", 0)  # 0 = legacy format

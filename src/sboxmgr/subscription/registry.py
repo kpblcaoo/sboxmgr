@@ -1,3 +1,5 @@
+"""Plugin registry for subscription parsers and exporters."""
+
 from typing import Type, Dict
 import logging
 
@@ -6,6 +8,12 @@ PLUGIN_REGISTRY: Dict[str, Type] = {}
 # Явная регистрация через декоратор
 
 def register(source_type: str):
+    """Register a plugin class for a specific source type.
+    
+    Args:
+        source_type: Type of subscription source
+
+    """
     def wrapper(cls):
         PLUGIN_REGISTRY[source_type] = cls
         return cls
@@ -14,10 +22,20 @@ def register(source_type: str):
 # Получение класса по типу
 
 def get_plugin(source_type: str):
+    """Get plugin class for a specific source type.
+    
+    Args:
+        source_type: Type of subscription source
+        
+    Returns:
+        Plugin class or None if not found
+
+    """
     return PLUGIN_REGISTRY.get(source_type)
 
 # Задел под entry points (setuptools)
 def load_entry_points():
+    """Load plugins from setuptools entry points."""
     try:
         import importlib.metadata
         eps = importlib.metadata.entry_points()

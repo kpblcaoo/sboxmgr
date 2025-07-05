@@ -27,11 +27,13 @@ logger = _get_logger()
 
 class EventSenderError(Exception):
     """Base exception for event sender errors."""
+
     pass
 
 
 class AgentNotConnectedError(EventSenderError):
     """Raised when agent is not connected."""
+
     pass
 
 
@@ -52,6 +54,7 @@ class EventSender:
         ...         "subscription_url": "https://...",
         ...         "servers_count": 150
         ...     })
+
     """
     
     def __init__(self, socket_path: str = "/tmp/sboxagent.sock", timeout: float = 5.0):
@@ -60,6 +63,7 @@ class EventSender:
         Args:
             socket_path: Path to Unix socket
             timeout: Connection timeout in seconds
+
         """
         self.socket_path = socket_path
         self.timeout = timeout
@@ -71,6 +75,7 @@ class EventSender:
         
         Returns:
             True if connection successful, False otherwise
+
         """
         try:
             if self._client:
@@ -103,6 +108,7 @@ class EventSender:
         
         Returns:
             True if connected, False otherwise
+
         """
         return self._connected and self._client is not None
     
@@ -134,6 +140,7 @@ class EventSender:
             ...     "config_size": 1024,
             ...     "generation_time_ms": 250
             ... })
+
         """
         if not self.is_connected():
             if not self.connect():
@@ -199,6 +206,7 @@ class EventSender:
             
         Returns:
             True if heartbeat sent successfully, False otherwise
+
         """
         if not self.is_connected():
             if not self.connect():
@@ -251,6 +259,7 @@ class EventSender:
             
         Returns:
             Response data if successful, None otherwise
+
         """
         if not self.is_connected():
             if not self.connect():
@@ -302,6 +311,7 @@ class EventSender:
         
         Returns:
             True if ping successful, False otherwise
+
         """
         response = self.send_command("ping", {})
         return response is not None and response.get("pong") is True
@@ -311,6 +321,7 @@ class EventSender:
         
         Returns:
             Agent status data if successful, None otherwise
+
         """
         return self.send_command("status", {})
     
@@ -388,6 +399,7 @@ def get_event_sender() -> EventSender:
     
     Returns:
         EventSender instance
+
     """
     global _event_sender
     if _event_sender is None:
@@ -399,7 +411,7 @@ def send_event(event_type: str,
                event_data: Dict[str, Any],
                source: str = "sboxmgr",
                priority: str = "normal") -> bool:
-    """Convenience function to send an event.
+    """Send an event with convenience parameters.
     
     Args:
         event_type: Type of event
@@ -409,6 +421,7 @@ def send_event(event_type: str,
         
     Returns:
         True if sent successfully, False otherwise
+
     """
     sender = get_event_sender()
     try:
@@ -419,20 +432,22 @@ def send_event(event_type: str,
 
 
 def send_heartbeat() -> bool:
-    """Convenience function to send a heartbeat.
+    """Send a heartbeat event.
     
     Returns:
         True if sent successfully, False otherwise
+
     """
     sender = get_event_sender()
     return sender.send_heartbeat()
 
 
 def ping_agent() -> bool:
-    """Convenience function to ping the agent.
+    """Ping the agent to check connectivity.
     
     Returns:
         True if ping successful, False otherwise
+
     """
     sender = get_event_sender()
     return sender.ping() 

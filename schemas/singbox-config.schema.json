@@ -1,4 +1,9 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SingBoxConfig",
+  "description": "Complete sing-box configuration model.\n\nThis model represents the full sing-box configuration with all supported\nprotocols and features. It is validated against sing-box 1.11.13.\n\nFeatures:\n- 17 inbound protocols (mixed, socks, http, shadowsocks, vmess, vless, \n  trojan, hysteria2, wireguard, tuic, shadowtls, direct, anytls, naive, \n  redirect, tproxy, tun)\n- 18 outbound protocols (shadowsocks, vmess, vless, trojan, hysteria2, \n  wireguard, http, socks, tuic, shadowtls, dns, direct, block, selector, \n  urltest, hysteria, anytls, ssh, tor)\n- Complete DNS, routing, and experimental features support",
+  "generator": "sboxmgr-schema-generator",
+  "version": "1.0.0",
   "$defs": {
     "AnyTlsInbound": {
       "additionalProperties": false,
@@ -225,18 +230,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -414,18 +407,6 @@
           ],
           "default": null,
           "description": "TLS settings for secure connection."
-        },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
         },
         "multiplex": {
           "anyOf": [
@@ -804,18 +785,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -1134,18 +1103,6 @@
           ],
           "default": null,
           "description": "TLS settings for secure connection."
-        },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
         },
         "multiplex": {
           "anyOf": [
@@ -1915,18 +1872,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -2280,18 +2225,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -2331,6 +2264,18 @@
           ],
           "default": null,
           "description": "Domain resolution strategy."
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransportConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transport layer settings."
         },
         "password": {
           "anyOf": [
@@ -2467,18 +2412,6 @@
           ],
           "default": null,
           "description": "TLS settings for secure connection."
-        },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
         },
         "multiplex": {
           "anyOf": [
@@ -3859,18 +3792,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -4198,18 +4119,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -4249,6 +4158,18 @@
           ],
           "default": null,
           "description": "Domain resolution strategy."
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransportConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transport layer settings."
         },
         "version": {
           "anyOf": [
@@ -4540,18 +4461,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -4591,6 +4500,18 @@
           ],
           "default": null,
           "description": "Domain resolution strategy."
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransportConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transport layer settings."
         },
         "method": {
           "description": "Encryption method, e.g., 'aes-256-gcm'.",
@@ -4864,18 +4785,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -5027,18 +4936,6 @@
           ],
           "default": null,
           "description": "TLS settings for secure connection."
-        },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
         },
         "multiplex": {
           "anyOf": [
@@ -5451,18 +5348,6 @@
           ],
           "default": null,
           "description": "TLS settings for secure connection."
-        },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
         },
         "multiplex": {
           "anyOf": [
@@ -6025,18 +5910,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -6076,6 +5949,18 @@
           ],
           "default": null,
           "description": "Domain resolution strategy."
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransportConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transport layer settings."
         },
         "password": {
           "description": "Password for authentication.",
@@ -6348,18 +6233,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -6399,6 +6272,18 @@
           ],
           "default": null,
           "description": "Domain resolution strategy."
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransportConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transport layer settings."
         },
         "uuid": {
           "description": "UUID for authentication.",
@@ -7062,18 +6947,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -7462,18 +7335,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -7513,6 +7374,18 @@
           ],
           "default": null,
           "description": "Domain resolution strategy."
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransportConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transport layer settings."
         },
         "uuid": {
           "description": "User UUID for authentication.",
@@ -7786,18 +7659,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -7837,6 +7698,18 @@
           ],
           "default": null,
           "description": "Domain resolution strategy."
+        },
+        "transport": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TransportConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Transport layer settings."
         },
         "uuid": {
           "description": "User UUID for authentication.",
@@ -8194,18 +8067,6 @@
           "default": null,
           "description": "TLS settings for secure connection."
         },
-        "transport": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TransportConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Transport layer settings."
-        },
         "multiplex": {
           "anyOf": [
             {
@@ -8365,7 +8226,6 @@
     }
   },
   "additionalProperties": false,
-  "description": "Complete sing-box configuration model.\n\nThis model represents the full sing-box configuration with all supported\nprotocols and features. It is validated against sing-box 1.11.13.\n\nFeatures:\n- 17 inbound protocols (mixed, socks, http, shadowsocks, vmess, vless, \n  trojan, hysteria2, wireguard, tuic, shadowtls, direct, anytls, naive, \n  redirect, tproxy, tun)\n- 18 outbound protocols (shadowsocks, vmess, vless, trojan, hysteria2, \n  wireguard, http, socks, tuic, shadowtls, dns, direct, block, selector, \n  urltest, hysteria, anytls, ssh, tor)\n- Complete DNS, routing, and experimental features support",
   "properties": {
     "log": {
       "anyOf": [
@@ -8628,6 +8488,5 @@
       "description": "Server probing configuration."
     }
   },
-  "title": "SingBoxConfig",
   "type": "object"
 }

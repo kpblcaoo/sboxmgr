@@ -14,6 +14,7 @@ class IntegrityPolicy(BasePolicy):
     Validates that profiles are not corrupted and contain valid data.
     Checks for required fields, data types, and structural integrity.
     """
+
     name = "IntegrityPolicy"
     description = "Validates profile integrity and data structure"
     group = "profile"
@@ -23,6 +24,7 @@ class IntegrityPolicy(BasePolicy):
         
         Args:
             required_fields: List of required fields in profile
+
         """
         super().__init__()
         self.required_fields = required_fields or ["name", "type"]
@@ -35,6 +37,7 @@ class IntegrityPolicy(BasePolicy):
             
         Returns:
             PolicyResult indicating if profile is valid
+
         """
         profile = context.profile
         
@@ -60,6 +63,7 @@ class PermissionPolicy(BasePolicy):
     Validates that the current user has permission to access/modify
     the profile based on ownership and access rules.
     """
+
     name = "PermissionPolicy"
     description = "Validates profile access permissions"
     group = "profile"
@@ -70,6 +74,7 @@ class PermissionPolicy(BasePolicy):
         Args:
             allowed_users: List of users allowed to access profiles
             admin_users: List of admin users with full access
+
         """
         super().__init__()
         self.allowed_users = allowed_users or []
@@ -83,6 +88,7 @@ class PermissionPolicy(BasePolicy):
             
         Returns:
             PolicyResult indicating if access is allowed
+
         """
         user = context.user
         
@@ -106,6 +112,7 @@ class LimitPolicy(BasePolicy):
     Limits the number of servers, subscriptions, and other resources
     that can be included in a profile.
     """
+
     name = "LimitPolicy"
     description = "Enforces resource limits on profiles"
     group = "profile"
@@ -117,6 +124,7 @@ class LimitPolicy(BasePolicy):
             max_servers: Maximum number of servers allowed
             max_subscriptions: Maximum number of subscriptions allowed
             max_size_mb: Maximum profile size in MB
+
         """
         super().__init__()
         self.max_servers = max_servers
@@ -131,6 +139,7 @@ class LimitPolicy(BasePolicy):
             
         Returns:
             PolicyResult indicating if limits are within bounds
+
         """
         profile = context.profile
         

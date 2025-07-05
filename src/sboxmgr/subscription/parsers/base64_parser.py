@@ -44,6 +44,7 @@ class Base64Parser(BaseParser):
         Note:
             Automatically adds "ss://" prefix to legacy shadowsocks format
             lines that match the pattern "method:password@server:port".
+
         """
         decoded = base64.b64decode(raw)
         lines = decoded.decode("utf-8").splitlines()

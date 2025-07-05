@@ -39,6 +39,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             'measurement_method': 'tcp'
         })
         sorted_servers = processor.process(servers, context, profile)
+
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -46,6 +47,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
         
         Args:
             config: Configuration dictionary with sorting options
+
         """
         super().__init__(config)
         self.sort_order = self.config.get('sort_order', 'asc')
@@ -72,6 +74,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             
         Returns:
             List of servers sorted by latency
+
         """
         if not servers:
             return servers
@@ -116,6 +119,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             
         Returns:
             Dictionary with latency configuration
+
         """
         latency_config = {
             'sort_order': self.sort_order,
@@ -158,6 +162,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             
         Returns:
             Latency in milliseconds
+
         """
         server_key = f"{server.address}:{server.port}"
         
@@ -212,6 +217,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             
         Returns:
             Latency in milliseconds
+
         """
         import subprocess
         import platform
@@ -249,6 +255,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             
         Returns:
             Latency in milliseconds
+
         """
         import socket
         
@@ -278,6 +285,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             
         Returns:
             Latency in milliseconds
+
         """
         try:
             import requests
@@ -311,6 +319,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             servers: List of servers to be processed
             context: Pipeline context
             profile: Full profile configuration
+
         """
         # Clear old cache entries
         current_time = time.time()
@@ -330,6 +339,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             
         Returns:
             bool: True if latency sorting is applicable
+
         """
         return len(servers) > 1  # Only useful if there are multiple servers to sort
     
@@ -338,6 +348,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
         
         Returns:
             Dict containing postprocessor metadata
+
         """
         metadata = super().get_metadata()
         metadata.update({

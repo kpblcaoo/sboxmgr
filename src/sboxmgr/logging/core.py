@@ -27,6 +27,7 @@ class LoggingCore:
         
         Args:
             config: Logging configuration object
+
         """
         self.config = config
         self._configured = False
@@ -69,6 +70,7 @@ class LoggingCore:
             >>> core = LoggingCore(config)
             >>> logger = core.get_logger('sboxmgr.test')
             >>> logger.info("Test message")
+
         """
         # Ensure logging is configured
         self.configure()
@@ -89,6 +91,7 @@ class LoggingCore:
         
         Args:
             new_config: New logging configuration
+
         """
         self.config = new_config
         self._configured = False
@@ -122,6 +125,7 @@ class LoggingCore:
         
         Returns:
             Dict[str, Dict]: Mapping of sink names to their configurations
+
         """
         sinks = {}
         
@@ -154,6 +158,7 @@ class LoggingCore:
             
         Returns:
             logging.Handler: Configured handler
+
         """
         sink = sink_config['sink']
         level = sink_config.get('level', self.config.level)
@@ -177,6 +182,7 @@ class LoggingCore:
             
         Returns:
             logging.Formatter: Configured formatter
+
         """
         # Auto-select formatter based on sink if format is 'auto'
         if format_type == 'auto':
@@ -214,6 +220,7 @@ class StructuredLoggerAdapter(logging.LoggerAdapter):
         
         Args:
             logger: Base logger to wrap
+
         """
         super().__init__(logger, {})
     
@@ -226,6 +233,7 @@ class StructuredLoggerAdapter(logging.LoggerAdapter):
             
         Returns:
             Tuple[str, Dict]: Processed message and extra fields
+
         """
         # Ensure 'extra' dict exists
         if 'extra' not in kwargs:
@@ -244,6 +252,7 @@ class StructuredLoggerAdapter(logging.LoggerAdapter):
             operation: Operation name
             message: Log message
             **extra_fields: Additional structured fields
+
         """
         extra = {'operation': operation}
         extra.update(extra_fields)
@@ -256,6 +265,7 @@ class StructuredLoggerAdapter(logging.LoggerAdapter):
             operation: Operation name
             message: Log message
             **extra_fields: Additional structured fields
+
         """
         self.log_operation(logging.INFO, operation, message, **extra_fields)
     
@@ -266,6 +276,7 @@ class StructuredLoggerAdapter(logging.LoggerAdapter):
             operation: Operation name
             message: Log message
             **extra_fields: Additional structured fields
+
         """
         self.log_operation(logging.ERROR, operation, message, **extra_fields)
     
@@ -276,6 +287,7 @@ class StructuredLoggerAdapter(logging.LoggerAdapter):
             operation: Operation name
             message: Log message
             **extra_fields: Additional structured fields
+
         """
         self.log_operation(logging.DEBUG, operation, message, **extra_fields)
 
@@ -292,6 +304,7 @@ def initialize_logging(config: LoggingConfig) -> LoggingCore:
         
     Returns:
         LoggingCore: Configured logging core
+
     """
     global _logging_core
     _logging_core = LoggingCore(config)
@@ -310,6 +323,7 @@ def get_logger(name: str) -> logging.Logger:
         
     Raises:
         RuntimeError: If logging not initialized
+
     """
     if _logging_core is None:
         raise RuntimeError("Logging not initialized. Call initialize_logging() first.")
@@ -325,6 +339,7 @@ def reconfigure_logging(config: LoggingConfig) -> None:
         
     Raises:
         RuntimeError: If logging not initialized
+
     """
     if _logging_core is None:
         raise RuntimeError("Logging not initialized. Call initialize_logging() first.")

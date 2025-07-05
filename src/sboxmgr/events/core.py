@@ -45,6 +45,7 @@ class EventHandler(ABC):
             
         Returns:
             True if handler can process this event
+
         """
         pass
     
@@ -57,6 +58,7 @@ class EventHandler(ABC):
             
         Returns:
             Result of event processing (if any)
+
         """
         pass
     
@@ -66,6 +68,7 @@ class EventHandler(ABC):
         
         Returns:
             True if handler is async
+
         """
         return asyncio.iscoroutinefunction(self.handle)
 
@@ -94,6 +97,7 @@ class Event(BaseModel):
         
         Args:
             result: Result from event handler
+
         """
         self.results.append(result)
     
@@ -102,6 +106,7 @@ class Event(BaseModel):
         
         Args:
             error: Exception that occurred during processing
+
         """
         self.errors.append(error)
     
@@ -129,6 +134,7 @@ class EventManager:
         >>> manager = EventManager()
         >>> manager.register_handler(my_handler)
         >>> manager.emit(EventType.CONFIG_UPDATED, {"path": "/config.json"})
+
     """
     
     def __init__(self, max_handlers: int = 100):
@@ -136,6 +142,7 @@ class EventManager:
         
         Args:
             max_handlers: Maximum number of handlers to register
+
         """
         self._handlers: List[EventHandler] = []
         self._max_handlers = max_handlers
@@ -152,6 +159,7 @@ class EventManager:
             
         Raises:
             ValueError: If max handlers exceeded or handler already registered
+
         """
         with self._lock:
             if len(self._handlers) >= self._max_handlers:
@@ -170,6 +178,7 @@ class EventManager:
             
         Returns:
             True if handler was found and removed
+
         """
         with self._lock:
             try:
@@ -192,6 +201,7 @@ class EventManager:
             
         Returns:
             Event object with processing results
+
         """
         if not self._enabled:
             return self._create_cancelled_event(event_type, payload, source)
@@ -230,6 +240,7 @@ class EventManager:
             
         Returns:
             Event object with processing results
+
         """
         if not self._enabled:
             return self._create_cancelled_event(event_type, payload, source)
@@ -262,6 +273,7 @@ class EventManager:
             
         Returns:
             List of matching handlers
+
         """
         with self._lock:
             if event_type is None:
@@ -298,6 +310,7 @@ class EventManager:
             
         Returns:
             List of recent events
+
         """
         with self._lock:
             if limit is None:
@@ -404,6 +417,7 @@ def get_event_manager() -> EventManager:
     
     Returns:
         Global EventManager instance
+
     """
     global _event_manager
     
@@ -417,7 +431,7 @@ def get_event_manager() -> EventManager:
 
 def emit_event(event_type: EventType, payload: EventPayload, 
                source: str = "unknown", priority: EventPriority = EventPriority.NORMAL) -> Event:
-    """Convenience function to emit events using global manager.
+    """Emit events using global manager.
     
     Args:
         event_type: Type of event to emit
@@ -427,5 +441,6 @@ def emit_event(event_type: EventType, payload: EventPayload,
         
     Returns:
         Event object with processing results
+
     """
     return get_event_manager().emit(event_type, payload, source, priority) 

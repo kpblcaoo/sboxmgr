@@ -1,5 +1,4 @@
-"""
-JSON Export Framework for sboxmgr
+"""JSON Export Framework for sboxmgr.
 
 Provides standardized JSON output format for all subbox client configurations
 with metadata, validation, and schema compliance.
@@ -19,9 +18,15 @@ logger = get_logger(__name__)
 
 
 class JSONExporter:
-    """Standardized JSON exporter for subbox configurations"""
+    """Standardized JSON exporter for subbox configurations."""
     
     def __init__(self, validate: bool = True):
+        """Initialize JSON exporter.
+        
+        Args:
+            validate: Whether to validate exported configurations.
+            
+        """
         self.version = self._get_version()
         self.logger = logger
         self.validate = validate
@@ -32,8 +37,7 @@ class JSONExporter:
                      subscription_url: Optional[str] = None,
                      metadata: Optional[Dict[str, Any]] = None,
                      validate: Optional[bool] = None) -> Dict[str, Any]:
-        """
-        Export configuration in standardized JSON format
+        """Export configuration in standardized JSON format.
         
         Args:
             client_type: Type of client (sing-box, clash, xray, mihomo)
@@ -44,6 +48,7 @@ class JSONExporter:
             
         Returns:
             Standardized JSON configuration
+
         """
         try:
             # Create base export structure
@@ -84,8 +89,7 @@ class JSONExporter:
                       metadata: Optional[Dict[str, Any]] = None,
                       pretty: bool = True,
                       validate: Optional[bool] = None) -> Path:
-        """
-        Export configuration to file
+        """Export configuration to file.
         
         Args:
             client_type: Type of client
@@ -98,6 +102,7 @@ class JSONExporter:
             
         Returns:
             Path to created file
+
         """
         try:
             # Ensure output directory exists
@@ -125,8 +130,7 @@ class JSONExporter:
                        output_dir: Path,
                        pretty: bool = True,
                        validate: Optional[bool] = None) -> List[Path]:
-        """
-        Export multiple configurations
+        """Export multiple configurations.
         
         Args:
             configs: List of config dicts with keys: client_type, config_data, subscription_url, metadata
@@ -136,6 +140,7 @@ class JSONExporter:
             
         Returns:
             List of created file paths
+
         """
         created_files = []
         
@@ -167,7 +172,7 @@ class JSONExporter:
     def _generate_metadata(self, 
                           subscription_url: Optional[str] = None,
                           additional_metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Generate metadata for exported configuration"""
+        """Generate metadata for exported configuration."""
         metadata = {
             "source": subscription_url or "manual",
             "generator": f"sboxmgr-{self.version}",
@@ -181,7 +186,7 @@ class JSONExporter:
         return metadata
     
     def _calculate_checksum(self, data: Dict[str, Any]) -> str:
-        """Calculate SHA256 checksum of configuration data"""
+        """Calculate SHA256 checksum of configuration data."""
         # Create a copy without checksum for consistent hashing
         data_copy = data.copy()
         if "metadata" in data_copy and "checksum" in data_copy["metadata"]:
@@ -199,7 +204,7 @@ class JSONExporter:
             return "unknown"
     
     def _get_client_version(self, client_type: str) -> str:
-        """Get client version if available"""
+        """Get client version if available."""
         # This could be enhanced to detect actual client versions
         client_versions = {
             "sing-box": "1.8.0",
@@ -217,6 +222,7 @@ class JSONExporter:
             
         Raises:
             ConfigValidationError: If validation fails
+
         """
         required_fields = ["client", "version", "created_at", "config", "metadata"]
         for field in required_fields:
@@ -241,6 +247,7 @@ class JSONExporter:
             
         Raises:
             ConfigValidationError: If validation fails
+
         """
         if client_type == "sing-box":
             # Use internal sing-box validator
@@ -258,15 +265,15 @@ class JSONExporter:
 
 
 class JSONExporterFactory:
-    """Factory for creating JSON exporters with different configurations"""
+    """Factory for creating JSON exporters with different configurations."""
     
     @staticmethod
     def create_exporter(config: Optional[Dict[str, Any]] = None) -> JSONExporter:
-        """Create JSON exporter with optional configuration"""
+        """Create JSON exporter with optional configuration."""
         validate = config.get("validate", True) if config else True
         return JSONExporter(validate=validate)
     
     @staticmethod
     def create_batch_exporter() -> JSONExporter:
-        """Create exporter optimized for batch operations"""
+        """Create exporter optimized for batch operations."""
         return JSONExporter(validate=True) 

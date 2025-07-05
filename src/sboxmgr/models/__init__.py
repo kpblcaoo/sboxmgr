@@ -1,5 +1,4 @@
-"""
-Configuration models for various proxy protocols.
+"""Configuration models for various proxy protocols.
 
 This module contains Pydantic models for different proxy configuration formats:
 - sing-box: Complete sing-box configuration models

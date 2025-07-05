@@ -1,9 +1,12 @@
+"""DNS models for sing-box configuration."""
+
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Literal, Optional, Union, Dict, Any
 from .enums import DomainStrategy
 
 class DnsServer(BaseModel):
     """DNS server configuration."""
+
     tag: Optional[str] = Field(default=None, description="Unique tag for the DNS server.")
     address: str = Field(..., description="DNS server address, e.g., 8.8.8.8 or https://dns.google/dns-query.")
     address_resolver: Optional[str] = Field(default=None, description="Tag of resolver for this server's address.")
@@ -15,6 +18,7 @@ class DnsServer(BaseModel):
 
 class DnsRule(BaseModel):
     """DNS routing rule."""
+
     type: str = Field(..., description="Rule type, e.g., 'default', 'logical'.")
     inbound: Optional[List[str]] = Field(default=None, description="List of inbound tags to match.")
     ip_version: Optional[Literal[4, 6]] = Field(default=None, description="IP version to match (4 or 6).")
@@ -41,6 +45,7 @@ class DnsRule(BaseModel):
 
 class DnsConfig(BaseModel):
     """DNS configuration for sing-box."""
+
     servers: Optional[List[DnsServer]] = Field(default=None, description="List of DNS servers.")
     rules: Optional[List[DnsRule]] = Field(default=None, description="DNS routing rules.")
     final: Optional[str] = Field(default=None, description="Default DNS server tag.")

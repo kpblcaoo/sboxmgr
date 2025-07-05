@@ -31,6 +31,7 @@ class BaseSelector(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class.
+
         """
         pass
 
@@ -55,6 +56,7 @@ class DefaultSelector(BaseSelector):
             
         Returns:
             List of filtered ParsedServer objects matching the selection criteria.
+
         """
         user_routes = user_routes or []
         exclusions = exclusions or []

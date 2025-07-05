@@ -18,6 +18,7 @@ class BaseParser(ABC):
     
     Attributes:
         plugin_type: Plugin type identifier for auto-discovery and filtering.
+
     """
     
     plugin_type = "parser"
@@ -35,5 +36,6 @@ class BaseParser(ABC):
         Raises:
             ValueError: If the data format is invalid or cannot be parsed.
             NotImplementedError: If called directly on base class.
+
         """
         pass 

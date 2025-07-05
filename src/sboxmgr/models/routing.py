@@ -1,8 +1,11 @@
+"""Routing models for SBoxMgr."""
+
 from pydantic import BaseModel, Field
 from typing import List, Literal, Optional, Dict, Any, Union
 
 class RouteRule(BaseModel):
     """Routing rule for traffic management."""
+
     type: Optional[str] = Field(default=None, description="Rule type, e.g., 'default', 'logical'.")
     inbound: Optional[List[str]] = Field(default=None, description="List of inbound tags to match.")
     ip_version: Optional[Literal[4, 6]] = Field(default=None, description="IP version to match (4 or 6).")
@@ -28,6 +31,7 @@ class RouteRule(BaseModel):
 
 class RouteConfig(BaseModel):
     """Routing configuration."""
+
     rules: Optional[List[RouteRule]] = Field(default=None, description="List of routing rules.")
     final: Optional[str] = Field(default=None, description="Default outbound tag.")
     auto_detect_interface: Optional[bool] = Field(default=None, description="Auto-detect network interface.")

@@ -11,6 +11,15 @@ class DecoratedEventHandler(EventHandler):
     
     def __init__(self, func: Callable, event_types: Set[EventType], 
                  source_filter: Optional[str] = None, priority: int = 50):
+        """Initialize decorated event handler.
+        
+        Args:
+            func: Function to wrap as event handler
+            event_types: Set of event types this handler responds to
+            source_filter: Optional source filter
+            priority: Handler priority level
+            
+        """
         self.func = func
         self.event_types = event_types
         self.source_filter = source_filter
@@ -33,7 +42,7 @@ class DecoratedEventHandler(EventHandler):
 
 def event_handler(*event_types: EventType, source: Optional[str] = None, 
                   priority: int = 50, auto_register: bool = True):
-    """Decorator to mark a function as an event handler."""
+    """Mark a function as an event handler."""
     def decorator(func: Callable) -> Callable:
         handler = DecoratedEventHandler(
             func=func,
@@ -58,7 +67,7 @@ def event_handler(*event_types: EventType, source: Optional[str] = None,
 
 def async_event_handler(*event_types: EventType, source: Optional[str] = None,
                        priority: int = 50, auto_register: bool = True):
-    """Decorator to mark an async function as an event handler."""
+    """Mark an async function as an event handler."""
     def decorator(func: Callable) -> Callable:
         handler = DecoratedEventHandler(
             func=func,

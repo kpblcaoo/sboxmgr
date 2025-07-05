@@ -24,12 +24,19 @@ class FileFetcher(BaseFetcher):
         SUPPORTED_SCHEMES: Tuple of supported URL schemes ("file",).
         _cache_lock: Thread lock for cache synchronization.
         _fetch_cache: Cache dictionary for storing fetched file contents.
+
     """
+
     SUPPORTED_SCHEMES: Tuple[str, ...] = ("file",)
     _cache_lock = threading.Lock()
     _fetch_cache: Dict[Tuple[str], bytes] = {}
 
     def __init__(self, source: SubscriptionSource):
+        """Initialize FileFetcher.
+        
+        Args:
+            source: Subscription source configuration.
+        """
         super().__init__(source)
 
     def fetch(self, force_reload: bool = False) -> bytes:
@@ -44,6 +51,7 @@ class FileFetcher(BaseFetcher):
         Raises:
             ValueError: Если размер файла превышает лимит.
             FileNotFoundError: Если файл не найден.
+
         """
         key = (self.source.url,)
         if force_reload:

@@ -1,8 +1,12 @@
+"""File utilities for SBoxMgr."""
+
 import os
 import json
 import tempfile
 import shutil
 import logging
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 def handle_temp_file(content, target_path, validate_fn=None):
     """Write content to temporary file with validation and atomic move.
@@ -23,6 +27,7 @@ def handle_temp_file(content, target_path, validate_fn=None):
     Raises:
         ValueError: If validation fails.
         Exception: For file I/O errors or other failures.
+
     """
     temp_path = os.path.join(tempfile.gettempdir(), os.path.basename(target_path))
     try:
@@ -56,6 +61,7 @@ def atomic_write_json(data, path):
         
     Note:
         Temporary file is automatically cleaned up on failure.
+
     """
     temp_path = f"{path}.tmp"
     try:
@@ -84,6 +90,7 @@ def atomic_remove(path):
     Note:
         This function does not return a value. Check for exceptions
         to determine success or failure.
+
     """
     try:
         if os.path.exists(path):
@@ -101,6 +108,7 @@ def file_exists(path):
         
     Returns:
         True if file exists, False otherwise.
+
     """
     return os.path.exists(path)
 
@@ -116,6 +124,7 @@ def read_json(path):
     Raises:
         FileNotFoundError: If file does not exist.
         json.JSONDecodeError: If file contains invalid JSON.
+
     """
     with open(path, "r") as f:
         return json.load(f)
@@ -133,6 +142,7 @@ def write_json(data, path):
     Note:
         This function does not return a value and does not provide
         atomic write guarantees. Use atomic_write_json for safer operations.
+
     """
     with open(path, "w") as f:
         json.dump(data, f, indent=2)

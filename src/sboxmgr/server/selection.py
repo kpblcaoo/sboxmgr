@@ -11,8 +11,7 @@ import logging
 import typer
 
 def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
-    """
-    List all supported outbounds with indices and details.
+    """List all supported outbounds with indices and details.
     Excluded servers помечаются как (excluded), индексация сквозная.
     """
     exclusions = load_exclusions(dry_run=dry_run)

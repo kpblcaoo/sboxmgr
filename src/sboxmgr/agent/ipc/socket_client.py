@@ -1,16 +1,4 @@
-import socket
-from typing import Optional, Dict, Any
-
-try:
-    from sbox_common.protocols.socket.framed_json import FramedJSONProtocol
-except ImportError:
-    raise ImportError(
-        "sbox_common package not found. Please install it with: "
-        "pip install -e ../sbox-common"
-    )
-
-"""
-SocketClient for framed JSON protocol over Unix socket.
+"""SocketClient for framed JSON protocol over Unix socket.
 
 Usage example:
     from sboxmgr.agent.ipc.socket_client import SocketClient
@@ -23,6 +11,17 @@ Usage example:
     client.close()
 """
 
+import socket
+from typing import Optional, Dict, Any
+
+try:
+    from sbox_common.protocols.socket.framed_json import FramedJSONProtocol
+except ImportError:
+    raise ImportError(
+        "sbox_common package not found. Please install it with: "
+        "pip install -e ../sbox-common"
+    )
+
 class SocketClient:
     """Client for framed JSON protocol over Unix socket."""
     
@@ -32,6 +31,7 @@ class SocketClient:
         Args:
             socket_path: Path to Unix socket.
             timeout: Connection timeout in seconds.
+
         """
         self.socket_path = socket_path
         self.timeout = timeout
@@ -52,6 +52,7 @@ class SocketClient:
             
         Raises:
             RuntimeError: If socket is not connected.
+
         """
         if not self.sock:
             raise RuntimeError("Socket is not connected")
@@ -67,6 +68,7 @@ class SocketClient:
         Raises:
             RuntimeError: If socket is not connected or connection closed.
             ConnectionError: If incomplete data received.
+
         """
         if not self.sock:
             raise RuntimeError("Socket is not connected")
@@ -96,6 +98,7 @@ class SocketClient:
             
         Returns:
             Received bytes (may be less than n if connection closed).
+
         """
         buf = b''
         while len(buf) < n:
@@ -119,6 +122,7 @@ class SocketClient:
             
         Returns:
             Tuple of (length, version).
+
         """
         import struct
         return struct.unpack('>II', header) 

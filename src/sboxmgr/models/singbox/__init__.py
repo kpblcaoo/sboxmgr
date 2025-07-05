@@ -1,5 +1,4 @@
-"""
-Sing-box configuration models.
+"""Sing-box configuration models.
 
 This module contains Pydantic models for sing-box configuration format.
 All models are strictly typed and validated against sing-box 1.11.13.

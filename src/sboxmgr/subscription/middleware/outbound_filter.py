@@ -33,6 +33,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
             'strict_mode': False
         })
         filtered_servers = middleware.process(servers, context, profile)
+
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -40,6 +41,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         
         Args:
             config: Configuration dictionary with filtering options
+
         """
         super().__init__(config)
         self.exclude_types = set(self.config.get('exclude_types', []))
@@ -61,6 +63,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
             
         Returns:
             List of servers with excluded outbound types removed
+
         """
         if not servers:
             return servers
@@ -115,6 +118,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
             
         Returns:
             Dictionary with exclude configuration
+
         """
         exclude_config = {
             'exclude_types': self.exclude_types.copy()
@@ -158,6 +162,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
             
         Returns:
             bool: True if outbound filtering is applicable
+
         """
         if not servers:
             return False
@@ -176,6 +181,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         
         Returns:
             Dictionary with middleware metadata
+
         """
         return {
             'type': 'outbound_filter',

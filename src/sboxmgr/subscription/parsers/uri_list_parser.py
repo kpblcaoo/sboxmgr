@@ -49,6 +49,7 @@ class URIListParser(BaseParser):
         Raises:
             ValueError: If URI format is invalid or unsupported.
             UnicodeDecodeError: If raw data cannot be decoded as UTF-8.
+
         """
         try:
             lines = raw.decode("utf-8").splitlines()
@@ -125,6 +126,7 @@ class URIListParser(BaseParser):
             
         Returns:
             ParsedServer object with parsed configuration or None if parsing fails
+
         """
         # Исправляем проблему с неправильным порядком # и ? в URL
         if '#' in line and '?' in line:

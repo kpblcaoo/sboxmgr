@@ -1,5 +1,4 @@
-"""
-CLI commands for profile management (ADR-0017, ADR-0019).
+"""CLI commands for profile management (ADR-0017, ADR-0019).
 
 This module provides commands for applying, validating, and managing profiles.
 """
@@ -30,7 +29,6 @@ def apply(
     output: Optional[str] = typer.Option(None, "--output", "-o", help="Override output file path"),
 ) -> None:
     """Apply a profile configuration (ADR-0017)."""
-    
     logger = get_logger(__name__)  # Initialize logger inside function
     
     try:
@@ -57,7 +55,6 @@ def validate(
     profile_path: str = typer.Argument(..., help="Path to profile JSON file"),
 ) -> None:
     """Validate a profile configuration."""
-    
     logger = get_logger(__name__)
     
     try:
@@ -78,7 +75,6 @@ def explain(
     profile_path: str = typer.Argument(..., help="Path to profile JSON file"),
 ) -> None:
     """Explain what a profile does."""
-    
     logger = get_logger(__name__)
     
     try:
@@ -97,7 +93,6 @@ def diff(
     profile2: str = typer.Argument(..., help="Second profile path or ID"),
 ) -> None:
     """Show differences between two profiles."""
-    
     logger = get_logger(__name__)
     
     try:
@@ -118,7 +113,6 @@ def switch(
     profile_id: str = typer.Argument(..., help="Profile ID to switch to"),
 ) -> None:
     """Switch to a different profile (ADR-0019)."""
-    
     logger = get_logger(__name__)
     
     try:
@@ -138,7 +132,6 @@ def switch(
 @app.command()
 def list() -> None:
     """List available profiles."""
-    
     logger = get_logger(__name__)
     
     try:
@@ -167,7 +160,6 @@ def list() -> None:
 
 def _load_profile(profile_path: str) -> FullProfile:
     """Load and validate a profile from file."""
-    
     path = Path(profile_path)
     if not path.exists():
         raise FileNotFoundError(f"Profile file not found: {profile_path}")
@@ -192,7 +184,6 @@ def _load_profile(profile_path: str) -> FullProfile:
 
 def _convert_legacy_profile(legacy: LegacyProfile) -> FullProfile:
     """Convert legacy profile to FullProfile format."""
-    
     # Create subscription profiles from URLs
     subscriptions = []
     for i, url in enumerate(legacy.subscriptions):
@@ -225,7 +216,6 @@ def _convert_legacy_profile(legacy: LegacyProfile) -> FullProfile:
 
 def _apply_profile(profile: FullProfile, override_subscription: Optional[str], output: Optional[str]) -> None:
     """Apply a profile configuration."""
-    
     # TODO: Implement full profile application
     # For now, just show what would be applied
     
@@ -246,7 +236,6 @@ def _apply_profile(profile: FullProfile, override_subscription: Optional[str], o
 
 def _show_profile_preview(profile: FullProfile) -> None:
     """Show a preview of what the profile would do."""
-    
     console.print(Panel(
         f"[bold]Profile Preview: {profile.id}[/bold]\n"
         f"Description: {profile.description or 'No description'}\n"
@@ -260,7 +249,6 @@ def _show_profile_preview(profile: FullProfile) -> None:
 
 def _show_profile_summary(profile: FullProfile) -> None:
     """Show a summary of the profile."""
-    
     table = Table(title=f"Profile Summary: {profile.id}")
     table.add_column("Component", style="cyan")
     table.add_column("Details", style="green")
@@ -277,7 +265,6 @@ def _show_profile_summary(profile: FullProfile) -> None:
 
 def _show_profile_explanation(profile: FullProfile) -> None:
     """Explain what the profile does."""
-    
     console.print(Panel(
         f"[bold]What this profile does:[/bold]\n\n"
         f"• [cyan]Subscriptions:[/cyan] {len(profile.subscriptions)} subscription(s) will be processed\n"
@@ -293,7 +280,6 @@ def _show_profile_explanation(profile: FullProfile) -> None:
 
 def _show_profile_diff(profile1: FullProfile, profile2: FullProfile) -> None:
     """Show differences between two profiles."""
-    
     console.print(Panel(
         f"[bold]Profile Comparison[/bold]\n\n"
         f"[cyan]{profile1.id}[/cyan] vs [cyan]{profile2.id}[/cyan]\n\n"

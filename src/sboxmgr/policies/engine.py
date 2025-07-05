@@ -18,6 +18,7 @@ class PolicyEngine:
     Attributes:
         policies: List of registered policies
         logger: Logger for policy evaluation events
+
     """
     
     def __init__(self):
@@ -30,6 +31,7 @@ class PolicyEngine:
         
         Args:
             policy: Policy to register
+
         """
         self.policies.append(policy)
         self.logger.debug(f"Registered policy: {policy.name}")
@@ -41,6 +43,7 @@ class PolicyEngine:
             name: Name of the policy to enable
         Returns:
             True if found and enabled, False otherwise
+
         """
         for p in self.policies:
             if p.name == name:
@@ -55,6 +58,7 @@ class PolicyEngine:
             name: Name of the policy to disable
         Returns:
             True if found and disabled, False otherwise
+
         """
         for p in self.policies:
             if p.name == name:
@@ -73,6 +77,7 @@ class PolicyEngine:
             
         Returns:
             PolicyResult from first denying policy or allow result
+
         """
         for policy in self.policies:
             if not policy.enabled:
@@ -99,6 +104,7 @@ class PolicyEngine:
             
         Returns:
             PolicyEvaluationResult containing all policy results
+
         """
         evaluation_result = PolicyEvaluationResult(
             server_identifier=context.get_server_identifier()
@@ -145,6 +151,7 @@ class PolicyEngine:
             
         Returns:
             List of matching policies
+
         """
         result = []
         for policy in self.policies:
@@ -163,6 +170,7 @@ class PolicyEngine:
             
         Returns:
             Policy object or None if not found
+
         """
         for policy in self.policies:
             if policy.name == name:

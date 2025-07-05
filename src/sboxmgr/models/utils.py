@@ -1,3 +1,5 @@
+"""Utility models for SBoxMgr."""
+
 import json
 from pathlib import Path
 from pydantic import ValidationError

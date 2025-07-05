@@ -91,6 +91,7 @@ class EventData(BaseModel):
             
         Returns:
             Value from payload or default
+
         """
         return self.payload.get(key, default)
     
@@ -100,6 +101,7 @@ class EventData(BaseModel):
         Args:
             key: Key to set in payload
             value: Value to set
+
         """
         self.payload[key] = value
 

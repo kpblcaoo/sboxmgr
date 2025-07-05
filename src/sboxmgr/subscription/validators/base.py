@@ -20,6 +20,7 @@ class ValidationResult:
         valid: Whether the validation passed.
         errors: List of error messages if validation failed.
         valid_servers: List of valid servers (for parsed validators).
+
     """
     
     def __init__(self, valid: bool, errors: List[str] = None, valid_servers: List = None):
@@ -29,6 +30,7 @@ class ValidationResult:
             valid: Whether the validation passed.
             errors: Optional list of error messages.
             valid_servers: Optional list of valid servers.
+
         """
         self.valid = valid
         self.errors = errors or []
@@ -44,6 +46,7 @@ def register_raw_validator(name):
         
     Returns:
         Decorator function that registers the validator class.
+
     """
     def decorator(cls):
         RAW_VALIDATOR_REGISTRY[name] = cls
@@ -59,6 +62,7 @@ class BaseRawValidator(ABC):
     
     Attributes:
         plugin_type: Plugin type identifier for auto-discovery and filtering.
+
     """
     
     plugin_type = "validator"
@@ -76,6 +80,7 @@ class BaseRawValidator(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class.
+
         """
         pass
 
@@ -95,6 +100,7 @@ class NoOpRawValidator(BaseRawValidator):
             
         Returns:
             ValidationResult with valid=True.
+
         """
         return ValidationResult(valid=True)
 
@@ -108,6 +114,7 @@ def register_parsed_validator(name):
         
     Returns:
         Decorator function that registers the validator class.
+
     """
     def decorator(cls):
         PARSED_VALIDATOR_REGISTRY[name] = cls
@@ -123,6 +130,7 @@ class BaseParsedValidator(ABC):
     
     Attributes:
         plugin_type: Plugin type identifier for auto-discovery and filtering.
+
     """
     
     plugin_type = "parsed_validator"
@@ -140,6 +148,7 @@ class BaseParsedValidator(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class.
+
         """
         pass
 
@@ -152,6 +161,7 @@ class BaseValidator(ABC):
     
     Attributes:
         plugin_type: Plugin type identifier for auto-discovery and filtering.
+
     """
     
     plugin_type = "validator"
@@ -169,5 +179,6 @@ class BaseValidator(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class.
+
         """
         pass 

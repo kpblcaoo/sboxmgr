@@ -37,6 +37,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
             'fallback_mode': 'allow_all'
         })
         filtered_servers = processor.process(servers, context, profile)
+
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
@@ -44,6 +45,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
         
         Args:
             config: Configuration dictionary with filtering options
+
         """
         super().__init__(config)
         self.allowed_countries = self.config.get('allowed_countries', [])
@@ -67,6 +69,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             List of servers that match geographic criteria
+
         """
         if not servers:
             return servers
@@ -94,6 +97,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             Dictionary with geographic configuration
+
         """
         geo_config = {
             'allowed_countries': self.allowed_countries,
@@ -132,6 +136,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             bool: True if server should be included
+
         """
         # Extract country code from server metadata
         country_code = self._extract_country_code(server)
@@ -159,6 +164,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             ISO 3166-1 alpha-2 country code or None
+
         """
         # Check various metadata fields for country information
         if 'country' in server.meta:
@@ -193,6 +199,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
             
         Returns:
             bool: True if geo filtering is applicable
+
         """
         if not servers:
             return False
@@ -210,6 +217,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
         
         Returns:
             Dict containing postprocessor metadata
+
         """
         metadata = super().get_metadata()
         metadata.update({

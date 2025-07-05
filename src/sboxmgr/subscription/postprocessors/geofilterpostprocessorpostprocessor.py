@@ -13,9 +13,12 @@ from ..postprocessor_base import BasePostProcessor
 class GeoFilterPostProcessorPostprocessor(BasePostProcessor):
     """GeoFilterPostProcessorPostprocessor post-processes parsed servers.
 
-Example:
+    Example:
     pp = GeoFilterPostProcessorPostprocessor()
-    servers = pp.process(servers, context=context)"""
+    servers = pp.process(servers, context=context)
+
+    """
+
     def process(self, servers, context):
         """Post-process parsed servers.
 
@@ -25,6 +28,7 @@ Example:
 
         Returns:
             list[ParsedServer]: Processed servers.
+
         """
         raise NotImplementedError()
 

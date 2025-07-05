@@ -26,6 +26,7 @@ def load_config(config_file_path: Optional[str] = None) -> AppConfig:
     Raises:
         ValidationError: If configuration validation fails
         FileNotFoundError: If specified config file doesn't exist
+
     """
     config_data = {}
     
@@ -57,6 +58,7 @@ def load_config_file(file_path: str) -> Dict[str, Any]:
     Raises:
         FileNotFoundError: If file doesn't exist
         ValueError: If file format is unsupported or invalid
+
     """
     path = Path(file_path)
     
@@ -117,6 +119,7 @@ def find_config_file() -> Optional[str]:
     
     Returns:
         Optional path to found configuration file
+
     """
     search_paths = [
         Path.cwd(),
@@ -156,6 +159,7 @@ def save_config(config: AppConfig, file_path: str) -> None:
     Raises:
         ValueError: If file format is unsupported
         OSError: If file cannot be written
+
     """
     path = Path(file_path)
     suffix = path.suffix.lower()
@@ -190,6 +194,7 @@ def create_default_config_file(output_path: str) -> None:
         
     Raises:
         ConfigValidationError: If file cannot be created
+
     """
     default_config = {
         "debug": False,
@@ -245,6 +250,7 @@ def merge_cli_args_to_config(
         
     Returns:
         AppConfig: Updated configuration object
+
     """
     config_dict = base_config.model_dump()
     
