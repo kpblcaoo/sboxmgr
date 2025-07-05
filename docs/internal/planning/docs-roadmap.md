@@ -209,6 +209,63 @@ This document outlines the plan for updating SBoxMgr documentation to reflect th
 - User experience principles
 - Accessibility guidelines
 
+## Отчет о проверке качества документации (2025-01-05)
+
+### Найденные и исправленные ошибки CLI команд:
+
+1. **clear-exclusions** - неправильная команда
+   - **Было:** `sboxctl clear-exclusions --yes`
+   - **Стало:** `sboxctl exclusions --clear --yes`
+   - **Исправлено в:** CLI reference (EN/RU), README (RU), SHOWCASE (RU)
+
+2. **config validate --file** - неправильный синтаксис
+   - **Было:** `sboxctl config validate --file config.json`
+   - **Стало:** `sboxctl config validate config.json`
+   - **Исправлено в:** CLI reference (RU)
+
+3. **config generate** - несуществующая команда
+   - **Было:** `sboxctl config generate --output template.json`
+   - **Стало:** `sboxctl config dump --format json` / `sboxctl config schema --output schema.json`
+   - **Исправлено в:** CLI reference (EN/RU)
+
+4. **profile validate --file** - неправильный синтаксис
+   - **Было:** `sboxctl profile validate --file profile.json`
+   - **Стало:** `sboxctl profile validate profile.json`
+   - **Исправлено в:** CLI reference (EN/RU), profiles.md, profile_management.md, configuration.md
+
+5. **profile apply --name** - неправильный синтаксис
+   - **Было:** `sboxctl profile apply --name home`
+   - **Стало:** `sboxctl profile apply profile.json`
+   - **Исправлено в:** CLI reference (EN/RU), profiles.md, profile_management.md, troubleshooting.md
+
+6. **profile switch --name** - неправильный синтаксис
+   - **Было:** `sboxctl profile switch --name work`
+   - **Стало:** `sboxctl profile switch work`
+   - **Исправлено в:** CLI reference (EN/RU)
+
+7. **policy evaluate** - несуществующая команда
+   - **Было:** `sboxctl policy evaluate --config config.json`
+   - **Стало:** `sboxctl policy test --profile profile.json`
+   - **Исправлено в:** CLI reference (EN/RU)
+
+8. **policy test --config** - неправильный синтаксис
+   - **Было:** `sboxctl policy test --config config.json`
+   - **Стало:** `sboxctl policy test --profile profile.json`
+   - **Исправлено в:** CLI reference (EN/RU)
+
+9. **policy audit --url** - неправильный синтаксис
+   - **Было:** `sboxctl policy audit --url "https://example.com/proxy.json"`
+   - **Стало:** `sboxctl policy audit --servers servers.json`
+   - **Исправлено в:** CLI reference (EN/RU)
+
+### Результат:
+- ✅ Все CLI команды в документации теперь соответствуют реальному интерфейсу
+- ✅ Синтаксис всех команд исправлен согласно help выводам
+- ✅ Удалены несуществующие команды и заменены на правильные
+- ✅ Документация полностью синхронизирована с актуальным CLI
+
+### Статус: ЗАВЕРШЕНО ✅
+
 ---
 
 **Last Updated:** 2025-07-05

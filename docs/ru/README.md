@@ -76,7 +76,7 @@ sboxctl exclusions -u "https://example.com/proxy.json" --remove 3
 sboxctl exclusions --view
 
 # Очистить все исключения
-sboxctl clear-exclusions
+sboxctl exclusions --clear --yes
 ```
 
 ### Продвинутая конфигурация

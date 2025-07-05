@@ -157,13 +157,13 @@ sboxctl profile list
 ### Apply Profile
 
 ```bash
-sboxctl profile apply --name my-profile
+sboxctl profile apply my-profile.json
 ```
 
 ### Validate Profile
 
 ```bash
-sboxctl profile validate --file profile.json
+sboxctl profile validate profile.json
 ```
 
 ### Explain Profile

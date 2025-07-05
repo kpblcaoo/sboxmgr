@@ -65,7 +65,7 @@ sboxctl exclusions --view
 
 ### Очистить exclusions
 ```bash
-sboxctl clear-exclusions
+sboxctl exclusions --clear --yes
 # Вывод: exclusions.json очищен
 ```
 
@@ -115,7 +115,7 @@ sboxctl export -u "invalid-url"
 - Для скриптов проверяйте коды возврата: `0` = успех, `1` = ошибка.
 - Используйте `--dry-run` для предварительного просмотра изменений.
 - Все команды CLI поддерживают `--help` для справки.
-- **Если не удаётся удалить exclusion по индексу или ID, используйте `sboxctl clear-exclusions --yes` для полной очистки или вручную отредактируйте exclusions.json.**
+- **Если не удаётся удалить exclusion по индексу или ID, используйте `sboxctl exclusions --clear --yes` для полной очистки или вручную отредактируйте exclusions.json.**
 - Для продвинутого использования и разработки см. [README.md](README.md) и [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---

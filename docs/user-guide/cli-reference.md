@@ -79,6 +79,7 @@ Manage server exclusions.
 - `--add <index>`: Add server to exclusions
 - `--remove <index>`: Remove server from exclusions
 - `--view`: View current exclusions
+- `--clear`: Clear all exclusions
 
 **Examples:**
 ```bash
@@ -90,17 +91,9 @@ sboxctl exclusions -u "https://example.com/proxy.json" --remove 3
 
 # View exclusions
 sboxctl exclusions --view
-```
 
-#### `sboxctl clear-exclusions`
-Clear all server exclusions.
-
-**Options:**
-- `--yes`: Confirm without prompting
-
-**Example:**
-```bash
-sboxctl clear-exclusions --yes
+# Clear all exclusions
+sboxctl exclusions --clear --yes
 ```
 
 ### Configuration Management
@@ -110,15 +103,20 @@ Configuration management commands.
 
 **Subcommands:**
 - `validate`: Validate configuration file
-- `generate`: Generate configuration template
+- `dump`: Dump resolved configuration
+- `schema`: Generate JSON schema
+- `env-info`: Show environment detection
 
 **Examples:**
 ```bash
 # Validate config
-sboxctl config validate --file config.json
+sboxctl config validate config.json
 
-# Generate template
-sboxctl config generate --output template.json
+# Dump configuration
+sboxctl config dump --format json
+
+# Generate schema
+sboxctl config schema --output schema.json
 ```
 
 ### Profile Management
@@ -132,6 +130,7 @@ Profile management commands.
 - `validate`: Validate profile
 - `explain`: Explain profile settings
 - `diff`: Show differences between profiles
+- `switch`: Switch to different profile
 
 **Examples:**
 ```bash
@@ -139,10 +138,13 @@ Profile management commands.
 sboxctl profile list
 
 # Apply profile
-sboxctl profile apply --name home
+sboxctl profile apply profile.json
 
 # Validate profile
-sboxctl profile validate --file profile.json
+sboxctl profile validate profile.json
+
+# Switch profile
+sboxctl profile switch work
 ```
 
 ### Policy Management
@@ -152,15 +154,22 @@ Policy management commands.
 
 **Subcommands:**
 - `list`: List available policies
-- `evaluate`: Evaluate policies against configuration
+- `test`: Test policies with context
+- `audit`: Audit servers against policies
+- `enable`: Enable policies
+- `disable`: Disable policies
+- `info`: Show policy system information
 
 **Examples:**
 ```bash
 # List policies
 sboxctl policy list
 
-# Evaluate policies
-sboxctl policy evaluate --config config.json
+# Test policies
+sboxctl policy test --profile profile.json
+
+# Audit servers
+sboxctl policy audit --url "https://example.com/proxy.json"
 ```
 
 ### Language Management

@@ -163,7 +163,7 @@ sboxctl profile apply --name my-profile
 ### Валидация профиля
 
 ```bash
-sboxctl profile validate --file profile.json
+sboxctl profile validate profile.json
 ```
 
 ### Объяснение профиля
