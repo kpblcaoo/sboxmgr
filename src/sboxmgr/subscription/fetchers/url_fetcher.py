@@ -34,6 +34,11 @@ class URLFetcher(BaseFetcher):
     _fetch_cache: Dict[Tuple[str, Optional[str], str], bytes] = {}
 
     def __init__(self, source: SubscriptionSource):
+        """Initialize URLFetcher.
+        
+        Args:
+            source: Subscription source configuration.
+        """
         super().__init__(source)  # SEC: centralized scheme validation
 
     def fetch(self, force_reload: bool = False) -> bytes:

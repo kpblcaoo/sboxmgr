@@ -37,7 +37,18 @@ class BasePostProcessor(ABC):
         pass
 
 class DedupPostProcessor(BasePostProcessor):
+    """Remove duplicate servers based on type, address, port, and tag."""
+    
     def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
+        """Remove duplicate servers from the list.
+        
+        Args:
+            servers: List of ParsedServer objects to deduplicate.
+            context: Pipeline context (unused in this implementation).
+            
+        Returns:
+            List[ParsedServer]: Deduplicated server list.
+        """
         seen = set()
         result = []
         for s in servers:
@@ -60,6 +71,11 @@ class PostProcessorChain(BasePostProcessor):
     """
 
     def __init__(self, processors: list):
+        """Initialize postprocessor chain.
+        
+        Args:
+            processors: List of postprocessor instances to chain.
+        """
         self.processors = processors
 
     def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:

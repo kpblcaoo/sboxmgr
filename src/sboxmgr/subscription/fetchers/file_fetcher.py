@@ -32,6 +32,11 @@ class FileFetcher(BaseFetcher):
     _fetch_cache: Dict[Tuple[str], bytes] = {}
 
     def __init__(self, source: SubscriptionSource):
+        """Initialize FileFetcher.
+        
+        Args:
+            source: Subscription source configuration.
+        """
         super().__init__(source)
 
     def fetch(self, force_reload: bool = False) -> bytes:

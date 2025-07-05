@@ -43,6 +43,11 @@ class MiddlewareChain(BaseMiddleware):
     """Chain of middleware called sequentially to process ParsedServer list."""
 
     def __init__(self, middlewares: list):
+        """Initialize middleware chain.
+        
+        Args:
+            middlewares: List of middleware instances to chain.
+        """
         self.middlewares = middlewares
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
         """Process servers through the middleware chain sequentially.
@@ -67,6 +72,11 @@ class LoggingMiddleware(BaseMiddleware):
     """
     
     def __init__(self, stage_name: str = "middleware"):
+        """Initialize logging middleware.
+        
+        Args:
+            stage_name: Name of the processing stage for logging.
+        """
         self.stage_name = stage_name
         
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
@@ -104,6 +114,15 @@ class TagFilterMiddleware(BaseMiddleware):
     """Filter servers by tag from context.tag_filters (tag list)."""
 
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
+        """Filter servers by tags from context.
+        
+        Args:
+            servers: List of ParsedServer objects to filter.
+            context: Pipeline context containing tag filters.
+            
+        Returns:
+            List[ParsedServer]: Filtered servers matching tag criteria.
+        """
         tags = getattr(context, 'tag_filters', None)
         # Basic user input validation (SEC-MW-05)
         if tags is not None:
@@ -123,6 +142,15 @@ class EnrichMiddleware(BaseMiddleware):
     """
 
     def process(self, servers: List[ParsedServer], context: PipelineContext) -> List[ParsedServer]:
+        """Enrich servers with metadata.
+        
+        Args:
+            servers: List of ParsedServer objects to enrich.
+            context: Pipeline context (unused in this implementation).
+            
+        Returns:
+            List[ParsedServer]: Servers with enriched metadata.
+        """
         for s in servers:
             if not hasattr(s, 'meta') or s.meta is None:
                 s.meta = {}
