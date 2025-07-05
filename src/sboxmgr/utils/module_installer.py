@@ -1,3 +1,5 @@
+"""Module installer utilities for SBoxMgr."""
+
 import subprocess
 import sys
 import logging
@@ -5,6 +7,7 @@ import logging
 # Function to install dependencies from requirements.txt
 
 def install_dependencies():
+    """Install dependencies from requirements.txt."""
     try:
         subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], check=True)
         logging.info("Dependencies installed successfully.")

@@ -1,3 +1,5 @@
+"""DNS models for sing-box configuration."""
+
 from pydantic import BaseModel, Field, field_validator
 from typing import List, Literal, Optional, Union, Dict, Any
 from .enums import DomainStrategy

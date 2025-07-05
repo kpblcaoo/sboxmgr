@@ -1,3 +1,5 @@
+"""Routing models for SBoxMgr."""
+
 from pydantic import BaseModel, Field
 from typing import List, Literal, Optional, Dict, Any, Union
 

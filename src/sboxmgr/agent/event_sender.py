@@ -411,7 +411,7 @@ def send_event(event_type: str,
                event_data: Dict[str, Any],
                source: str = "sboxmgr",
                priority: str = "normal") -> bool:
-    """Convenience function to send an event.
+    """Send an event with convenience parameters.
     
     Args:
         event_type: Type of event

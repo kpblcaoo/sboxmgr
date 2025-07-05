@@ -1,3 +1,5 @@
+"""Routing models for sing-box configuration."""
+
 from pydantic import BaseModel, Field
 from typing import List, Literal, Optional, Dict, Any, Union
 

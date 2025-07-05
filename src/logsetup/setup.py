@@ -1,3 +1,5 @@
+"""Logging setup module for SBoxMgr."""
+
 import logging
 import logging.handlers
 import os
@@ -35,7 +37,12 @@ def setup_logging(debug_level=None, log_file=None, max_log_size=None):
     rotate_logs(log_file, max_log_size)
 
 def rotate_logs(log_file, max_log_size):
-    """Rotate log file if it exceeds max_log_size."""
+    """Rotate log file if it exceeds max_log_size.
+    
+    Args:
+        log_file: Path to log file
+        max_log_size: Maximum size in bytes before rotation
+    """
     if not os.path.exists(log_file):
         return
     log_size = os.path.getsize(log_file)

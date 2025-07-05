@@ -1,3 +1,5 @@
+"""Authentication models for sing-box configuration."""
+
 from pydantic import BaseModel, Field
 from typing import List, Optional
 

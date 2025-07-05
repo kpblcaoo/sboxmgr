@@ -1,4 +1,8 @@
+"""ID generation utilities for SBoxMgr."""
+
 import hashlib
+import json
+from typing import Any, Dict
 
 def generate_server_id(server):
     """Generate a unique identifier for a server configuration.
