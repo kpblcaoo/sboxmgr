@@ -97,8 +97,8 @@ class ExportManager:
 
     def export(self, 
                servers: List[ParsedServer], 
-               exclusions: List[str] = None, 
-               user_routes: List[Dict] = None, 
+               exclusions: Optional[List[str]] = None, 
+               user_routes: Optional[List[Dict]] = None, 
                context: Union[Dict[str, Any], PipelineContext] = None, 
                client_profile: Optional[ClientProfile] = None, 
                profile: Optional[FullProfile] = None) -> Dict:
@@ -199,7 +199,7 @@ class ExportManager:
     
     def export_to_singbox(self, 
                          servers: List[ParsedServer], 
-                         routes: List[Dict] = None, 
+                         routes: Optional[List[Dict]] = None, 
                          client_profile: Optional[ClientProfile] = None, 
                          apply_phase3_processing: bool = True,
                          context: Optional[PipelineContext] = None,

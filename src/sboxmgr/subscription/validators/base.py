@@ -7,7 +7,7 @@ before export to client applications.
 """
 
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional, Any
 from sboxmgr.subscription.models import PipelineContext
 
 class ValidationResult:
@@ -23,7 +23,7 @@ class ValidationResult:
 
     """
     
-    def __init__(self, valid: bool, errors: List[str] = None, valid_servers: List = None):
+    def __init__(self, valid: bool, errors: Optional[List[str]] = None, valid_servers: Optional[List[Any]] = None):
         """Initialize validation result.
         
         Args:

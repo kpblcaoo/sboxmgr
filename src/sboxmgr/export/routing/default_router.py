@@ -6,7 +6,7 @@ that direct traffic through the configured proxy servers with basic fallback
 handling.
 """
 from .base_router import BaseRoutingPlugin
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 class DefaultRouter(BaseRoutingPlugin):
     """Default implementation of routing rule generation.
@@ -16,7 +16,7 @@ class DefaultRouter(BaseRoutingPlugin):
     with simple fallback to direct connection when needed.
     """
     
-    def generate_routes(self, servers: List[Any], exclusions: List[str], user_routes: List[Dict], context: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+    def generate_routes(self, servers: List[Any], exclusions: List[str], user_routes: List[Dict], context: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Generate default routing rules for sing-box configuration.
         
         Creates basic routing rules that direct traffic through proxy servers

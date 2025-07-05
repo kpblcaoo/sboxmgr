@@ -200,7 +200,7 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
         elif inbound_type == "tproxy":
             inbounds.append(InboundProfile(
                 type="tproxy",
-                listen="0.0.0.0",
+                listen="127.0.0.1",
                 port=12345,
                 options={
                     "tag": "tproxy-in",
@@ -211,7 +211,7 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
         elif inbound_type == "socks5":
             inbounds.append(InboundProfile(
                 type="socks",
-                listen="0.0.0.0",
+                listen="127.0.0.1",
                 port=1080,
                 options={
                     "tag": "socks-in",
@@ -227,7 +227,7 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
         elif inbound_type == "http":
             inbounds.append(InboundProfile(
                 type="http",
-                listen="0.0.0.0",
+                listen="127.0.0.1",
                 port=8080,
                 options={
                     "tag": "http-in",
@@ -253,7 +253,7 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
                 ),
                 InboundProfile(
                     type="tproxy",
-                    listen="0.0.0.0",
+                    listen="127.0.0.1",
                     port=12345,
                     options={
                         "tag": "tproxy-in",
@@ -263,7 +263,7 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
                 ),
                 InboundProfile(
                     type="socks",
-                    listen="0.0.0.0",
+                    listen="127.0.0.1",
                     port=1080,
                     options={
                         "tag": "socks-in",
@@ -278,7 +278,7 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
                 ),
                 InboundProfile(
                     type="http",
-                    listen="0.0.0.0",
+                    listen="127.0.0.1",
                     port=8080,
                     options={
                         "tag": "http-in",

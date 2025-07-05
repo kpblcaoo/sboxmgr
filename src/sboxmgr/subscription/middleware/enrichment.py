@@ -201,7 +201,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         
         # Add server identifier hash
         server_id = f"{server.type}://{server.address}:{server.port}"
-        server.meta['server_id'] = hashlib.md5(server_id.encode()).hexdigest()[:8]
+        server.meta['server_id'] = hashlib.sha256(server_id.encode()).hexdigest()[:8]
         
         # Add source information
         if context.source:

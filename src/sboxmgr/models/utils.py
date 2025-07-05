@@ -36,7 +36,7 @@ def create_example_config() -> dict:
             {
                 "type": "mixed",
                 "tag": "mixed-in",
-                "listen": "0.0.0.0",
+                "listen": "127.0.0.1",
                 "listen_port": 1080,
                 "users": [{"username": "user", "password": "pass"}]
             }

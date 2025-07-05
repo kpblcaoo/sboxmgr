@@ -181,9 +181,9 @@ class InboundProfile(BaseModel):
             ValueError: If bind address is not localhost or private network.
 
         """
-        # Allow 0.0.0.0 for tproxy and other types that need to listen on all interfaces
+        # Allow 0.0.0.0 only for tproxy and tun that need to listen on all interfaces
         inbound_type = info.data.get('type') if info.data else None
-        if inbound_type in ['tproxy', 'tun', 'socks', 'http'] and v == "0.0.0.0":
+        if inbound_type in ['tproxy', 'tun'] and v == "0.0.0.0":
             return v
             
         if v not in ("127.0.0.1", "::1") and not v.startswith("192.168."):
