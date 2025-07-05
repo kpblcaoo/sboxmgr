@@ -35,12 +35,11 @@ def _is_service_outbound(outbound: dict) -> bool:
     return outbound_type in service_types or tag in service_tags
 
 
-def _format_policy_details(context: PipelineContext, server_index: int, server_tag: str) -> str:
+def _format_policy_details(context: PipelineContext, server_tag: str) -> str:
     """Форматирует детали политик для сервера.
     
     Args:
         context: Pipeline context с результатами политик
-        server_index: Индекс сервера
         server_tag: Тег сервера
         
     Returns:
@@ -209,7 +208,7 @@ def list_servers(
             server_info = f"[{i}] {server_tag} ({s.get('type', '')}:{s.get('server_port', '')})"
             
             if policy_details:
-                policy_info = _format_policy_details(context, i, server_tag)
+                policy_info = _format_policy_details(context, server_tag)
                 typer.echo(f"{server_info}")
                 if policy_info != "✅ ALLOWED":
                     typer.echo(f"    {policy_info}")

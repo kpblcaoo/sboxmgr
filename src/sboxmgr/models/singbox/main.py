@@ -9,7 +9,6 @@ from typing import List, Optional
 from .enums import LogLevel
 from .dns import DnsConfig
 from .ntp import NtpConfig
-from .auth import AuthenticationConfig
 from .inbounds import Inbound
 from .outbounds import Outbound
 from .routing import RouteConfig

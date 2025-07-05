@@ -5,8 +5,6 @@ import json
 import tempfile
 import shutil
 import logging
-from pathlib import Path
-from typing import Any, Dict, Optional
 
 def handle_temp_file(content, target_path, validate_fn=None):
     """Write content to temporary file with validation and atomic move.

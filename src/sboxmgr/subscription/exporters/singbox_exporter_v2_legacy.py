@@ -1,30 +1,23 @@
-"""Compatibility layer for sing-box exporter v2.
+"""New Sing-box configuration exporter using modular Pydantic models.
 
-This module provides backward compatibility for the original singbox_exporter_v2.py
-while delegating all functionality to the new modular architecture.
+This module provides a modern sing-box configuration exporter that uses
+the modular Pydantic models from src.sboxmgr.models.singbox for better
+validation, type safety, and maintainability.
 
-The new modular structure is located in the singbox_exporter_v2/ package.
+Features:
+- Full Pydantic validation of all configurations
+- Type-safe conversion from ParsedServer to sing-box models
+- Automatic field filtering based on protocol support
+- Better error handling and debugging
 """
 
 import logging
-import warnings
+from typing import List, Optional, Dict, Any, Union
+from ..models import ParsedServer, ClientProfile
+from ..base_exporter import BaseExporter
+from ..registry import register
 
-# Import all functionality from the new modular structure
-from .singbox_exporter_v2 import (
-    convert_parsed_server_to_outbound,
-    convert_shadowsocks, convert_vmess, convert_vless, convert_trojan,
-    convert_hysteria2, convert_wireguard, convert_tuic, convert_shadowtls,
-    convert_anytls, convert_tor, convert_ssh, convert_http, convert_socks,
-    convert_direct, convert_tls_config, convert_transport_config,
-    convert_client_profile_to_inbounds, SingboxExporterV2
-)
-
-# Maintain backward compatibility with original imports
-from .models import ParsedServer, ClientProfile
-from .base_exporter import BaseExporter
-from .registry import register
-
-# Import new sing-box models for backward compatibility
+# Import new sing-box models
 from sboxmgr.models.singbox import (
     SingBoxConfig, LogConfig,
     # Inbounds
@@ -42,54 +35,6 @@ from sboxmgr.models.singbox import (
 )
 
 logger = logging.getLogger(__name__)
-
-# Issue deprecation warning for direct imports
-warnings.warn(
-    "Direct imports from singbox_exporter_v2.py are deprecated. "
-    "Please use the modular singbox_exporter_v2 package instead.",
-    DeprecationWarning,
-    stacklevel=2
-)
-
-# Backward compatibility aliases for protocol converter functions
-_convert_shadowsocks = convert_shadowsocks
-_convert_vmess = convert_vmess
-_convert_vless = convert_vless
-_convert_trojan = convert_trojan
-_convert_hysteria2 = convert_hysteria2
-_convert_wireguard = convert_wireguard
-_convert_tuic = convert_tuic
-_convert_shadowtls = convert_shadowtls
-_convert_anytls = convert_anytls
-_convert_tor = convert_tor
-_convert_ssh = convert_ssh
-_convert_http = convert_http
-_convert_socks = convert_socks
-_convert_direct = convert_direct
-
-# Backward compatibility aliases for utility functions
-_convert_tls_config = convert_tls_config
-_convert_transport_config = convert_transport_config
-
-# Re-export the main exporter class with registration
-# (The registration is handled in the new modular structure)
-__all__ = [
-    'SingboxExporterV2',
-    'convert_parsed_server_to_outbound',
-    'convert_client_profile_to_inbounds',
-    # Protocol converters
-    'convert_shadowsocks', 'convert_vmess', 'convert_vless', 'convert_trojan',
-    'convert_hysteria2', 'convert_wireguard', 'convert_tuic', 'convert_shadowtls',
-    'convert_anytls', 'convert_tor', 'convert_ssh', 'convert_http', 'convert_socks',
-    'convert_direct',
-    # Utility functions
-    'convert_tls_config', 'convert_transport_config',
-    # Backward compatibility aliases
-    '_convert_shadowsocks', '_convert_vmess', '_convert_vless', '_convert_trojan',
-    '_convert_hysteria2', '_convert_wireguard', '_convert_tuic', '_convert_shadowtls',
-    '_convert_anytls', '_convert_tor', '_convert_ssh', '_convert_http', '_convert_socks',
-    '_convert_direct', '_convert_tls_config', '_convert_transport_config'
-]
 
 
 def convert_parsed_server_to_outbound(server: ParsedServer) -> Optional[Union[

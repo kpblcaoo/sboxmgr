@@ -1,37 +1,50 @@
-"""Protocol-specific Pydantic models for subscription validation.
+"""Protocol models package for VPN protocols validation.
 
-This module provides detailed validation models for various VPN protocols
-including Shadowsocks, VMess, VLESS, Trojan, and others. These models
-ensure proper validation of protocol-specific parameters and generate
-accurate JSON schemas for configuration validation.
+This package provides comprehensive Pydantic models for validating various VPN protocols
+including Shadowsocks, VMess, VLESS, Trojan, and WireGuard configurations.
 
-Implements ADR-0016: Pydantic as Single Source of Truth for Validation and Schema Generation.
+The package is organized into specialized modules:
+- enums: Common enumeration types
+- transport: Transport layer configurations
+- common: Shared models across protocols
+- protocol_configs: Protocol-specific configurations
+- outbound_models: Outbound configurations for sing-box
+- validators: Validation utilities and functions
 
-NOTE: This file has been refactored into a modular structure. This file now serves
-as a compatibility layer. For new development, import from the protocol_models package directly.
+Example usage:
+    from sboxmgr.subscription.validators.protocol_models import (
+        validate_protocol_config,
+        ShadowsocksConfig,
+        VmessConfig,
+        OutboundModel
+    )
+    
+    # Validate a protocol configuration
+    config = validate_protocol_config(config_dict, "shadowsocks")
 """
 
-# Import all components from the new modular structure
-from .protocol_models import *
+# Enums
+from .enums import LogLevel, DomainStrategy, Network
 
-# Keep the original imports for backward compatibility
-from .protocol_models import (
-    # Enums
-    LogLevel,
-    DomainStrategy,
-    Network,
-    # Transport
+# Transport configurations
+from .transport import (
     RealityConfig,
     UtlsConfig,
     WsConfig,
     HttpConfig,
     GrpcConfig,
-    QuicConfig,
-    # Common
+    QuicConfig
+)
+
+# Common models
+from .common import (
     TlsConfig,
     StreamSettings,
-    MultiplexConfig,
-    # Protocol configs
+    MultiplexConfig
+)
+
+# Protocol configurations
+from .protocol_configs import (
     ShadowsocksConfig,
     VmessUser,
     VmessSettings,
@@ -44,8 +57,11 @@ from .protocol_models import (
     WireGuardPeer,
     WireGuardInterface,
     WireGuardConfig,
-    ProtocolConfig,
-    # Outbound models
+    ProtocolConfig
+)
+
+# Outbound models
+from .outbound_models import (
     OutboundBase,
     ShadowsocksOutbound,
     VmessOutbound,
@@ -60,17 +76,19 @@ from .protocol_models import (
     BlockOutbound,
     DnsOutbound,
     OutboundModel,
-    OutboundConfig,
-    # Validators
+    OutboundConfig
+)
+
+# Validators
+from .validators import (
     validate_protocol_config,
     generate_protocol_schema,
     validate_outbound_config,
     generate_outbound_schema,
     convert_protocol_to_outbound,
-    create_outbound_from_dict,
+    create_outbound_from_dict
 )
 
-# For backwards compatibility, keep the original variable names
 __all__ = [
     # Enums
     "LogLevel",

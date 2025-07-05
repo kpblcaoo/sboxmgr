@@ -1,8 +1,8 @@
 """Inbound models for sing-box configuration."""
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 from typing import List, Literal, Optional, Dict, Any, Annotated, Union
-from .enums import DomainStrategy, Network
+from .enums import Network
 from .common import TlsConfig, TransportConfig
 from .auth import AuthenticationUser
 from .base import SingBoxModelBase

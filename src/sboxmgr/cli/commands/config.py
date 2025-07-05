@@ -245,7 +245,7 @@ def environment_info():
         raise typer.Exit(1)
 
 
-def _output_env_format(data: dict, prefix: str = "", parent_key: str = "") -> None:
+def _output_env_format(data: dict, prefix: str = "") -> None:
     """Output configuration in environment variable format.
     
     Converts nested configuration to SBOXMGR__SECTION__KEY format.
@@ -253,7 +253,6 @@ def _output_env_format(data: dict, prefix: str = "", parent_key: str = "") -> No
     Args:
         data: Configuration dictionary to convert
         prefix: Environment variable prefix
-        parent_key: Parent key for nested structures
 
     """
     for key, value in data.items():
@@ -263,7 +262,7 @@ def _output_env_format(data: dict, prefix: str = "", parent_key: str = "") -> No
         env_key = f"{prefix}__{key.upper()}" if prefix else key.upper()
         
         if isinstance(value, dict):
-            _output_env_format(value, env_key, key)
+            _output_env_format(value, env_key)
         elif isinstance(value, list):
             # Convert lists to comma-separated strings
             env_value = ",".join(str(v) for v in value)

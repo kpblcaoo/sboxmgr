@@ -1,6 +1,6 @@
 """Base classes for sing-box models with smart export functionality."""
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from pydantic import BaseModel
 
 
