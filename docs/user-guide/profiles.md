@@ -1,15 +1,15 @@
 # Profiles
 
-Profiles in SBoxMgr allow you to customize configuration generation, filtering, and export settings.
+Profiles in SBoxMgr allow you to customize configuration generation, filtering, and export settings using JSON configuration files.
 
 ## Overview
 
 A profile is a JSON configuration file that defines:
-- Subscription settings
-- Export preferences
-- Filtering rules
-- Routing configuration
-- Custom middleware
+- Subscription settings and preferences
+- Export configuration and routing
+- Filtering rules and exclusions
+- Custom middleware and postprocessors
+- Security policies
 
 ## Profile Structure
 
@@ -18,7 +18,6 @@ A profile is a JSON configuration file that defines:
   "id": "my-profile",
   "name": "My Custom Profile",
   "description": "Custom profile for my needs",
-  "priority": 1,
   "subscription": {
     "url": "https://example.com/subscription",
     "user_agent": "Custom User-Agent",
@@ -26,13 +25,26 @@ A profile is a JSON configuration file that defines:
   },
   "export": {
     "format": "sing-box",
-    "routing": true,
-    "filtering": true
+    "inbound_types": ["socks", "http"],
+    "socks_port": 1080,
+    "http_port": 8080
   },
   "filter": {
     "exclude_tags": ["blocked"],
     "only_tags": ["premium"],
-    "exclusions": ["server-id-1"]
+    "geo_filter": {
+      "include": ["US", "CA"],
+      "exclude": ["CN", "RU"]
+    }
+  },
+  "routing": {
+    "final": "proxy",
+    "rules": [
+      {
+        "domain_suffix": [".ru"],
+        "outbound": "direct"
+      }
+    ]
   }
 }
 ```
@@ -49,7 +61,10 @@ Defines subscription source and settings:
     "url": "https://example.com/subscription",
     "user_agent": "Custom User-Agent",
     "timeout": 30,
-    "retries": 3
+    "retries": 3,
+    "headers": {
+      "Authorization": "Bearer token"
+    }
   }
 }
 ```
@@ -59,27 +74,33 @@ Defines subscription source and settings:
 - `user_agent`: Custom User-Agent header
 - `timeout`: Request timeout in seconds
 - `retries`: Number of retry attempts
+- `headers`: Custom HTTP headers
 
 ### Export Section
 
-Configures export behavior:
+Configures export behavior and inbound settings:
 
 ```json
 {
   "export": {
     "format": "sing-box",
-    "routing": true,
-    "filtering": true,
-    "middleware": ["logging", "enrichment"]
+    "inbound_types": ["socks", "http", "tun"],
+    "socks_port": 1080,
+    "socks_listen": "127.0.0.1",
+    "http_port": 8080,
+    "tun_address": "172.19.0.1/30",
+    "final_route": "proxy"
   }
 }
 ```
 
 **Options:**
-- `format`: Export format (sing-box, clash, xray)
-- `routing`: Enable routing rules
-- `filtering`: Enable server filtering
-- `middleware`: List of middleware to apply
+- `format`: Export format (sing-box)
+- `inbound_types`: List of inbound types to enable
+- `socks_port`, `http_port`, `tproxy_port`: Port numbers
+- `socks_listen`, `http_listen`: Listen addresses
+- `tun_address`: TUN interface address
+- `final_route`: Final routing destination
 
 ### Filter Section
 
@@ -90,7 +111,6 @@ Defines server filtering rules:
   "filter": {
     "exclude_tags": ["blocked", "slow"],
     "only_tags": ["premium", "fast"],
-    "exclusions": ["server-id-1", "server-id-2"],
     "geo_filter": {
       "include": ["US", "CA"],
       "exclude": ["CN", "RU"]
@@ -102,28 +122,29 @@ Defines server filtering rules:
 **Options:**
 - `exclude_tags`: Tags to exclude
 - `only_tags`: Tags to include (whitelist)
-- `exclusions`: Server IDs to exclude
-- `geo_filter`: Geographic filtering
+- `geo_filter`: Geographic filtering rules
 
-## Creating Profiles
+### Routing Section
 
-### Interactive Mode
+Configures routing rules:
 
-```bash
-sboxctl profile create --interactive
+```json
+{
+  "routing": {
+    "final": "proxy",
+    "rules": [
+      {
+        "domain_suffix": [".ru", ".рф"],
+        "outbound": "direct"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      }
+    ]
+  }
+}
 ```
-
-This will guide you through profile creation step by step.
-
-### From Template
-
-```bash
-sboxctl profile create --name my-profile --template template.json
-```
-
-### Manual Creation
-
-Create a JSON file with the profile structure and save it to the profiles directory.
 
 ## Managing Profiles
 
@@ -133,16 +154,28 @@ Create a JSON file with the profile structure and save it to the profiles direct
 sboxctl profile list
 ```
 
-### Edit Profile
+### Apply Profile
 
 ```bash
-sboxctl profile edit --name my-profile
+sboxctl profile apply --name my-profile
 ```
 
 ### Validate Profile
 
 ```bash
-sboxctl profile validate --name my-profile
+sboxctl profile validate --file profile.json
+```
+
+### Explain Profile
+
+```bash
+sboxctl profile explain --name my-profile
+```
+
+### Show Profile Differences
+
+```bash
+sboxctl profile diff --name profile1 --name profile2
 ```
 
 ## Using Profiles
@@ -150,85 +183,89 @@ sboxctl profile validate --name my-profile
 ### With Export Command
 
 ```bash
-sboxctl export --profile my-profile
+# Apply profile and export
+sboxctl profile apply --name my-profile
+sboxctl export -u "https://example.com/subscription" --index 1
+
+# Or use profile directly
+sboxctl export -u "https://example.com/subscription" --index 1 \
+  --inbound-types socks --socks-port 1080
 ```
 
-### With List Servers
+### Profile Examples
 
-```bash
-sboxctl list-servers --profile my-profile
-```
-
-## Profile Priority
-
-Profiles have a priority field that determines which profile to use when multiple profiles match:
-
-- Higher priority numbers take precedence
-- Default priority is 1
-- Profiles with the same priority use the first one found
-
-## Profile Inheritance
-
-Profiles can inherit from other profiles:
-
+#### Basic Home Profile
 ```json
 {
-  "id": "child-profile",
-  "inherits": "parent-profile",
-  "export": {
-    "format": "clash"
-  }
-}
-```
-
-The child profile will inherit all settings from the parent and override specified fields.
-
-## Examples
-
-### Basic Profile
-
-```json
-{
-  "id": "basic",
-  "name": "Basic Profile",
+  "id": "home",
+  "name": "Home Profile",
   "subscription": {
     "url": "https://example.com/subscription"
   },
   "export": {
-    "format": "sing-box"
+    "format": "sing-box",
+    "inbound_types": ["socks"],
+    "socks_port": 1080
   }
 }
 ```
 
-### Advanced Profile
-
+#### Developer Profile
 ```json
 {
-  "id": "advanced",
-  "name": "Advanced Profile",
-  "subscription": {
-    "url": "https://example.com/subscription",
-    "user_agent": "SBoxMgr/1.0",
-    "timeout": 60
-  },
+  "id": "developer",
+  "name": "Developer Profile",
   "export": {
     "format": "sing-box",
-    "routing": true,
-    "filtering": true,
-    "middleware": ["logging", "enrichment"]
+    "inbound_types": ["socks", "http"],
+    "socks_port": 1080,
+    "http_port": 8080
   },
   "filter": {
-    "exclude_tags": ["blocked"],
-    "only_tags": ["premium"],
-    "geo_filter": {
-      "include": ["US", "CA", "EU"]
-    }
+    "exclude_tags": ["slow"]
   }
 }
+```
+
+#### Server Profile
+```json
+{
+  "id": "server",
+  "name": "Server Profile",
+  "export": {
+    "format": "sing-box",
+    "inbound_types": ["socks", "http", "tproxy"],
+    "socks_listen": "0.0.0.0",
+    "http_listen": "0.0.0.0",
+    "socks_auth": "admin:password"
+  },
+  "routing": {
+    "final": "proxy"
+  }
+}
+```
+
+## Profile Locations
+
+Profiles are typically stored in:
+- `~/.config/sboxmgr/profiles/` (Linux/macOS)
+- `%APPDATA%\sboxmgr\profiles\` (Windows)
+- `./profiles/` (current directory)
+
+## Environment Variables
+
+Set profile-related environment variables:
+
+```bash
+# Profile directory
+export SBOXMGR_PROFILE_DIR="~/.config/sboxmgr/profiles"
+
+# Default profile
+export SBOXMGR_DEFAULT_PROFILE="home"
 ```
 
 ## See Also
 
 - [CLI Reference](cli-reference.md) - Command line interface
 - [Subscriptions](subscriptions.md) - Subscription management
-- [Troubleshooting](troubleshooting.md) - Problem solving 
+- [Configuration](../getting-started/configuration.md) - System configuration 

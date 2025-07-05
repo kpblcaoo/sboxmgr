@@ -1,116 +1,43 @@
 # Installation
 
-This guide covers installing SBoxMgr on different platforms.
+This guide covers installing SBoxMgr from source.
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.9 or higher
 - pip (Python package installer)
-- Git (for development installation)
+- Git
 
-## Installation Methods
+## Installation from Source
 
-### From PyPI (Recommended)
-
+### 1. Clone Repository
 ```bash
-pip install sboxmgr
+git clone https://github.com/kpblcaoo/update-singbox.git
+cd update-singbox
 ```
 
-### From Source
-
+### 2. Create Virtual Environment
 ```bash
-# Clone repository
-git clone https://github.com/your-repo/sboxmgr.git
-cd sboxmgr
+# Create virtual environment
+python -m venv .venv
 
+# Activate virtual environment
+# On Linux/macOS:
+source .venv/bin/activate
+# On Windows:
+.venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+```bash
 # Install in development mode
 pip install -e .
+
+# Or install with development dependencies
+pip install -e ".[dev]"
 ```
 
-### Using pipx (Isolated Environment)
-
-```bash
-# Install pipx if not available
-python -m pip install --user pipx
-
-# Install SBoxMgr
-pipx install sboxmgr
-```
-
-## Platform-Specific Instructions
-
-### Linux
-
-#### Ubuntu/Debian
-```bash
-# Update package list
-sudo apt update
-
-# Install Python and pip
-sudo apt install python3 python3-pip
-
-# Install SBoxMgr
-pip3 install sboxmgr
-```
-
-#### CentOS/RHEL/Fedora
-```bash
-# Install Python and pip
-sudo dnf install python3 python3-pip
-
-# Install SBoxMgr
-pip3 install sboxmgr
-```
-
-#### Arch Linux
-```bash
-# Install from AUR
-yay -S sboxmgr
-
-# Or install manually
-pip install sboxmgr
-```
-
-### macOS
-
-#### Using Homebrew
-```bash
-# Install Homebrew if not available
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install SBoxMgr
-brew install sboxmgr
-```
-
-#### Using pip
-```bash
-# Install Python (if not available)
-brew install python
-
-# Install SBoxMgr
-pip3 install sboxmgr
-```
-
-### Windows
-
-#### Using pip
-```cmd
-# Install Python from python.org
-# Then install SBoxMgr
-pip install sboxmgr
-```
-
-#### Using Chocolatey
-```cmd
-# Install Chocolatey if not available
-# Then install SBoxMgr
-choco install sboxmgr
-```
-
-## Verification
-
-After installation, verify that SBoxMgr is working:
-
+### 4. Verify Installation
 ```bash
 # Check version
 sboxctl --version
@@ -119,7 +46,54 @@ sboxctl --version
 sboxctl --help
 
 # Test basic functionality
-sboxctl config generate --output test.json
+sboxctl list-servers --help
+```
+
+## Platform-Specific Instructions
+
+### Linux
+
+#### Ubuntu/Debian
+```bash
+# Install system dependencies
+sudo apt update
+sudo apt install python3 python3-pip python3-venv git
+
+# Follow installation steps above
+```
+
+#### CentOS/RHEL/Fedora
+```bash
+# Install system dependencies
+sudo dnf install python3 python3-pip git
+
+# Follow installation steps above
+```
+
+#### Arch Linux
+```bash
+# Install system dependencies
+sudo pacman -S python python-pip git
+
+# Follow installation steps above
+```
+
+### macOS
+
+#### Using Homebrew
+```bash
+# Install Python (if not available)
+brew install python
+
+# Follow installation steps above
+```
+
+### Windows
+
+#### Using pip
+```cmd
+# Install Python from python.org
+# Then follow installation steps above
 ```
 
 ## Configuration
@@ -131,51 +105,50 @@ sboxctl config generate --output test.json
 mkdir -p ~/.config/sboxmgr
 ```
 
-2. Generate initial configuration:
-```bash
-sboxctl config generate --output ~/.config/sboxmgr/config.json
-```
-
-3. Set environment variables:
+2. Set environment variables:
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
 export SBOXMGR_CONFIG_FILE="$HOME/.config/sboxmgr/config.json"
 export SBOXMGR_LOG_FILE="$HOME/.config/sboxmgr/sboxmgr.log"
+export SBOXMGR_EXCLUSION_FILE="$HOME/.config/sboxmgr/exclusions.json"
 ```
 
-### Configuration File
+### Environment Variables
 
-The default configuration file location is:
-- Linux/macOS: `~/.config/sboxmgr/config.json`
-- Windows: `%APPDATA%\sboxmgr\config.json`
-
-Example configuration:
-```json
-{
-  "subscription": {
-    "url": "https://example.com/subscription",
-    "timeout": 30
-  },
-  "export": {
-    "format": "sing-box",
-    "output_path": "/etc/sing-box/config.json"
-  },
-  "logging": {
-    "level": "INFO",
-    "file": "/var/log/sboxmgr.log"
-  }
-}
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SBOXMGR_CONFIG_FILE` | `./config.json` | Output configuration file path |
+| `SBOXMGR_LOG_FILE` | `./sboxmgr.log` | Log file path |
+| `SBOXMGR_EXCLUSION_FILE` | `./exclusions.json` | Server exclusions file |
+| `SBOXMGR_LANG` | `en` | Interface language |
 
 ## Dependencies
 
 SBoxMgr automatically installs required dependencies:
 
-- `pydantic` - Data validation
-- `typer` - CLI framework
-- `httpx` - HTTP client
-- `pyyaml` - YAML support
-- `rich` - Terminal output
+- `pydantic>=2.0` - Data validation
+- `typer>=0.9.0` - CLI framework
+- `requests>=2.28.0` - HTTP client
+- `python-dotenv` - Environment variable management
+- `packaging>=21.0` - Version handling
+
+## Development Setup
+
+For development work:
+
+```bash
+# Install with development dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest -v
+
+# Run linting
+ruff check src/
+
+# Format code
+black src/
+```
 
 ## Troubleshooting
 
@@ -184,12 +157,12 @@ SBoxMgr automatically installs required dependencies:
 #### Permission Errors
 ```bash
 # Install for current user only
-pip install --user sboxmgr
+pip install --user -e .
 
-# Or use virtual environment
-python -m venv sboxmgr-env
-source sboxmgr-env/bin/activate
-pip install sboxmgr
+# Or use virtual environment (recommended)
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
 ```
 
 #### Python Version Issues
@@ -198,27 +171,23 @@ pip install sboxmgr
 python3 --version
 
 # Use specific Python version
-python3.9 -m pip install sboxmgr
+python3.9 -m venv .venv
 ```
 
-#### Network Issues
+#### Missing Dependencies
 ```bash
-# Use alternative package index
-pip install -i https://pypi.org/simple/ sboxmgr
+# Update pip
+pip install --upgrade pip
 
-# Install with trusted host
-pip install --trusted-host pypi.org sboxmgr
+# Reinstall dependencies
+pip install -e . --force-reinstall
 ```
 
-### Uninstallation
+### Getting Help
 
-```bash
-# Remove SBoxMgr
-pip uninstall sboxmgr
-
-# Remove configuration files
-rm -rf ~/.config/sboxmgr
-```
+- Check the [troubleshooting guide](../user-guide/troubleshooting.md)
+- Open an issue on [GitHub](https://github.com/kpblcaoo/update-singbox/issues)
+- Review the [main README](../../README.md) for quick start examples
 
 ## Next Steps
 

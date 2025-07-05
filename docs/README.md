@@ -2,29 +2,29 @@
 
 **SBoxMgr** is a powerful tool for managing sing-box configurations with subscription support, filtering, and export capabilities.
 
-## 📚 Documentation
+## 📚 Documentation Structure
 
 ### 🚀 Getting Started
-- [Installation](getting-started/installation.md) - How to install SBoxMgr
-- [Quick Start](getting-started/quick-start.md) - First steps
-- [Configuration](getting-started/configuration.md) - System setup
+- [Installation](getting-started/installation.md) - How to install SBoxMgr from source
+- [Quick Start](getting-started/quick-start.md) - First steps and basic usage
+- [Configuration](getting-started/configuration.md) - System setup and environment variables
 
 ### 👥 User Guide
 - [CLI Reference](user-guide/cli-reference.md) - All commands and parameters
-- [Profiles](user-guide/profiles.md) - Working with profiles
+- [Profiles](user-guide/profiles.md) - Working with configuration profiles
 - [Subscriptions](user-guide/subscriptions.md) - Subscription management
-- [Troubleshooting](user-guide/troubleshooting.md) - Problem solving
+- [Troubleshooting](user-guide/troubleshooting.md) - Problem solving guide
 
 ### 👨‍💻 Developer Documentation
-- [Architecture](developer/architecture.md) - System architecture
-- [API Reference](developer/api-reference.md) - API reference
-- [Contributing](developer/contributing.md) - How to contribute
-- [Testing](developer/testing.md) - Testing
+- [Internal Documentation](internal/) - Development team documentation
+- [Architecture](internal/architecture/) - System architecture and design
+- [Contributing](internal/development/contributing.md) - How to contribute to the project
+- [Testing](internal/development/testing.md) - Testing guidelines and practices
 
 ### 📖 Reference
-- [Schemas](reference/schemas/) - JSON schemas
-- [Protocols](reference/protocols/) - Supported protocols
-- [Examples](reference/examples/) - Configuration examples
+- [Schemas](schemas/) - JSON schemas for configuration validation
+- [Security](security.md) - Security model and considerations
+- [Changelog](CHANGELOG.md) - Version history and changes
 
 ### 🏗️ Architecture Decisions
 - [ADR](arch/decisions/) - Architecture Decision Records
@@ -36,9 +36,10 @@
 
 ## 🔗 Useful Links
 
-- [GitHub Repository](https://github.com/your-repo/sboxmgr)
-- [Issues](https://github.com/your-repo/sboxmgr/issues)
-- [Releases](https://github.com/your-repo/sboxmgr/releases)
+- [GitHub Repository](https://github.com/kpblcaoo/update-singbox)
+- [Main README](../README.md) - Project overview and quick start
+- [Issues](https://github.com/kpblcaoo/update-singbox/issues)
+- [Releases](https://github.com/kpblcaoo/update-singbox/releases)
 
 ## 📝 License
 
@@ -46,4 +47,4 @@ See [LICENSE](../LICENSE) for details.
 
 ---
 
-**Last updated**: 2025-07-05 
+**Last updated**: 2025-01-05 

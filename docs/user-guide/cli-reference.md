@@ -11,40 +11,9 @@ SBoxMgr provides a command-line interface for managing sing-box configurations, 
 All commands support these global options:
 
 - `--debug`, `-d <level>`: Set debug level (0-3)
-- `--config <path>`: Specify configuration file path
 - `--help`, `-h`: Show help message
 
 ## Commands
-
-### Configuration Management
-
-#### `sboxctl config generate`
-Generate a new configuration file.
-
-**Options:**
-- `--output <path>`: Output file path
-- `--template <path>`: Template file path
-- `--force`: Overwrite existing file
-
-#### `sboxctl config validate`
-Validate configuration file.
-
-**Options:**
-- `--file <path>`: Configuration file to validate
-- `--strict`: Enable strict validation
-
-### Subscription Management
-
-#### `sboxctl subscription list`
-List available subscriptions.
-
-#### `sboxctl subscription fetch`
-Fetch subscription data.
-
-**Options:**
-- `--url <url>`: Subscription URL
-- `--format <format>`: Output format (json, yaml, text)
-- `--output <path>`: Output file path
 
 ### Server Management
 
@@ -52,124 +21,188 @@ Fetch subscription data.
 List all servers from subscription.
 
 **Options:**
-- `--url <url>`: Subscription URL
-- `--format <format>`: Output format
-- `--filter <filter>`: Filter servers
-- `--sort <field>`: Sort by field
+- `-u, --url <url>`: Subscription URL (required)
+- `--format <format>`: Output format (table, json, yaml)
+- `--filter <filter>`: Filter servers by criteria
 
-#### `sboxctl select-server`
-Select a server for use.
+**Example:**
+```bash
+sboxctl list-servers -u "https://example.com/proxy.json"
+```
 
-**Options:**
-- `--index <number>`: Server index
-- `--tag <tag>`: Server tag
-- `--auto`: Auto-select best server
-
-### Export
+### Export Configuration
 
 #### `sboxctl export`
-Export configuration.
+Export sing-box configuration.
 
 **Options:**
-- `--url <url>`: Subscription URL
-- `--format <format>`: Export format (sing-box, clash, xray)
-- `--output <path>`: Output file path
-- `--profile <path>`: Profile file path
-- `--dry-run`: Validate without writing
-- `--routing`: Enable routing rules
-- `--filter`: Enable filtering
+- `-u, --url <url>`: Subscription URL (required)
+- `--index <number>`: Server index to use
+- `--remarks <name>`: Server name/remarks to use
+- `--dry-run`: Validate without writing files
+- `--inbound-types <types>`: Inbound types (tun, socks, http, tproxy)
+- `--socks-port <port>`: SOCKS proxy port
+- `--socks-listen <address>`: SOCKS listen address
+- `--socks-auth <user:pass>`: SOCKS authentication
+- `--http-port <port>`: HTTP proxy port
+- `--http-listen <address>`: HTTP listen address
+- `--http-auth <user:pass>`: HTTP authentication
+- `--tproxy-port <port>`: TPROXY port
+- `--tproxy-listen <address>`: TPROXY listen address
+- `--tun-address <cidr>`: TUN interface address
+- `--tun-mtu <mtu>`: TUN interface MTU
+- `--tun-stack <stack>`: TUN stack (system, gvisor)
+- `--dns-mode <mode>`: DNS mode (system, tunnel, off)
+- `--final-route <route>`: Final routing destination
+- `--exclude-outbounds <types>`: Exclude outbound types
+
+**Examples:**
+```bash
+# Basic export
+sboxctl export -u "https://example.com/proxy.json" --index 1
+
+# With custom inbound
+sboxctl export -u "https://example.com/proxy.json" --index 1 \
+  --inbound-types socks --socks-port 1080
+
+# Dry run
+sboxctl export -u "https://example.com/proxy.json" --index 1 --dry-run
+```
+
+### Exclusions Management
+
+#### `sboxctl exclusions`
+Manage server exclusions.
+
+**Options:**
+- `-u, --url <url>`: Subscription URL
+- `--add <index>`: Add server to exclusions
+- `--remove <index>`: Remove server from exclusions
+- `--view`: View current exclusions
+
+**Examples:**
+```bash
+# Add server to exclusions
+sboxctl exclusions -u "https://example.com/proxy.json" --add 3
+
+# Remove server from exclusions
+sboxctl exclusions -u "https://example.com/proxy.json" --remove 3
+
+# View exclusions
+sboxctl exclusions --view
+```
+
+#### `sboxctl clear-exclusions`
+Clear all server exclusions.
+
+**Options:**
+- `--yes`: Confirm without prompting
+
+**Example:**
+```bash
+sboxctl clear-exclusions --yes
+```
+
+### Configuration Management
+
+#### `sboxctl config`
+Configuration management commands.
+
+**Subcommands:**
+- `validate`: Validate configuration file
+- `generate`: Generate configuration template
+
+**Examples:**
+```bash
+# Validate config
+sboxctl config validate --file config.json
+
+# Generate template
+sboxctl config generate --output template.json
+```
 
 ### Profile Management
 
-#### `sboxctl profile list`
-List available profiles.
+#### `sboxctl profile`
+Profile management commands.
 
-#### `sboxctl profile create`
-Create a new profile.
+**Subcommands:**
+- `list`: List available profiles
+- `apply`: Apply profile to configuration
+- `validate`: Validate profile
+- `explain`: Explain profile settings
+- `diff`: Show differences between profiles
 
-**Options:**
-- `--name <name>`: Profile name
-- `--template <path>`: Template file
-- `--interactive`: Interactive mode
-
-#### `sboxctl profile edit`
-Edit an existing profile.
-
-**Options:**
-- `--name <name>`: Profile name
-- `--editor <editor>`: Text editor to use
-
-### Exclusions
-
-#### `sboxctl exclusions list`
-List server exclusions.
-
-#### `sboxctl exclusions add`
-Add server exclusion.
-
-**Options:**
-- `--id <id>`: Server ID
-- `--tag <tag>`: Server tag
-- `--reason <reason>`: Exclusion reason
-
-#### `sboxctl exclusions remove`
-Remove server exclusion.
-
-**Options:**
-- `--id <id>`: Server ID
-- `--tag <tag>`: Server tag
-
-### Language
-
-#### `sboxctl lang set`
-Set interface language.
-
-**Options:**
-- `--lang <code>`: Language code (en, ru, etc.)
-
-#### `sboxctl lang list`
-List available languages.
-
-## Examples
-
-### Basic Usage
-
+**Examples:**
 ```bash
-# List servers from subscription
-sboxctl list-servers
+# List profiles
+sboxctl profile list
 
-# Export sing-box configuration
-sboxctl export --format sing-box --output config.json
+# Apply profile
+sboxctl profile apply --name home
 
-# Select server by index
-sboxctl select-server --index 0
-
-# Validate configuration
-sboxctl config validate --file config.json
+# Validate profile
+sboxctl profile validate --file profile.json
 ```
 
-### Advanced Usage
+### Policy Management
 
+#### `sboxctl policy`
+Policy management commands.
+
+**Subcommands:**
+- `list`: List available policies
+- `evaluate`: Evaluate policies against configuration
+
+**Examples:**
 ```bash
-# Export with routing and filtering
-sboxctl export --routing --filter --format sing-box
+# List policies
+sboxctl policy list
 
-# Dry run export
-sboxctl export --dry-run --format clash
+# Evaluate policies
+sboxctl policy evaluate --config config.json
+```
 
-# Debug mode
-sboxctl list-servers -d 2
+### Language Management
 
-# Use custom config
-sboxctl --config /path/to/config.json export
+#### `sboxctl lang`
+Language management commands.
+
+**Options:**
+- `--set <code>`: Set language (en, ru, de, etc.)
+- `--list`: List available languages
+
+**Examples:**
+```bash
+# Set language
+sboxctl lang --set ru
+
+# List languages
+sboxctl lang --list
+```
+
+### Plugin Development
+
+#### `sboxctl plugin-template`
+Generate plugin template.
+
+**Options:**
+- `<type>`: Plugin type (fetcher, parser, exporter, validator)
+- `<ClassName>`: Class name in CamelCase
+- `--output-dir <path>`: Output directory
+
+**Example:**
+```bash
+sboxctl plugin-template fetcher MyCustomFetcher --output-dir ./plugins/
 ```
 
 ## Environment Variables
 
 - `SBOXMGR_CONFIG_FILE`: Default configuration file path
-- `SBOXMGR_DEBUG`: Default debug level
-- `SINGBOX_URL`: Default subscription URL
 - `SBOXMGR_LOG_FILE`: Log file path
+- `SBOXMGR_EXCLUSION_FILE`: Exclusions file path
+- `SBOXMGR_LANG`: Interface language
+- `SBOXMGR_DEBUG`: Default debug level
 
 ## Exit Codes
 
@@ -179,6 +212,35 @@ sboxctl --config /path/to/config.json export
 - `3`: Validation error
 - `4`: Network error
 - `5`: Permission error
+
+## Examples
+
+### Basic Usage
+
+```bash
+# List servers from subscription
+sboxctl list-servers -u "https://example.com/proxy.json"
+
+# Export sing-box configuration
+sboxctl export -u "https://example.com/proxy.json" --index 1
+
+# Select server by name
+sboxctl export -u "https://example.com/proxy.json" --remarks "Fast Server"
+```
+
+### Advanced Usage
+
+```bash
+# Export with routing and filtering
+sboxctl export -u "https://example.com/proxy.json" --index 1 \
+  --final-route proxy --exclude-outbounds block,dns
+
+# Dry run export
+sboxctl export -u "https://example.com/proxy.json" --index 1 --dry-run
+
+# Debug mode
+sboxctl list-servers -u "https://example.com/proxy.json" -d 2
+```
 
 ## See Also
 

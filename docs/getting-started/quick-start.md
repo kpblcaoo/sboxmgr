@@ -1,129 +1,131 @@
-# sboxmgr Quick Reference Card
+# SBoxMgr Quick Start Guide
 
-## 🚀 Быстрый старт
+## 🚀 Quick Start
 
 ```bash
-# Простая команда
-python -m sboxmgr.cli export --inbound-types tun
+# Basic command
+sboxctl export -u "YOUR_SUBSCRIPTION_URL" --index 1
 
-# С параметрами
-python -m sboxmgr.cli export \
-  --url "$SUB_URL" \
-  --inbound-types tun,socks \
-  --socks-auth user:pass \
-  --postprocessors geo_filter
+# With parameters
+sboxctl export \
+  -u "YOUR_SUBSCRIPTION_URL" \
+  --index 1 \
+  --inbound-types socks \
+  --socks-port 1080
 ```
 
-## 📋 Основные компоненты
+## 📋 Core Components
 
-| Компонент | Файл | Назначение |
-|-----------|------|------------|
-| CLI Entry | `cli/commands/export.py` | Парсинг команд, координация |
-| InboundBuilder | `cli/inbound_builder.py` | Создание ClientProfile из CLI |
-| Fetchers | `subscription/fetchers/` | Загрузка подписок (URL/File/API) |
-| Parsers | `subscription/parsers/` | Парсинг форматов (YAML/JSON/base64) |
-| Middleware | `subscription/middleware/` | Обогащение данных |
-| Postprocessors | `subscription/postprocessors/` | Фильтрация и сортировка |
-| Exporters | `subscription/exporters/` | Генерация sing-box конфига |
-| Policies | `policies/` | Политики безопасности |
+| Component | File | Purpose |
+|-----------|------|---------|
+| CLI Entry | `cli/commands/export.py` | Command parsing, coordination |
+| InboundBuilder | `cli/inbound_builder.py` | Create ClientProfile from CLI |
+| Fetchers | `subscription/fetchers/` | Load subscriptions (URL/File/API) |
+| Parsers | `subscription/parsers/` | Parse formats (YAML/JSON/base64) |
+| Middleware | `subscription/middleware/` | Data enrichment |
+| Postprocessors | `subscription/postprocessors/` | Filtering and sorting |
+| Exporters | `subscription/exporters/` | Generate sing-box config |
+| Policies | `policies/` | Security policies |
 
-## 🔄 Поток данных
+## 🔄 Data Flow
 
 ```
 CLI → InboundBuilder → Fetcher → Parser → Middleware → Postprocessors → Exporter → Output
 ```
 
-## 📝 Доступные параметры
+## 📝 Available Parameters
 
 ### Inbound Types
-- `tun` - TUN интерфейс (системная маршрутизация)
-- `socks` - SOCKS5 прокси сервер
-- `http` - HTTP прокси сервер
+- `tun` - TUN interface (system routing)
+- `socks` - SOCKS5 proxy server
+- `http` - HTTP proxy server
 - `tproxy` - Transparent proxy (Linux)
 
 ### Postprocessors
-- `geo_filter` - Фильтрация по странам
-- `tag_filter` - Фильтрация по тегам
-- `latency_sort` - Сортировка по пингу
-- `duplicate_removal` - Удаление дубликатов
+- `geo_filter` - Filter by countries
+- `tag_filter` - Filter by tags
+- `latency_sort` - Sort by ping
+- `duplicate_removal` - Remove duplicates
 
 ### Middleware
-- `logging` - Логирование операций
-- `enrichment` - Обогащение метаданных
+- `logging` - Operation logging
+- `enrichment` - Metadata enrichment
 
-## 🛡️ Безопасность по умолчанию
+## 🛡️ Security by Default
 
-- SOCKS/HTTP: bind на `127.0.0.1`
-- Порты: только unprivileged (1024-65535)
-- TPROXY: bind на `0.0.0.0` (требуется для функциональности)
-- Предупреждения при внешнем bind
+- SOCKS/HTTP: bind to `127.0.0.1`
+- Ports: only unprivileged (1024-65535)
+- TPROXY: bind to `0.0.0.0` (required for functionality)
+- Warnings for external bind
 
-## 🔧 Примеры конфигураций
+## 🔧 Configuration Examples
 
-### Домашний пользователь
+### Home User
 ```bash
---inbound-types tun
+sboxctl export -u "YOUR_URL" --index 1 --inbound-types tun
 ```
 
-### Разработчик
+### Developer
 ```bash
---inbound-types socks,http \
---socks-port 1080 \
---http-port 8080
+sboxctl export -u "YOUR_URL" --index 1 \
+  --inbound-types socks,http \
+  --socks-port 1080 \
+  --http-port 8080
 ```
 
-### Сервер
+### Server
 ```bash
---inbound-types socks,http,tproxy \
---socks-listen "0.0.0.0" \
---socks-auth admin:password \
---http-listen "0.0.0.0" \
---postprocessors geo_filter
+sboxctl export -u "YOUR_URL" --index 1 \
+  --inbound-types socks,http,tproxy \
+  --socks-listen "0.0.0.0" \
+  --socks-auth admin:password \
+  --http-listen "0.0.0.0" \
+  --postprocessors geo_filter
 ```
 
-## 🚨 Частые проблемы
+## 🚨 Common Issues
 
-**Q: Серверы не появляются**
+**Q: No servers appear**
 ```bash
-# Добавить логирование
---middleware logging
+# Add logging
+sboxctl export -u "YOUR_URL" --index 1 --middleware logging
 ```
 
-**Q: Нужна фильтрация**
+**Q: Need filtering**
 ```bash
-# Исключить российские серверы
---postprocessors geo_filter
+# Exclude Russian servers
+sboxctl export -u "YOUR_URL" --index 1 --postprocessors geo_filter
 ```
 
-**Q: Ошибка bind permission**
+**Q: Bind permission error**
 ```bash
-# Использовать unprivileged порты
---socks-port 1080  # не 80
+# Use unprivileged ports
+sboxctl export -u "YOUR_URL" --index 1 --socks-port 1080  # not 80
 ```
 
-**Q: Внешний доступ к прокси**
+**Q: External proxy access**
 ```bash
-# Явно указать bind на все интерфейсы
---socks-listen "0.0.0.0"
+# Explicitly bind to all interfaces
+sboxctl export -u "YOUR_URL" --index 1 --socks-listen "0.0.0.0"
 ```
 
-## 📊 Отладка
+## 📊 Debugging
 
 ```bash
-# Полное логирование
---middleware logging --debug 2
+# Full logging
+sboxctl export -u "YOUR_URL" --index 1 --debug 2
 
-# Проверка без сохранения
---dry-run
+# Check without saving
+sboxctl export -u "YOUR_URL" --index 1 --dry-run
 
-# Валидация результата
-sing-box check -c output.json
+# Validate result
+sing-box check -c config.json
 ```
 
-## 🎯 Архитектурные принципы
+## 🎯 Architectural Principles
 
-1. **Модульность** - каждый компонент независим
-2. **Безопасность** - secure by default
-3. **Расширяемость** - легко добавлять новые форматы/протоколы
-4. **Совместимость** - обратная совместимость с профилями
-5. **Валидация** - проверка на каждом уровне 
+1. **Modularity** - Each component is independent
+2. **Security** - Secure by default
+3. **Extensibility** - Easy to add new formats/protocols
+4. **Compatibility** - Backward compatibility with profiles
+5. **Validation** - Validation at every level 

@@ -4,21 +4,21 @@ SBoxMgr supports various subscription formats for managing proxy server configur
 
 ## Overview
 
-Subscriptions provide a way to automatically fetch and update proxy server configurations from remote sources.
+Subscriptions provide a way to automatically fetch and update proxy server configurations from remote sources. SBoxMgr can parse multiple formats and automatically detect the subscription type.
 
 ## Supported Formats
 
 ### Sing-box Format
-Native sing-box configuration format.
+Native sing-box configuration format with outbounds and routing rules.
 
 ### Clash Format
-Clash configuration format with proxy groups.
+Clash configuration format with proxy groups and rules.
 
 ### Base64 Encoded
-Base64 encoded subscription data.
+Base64 encoded subscription data (common for many providers).
 
 ### URI List
-Simple list of proxy URIs.
+Simple list of proxy URIs (vmess://, vless://, etc.).
 
 ### JSON Format
 Structured JSON subscription data.
@@ -27,87 +27,97 @@ Structured JSON subscription data.
 
 ### HTTP/HTTPS URLs
 ```bash
-sboxctl export --url "https://example.com/subscription"
+sboxctl list-servers -u "https://example.com/subscription"
+sboxctl export -u "https://example.com/subscription" --index 1
 ```
 
 ### Local Files
 ```bash
-sboxctl export --url "file:///path/to/subscription.txt"
+sboxctl list-servers -u "file:///path/to/subscription.txt"
+sboxctl export -u "file:///path/to/subscription.txt" --index 1
 ```
 
 ### API Endpoints
 ```bash
-sboxctl export --url "https://api.example.com/subscription"
+sboxctl list-servers -u "https://api.example.com/subscription"
+sboxctl export -u "https://api.example.com/subscription" --index 1
 ```
 
 ## Authentication
 
 ### Basic Authentication
 ```bash
-sboxctl export --url "https://username:password@example.com/subscription"
+sboxctl list-servers -u "https://username:password@example.com/subscription"
 ```
 
 ### Custom Headers
-Use profiles to set custom headers:
-```json
-{
-  "subscription": {
-    "url": "https://example.com/subscription",
-    "headers": {
-      "Authorization": "Bearer token",
-      "X-API-Key": "your-api-key"
-    }
-  }
-}
+Use environment variables or profiles to set custom headers:
+```bash
+# Set custom User-Agent
+export SBOXMGR_USER_AGENT="Custom User-Agent"
+
+# Use with subscription
+sboxctl list-servers -u "https://example.com/subscription"
 ```
 
 ## Subscription Management
 
-### Fetching Data
-```bash
-# Fetch subscription data
-sboxctl subscription fetch --url "https://example.com/subscription"
-
-# Save to file
-sboxctl subscription fetch --url "https://example.com/subscription" --output data.json
-```
-
 ### Listing Servers
 ```bash
 # List all servers
-sboxctl list-servers --url "https://example.com/subscription"
+sboxctl list-servers -u "https://example.com/subscription"
 
-# With filtering
-sboxctl list-servers --url "https://example.com/subscription" --filter "US"
+# With format detection
+sboxctl list-servers -u "https://example.com/subscription" --format auto
+
+# With debug info
+sboxctl list-servers -u "https://example.com/subscription" -d 2
 ```
 
-### Validation
+### Exporting Configurations
 ```bash
-# Validate subscription
-sboxctl subscription validate --url "https://example.com/subscription"
+# Export basic config
+sboxctl export -u "https://example.com/subscription" --index 1
+
+# Export with custom settings
+sboxctl export -u "https://example.com/subscription" --index 1 \
+  --inbound-types socks --socks-port 1080
+
+# Dry run (validate without saving)
+sboxctl export -u "https://example.com/subscription" --index 1 --dry-run
+```
+
+### Server Selection
+```bash
+# Select by index
+sboxctl export -u "https://example.com/subscription" --index 5
+
+# Select by name/remarks
+sboxctl export -u "https://example.com/subscription" --remarks "Fast Server"
 ```
 
 ## Environment Variables
 
 Set default subscription URL:
 ```bash
-export SINGBOX_URL="https://example.com/subscription"
+export SBOXMGR_URL="https://example.com/subscription"
 ```
 
-Then use without `--url`:
+Then use without `-u`:
 ```bash
 sboxctl list-servers
+sboxctl export --index 1
 ```
 
 ## Error Handling
 
 ### Network Errors
 - Automatic retries with exponential backoff
-- Configurable timeout settings
+- Configurable timeout settings (default: 30 seconds)
 - Fallback to cached data if available
 
 ### Parsing Errors
-- Detailed error messages
+- Detailed error messages with debug mode
 - Partial data recovery when possible
 - Validation of individual servers
 
@@ -120,20 +130,31 @@ sboxctl list-servers
 
 ### Basic Usage
 ```bash
-# Export sing-box config
-sboxctl export --url "https://example.com/subscription" --format sing-box
+# List available servers
+sboxctl list-servers -u "https://example.com/subscription"
 
-# List servers with debug info
-sboxctl list-servers --url "https://example.com/subscription" -d 2
+# Export sing-box config
+sboxctl export -u "https://example.com/subscription" --index 1
+
+# Start sing-box with generated config
+sing-box run -c config.json
 ```
 
 ### Advanced Usage
 ```bash
-# Use profile with custom settings
-sboxctl export --profile my-profile --url "https://example.com/subscription"
+# Export with custom inbound
+sboxctl export -u "https://example.com/subscription" --index 1 \
+  --inbound-types socks,http \
+  --socks-port 1080 \
+  --http-port 8080
 
-# Export with routing and filtering
-sboxctl export --url "https://example.com/subscription" --routing --filter
+# Export with routing
+sboxctl export -u "https://example.com/subscription" --index 1 \
+  --final-route proxy \
+  --exclude-outbounds block,dns
+
+# Debug subscription parsing
+sboxctl list-servers -u "https://example.com/subscription" -d 3
 ```
 
 ## Troubleshooting
@@ -142,25 +163,53 @@ sboxctl export --url "https://example.com/subscription" --routing --filter
 
 **Network Timeout**
 ```bash
-# Increase timeout
-sboxctl export --url "https://example.com/subscription" --timeout 60
+# Check network connectivity
+curl -I "https://example.com/subscription"
+
+# Use different DNS
+export SBOXMGR_DNS="8.8.8.8"
 ```
 
 **Authentication Failed**
-- Check credentials
+- Check credentials in URL
 - Verify API key format
 - Ensure proper headers
 
 **Parsing Errors**
 - Check subscription format
 - Validate URL accessibility
-- Review error logs
+- Review error logs with debug mode
+
+**No Servers Found**
+```bash
+# Enable debug mode
+sboxctl list-servers -u "https://example.com/subscription" -d 2
+
+# Check subscription content
+curl "https://example.com/subscription" | head -20
+```
 
 ### Debug Mode
 ```bash
 # Enable debug output
-sboxctl list-servers --url "https://example.com/subscription" -d 3
+sboxctl list-servers -u "https://example.com/subscription" -d 3
+
+# Check specific format
+sboxctl list-servers -u "https://example.com/subscription" --format clash
 ```
+
+## Subscription Providers
+
+SBoxMgr works with most subscription providers that support:
+- Clash configuration format
+- Sing-box configuration format
+- Base64 encoded subscriptions
+- URI lists
+
+Common providers include:
+- V2Ray providers
+- Clash providers
+- Custom proxy services
 
 ## See Also
 
