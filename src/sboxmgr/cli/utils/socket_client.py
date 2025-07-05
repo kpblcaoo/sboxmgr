@@ -20,6 +20,7 @@ class SocketClient:
         
         Args:
             socket_path: Path to Unix socket.
+            
         """
         self.socket_path = socket_path
         self.sock = None
@@ -43,6 +44,7 @@ class SocketClient:
             
         Raises:
             NotImplementedError: Method not yet implemented.
+            
         """
         # TODO: framed JSON encode
         raise NotImplementedError
@@ -55,6 +57,7 @@ class SocketClient:
             
         Raises:
             NotImplementedError: Method not yet implemented.
+            
         """
         # TODO: framed JSON decode
         raise NotImplementedError

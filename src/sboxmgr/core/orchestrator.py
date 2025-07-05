@@ -417,7 +417,7 @@ class Orchestrator:
     
     @classmethod
     def create_default(cls, **config_overrides) -> 'Orchestrator':
-        """Factory method to create Orchestrator with default dependencies.
+        """Create Orchestrator with default dependencies.
         
         Provides a convenient way to create a fully configured Orchestrator
         instance with default implementations for all dependencies.

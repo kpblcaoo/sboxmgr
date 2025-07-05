@@ -334,6 +334,8 @@ class ExclusionManager(ExclusionManagerInterface):
         Args:
             json_data: Server data (will not re-cache if it's the same as cached)
             indices: Display indices from list_servers output
+            supported_protocols: List of supported protocol types
+            reason: Reason for exclusion
             
         Returns:
             List of added server IDs
@@ -420,6 +422,7 @@ class ExclusionManager(ExclusionManagerInterface):
         Args:
             json_data: Server data (will not re-cache if it's the same as cached)
             indices: Display indices from list_servers output
+            supported_protocols: List of supported protocol types
             
         Returns:
             List of removed server IDs
