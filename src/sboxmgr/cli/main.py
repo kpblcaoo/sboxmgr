@@ -50,6 +50,7 @@ def is_ai_lang(code):
         
     Returns:
         True if language is marked as AI-generated, False otherwise.
+
     """
     import json
     from pathlib import Path
@@ -85,6 +86,7 @@ def lang_cmd(
         
     Raises:
         typer.Exit: If specified language is not available or config write fails.
+
     """
     config_path = Path.home() / ".sboxmgr" / "config.toml"
     config_path.parent.mkdir(parents=True, exist_ok=True)

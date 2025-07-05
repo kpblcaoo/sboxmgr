@@ -1,5 +1,4 @@
-"""
-New Sing-box configuration exporter using modular Pydantic models.
+"""New Sing-box configuration exporter using modular Pydantic models.
 
 This module provides a modern sing-box configuration exporter that uses
 the modular Pydantic models from src.sboxmgr.models.singbox for better
@@ -48,14 +47,14 @@ def convert_parsed_server_to_outbound(server: ParsedServer) -> Optional[Union[
     BlockOutbound, SelectorOutbound, UrlTestOutbound, HysteriaOutbound,
     AnyTlsOutbound, SshOutbound, TorOutbound
 ]]:
-    """
-    Convert ParsedServer to appropriate sing-box outbound model.
+    """Convert ParsedServer to appropriate sing-box outbound model.
     
     Args:
         server: ParsedServer object to convert
         
     Returns:
         Appropriate outbound model instance or None if conversion fails
+
     """
     try:
         # Normalize protocol type
@@ -473,14 +472,14 @@ def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
     VmessInbound, VlessInbound, TrojanInbound, Hysteria2Inbound,
     WireGuardInbound, TuicInbound, ShadowTlsInbound, DirectInbound
 ]]:
-    """
-    Convert ClientProfile to list of sing-box inbound models.
+    """Convert ClientProfile to list of sing-box inbound models.
     
     Args:
         profile: ClientProfile object to convert
         
     Returns:
         List of inbound model instances
+
     """
     inbounds = []
     
@@ -539,8 +538,7 @@ def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
 
 @register("singbox_v2")
 class SingboxExporterV2(BaseExporter):
-    """
-    New Sing-box configuration exporter using modular Pydantic models.
+    """New Sing-box configuration exporter using modular Pydantic models.
     
     This exporter provides better validation, type safety, and maintainability
     compared to the legacy exporter. It uses the modular Pydantic models
@@ -548,8 +546,7 @@ class SingboxExporterV2(BaseExporter):
     """
     
     def export(self, servers: List[ParsedServer], client_profile: Optional[ClientProfile] = None) -> str:
-        """
-        Export servers to sing-box JSON configuration string.
+        """Export servers to sing-box JSON configuration string.
         
         Args:
             servers: List of ParsedServer objects to export
@@ -560,6 +557,7 @@ class SingboxExporterV2(BaseExporter):
             
         Raises:
             ValueError: If server data is invalid or cannot be exported
+
         """
         try:
             # Convert servers to outbounds

@@ -21,6 +21,7 @@ def detect_service_mode() -> bool:
     
     Returns:
         bool: True if service mode should be enabled
+
     """
     # 1. Explicit override via CLI arguments
     if "--service" in sys.argv or "--daemon" in sys.argv:
@@ -86,6 +87,7 @@ def detect_container_environment() -> bool:
     
     Returns:
         bool: True if container environment detected
+
     """
     # Docker detection
     if os.path.exists("/.dockerenv"):
@@ -134,6 +136,7 @@ def detect_systemd_environment() -> bool:
     
     Returns:
         bool: True if systemd environment is detected
+
     """
     # Check for systemd runtime directory
     if os.path.exists("/run/systemd/system"):
@@ -163,6 +166,7 @@ def detect_development_environment() -> bool:
     
     Returns:
         bool: True if development environment detected
+
     """
     # Check for common development indicators
     dev_indicators = [
@@ -195,6 +199,7 @@ def get_environment_info() -> dict:
     
     Returns:
         dict: Environment information including detection results
+
     """
     return {
         "service_mode": detect_service_mode(),

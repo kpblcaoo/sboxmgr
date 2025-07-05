@@ -3,6 +3,7 @@ from .base import BasePolicy, PolicyContext, PolicyResult
 
 class GeoTestPolicy(BasePolicy):
     """Test policy for geo group (demo only)."""
+
     name = "GeoTestPolicy"
     description = "Demo geo policy that always allows."
     group = "geo"

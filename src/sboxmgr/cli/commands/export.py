@@ -58,6 +58,7 @@ def _validate_flag_combinations(
         
     Raises:
         typer.Exit: If invalid flag combination detected
+
     """
     if dry_run and agent_check:
         typer.echo("❌ Error: --dry-run and --agent-check are mutually exclusive", err=True)
@@ -81,6 +82,7 @@ def _determine_output_format(output_file: str, format_flag: str) -> str:
         
     Returns:
         Determined format (json or toml)
+
     """
     if format_flag == "auto":
         ext = Path(output_file).suffix.lower()
@@ -100,6 +102,7 @@ def _create_backup_if_needed(output_file: str, backup: bool) -> Optional[str]:
         
     Returns:
         Path to backup file if created, None otherwise
+
     """
     if not backup or not os.path.exists(output_file):
         return None
@@ -122,6 +125,7 @@ def _run_agent_check(config_file: str, agent_check: bool) -> bool:
         
     Returns:
         True if check passed or skipped, False if failed
+
     """
     if not agent_check:
         return True
@@ -164,6 +168,7 @@ def _create_client_profile_from_profile(profile: Optional['FullProfile']) -> Opt
         
     Returns:
         ClientProfile with inbounds configured from profile, or None if no profile
+
     """
     if not profile or not hasattr(profile, 'export') or not profile.export:
         return None
@@ -328,8 +333,8 @@ def _generate_config_from_subscription(
         
     Raises:
         typer.Exit: On processing errors
+
     """
-    
     # Create subscription source
     # Используем автоопределение как в list-servers, а не жесткое кодирование форматов
     # source_type должен определяться по содержимому, а не по формату вывода
@@ -387,6 +392,7 @@ def _write_config_to_file(config_data: dict, output_file: str, output_format: st
         
     Raises:
         typer.Exit: If writing fails
+
     """
     try:
         # Ensure output directory exists
@@ -418,6 +424,7 @@ def _validate_postprocessors(processors: List[str]) -> None:
         
     Raises:
         typer.Exit: If invalid postprocessor names found
+
     """
     if invalid := [x for x in processors if x not in ALLOWED_POSTPROCESSORS]:
         typer.echo(f"❌ {t('cli.error.unknown_postprocessors').format(invalid=', '.join(invalid))}", err=True)
@@ -433,6 +440,7 @@ def _validate_middleware(middleware: List[str]) -> None:
         
     Raises:
         typer.Exit: If invalid middleware names found
+
     """
     if invalid := [x for x in middleware if x not in ALLOWED_MIDDLEWARE]:
         typer.echo(f"❌ {t('cli.error.unknown_middleware').format(invalid=', '.join(invalid))}", err=True)
@@ -451,6 +459,7 @@ def _load_profile_from_file(profile_path: str) -> Optional[FullProfile]:
         
     Raises:
         typer.Exit: If profile loading fails
+
     """
     if not PHASE3_AVAILABLE:
         typer.echo("⚠️  Profile support requires Phase 3 components", err=True)
@@ -495,6 +504,7 @@ def _generate_profile_from_cli(
         
     Raises:
         typer.Exit: If profile generation fails
+
     """
     if not PHASE3_AVAILABLE:
         typer.echo("⚠️  Profile generation requires Phase 3 components", err=True)
@@ -558,6 +568,7 @@ def _create_postprocessor_chain_from_list(processors: List[str]) -> Optional['Po
         
     Raises:
         typer.Exit: If invalid processor names found
+
     """
     if not PHASE3_AVAILABLE:
         typer.echo("⚠️  PostProcessor chains require Phase 3 components", err=True)
@@ -598,6 +609,7 @@ def _create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
         
     Raises:
         typer.Exit: If invalid middleware names found
+
     """
     if not PHASE3_AVAILABLE:
         typer.echo("⚠️  Middleware chains require Phase 3 components", err=True)
@@ -631,6 +643,7 @@ def _load_client_profile_from_file(client_profile_path: str) -> Optional['Client
         
     Raises:
         typer.Exit: If client profile loading fails
+
     """
     if not os.path.exists(client_profile_path):
         typer.echo(f"❌ Client profile not found: {client_profile_path}", err=True)
@@ -666,6 +679,7 @@ def _validate_final_route(final_route: str) -> None:
         
     Raises:
         typer.Exit: If final route is invalid
+
     """
     valid_routes = ["auto", "direct", "block", "proxy", "dns"]
     
@@ -691,6 +705,7 @@ def _validate_exclude_outbounds(exclude_outbounds: str) -> None:
         
     Raises:
         typer.Exit: If exclude outbounds contains invalid values
+
     """
     # Extended list of valid outbound types including all supported protocols
     valid_types = [
@@ -806,6 +821,7 @@ def export(
         
     Raises:
         typer.Exit: On validation failure or processing errors
+
     """
     from logsetup.setup import setup_logging
     setup_logging(debug_level=debug)

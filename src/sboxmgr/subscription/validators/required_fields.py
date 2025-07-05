@@ -33,6 +33,7 @@ class RequiredFieldsValidator(BaseParsedValidator):
             
         Returns:
             ValidationResult: Contains validation errors and list of valid servers.
+
         """
         errors = []
         valid_servers = []
@@ -104,6 +105,7 @@ class RequiredFieldsValidator(BaseParsedValidator):
             
         Returns:
             Dict с результатом проверки: {'valid': bool, 'error': str}
+
         """
         # Проверяем address
         if hasattr(server, 'address') and server.address:
@@ -133,6 +135,7 @@ class RequiredFieldsValidator(BaseParsedValidator):
             
         Returns:
             Dict с результатом исправления: {'success': bool, 'fixes': list}
+
         """
         fixes = []
         
@@ -185,6 +188,7 @@ class RequiredFieldsValidator(BaseParsedValidator):
             
         Returns:
             Строка-идентификатор сервера
+
         """
         # Приоритет: address > tag > name > fallback
         if hasattr(server, 'address') and server.address:

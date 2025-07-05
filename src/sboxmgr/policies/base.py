@@ -12,6 +12,7 @@ from enum import Enum
 
 class PolicySeverity(Enum):
     """Policy severity levels."""
+
     WARNING = "warning"
     DENY = "deny"
     INFO = "info"
@@ -27,7 +28,9 @@ class PolicyResult:
         policy_name: Name of the policy that made the decision
         timestamp: When the decision was made
         severity: Severity level of the decision
+
     """
+
     allowed: bool
     reason: str
     metadata: Dict[str, Any] = field(default_factory=dict)
@@ -45,6 +48,7 @@ class PolicyResult:
             
         Returns:
             PolicyResult with allowed=True
+
         """
         return PolicyResult(allowed=True, reason=reason, metadata=metadata, severity=PolicySeverity.INFO)
 
@@ -58,6 +62,7 @@ class PolicyResult:
             
         Returns:
             PolicyResult with allowed=False
+
         """
         return PolicyResult(allowed=False, reason=reason, metadata=metadata, severity=PolicySeverity.DENY)
 
@@ -71,6 +76,7 @@ class PolicyResult:
             
         Returns:
             PolicyResult with allowed=True but warning severity
+
         """
         return PolicyResult(allowed=True, reason=reason, metadata=metadata, severity=PolicySeverity.WARNING)
 
@@ -84,7 +90,9 @@ class PolicyEvaluationResult:
     Attributes:
         results: List of all policy results
         server_identifier: Identifier for the server being evaluated
+
     """
+
     results: List[PolicyResult] = field(default_factory=list)
     server_identifier: str = ""
     
@@ -93,6 +101,7 @@ class PolicyEvaluationResult:
         
         Args:
             result: Policy result to add
+
         """
         self.results.append(result)
     
@@ -102,6 +111,7 @@ class PolicyEvaluationResult:
         
         Returns:
             True if any policy result has severity DENY
+
         """
         return any(r.severity == PolicySeverity.DENY for r in self.results)
     
@@ -111,6 +121,7 @@ class PolicyEvaluationResult:
         
         Returns:
             True if any policy result has severity WARNING
+
         """
         return any(r.severity == PolicySeverity.WARNING for r in self.results)
     
@@ -120,6 +131,7 @@ class PolicyEvaluationResult:
         
         Returns:
             List of policy results with DENY severity
+
         """
         return [r for r in self.results if r.severity == PolicySeverity.DENY]
     
@@ -129,6 +141,7 @@ class PolicyEvaluationResult:
         
         Returns:
             List of policy results with WARNING severity
+
         """
         return [r for r in self.results if r.severity == PolicySeverity.WARNING]
     
@@ -138,6 +151,7 @@ class PolicyEvaluationResult:
         
         Returns:
             List of policy results with INFO severity
+
         """
         return [r for r in self.results if r.severity == PolicySeverity.INFO]
     
@@ -147,6 +161,7 @@ class PolicyEvaluationResult:
         
         Returns:
             True if no policies denied the action
+
         """
         return not self.has_denials
     
@@ -156,6 +171,7 @@ class PolicyEvaluationResult:
         
         Returns:
             Human-readable summary of the evaluation
+
         """
         if self.has_denials:
             denial_reasons = [r.reason for r in self.denials]
@@ -171,6 +187,7 @@ class PolicyEvaluationResult:
         
         Returns:
             Dictionary representation of the evaluation result
+
         """
         return {
             "server_identifier": self.server_identifier,
@@ -193,7 +210,9 @@ class PolicyContext:
         location: Geographic location information
         env: Environment variables
         metadata: Additional context metadata
+
     """
+
     profile: Optional[Any] = None
     server: Optional[Any] = None
     user: Optional[str] = None
@@ -206,6 +225,7 @@ class PolicyContext:
         
         Returns:
             Server identifier (address, name, or string representation)
+
         """
         if not self.server:
             return "unknown"
@@ -247,7 +267,9 @@ class BasePolicy(ABC):
         description: Description of what the policy does
         enabled: Whether the policy is currently enabled
         group: Group/category of the policy (e.g., 'profile', 'geo', 'security')
+
     """
+
     name: str = "BasePolicy"
     description: str = "Base policy class"
     enabled: bool = True
@@ -272,6 +294,7 @@ class BasePolicy(ABC):
             
         Returns:
             PolicyResult with allowed=True
+
         """
         return PolicyResult.allow(reason, **metadata)
 
@@ -284,6 +307,7 @@ class BasePolicy(ABC):
             
         Returns:
             PolicyResult with allowed=False
+
         """
         return PolicyResult.deny(reason, **metadata)
 
@@ -296,6 +320,7 @@ class BasePolicy(ABC):
             
         Returns:
             PolicyResult with allowed=True but warning severity
+
         """
         return PolicyResult.warning(reason, **metadata)
 
@@ -308,6 +333,7 @@ class BasePolicy(ABC):
             
         Returns:
             PolicyResult indicating whether the action is allowed
+
         """
         raise NotImplementedError
 
@@ -319,5 +345,6 @@ class BasePolicy(ABC):
             
         Returns:
             True if configuration is valid
+
         """
         return True 

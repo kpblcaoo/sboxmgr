@@ -59,6 +59,7 @@ def lang_cmd(
         sboxmgr lang                    # Show current language and available options
         sboxmgr lang --set ru           # Set Russian as default language
         SBOXMGR_LANG=de sboxmgr lang    # Temporarily use German
+
     """
     config_path = Path.home() / ".sboxmgr" / "config.toml"
     config_path.parent.mkdir(parents=True, exist_ok=True)

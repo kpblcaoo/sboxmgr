@@ -1,5 +1,4 @@
-"""
-src/sboxmgr/cli/utils/socket_client.py
+"""src/sboxmgr/cli/utils/socket_client.py
 sboxmgr: Unix socket client (framed JSON protocol_v1)
 
 TODO: Реализовать подключение к Unix socket, отправку/приём framed JSON сообщений,

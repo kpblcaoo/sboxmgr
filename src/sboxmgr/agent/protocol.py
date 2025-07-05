@@ -12,6 +12,7 @@ from enum import Enum
 
 class AgentCommand(str, Enum):
     """Available sboxagent commands."""
+
     VALIDATE = "validate"
     INSTALL = "install"
     CHECK = "check"
@@ -20,6 +21,7 @@ class AgentCommand(str, Enum):
 
 class ClientType(str, Enum):
     """Supported VPN client types."""
+
     SING_BOX = "sing-box"
     XRAY = "xray"
     CLASH = "clash"
@@ -36,6 +38,7 @@ class AgentRequest(BaseModel):
         command: The agent command to execute
         version: API version for compatibility
         trace_id: Optional trace ID for request tracking
+
     """
     
     command: AgentCommand = Field(..., description="Command to execute")
@@ -58,6 +61,7 @@ class ValidationRequest(AgentRequest):
         ...     config_path="/path/to/config.json",
         ...     client_type=ClientType.SING_BOX
         ... )
+
     """
     
     command: AgentCommand = Field(default=AgentCommand.VALIDATE)
@@ -81,6 +85,7 @@ class InstallRequest(AgentRequest):
         ...     client_type=ClientType.SING_BOX,
         ...     version="1.8.0"
         ... )
+
     """
     
     command: AgentCommand = Field(default=AgentCommand.INSTALL)
@@ -95,6 +100,7 @@ class CheckRequest(AgentRequest):
     Args:
         command: Must be "check"
         client_type: Optional specific client to check
+
     """
     
     command: AgentCommand = Field(default=AgentCommand.CHECK)
@@ -111,6 +117,7 @@ class AgentResponse(BaseModel):
         message: Human-readable message
         trace_id: Trace ID from request (if provided)
         error_code: Optional error code for programmatic handling
+
     """
     
     success: bool = Field(..., description="Operation success status")
@@ -136,6 +143,7 @@ class ValidationResponse(AgentResponse):
         ...     errors=["Missing required field: outbounds"],
         ...     client_detected=ClientType.SING_BOX
         ... )
+
     """
     
     errors: List[str] = Field(default_factory=list, description="Validation errors")
@@ -152,6 +160,7 @@ class InstallResponse(AgentResponse):
         client_type: Type of client that was installed
         version: Version that was installed
         binary_path: Path to installed binary
+
     """
     
     client_type: Optional[ClientType] = Field(None, description="Installed client type")
@@ -166,6 +175,7 @@ class CheckResponse(AgentResponse):
         success: Whether check completed successfully
         message: Check result message
         clients: Status of available clients
+
     """
     
     clients: Dict[str, Dict[str, Any]] = Field(

@@ -34,6 +34,7 @@ class SubscriptionManagerInterface(ABC):
             
         Returns:
             PipelineResult containing servers and execution metadata.
+
         """
         pass
     
@@ -54,6 +55,7 @@ class SubscriptionManagerInterface(ABC):
             
         Returns:
             PipelineResult containing exported configuration.
+
         """
         pass
 
@@ -82,6 +84,7 @@ class ExportManagerInterface(ABC):
             
         Returns:
             Dictionary containing the final client configuration.
+
         """
         pass
 
@@ -105,6 +108,7 @@ class ExclusionManagerInterface(ABC):
             
         Returns:
             True if added, False if already existed.
+
         """
         pass
     
@@ -117,6 +121,7 @@ class ExclusionManagerInterface(ABC):
             
         Returns:
             True if removed, False if not found.
+
         """
         pass
     
@@ -129,6 +134,7 @@ class ExclusionManagerInterface(ABC):
             
         Returns:
             True if server is excluded, False otherwise.
+
         """
         pass
     
@@ -138,6 +144,7 @@ class ExclusionManagerInterface(ABC):
         
         Returns:
             List of exclusion dictionaries with metadata.
+
         """
         pass
     
@@ -147,6 +154,7 @@ class ExclusionManagerInterface(ABC):
         
         Returns:
             Number of exclusions that were cleared.
+
         """
         pass
     
@@ -159,5 +167,6 @@ class ExclusionManagerInterface(ABC):
             
         Returns:
             Filtered list without excluded servers.
+
         """
         pass 

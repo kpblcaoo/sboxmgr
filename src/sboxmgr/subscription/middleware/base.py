@@ -32,6 +32,7 @@ class BaseMiddleware(ABC):
         
         Args:
             config: Optional configuration dictionary for the middleware
+
         """
         self.config = config or {}
         self.enabled = self.config.get('enabled', True)
@@ -55,6 +56,7 @@ class BaseMiddleware(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class
+
         """
         pass
     
@@ -73,6 +75,7 @@ class BaseMiddleware(ABC):
             
         Returns:
             bool: True if this middleware can handle the servers
+
         """
         return self.enabled and len(servers) > 0
     
@@ -81,6 +84,7 @@ class BaseMiddleware(ABC):
         
         Returns:
             Dict containing middleware metadata
+
         """
         return {
             "name": self.__class__.__name__,
@@ -105,6 +109,7 @@ class ProfileAwareMiddleware(BaseMiddleware):
             
         Returns:
             Dict with middleware configuration
+
         """
         if not profile or 'middleware' not in profile.metadata:
             return {}
@@ -129,6 +134,7 @@ class ProfileAwareMiddleware(BaseMiddleware):
             
         Returns:
             bool: True if server should be processed
+
         """
         # Basic implementation - can be overridden
         return True
@@ -153,6 +159,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
             servers: List of servers to be processed
             context: Pipeline context
             profile: Full profile configuration
+
         """
         pass
     
@@ -168,6 +175,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
             servers: List of processed servers
             context: Pipeline context
             profile: Full profile configuration
+
         """
         pass
     
@@ -186,6 +194,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
             
         Returns:
             List of processed servers
+
         """
         self.pre_process(servers, context, profile)
         result = self._do_process(servers, context, profile)
@@ -208,6 +217,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
             
         Returns:
             List of processed servers
+
         """
         pass
 
@@ -225,6 +235,7 @@ class ConditionalMiddleware(ChainableMiddleware):
         
         Args:
             config: Configuration dictionary with conditional settings
+
         """
         super().__init__(config)
         self.conditions = self.config.get('conditions', {})
@@ -248,6 +259,7 @@ class ConditionalMiddleware(ChainableMiddleware):
             
         Returns:
             bool: True if middleware should execute
+
         """
         if not super().can_process(servers, context, profile):
             return False
@@ -285,6 +297,7 @@ class TransformMiddleware(ConditionalMiddleware):
         
         Args:
             config: Configuration with transformation settings
+
         """
         super().__init__(config)
         self.field_mappings = self.config.get('field_mappings', {})
@@ -306,6 +319,7 @@ class TransformMiddleware(ConditionalMiddleware):
             
         Returns:
             Transformed server
+
         """
         # Apply field mappings
         for source_field, target_field in self.field_mappings.items():
@@ -335,6 +349,7 @@ class TransformMiddleware(ConditionalMiddleware):
             
         Returns:
             Transformed value
+
         """
         # Basic transformers - can be extended
         if transformer_name == 'uppercase':
@@ -360,6 +375,7 @@ class TransformMiddleware(ConditionalMiddleware):
             enricher_config: Enricher configuration
             context: Pipeline context
             profile: Full profile configuration
+
         """
         enricher_type = enricher_config.get('type')
         

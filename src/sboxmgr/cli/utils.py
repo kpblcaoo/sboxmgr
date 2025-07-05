@@ -23,6 +23,7 @@ def is_ai_lang(code):
     Returns:
         True if the language file is marked as AI-generated in its metadata,
         False otherwise or if the file doesn't exist.
+
     """
     i18n_dir = Path(__file__).parent.parent / "i18n"
     lang_file = i18n_dir / f"{code}.json"
@@ -53,6 +54,7 @@ def detect_lang_source():
         2. default_lang in ~/.sboxmgr/config.toml
         3. System locale (LANG environment variable)  
         4. Default fallback ('en')
+
     """
     config_path = Path.home() / ".sboxmgr" / "config.toml"
     if os.environ.get("SBOXMGR_LANG"):

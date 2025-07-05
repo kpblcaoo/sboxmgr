@@ -22,6 +22,7 @@ class InboundBuilder:
             .add_tun(address="198.18.0.1/16", mtu=1500)
             .add_socks(port=1080, listen="127.0.0.1")
             .build())
+
     """
     
     def __init__(self):
@@ -55,6 +56,7 @@ class InboundBuilder:
             
         Raises:
             ValueError: If parameters are invalid
+
         """
         # Set secure defaults
         if address is None:
@@ -108,6 +110,7 @@ class InboundBuilder:
             
         Raises:
             ValueError: If parameters are invalid
+
         """
         if port is None:
             port = 1080
@@ -155,6 +158,7 @@ class InboundBuilder:
             
         Raises:
             ValueError: If parameters are invalid
+
         """
         if port is None:
             port = 8080
@@ -202,6 +206,7 @@ class InboundBuilder:
             
         Raises:
             ValueError: If parameters are invalid
+
         """
         if port is None:
             port = 7895
@@ -238,6 +243,7 @@ class InboundBuilder:
             
         Raises:
             ValueError: If mode is invalid
+
         """
         if mode not in ["system", "tunnel", "off"]:
             raise ValueError(f"Invalid DNS mode: {mode}. Must be one of: system, tunnel, off")
@@ -252,6 +258,7 @@ class InboundBuilder:
             
         Raises:
             ValueError: If no inbounds are configured
+
         """
         if not self._inbounds:
             raise ValueError("At least one inbound must be configured")
@@ -307,6 +314,7 @@ def build_client_profile_from_cli(
         
     Raises:
         ValueError: If parameters are invalid or incompatible
+
     """
     if not inbound_types:
         return None

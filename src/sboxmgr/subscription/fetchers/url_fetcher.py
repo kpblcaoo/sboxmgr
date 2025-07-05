@@ -27,7 +27,9 @@ class URLFetcher(BaseFetcher):
     Attributes:
         _cache_lock: Thread lock for cache synchronization.
         _fetch_cache: Cache dictionary for storing fetched data.
+
     """
+
     _cache_lock = threading.Lock()
     _fetch_cache: Dict[Tuple[str, Optional[str], str], bytes] = {}
 
@@ -46,6 +48,7 @@ class URLFetcher(BaseFetcher):
         Raises:
             ValueError: Если размер файла превышает лимит.
             requests.RequestException: Если не удалось скачать файл.
+
         """
         key = (self.source.url, getattr(self.source, 'user_agent', None), str(getattr(self.source, 'headers', None)))
         if force_reload:

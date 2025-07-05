@@ -34,5 +34,6 @@ class BaseRoutingPlugin(ABC):
             
         Returns:
             List of routing rule dictionaries in the target client format.
+
         """
         pass 

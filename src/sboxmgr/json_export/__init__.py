@@ -1,5 +1,4 @@
-"""
-Export module for sboxmgr
+"""Export module for sboxmgr
 
 Provides standardized export functionality for subbox configurations.
 """

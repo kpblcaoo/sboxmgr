@@ -36,6 +36,7 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
         
     Returns:
         Parser instance or None if detection fails.
+
     """
     # Декодируем данные
     text = raw.decode('utf-8', errors='ignore')
@@ -113,6 +114,7 @@ class SubscriptionManager:
         middleware_chain: Chain of middleware plugins.
         selector: Server selection strategy.
         detect_parser: Function for auto-detecting parsers.
+
     """
     
     _cache_lock = threading.Lock()
@@ -129,6 +131,7 @@ class SubscriptionManager:
             
         Raises:
             ValueError: If source_type is unknown or unsupported.
+
         """
         load_entry_points()  # Подгружаем entry points, если есть
         fetcher_cls = get_plugin(source.source_type)
@@ -164,6 +167,7 @@ class SubscriptionManager:
             
         Returns:
             Tuple representing the unique cache key.
+
         """
         return (
             str(self.fetcher.source.url),
@@ -187,6 +191,7 @@ class SubscriptionManager:
             
         Returns:
             Formatted PipelineError object.
+
         """
         return PipelineError(
             type=error_type,
@@ -208,6 +213,7 @@ class SubscriptionManager:
         Returns:
             Tuple of (raw_data, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
+
         """
         try:
             # Логируем User-Agent на уровне 1
@@ -267,6 +273,7 @@ class SubscriptionManager:
         Returns:
             Tuple of (servers_list, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
+
         """
         try:
             debug_level = getattr(context, 'debug_level', 0)
@@ -316,6 +323,7 @@ class SubscriptionManager:
         Returns:
             Tuple of (validated_servers, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
+
         """
         try:
             debug_level = getattr(context, 'debug_level', 0)
@@ -385,8 +393,10 @@ class SubscriptionManager:
         Args:
             servers: List of ParsedServer objects.
             context: PipelineContext for tracing and audit.
+
         Returns:
             List of servers that passed all DENY policies.
+
         """
         from sboxmgr.policies import policy_registry, PolicyContext as PolCtx
         result = []
@@ -465,6 +475,7 @@ class SubscriptionManager:
         Returns:
             Tuple of (processed_servers, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
+
         """
         try:
             debug_level = getattr(context, 'debug_level', 0)
@@ -500,6 +511,7 @@ class SubscriptionManager:
         Returns:
             Tuple of (selected_servers, success_flag). Selection failures
             are not considered critical errors.
+
         """
         try:
             # Post-processing
@@ -546,6 +558,7 @@ class SubscriptionManager:
             
             Results are cached based on source URL, headers, filters, and mode to
             improve performance for repeated requests.
+
         """
         # Initialize context and parameters
         context = context or PipelineContext()
@@ -649,6 +662,7 @@ class SubscriptionManager:
         Note:
             This method combines get_servers() with format-specific export logic.
             The export format is determined by the export_manager configuration.
+
         """
         exclusions = exclusions or []
         user_routes = user_routes or []

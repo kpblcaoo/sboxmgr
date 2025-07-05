@@ -53,6 +53,7 @@ def apply_profile(profile_path: str, dry_run: bool = False) -> None:
     Args:
         profile_path: Path to the profile file
         dry_run: If True, don't actually apply the profile
+
     """
     try:
         manager = ProfileManager()
@@ -157,6 +158,7 @@ def explain_profile(profile_path: str) -> None:
     
     Args:
         profile_path: Path to the profile file
+
     """
     try:
         loader = ProfileLoader()
@@ -242,6 +244,7 @@ def diff_profiles(profile1_path: str, profile2_path: str) -> None:
     Args:
         profile1_path: Path to the first profile file
         profile2_path: Path to the second profile file
+
     """
     try:
         loader = ProfileLoader()
@@ -301,6 +304,7 @@ def list_profiles(profiles_dir: Optional[str] = None) -> None:
     
     Args:
         profiles_dir: Directory to search for profiles
+
     """
     try:
         manager = ProfileManager(profiles_dir)
@@ -349,6 +353,7 @@ def switch_profile(profile_id: str, profiles_dir: Optional[str] = None) -> None:
     Args:
         profile_id: Profile ID (name or path)
         profiles_dir: Directory to search for profiles
+
     """
     try:
         manager = ProfileManager(profiles_dir)

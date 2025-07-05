@@ -26,6 +26,7 @@ class StructuredFormatter(logging.Formatter):
         Args:
             component: Component name for structured logging
             **kwargs: Additional arguments passed to parent formatter
+
         """
         super().__init__(**kwargs)
         self.component = component
@@ -39,6 +40,7 @@ class StructuredFormatter(logging.Formatter):
             
         Returns:
             str: Formatted log message
+
         """
         # Add structured fields to record
         self._add_structured_fields(record)
@@ -51,6 +53,7 @@ class StructuredFormatter(logging.Formatter):
         
         Args:
             record: Log record to enhance
+
         """
         # Basic structured fields from LOG-02 (UTC timestamps for structured logging)
         record.timestamp = datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat()
@@ -74,6 +77,7 @@ class StructuredFormatter(logging.Formatter):
             
         Returns:
             str: Operation name (e.g., 'fetch')
+
         """
         parts = logger_name.split('.')
         if len(parts) >= 3:  # sboxmgr.module.operation
@@ -99,6 +103,7 @@ class JSONFormatter(StructuredFormatter):
             
         Returns:
             str: JSON-formatted log message
+
         """
         # Add structured fields
         self._add_structured_fields(record)
@@ -154,6 +159,7 @@ class HumanFormatter(StructuredFormatter):
             component: Component name for structured logging
             show_trace_id: Whether to show trace ID in output
             **kwargs: Additional arguments passed to parent formatter
+
         """
         super().__init__(component, **kwargs)
         self.show_trace_id = show_trace_id
@@ -166,6 +172,7 @@ class HumanFormatter(StructuredFormatter):
             
         Returns:
             str: Human-readable log message.
+
         """
         # Add structured fields
         self._add_structured_fields(record)
@@ -210,6 +217,7 @@ class HumanFormatter(StructuredFormatter):
             
         Returns:
             str: Colorized level name (if terminal supports colors)
+
         """
         # Skip coloring if not a TTY or NO_COLOR is set
         if not sys.stderr.isatty() or os.environ.get('NO_COLOR'):
@@ -243,6 +251,7 @@ class CompactFormatter(StructuredFormatter):
             
         Returns:
             str: Compact log message.
+
         """
         # Add structured fields
         self._add_structured_fields(record)
@@ -277,6 +286,7 @@ def create_formatter(
         >>> formatter = create_formatter('json', component='test')
         >>> isinstance(formatter, JSONFormatter)
         True
+
     """
     formatters = {
         'json': JSONFormatter,
@@ -302,6 +312,7 @@ def get_default_formatter(service_mode: bool = False, component: str = "sboxmgr"
         
     Returns:
         logging.Formatter: Default formatter for the mode
+
     """
     if service_mode:
         return JSONFormatter(component=component)

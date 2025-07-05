@@ -27,6 +27,7 @@ def get_log_file():
     
     Returns:
         str: Log file path
+
     """
     if os.getenv("SBOXMGR_LOG_FILE"):
         return os.getenv("SBOXMGR_LOG_FILE")
@@ -51,6 +52,7 @@ def get_config_file():
     Returns:
         str: Configuration file path from SBOXMGR_CONFIG_FILE environment
              variable or default '/etc/sing-box/config.json'.
+
     """
     # Default matches sing-box config location
     return os.getenv("SBOXMGR_CONFIG_FILE", "/etc/sing-box/config.json")
@@ -61,6 +63,7 @@ def get_backup_file():
     Returns:
         str: Backup file path from SBOXMGR_BACKUP_FILE environment
              variable or default '/etc/sing-box/config.json.bak'.
+
     """
     # Default matches sing-box config location
     return os.getenv("SBOXMGR_BACKUP_FILE", "/etc/sing-box/config.json.bak")
@@ -71,6 +74,7 @@ def get_template_file():
     Returns:
         str: Template file path from SBOXMGR_TEMPLATE_FILE environment
              variable or default './config.template.json'.
+
     """
     return os.getenv("SBOXMGR_TEMPLATE_FILE", "./config.template.json")
 
@@ -80,6 +84,7 @@ def get_exclusion_file():
     Returns:
         str: Exclusions file path from SBOXMGR_EXCLUSION_FILE environment
              variable or default './exclusions.json'.
+
     """
     return os.getenv("SBOXMGR_EXCLUSION_FILE", "./exclusions.json")
 
@@ -89,6 +94,7 @@ def get_selected_config_file():
     Returns:
         str: Selected config file path from SBOXMGR_SELECTED_CONFIG_FILE
              environment variable or default './selected_config.json'.
+
     """
     return os.getenv("SBOXMGR_SELECTED_CONFIG_FILE", "./selected_config.json")
 
@@ -98,6 +104,7 @@ def get_max_log_size():
     Returns:
         int: Maximum log size from SBOXMGR_MAX_LOG_SIZE environment
              variable or default 1048576 (1MB).
+
     """
     return int(os.getenv("SBOXMGR_MAX_LOG_SIZE", "1048576"))
 
@@ -109,6 +116,7 @@ def get_debug_level(default=0):
         
     Returns:
         int: Debug level from SBOXMGR_DEBUG environment variable or default.
+
     """
     return int(os.getenv("SBOXMGR_DEBUG", str(default)))
 
@@ -120,6 +128,7 @@ def get_fetch_timeout():
     
     Returns:
         int: Request timeout in seconds
+
     """
     try:
         return int(os.getenv("SBOXMGR_FETCH_TIMEOUT", "30"))
@@ -134,6 +143,7 @@ def get_fetch_size_limit():
     
     Returns:
         int: Size limit in bytes
+
     """
     try:
         return int(os.getenv("SBOXMGR_FETCH_SIZE_LIMIT", "2097152"))
@@ -148,5 +158,6 @@ def get_url():
     
     Returns:
         str or None: Subscription URL if found in environment variables.
+
     """
     return os.getenv("SBOXMGR_URL") or os.getenv("SINGBOX_URL") or os.getenv("TEST_URL") 

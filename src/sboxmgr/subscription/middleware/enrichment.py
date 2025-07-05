@@ -39,6 +39,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             'geo_database_path': '/path/to/geoip.db'
         })
         enriched_servers = middleware.process(servers, context, profile)
+
     """
     
     middleware_type = "enrichment"
@@ -48,6 +49,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         
         Args:
             config: Configuration dictionary for enrichment options
+
         """
         super().__init__(config)
         self.enable_geo_enrichment = self.config.get('enable_geo_enrichment', True)
@@ -79,6 +81,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             List of enriched servers
+
         """
         if not servers:
             return servers
@@ -116,6 +119,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Dictionary with enrichment configuration
+
         """
         enrichment_config = {
             'enable_geo_enrichment': self.enable_geo_enrichment,
@@ -154,6 +158,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Enriched server
+
         """
         if not enrichment_config:
             enrichment_config = self._extract_enrichment_config(profile)
@@ -188,6 +193,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Server with basic enrichment
+
         """
         # Add processing metadata
         server.meta['enriched_at'] = time.time()
@@ -218,6 +224,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Server with geographic enrichment
+
         """
         server_key = server.address
         
@@ -251,6 +258,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Dictionary with geographic information
+
         """
         geo_info = {}
         
@@ -298,6 +306,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             bool: True if address is private
+
         """
         import ipaddress
         
@@ -317,6 +326,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Server with performance enrichment
+
         """
         server_key = f"{server.address}:{server.port}"
         
@@ -357,6 +367,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Latency class ('low', 'medium', 'high', 'unknown')
+
         """
         # Basic heuristics for latency estimation
         if 'geo' in server.meta:
@@ -378,6 +389,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Efficiency rating ('high', 'medium', 'low')
+
         """
         efficiency_map = {
             'wireguard': 'high',
@@ -400,6 +412,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Security level ('high', 'medium', 'low')
+
         """
         protocol_security = {
             'wireguard': 'high',
@@ -430,6 +443,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Reliability score (0.0 to 1.0)
+
         """
         score = 0.5  # Base score
         
@@ -467,6 +481,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Server with security enrichment
+
         """
         security_info = {}
         
@@ -494,6 +509,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Encryption level ('strong', 'moderate', 'weak', 'none')
+
         """
         if server.security in ['tls', 'reality', 'xtls']:
             return 'strong'
@@ -512,6 +528,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Port classification
+
         """
         if port in [80, 8080]:
             return 'http'
@@ -534,6 +551,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             List of vulnerability descriptions
+
         """
         vulnerabilities = {
             'vmess': ['timing_attack_v1', 'weak_uuid_generation'],
@@ -552,6 +570,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Dictionary with recommended settings
+
         """
         recommendations = {}
         
@@ -588,6 +607,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             
         Returns:
             Server with custom enrichment
+
         """
         if not profile or not enrichment_config:
             return server
@@ -614,6 +634,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         # Find matching subscription
         for sub_profile in profile.subscriptions:
@@ -630,6 +651,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         priority_score = 0.5  # Base score
         
@@ -653,6 +675,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         compatibility = {'compatible': True, 'issues': []}
         

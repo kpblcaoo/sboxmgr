@@ -1,5 +1,4 @@
-"""
-Pydantic models for Full Profile Architecture (ADR-0017).
+"""Pydantic models for Full Profile Architecture (ADR-0017).
 
 This module defines the core models for profile-based configuration,
 including subscriptions, filters, routing, export settings, agent config, and UI preferences.
@@ -12,6 +11,7 @@ from enum import Enum
 
 class ExportFormat(str, Enum):
     """Supported export formats."""
+
     SINGBOX = "sing-box"
     CLASH = "clash"
     JSON = "json"
@@ -19,6 +19,7 @@ class ExportFormat(str, Enum):
 
 class UIMode(str, Enum):
     """Supported UI modes."""
+
     CLI = "cli"
     TUI = "tui"
     GUI = "gui"

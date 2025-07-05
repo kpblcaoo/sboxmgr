@@ -43,6 +43,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             'error_strategy': 'continue'
         })
         processed_servers = chain.process(servers, context, profile)
+
     """
     
     def __init__(
@@ -55,6 +56,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         Args:
             processors: List of postprocessors to execute
             config: Configuration dictionary for chain execution
+
         """
         super().__init__(config)
         self.processors = processors
@@ -82,6 +84,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             
         Returns:
             List of processed servers
+
         """
         if not servers or not self.processors:
             return servers
@@ -142,6 +145,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             
         Returns:
             List of processed servers
+
         """
         current_servers = servers
         
@@ -203,6 +207,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             
         Returns:
             List of processed servers (merged results)
+
         """
         with ThreadPoolExecutor(max_workers=self.parallel_workers) as executor:
             # Submit all processors
@@ -271,6 +276,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             
         Returns:
             List of processed servers
+
         """
         current_servers = servers
         
@@ -337,6 +343,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             
         Returns:
             bool: True if processor should be executed
+
         """
         # Basic conditional logic - can be extended
         if not processor.can_process(servers, context):
@@ -367,6 +374,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             
         Returns:
             List of processed servers
+
         """
         last_exception = None
         
@@ -395,6 +403,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             
         Returns:
             bool: True if at least one processor can handle the servers
+
         """
         if not servers or not self.processors:
             return False
@@ -411,6 +420,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         
         Returns:
             Dict containing chain execution metadata
+
         """
         metadata = super().get_metadata()
         metadata.update({
@@ -429,6 +439,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             
         Returns:
             Processor instance or None
+
         """
         for processor in self.processors:
             if processor.__class__.__name__ == name:
@@ -441,6 +452,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         Args:
             processor: Processor to add
             index: Optional index to insert at (default: append)
+
         """
         if index is None:
             self.processors.append(processor)
@@ -455,6 +467,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             
         Returns:
             bool: True if processor was removed
+
         """
         if isinstance(processor, int):
             if 0 <= processor < len(self.processors):

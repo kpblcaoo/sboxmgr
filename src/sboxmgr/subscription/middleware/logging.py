@@ -40,6 +40,7 @@ class LoggingMiddleware(ChainableMiddleware):
             'max_servers_logged': 10
         })
         processed_servers = middleware.process(servers, context, profile)
+
     """
     
     middleware_type = "logging"
@@ -49,6 +50,7 @@ class LoggingMiddleware(ChainableMiddleware):
         
         Args:
             config: Configuration dictionary for logging options
+
         """
         super().__init__(config)
         self.log_level = self.config.get('log_level', 'info')
@@ -74,6 +76,7 @@ class LoggingMiddleware(ChainableMiddleware):
             servers: List of servers to be processed
             context: Pipeline context
             profile: Full profile configuration
+
         """
         self._start_time = time.time()
         
@@ -111,6 +114,7 @@ class LoggingMiddleware(ChainableMiddleware):
             servers: List of processed servers
             context: Pipeline context
             profile: Full profile configuration
+
         """
         duration = time.time() - self._start_time
         
@@ -156,6 +160,7 @@ class LoggingMiddleware(ChainableMiddleware):
             
         Returns:
             List of servers (unchanged)
+
         """
         # Store input count for post-processing metrics
         context.metadata['input_server_count'] = len(servers)
@@ -174,6 +179,7 @@ class LoggingMiddleware(ChainableMiddleware):
             
         Returns:
             Dictionary with logging configuration
+
         """
         log_config = {
             'log_level': self.log_level,
@@ -213,6 +219,7 @@ class LoggingMiddleware(ChainableMiddleware):
             servers: List of servers to log
             context: Pipeline context
             stage: Processing stage ('input' or 'output')
+
         """
         servers_to_log = servers[:self.max_servers_logged]
         
@@ -254,6 +261,7 @@ class LoggingMiddleware(ChainableMiddleware):
             servers: List of processed servers
             context: Pipeline context
             duration: Processing duration in seconds
+
         """
         metrics = {
             'total_servers': len(servers),
@@ -288,6 +296,7 @@ class LoggingMiddleware(ChainableMiddleware):
         Args:
             servers: List of servers to check
             context: Pipeline context
+
         """
         error_count = 0
         
@@ -330,6 +339,7 @@ class LoggingMiddleware(ChainableMiddleware):
         
         Returns:
             Memory usage in megabytes
+
         """
         try:
             import psutil
@@ -354,6 +364,7 @@ class LoggingMiddleware(ChainableMiddleware):
             
         Returns:
             bool: True if logging is enabled
+
         """
         if not super().can_process(servers, context, profile):
             return False
@@ -371,6 +382,7 @@ class LoggingMiddleware(ChainableMiddleware):
         
         Returns:
             Dict containing middleware metadata
+
         """
         metadata = super().get_metadata()
         metadata.update({

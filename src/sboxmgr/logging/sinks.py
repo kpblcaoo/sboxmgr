@@ -43,6 +43,7 @@ def detect_available_sinks() -> List[LogSink]:
         >>> sinks = detect_available_sinks()
         >>> LogSink.STDOUT in sinks
         True
+
     """
     available = []
     
@@ -90,6 +91,7 @@ def create_handler(
         >>> handler = create_handler(LogSink.STDOUT, config)
         >>> isinstance(handler, logging.StreamHandler)
         True
+
     """
     try:
         if sink == LogSink.AUTO:
@@ -130,6 +132,7 @@ def _is_journald_available() -> bool:
     
     Returns:
         bool: True if journald is available
+
     """
     # Check if systemd environment is detected
     if not detect_systemd_environment():
@@ -152,6 +155,7 @@ def _is_syslog_available() -> bool:
     
     Returns:
         bool: True if syslog is available
+
     """
     # Check for common syslog socket locations
     syslog_paths = [
@@ -176,6 +180,7 @@ def _create_journald_handler(config: 'LoggingConfig', level: Optional[str] = Non
         
     Returns:
         logging.Handler: Journald handler
+
     """
     try:
         # Try to import systemd journal handler
@@ -267,6 +272,7 @@ def _create_syslog_handler(config: 'LoggingConfig', level: Optional[str] = None)
         
     Returns:
         logging.Handler: Syslog handler
+
     """
     # Try different syslog addresses
     addresses: List[Union[str, Tuple[str, int]]] = [
@@ -297,6 +303,7 @@ def _create_stdout_handler(config: 'LoggingConfig', level: Optional[str] = None)
         
     Returns:
         logging.Handler: Stdout handler
+
     """
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(level or config.level)
@@ -312,6 +319,7 @@ def _create_stderr_handler(config: 'LoggingConfig', level: Optional[str] = None)
         
     Returns:
         logging.Handler: Stderr handler
+
     """
     handler = logging.StreamHandler(sys.stderr)
     handler.setLevel(level or config.level)
@@ -330,6 +338,7 @@ def _create_file_handler(config: 'LoggingConfig', level: Optional[str] = None) -
         
     Raises:
         ValueError: If file path not configured
+
     """
     if not config.file_path:
         raise ValueError("File path not configured for file handler")
@@ -357,6 +366,7 @@ def _add_journald_fields(record: logging.LogRecord) -> bool:
         
     Returns:
         bool: Always True (don't filter)
+
     """
     # Add structured fields that journald can index
     record.SYSLOG_IDENTIFIER = "sboxmgr"
@@ -373,6 +383,7 @@ def _get_syslog_priority(level: int) -> int:
         
     Returns:
         int: Syslog priority value
+
     """
     mapping = {
         logging.DEBUG: 7,    # LOG_DEBUG

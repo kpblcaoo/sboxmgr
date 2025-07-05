@@ -1,5 +1,4 @@
-"""
-DEPRECATED: Configuration models for sing-box.
+"""DEPRECATED: Configuration models for sing-box.
 
 This module is deprecated and will be removed in a future version.
 Use src.sboxmgr.models.singbox instead for the complete sing-box schema.
@@ -33,6 +32,7 @@ from .singbox.observatory import ObservatoryConfig
 
 class LogConfig(BaseModel):
     """Logging configuration for sing-box."""
+
     level: Optional[LogLevel] = Field(default=None, description="Log level.")
     timestamp: Optional[bool] = Field(default=None, description="Include timestamp in log messages.")
     output: Optional[str] = Field(default=None, description="Log output path.")
@@ -43,6 +43,7 @@ class LogConfig(BaseModel):
 
 class DnsServer(BaseModel):
     """DNS server configuration."""
+
     tag: Optional[str] = None
     address: str
     address_resolver: Optional[str] = None
@@ -54,6 +55,7 @@ class DnsServer(BaseModel):
 
 class DnsRule(BaseModel):
     """DNS rule configuration."""
+
     type: str
     inbound: Optional[List[str]] = None
     ip_version: Optional[Literal[4, 6]] = None
@@ -79,6 +81,7 @@ class DnsRule(BaseModel):
 
 class DnsConfig(BaseModel):
     """DNS configuration."""
+
     servers: Optional[List[DnsServer]] = None
     rules: Optional[List[DnsRule]] = None
     final: Optional[str] = None
@@ -100,6 +103,7 @@ class DnsConfig(BaseModel):
 
 class NtpConfig(BaseModel):
     """NTP configuration."""
+
     enabled: Optional[bool] = None
     server: str
     server_port: Optional[int] = Field(None, ge=1, le=65535)
@@ -109,11 +113,13 @@ class NtpConfig(BaseModel):
 
 class CertificateConfig(BaseModel):
     """Certificate configuration."""
+
     store: Optional[Dict[str, Any]] = None
 
 
 class ClashApiConfig(BaseModel):
     """Clash API configuration."""
+
     external_controller: Optional[str] = None
     external_ui: Optional[str] = None
     secret: Optional[str] = None
@@ -122,6 +128,7 @@ class ClashApiConfig(BaseModel):
 
 class V2RayApiConfig(BaseModel):
     """V2Ray API configuration."""
+
     listen: Optional[str] = None
     stats_enabled: Optional[bool] = None
     stats_outbound_downlink: Optional[bool] = None
@@ -130,6 +137,7 @@ class V2RayApiConfig(BaseModel):
 
 class ExperimentalConfig(BaseModel):
     """Experimental features configuration."""
+
     clash_api: Optional[ClashApiConfig] = None
     v2ray_api: Optional[V2RayApiConfig] = None
     cache_file: Optional[Dict[str, Any]] = None
@@ -139,6 +147,7 @@ class ExperimentalConfig(BaseModel):
 
 class SingBoxConfig(BaseModel):
     """Full sing-box configuration (1.11.14)."""
+
     log: Optional[LogConfig] = Field(default=None, description="Logging configuration.")
     dns: Optional[DnsConfig] = Field(default=None, description="DNS configuration.")
     ntp: Optional[NtpConfig] = Field(default=None, description="NTP configuration for time synchronization.")

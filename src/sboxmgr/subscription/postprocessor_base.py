@@ -17,6 +17,7 @@ class BasePostProcessor(ABC):
     stage. They can add geographic information, apply filtering rules,
     optimize server lists, or perform custom transformations.
     """
+
     plugin_type = "postprocessor"
     @abstractmethod
     def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
@@ -31,6 +32,7 @@ class BasePostProcessor(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class.
+
         """
         pass
 
@@ -54,7 +56,9 @@ class PostProcessorChain(BasePostProcessor):
     Example:
         chain = PostProcessorChain([DedupPostProcessor(), GeoPostProcessor()])
         servers = chain.process(servers)
+
     """
+
     def __init__(self, processors: list):
         self.processors = processors
 
@@ -67,6 +71,7 @@ class PostProcessorChain(BasePostProcessor):
 
         Returns:
             List[ParsedServer]: Result after applying all postprocessor plugins.
+
         """
         for proc in self.processors:
             sig = inspect.signature(proc.process)

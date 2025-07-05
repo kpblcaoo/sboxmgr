@@ -30,6 +30,7 @@ class DefaultRouter(BaseRoutingPlugin):
             
         Returns:
             List of routing rule dictionaries for sing-box configuration.
+
         """
         # Логируем только при debug_level >= 2
         debug_level = getattr(context, 'debug_level', 0) if context else 0
@@ -154,6 +155,7 @@ class DefaultRouter(BaseRoutingPlugin):
             
         Returns:
             True if it looks like an IP address.
+
         """
         try:
             import ipaddress

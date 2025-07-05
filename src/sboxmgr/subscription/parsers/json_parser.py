@@ -34,6 +34,7 @@ class JSONParser(BaseParser):
         Raises:
             json.JSONDecodeError: If JSON parsing fails.
             KeyError: If required JSON fields are missing.
+
         """
         debug_level = get_debug_level()
         try:
@@ -65,6 +66,7 @@ class TolerantJSONParser(BaseParser):
             
         Raises:
             json.JSONDecodeError: If JSON parsing fails after cleaning.
+
         """
         debug_level = get_debug_level()
         clean_json, removed = self._strip_comments_and_validate(raw.decode("utf-8"))
@@ -135,6 +137,7 @@ class SSRJSONParser(BaseParser):
         Raises:
             json.JSONDecodeError: If JSON parsing fails.
             KeyError: If required SSR fields are missing.
+
         """
         # TODO: implement SSR JSON parsing logic
         return []

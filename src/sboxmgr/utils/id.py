@@ -17,6 +17,7 @@ def generate_server_id(server):
     Note:
         The identifier is stable across subscription updates as long as
         the server's core attributes (tag, type, port) remain unchanged.
+
     """
     identifier = f"{server.get('tag', '')}{server.get('type', '')}{server.get('server_port', '')}"
     return hashlib.sha256(identifier.encode()).hexdigest() 

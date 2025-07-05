@@ -16,7 +16,9 @@ class SfiParser(BaseParser):
     Example:
         parser = SfiParser()
         servers = parser.parse(raw)
+
     """
+
     def parse(self, raw: bytes):
         """Parse subscription data.
 
@@ -25,6 +27,7 @@ class SfiParser(BaseParser):
 
         Returns:
             list[ParsedServer]: Servers.
+
         """
         raise NotImplementedError()
 

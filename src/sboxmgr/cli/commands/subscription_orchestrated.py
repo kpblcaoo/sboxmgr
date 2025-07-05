@@ -25,6 +25,7 @@ def _create_orchestrator(debug_level: int = 0, fail_safe: bool = False) -> Orche
         
     Returns:
         Orchestrator: Configured orchestrator instance.
+
     """
     return Orchestrator.create_default(debug_level=debug_level, fail_safe=fail_safe)
 
@@ -79,6 +80,7 @@ def run_orchestrated(
         
     Raises:
         typer.Exit: On validation failure or processing errors.
+
     """
     from logsetup.setup import setup_logging
     setup_logging(debug_level=debug)
@@ -218,6 +220,7 @@ def dry_run_orchestrated(
         
     Raises:
         typer.Exit: Exit code 0 if valid, 1 if invalid.
+
     """
     # Simply call run_orchestrated with dry_run=True
     run_orchestrated(
@@ -265,6 +268,7 @@ def list_servers_orchestrated(
         
     Raises:
         typer.Exit: On fetch or processing failure.
+
     """
     from logsetup.setup import setup_logging
     setup_logging(debug_level=debug)

@@ -36,6 +36,7 @@ class PipelineError(BaseModel):
         message: Human-readable error description.
         context: Additional context information about the error.
         timestamp: When the error occurred (UTC).
+
     """
     
     model_config = ConfigDict(extra='allow')

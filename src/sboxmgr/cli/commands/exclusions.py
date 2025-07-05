@@ -47,7 +47,6 @@ def exclusions(
     Supports adding, removing, viewing exclusions with interactive selection,
     wildcard patterns, and JSON export capabilities.
     """
-    
     manager = ExclusionManager.default()
     
     # Handle view-only operations first (no URL needed)
@@ -107,6 +106,7 @@ def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
         
     Raises:
         typer.Exit: If fetching or parsing fails
+
     """
     try:
         json_data = fetch_json(url)
@@ -138,6 +138,7 @@ def _cache_server_data(manager: ExclusionManager, json_data: dict, json_output: 
         
     Raises:
         typer.Exit: If server data format is invalid
+
     """
     try:
         manager.set_servers_cache(json_data, SUPPORTED_PROTOCOLS)
@@ -161,6 +162,7 @@ def _view_exclusions(manager: ExclusionManager, json_output: bool) -> None:
     Args:
         manager: ExclusionManager instance for data access.
         json_output: If True, output JSON format; otherwise rich table format.
+
     """
     exclusions = manager.list_all()
     
@@ -199,6 +201,7 @@ def _list_servers(manager: ExclusionManager, json_output: bool, show_excluded: b
         manager: ExclusionManager instance with cached server data.
         json_output: If True, output JSON format; otherwise rich table format.
         show_excluded: Whether to include excluded servers in the listing.
+
     """
     servers_info = manager.list_servers(show_excluded=show_excluded)
     

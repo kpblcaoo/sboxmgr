@@ -1,5 +1,4 @@
-"""
-Fetchers: загрузчики подписок (HTTP, file, API и др.)
+"""Fetchers: загрузчики подписок (HTTP, file, API и др.)
 
 Точка подключения для AuthHandler и HeaderPlugin (будущее).
 """

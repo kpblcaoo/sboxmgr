@@ -1,5 +1,4 @@
-"""
-Main sing-box configuration model.
+"""Main sing-box configuration model.
 
 This module provides the main SingBoxConfig class that combines all
 sing-box configuration components into a single validated model.
@@ -20,6 +19,7 @@ from .observatory import ObservatoryConfig
 
 class LogConfig(BaseModel):
     """Logging configuration for sing-box."""
+
     disabled: Optional[bool] = Field(default=None, description="Disable logging.")
     level: Optional[LogLevel] = Field(default=None, description="Log level.")
     timestamp: Optional[bool] = Field(default=None, description="Include timestamp in log messages.")
@@ -29,8 +29,7 @@ class LogConfig(BaseModel):
 
 
 class SingBoxConfig(BaseModel):
-    """
-    Complete sing-box configuration model.
+    """Complete sing-box configuration model.
     
     This model represents the full sing-box configuration with all supported
     protocols and features. It is validated against sing-box 1.11.13.
@@ -44,6 +43,7 @@ class SingBoxConfig(BaseModel):
       urltest, hysteria, anytls, ssh, tor)
     - Complete DNS, routing, and experimental features support
     """
+
     log: Optional[LogConfig] = Field(default=None, description="Logging configuration.")
     dns: Optional[DnsConfig] = Field(default=None, description="DNS configuration.")
     ntp: Optional[NtpConfig] = Field(default=None, description="NTP configuration for time synchronization.")

@@ -19,6 +19,7 @@ def clash_export(servers: List[ParsedServer], routes: List[Dict[str, Any]] = Non
         
     Returns:
         Dictionary containing Clash configuration.
+
     """
     # Basic Clash configuration structure
     config = {
@@ -67,6 +68,7 @@ def _convert_server_to_clash_proxy(server: ParsedServer) -> Dict[str, Any]:
         
     Returns:
         Dictionary with Clash proxy configuration.
+
     """
     if not server or not hasattr(server, 'protocol'):
         return None
@@ -106,9 +108,12 @@ def _convert_server_to_clash_proxy(server: ParsedServer) -> Dict[str, Any]:
 class ClashExporter(BaseExporter):
     """ClashExporter exports parsed servers to config.
 
-Example:
+    Example:
     exporter = ClashExporter()
-    config = exporter.export(servers)"""
+    config = exporter.export(servers)
+
+    """
+
     def export(self, servers):
         """Export parsed servers to config.
 
@@ -117,6 +122,7 @@ Example:
 
         Returns:
             dict: Exported config.
+
         """
         return clash_export(servers)
 

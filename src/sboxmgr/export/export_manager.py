@@ -62,6 +62,7 @@ class ExportManager:
         postprocessor_chain: Optional PostProcessorChain for server processing.
         middleware_chain: Optional MiddlewareChain for data enrichment.
         profile: Optional FullProfile for profile-based configuration.
+
     """
     
     def __init__(self, 
@@ -81,6 +82,7 @@ class ExportManager:
             postprocessor_chain: Optional PostProcessorChain for server processing.
             middleware_chain: Optional list of middleware components.
             profile: Optional FullProfile for profile-based configuration.
+
         """
         self.routing_plugin = routing_plugin or DefaultRouter()
         self.export_format = export_format
@@ -112,6 +114,7 @@ class ExportManager:
             
         Returns:
             Dictionary containing exported configuration.
+
         """
         # Convert context to PipelineContext if needed
         if isinstance(context, dict):
@@ -217,6 +220,7 @@ class ExportManager:
             
         Returns:
             Dictionary containing sing-box configuration.
+
         """
         routes = routes or []
         client_profile = client_profile or self.client_profile
@@ -269,6 +273,7 @@ class ExportManager:
             
         Returns:
             New ExportManager instance configured from profile.
+
         """
         if not PHASE3_AVAILABLE:
             # Return current instance if Phase 3 not available
@@ -311,6 +316,7 @@ class ExportManager:
             
         Returns:
             Dictionary with postprocessor configuration or None.
+
         """
         if not hasattr(profile, 'filter') or not profile.filter:
             return None
@@ -343,6 +349,7 @@ class ExportManager:
             
         Returns:
             Configured PostProcessorChain or None.
+
         """
         if not PHASE3_AVAILABLE:
             return None
@@ -383,6 +390,7 @@ class ExportManager:
             
         Returns:
             List of configured middleware components.
+
         """
         if not PHASE3_AVAILABLE:
             return []
@@ -413,6 +421,7 @@ class ExportManager:
         
         Returns:
             True if Phase 3 components are available and configured.
+
         """
         return (PHASE3_AVAILABLE and 
                 (self.postprocessor_chain is not None or 
@@ -423,6 +432,7 @@ class ExportManager:
         
         Returns:
             Dictionary with metadata about processing configuration.
+
         """
         metadata = {
             'export_format': self.export_format,
@@ -450,6 +460,7 @@ class ExportManager:
         
         Args:
             client_profile: Client profile with configuration
+
         """
         if not PHASE3_AVAILABLE:
             return

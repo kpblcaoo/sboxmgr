@@ -6,6 +6,7 @@ from .base import SingBoxModelBase
 
 class OutboundBase(SingBoxModelBase):
     """Base class for outbound configurations."""
+
     type: str = Field(..., description="Outbound protocol type, e.g., 'shadowsocks', 'vmess'.")
     tag: Optional[str] = Field(default=None, description="Unique tag for the outbound.")
     server: Optional[str] = Field(default=None, description="Server address (IP or domain).")
@@ -19,10 +20,12 @@ class OutboundBase(SingBoxModelBase):
 
 class OutboundWithTransport(OutboundBase):
     """Base class for outbounds that support transport layer."""
+
     transport: Optional[TransportConfig] = Field(default=None, description="Transport layer settings.")
 
 class ShadowsocksOutbound(OutboundWithTransport):
     """Shadowsocks outbound configuration."""
+
     type: Literal["shadowsocks"] = Field(default="shadowsocks", description="Shadowsocks protocol.")
     method: str = Field(..., description="Encryption method, e.g., 'aes-256-gcm'.")
     password: str = Field(..., description="Password for authentication.")
@@ -40,6 +43,7 @@ class ShadowsocksOutbound(OutboundWithTransport):
 
 class VmessOutbound(OutboundWithTransport):
     """VMess outbound configuration."""
+
     type: Literal["vmess"] = Field(default="vmess", description="VMess protocol.")
     uuid: str = Field(..., description="User UUID for authentication.")
     security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = Field(default="auto", description="Encryption method.")
@@ -50,6 +54,7 @@ class VmessOutbound(OutboundWithTransport):
 
 class VlessOutbound(OutboundWithTransport):
     """VLESS outbound configuration."""
+
     type: Literal["vless"] = Field(default="vless", description="VLESS protocol.")
     uuid: str = Field(..., description="User UUID for authentication.")
     flow: Optional[Literal["xtls-rprx-vision", ""]] = Field(default=None, description="Flow type for XTLS, e.g., 'xtls-rprx-vision'.")
@@ -57,12 +62,14 @@ class VlessOutbound(OutboundWithTransport):
 
 class TrojanOutbound(OutboundWithTransport):
     """Trojan outbound configuration."""
+
     type: Literal["trojan"] = Field(default="trojan", description="Trojan protocol.")
     password: str = Field(..., description="Password for authentication.")
     fallback: Optional[Dict[str, Any]] = Field(default=None, description="Fallback settings, e.g., {'dest': '80'}.")
 
 class Hysteria2Outbound(OutboundWithTransport):
     """Hysteria2 outbound configuration."""
+
     type: Literal["hysteria2"] = Field(default="hysteria2", description="Hysteria2 protocol.")
     password: Optional[str] = Field(default=None, description="Password for authentication.")
     up_mbps: Optional[int] = Field(default=None, ge=0, description="Upload bandwidth in Mbps.")
@@ -72,6 +79,7 @@ class Hysteria2Outbound(OutboundWithTransport):
 
 class WireGuardOutbound(OutboundBase):
     """WireGuard outbound configuration."""
+
     type: Literal["wireguard"] = Field(default="wireguard", description="WireGuard protocol.")
     private_key: str = Field(..., description="Private key for WireGuard.")
     peer_public_key: str = Field(..., description="Public key of the peer.")
@@ -86,6 +94,7 @@ class WireGuardOutbound(OutboundBase):
 
 class HttpOutbound(OutboundBase):
     """HTTP outbound configuration."""
+
     type: Literal["http"] = Field(default="http", description="HTTP protocol.")
     username: Optional[str] = Field(default=None, description="Username for authentication.")
     password: Optional[str] = Field(default=None, description="Password for authentication.")
@@ -93,6 +102,7 @@ class HttpOutbound(OutboundBase):
 
 class SocksOutbound(OutboundBase):
     """SOCKS outbound configuration."""
+
     type: Literal["socks"] = Field(default="socks", description="SOCKS protocol (v4/v5).")
     version: Optional[Literal["4", "4a", "5"]] = Field(default="5", description="SOCKS version.")
     username: Optional[str] = Field(default=None, description="Username for authentication.")
@@ -100,6 +110,7 @@ class SocksOutbound(OutboundBase):
 
 class TuicOutbound(OutboundWithTransport):
     """TUIC outbound configuration."""
+
     type: Literal["tuic"] = Field(default="tuic", description="TUIC protocol.")
     uuid: str = Field(..., description="UUID for authentication.")
     password: str = Field(..., description="Password for authentication.")
@@ -110,6 +121,7 @@ class TuicOutbound(OutboundWithTransport):
 
 class ShadowTlsOutbound(OutboundWithTransport):
     """ShadowTLS outbound configuration."""
+
     type: Literal["shadowtls"] = Field(default="shadowtls", description="ShadowTLS protocol.")
     version: Optional[Literal[1, 2, 3]] = Field(default=None, description="ShadowTLS version (1, 2, or 3).")
     password: Optional[str] = Field(default=None, description="Password for authentication.")
@@ -118,10 +130,12 @@ class ShadowTlsOutbound(OutboundWithTransport):
 
 class DnsOutbound(OutboundBase):
     """DNS outbound configuration."""
+
     type: Literal["dns"] = Field(default="dns", description="DNS protocol.")
 
 class DirectOutbound(OutboundBase):
     """Direct outbound configuration."""
+
     type: Literal["direct"] = Field(default="direct", description="Direct connection protocol.")
     override_address: Optional[str] = Field(default=None, description="Override destination address.")
     override_port: Optional[int] = Field(default=None, ge=0, le=65535, description="Override destination port.")
@@ -129,16 +143,19 @@ class DirectOutbound(OutboundBase):
 
 class BlockOutbound(OutboundBase):
     """Block outbound configuration."""
+
     type: Literal["block"] = Field(default="block", description="Block connection protocol.")
 
 class SelectorOutbound(OutboundBase):
     """Selector outbound configuration."""
+
     type: Literal["selector"] = Field(default="selector", description="Selector for outbound switching.")
     outbounds: List[str] = Field(..., description="List of outbound tags to select from.")
     default: Optional[str] = Field(default=None, description="Default outbound tag.")
 
 class UrlTestOutbound(OutboundBase):
     """URLTest outbound configuration."""
+
     type: Literal["urltest"] = Field(default="urltest", description="URLTest for automatic outbound selection.")
     outbounds: List[str] = Field(..., description="List of outbound tags to test.")
     url: str = Field(..., description="URL for latency testing, e.g., 'http://www.google.com/generate_204'.")
@@ -148,6 +165,7 @@ class UrlTestOutbound(OutboundBase):
 
 class HysteriaOutbound(OutboundBase):
     """Hysteria outbound configuration (legacy version)."""
+
     type: Literal["hysteria"] = Field(default="hysteria", description="Hysteria protocol (legacy).")
     up_mbps: Optional[int] = Field(None, ge=0, description="Upload speed in Mbps.")
     down_mbps: Optional[int] = Field(None, ge=0, description="Download speed in Mbps.")
@@ -159,6 +177,7 @@ class HysteriaOutbound(OutboundBase):
 
 class AnyTlsOutbound(OutboundBase):
     """AnyTLS outbound configuration."""
+
     type: Literal["anytls"] = Field(default="anytls", description="AnyTLS protocol.")
     password: str = Field(..., description="AnyTLS password.")
     idle_session_check_interval: Optional[str] = Field(None, description="Interval checking for idle sessions.")
@@ -167,6 +186,7 @@ class AnyTlsOutbound(OutboundBase):
 
 class SshOutbound(OutboundBase):
     """SSH outbound configuration."""
+
     type: Literal["ssh"] = Field(default="ssh", description="SSH protocol.")
     user: Optional[str] = Field(None, description="SSH user.")
     password: Optional[str] = Field(None, description="SSH password.")
@@ -179,6 +199,7 @@ class SshOutbound(OutboundBase):
 
 class TorOutbound(OutboundBase):
     """Tor outbound configuration."""
+
     type: Literal["tor"] = Field(default="tor", description="Tor protocol.")
     executable_path: Optional[str] = Field(None, description="Path to Tor executable.")
     extra_args: Optional[List[str]] = Field(None, description="Extra arguments for Tor.")

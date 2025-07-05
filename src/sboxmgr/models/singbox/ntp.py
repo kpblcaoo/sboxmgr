@@ -3,6 +3,7 @@ from typing import Optional
 
 class NtpConfig(BaseModel):
     """NTP configuration for time synchronization."""
+
     enabled: Optional[bool] = Field(default=None, description="Enable NTP synchronization.")
     server: str = Field(..., description="NTP server address, e.g., 'pool.ntp.org'.")
     server_port: Optional[int] = Field(default=None, ge=1, le=65535, description="NTP server port, typically 123.")

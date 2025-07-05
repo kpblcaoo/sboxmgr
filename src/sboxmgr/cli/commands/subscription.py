@@ -20,6 +20,7 @@ def _is_service_outbound(outbound: dict) -> bool:
         
     Returns:
         bool: True если это служебный outbound
+
     """
     if not outbound or not isinstance(outbound, dict):
         return False
@@ -44,6 +45,7 @@ def _format_policy_details(context: PipelineContext, server_index: int, server_t
         
     Returns:
         Строка с деталями политик
+
     """
     details = []
     
@@ -99,6 +101,7 @@ def list_servers(
         
     Raises:
         typer.Exit: On subscription fetch failure or parsing errors.
+
     """
     try:
         if no_user_agent:

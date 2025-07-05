@@ -24,6 +24,7 @@ def _get_logger():
     
     Returns:
         Logger instance for this module.
+
     """
     from ..logging import get_logger
     return get_logger(__name__)
@@ -34,6 +35,7 @@ def _get_trace_id():
     
     Returns:
         Current trace ID for request correlation.
+
     """
     from ..logging.trace import get_trace_id
     return get_trace_id()
@@ -41,11 +43,13 @@ def _get_trace_id():
 
 class AgentError(Exception):
     """Base exception for agent communication errors."""
+
     pass
 
 
 class AgentNotAvailableError(AgentError):
     """Raised when sboxagent is not available or not found."""
+
     pass
 
 
@@ -65,6 +69,7 @@ class AgentBridge:
         >>> if bridge.is_available():
         ...     result = bridge.validate("/path/to/config.json")
         ...     print(f"Valid: {result.success}")
+
     """
     
     def __init__(self, agent_path: Optional[str] = None, timeout: int = 30):
@@ -73,6 +78,7 @@ class AgentBridge:
         Args:
             agent_path: Path to sboxagent executable
             timeout: Timeout for operations in seconds
+
         """
         self.agent_path = agent_path or self._find_agent()
         self.timeout = timeout
@@ -85,6 +91,7 @@ class AgentBridge:
         
         Returns:
             Path to sboxagent executable or None if not found.
+
         """
         return shutil.which("sbox-agent") or shutil.which("sboxagent")
     
@@ -93,6 +100,7 @@ class AgentBridge:
         
         Returns:
             True if sboxagent is available and responsive
+
         """
         if self._available is not None:
             return self._available
@@ -142,6 +150,7 @@ class AgentBridge:
             >>> response = bridge.validate(Path("config.json"))
             >>> if not response.success:
             ...     print(f"Errors: {response.errors}")
+
         """
         if not self.is_available():
             raise AgentNotAvailableError("sboxagent is not available")
@@ -230,6 +239,7 @@ class AgentBridge:
         Raises:
             AgentNotAvailableError: If sboxagent is not available
             AgentError: If installation fails
+
         """
         if not self.is_available():
             raise AgentNotAvailableError("sboxagent is not available")
@@ -300,6 +310,7 @@ class AgentBridge:
         Raises:
             AgentNotAvailableError: If sboxagent is not available
             AgentError: If check fails
+
         """
         if not self.is_available():
             raise AgentNotAvailableError("sboxagent is not available")
@@ -354,6 +365,7 @@ class AgentBridge:
             
         Raises:
             AgentError: If agent call fails
+
         """
         if not self.agent_path:
             raise AgentError("Agent path not set")

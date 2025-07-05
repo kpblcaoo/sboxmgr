@@ -17,6 +17,7 @@ class ConfigValidationError(Exception):
     - Schema validation errors
     - Value validation errors
     """
+
     pass
 
 
@@ -28,6 +29,7 @@ def validate_config_file(file_path: str) -> None:
     
     Raises:
         ConfigValidationError: If file is invalid
+
     """
     path = Path(file_path)
     
@@ -82,6 +84,7 @@ def validate_log_level(level: str) -> str:
         
     Raises:
         ConfigValidationError: If log level is invalid
+
     """
     valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     normalized_level = level.upper()
@@ -105,6 +108,7 @@ def validate_log_sinks(sinks: List[str]) -> List[str]:
         
     Raises:
         ConfigValidationError: If any sink is invalid
+
     """
     valid_sinks = ["auto", "stdout", "stderr", "journald", "syslog", "file"]
     
@@ -129,6 +133,7 @@ def validate_port_number(port: int, name: str = "port") -> int:
         
     Raises:
         ConfigValidationError: If port is invalid
+
     """
     if not isinstance(port, int):
         raise ConfigValidationError(f"{name} must be an integer, got {type(port)}")
@@ -151,6 +156,7 @@ def validate_file_path_writable(file_path: str, name: str = "file") -> str:
         
     Raises:
         ConfigValidationError: If path is not writable
+
     """
     path = Path(file_path)
     
@@ -182,6 +188,7 @@ def validate_environment_variables(config_dict: Dict[str, Any]) -> Dict[str, Any
         
     Raises:
         ConfigValidationError: If environment configuration is invalid
+
     """
     # Check for conflicting environment variables
     env_conflicts = []
@@ -211,6 +218,7 @@ def validate_service_configuration(config_dict: Dict[str, Any]) -> Dict[str, Any
         
     Raises:
         ConfigValidationError: If service configuration is invalid
+
     """
     service_config = config_dict.get("service", {})
     
@@ -237,6 +245,7 @@ def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
         
     Returns:
         Dict containing validation results and recommendations.
+
     """
     summary: Dict[str, Any] = {
         "valid": True,

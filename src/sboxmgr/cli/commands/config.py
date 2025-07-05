@@ -52,6 +52,7 @@ def dump_config(
         sboxctl config dump --format json
         sboxctl config dump --include-env-info
         SBOXMGR__LOGGING__LEVEL=DEBUG sboxctl config dump
+
     """
     try:
         # Load configuration with optional config file
@@ -253,6 +254,7 @@ def _output_env_format(data: dict, prefix: str = "", parent_key: str = "") -> No
         data: Configuration dictionary to convert
         prefix: Environment variable prefix
         parent_key: Parent key for nested structures
+
     """
     for key, value in data.items():
         if key.startswith("_"):  # Skip metadata

@@ -13,9 +13,12 @@ from ..base_fetcher import BaseFetcher
 class ApiFetcher(BaseFetcher):
     """ApiFetcher fetches subscription data.
 
-Example:
+    Example:
     fetcher = ApiFetcher(source)
-    data = fetcher.fetch()"""
+    data = fetcher.fetch()
+
+    """
+
     def fetch(self, force_reload: bool = False) -> bytes:
         """Fetch subscription data.
 
@@ -24,6 +27,7 @@ Example:
 
         Returns:
             bytes: Raw data.
+
         """
         raise NotImplementedError()
 

@@ -15,6 +15,7 @@ class ProtocolPolicy(BasePolicy):
     Validates that servers use secure protocols and blocks
     potentially unsafe or deprecated protocols.
     """
+
     name = "ProtocolPolicy"
     description = "Validates protocol security"
     group = "security"
@@ -31,6 +32,7 @@ class ProtocolPolicy(BasePolicy):
             
         Raises:
             ValueError: If mode is not 'whitelist' or 'blacklist'
+
         """
         super().__init__()
         validate_mode(mode, ["whitelist", "blacklist"])
@@ -55,6 +57,7 @@ class ProtocolPolicy(BasePolicy):
             
         Returns:
             PolicyResult indicating if protocol is allowed
+
         """
         server = context.server
         
@@ -92,6 +95,7 @@ class ProtocolPolicy(BasePolicy):
             
         Returns:
             Protocol name or None if not found
+
         """
         protocol = extract_metadata_field(
             server, 
@@ -107,6 +111,7 @@ class EncryptionPolicy(BasePolicy):
     Ensures that servers use strong encryption methods
     and blocks weak or deprecated encryption.
     """
+
     name = "EncryptionPolicy"
     description = "Validates encryption strength"
     group = "security"
@@ -120,6 +125,7 @@ class EncryptionPolicy(BasePolicy):
             strong_encryption: List of strong encryption methods
             weak_encryption: List of weak encryption methods
             require_encryption: Whether encryption is required
+
         """
         super().__init__()
         
@@ -144,6 +150,7 @@ class EncryptionPolicy(BasePolicy):
             
         Returns:
             PolicyResult indicating if encryption is acceptable
+
         """
         server = context.server
         
@@ -181,6 +188,7 @@ class EncryptionPolicy(BasePolicy):
             
         Returns:
             Encryption method or None if not found
+
         """
         # Try direct fields first
         encryption = extract_metadata_field(
@@ -213,6 +221,7 @@ class AuthenticationPolicy(BasePolicy):
     Ensures that servers use proper authentication methods
     and validates authentication credentials.
     """
+
     name = "AuthenticationPolicy"
     description = "Validates authentication methods"
     group = "security"
@@ -226,6 +235,7 @@ class AuthenticationPolicy(BasePolicy):
             required_auth: Whether authentication is required
             allowed_auth_methods: List of allowed authentication methods
             min_password_length: Minimum password length
+
         """
         super().__init__()
         self.required_auth = required_auth
@@ -242,6 +252,7 @@ class AuthenticationPolicy(BasePolicy):
             
         Returns:
             PolicyResult indicating if authentication is acceptable
+
         """
         server = context.server
         
@@ -285,6 +296,7 @@ class AuthenticationPolicy(BasePolicy):
             
         Returns:
             Authentication method or None if not found
+
         """
         method = extract_metadata_field(
             server, 
@@ -301,6 +313,7 @@ class AuthenticationPolicy(BasePolicy):
             
         Returns:
             Credentials or None if not found
+
         """
         # Try direct fields first
         credentials = extract_metadata_field(

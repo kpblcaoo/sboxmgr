@@ -1,5 +1,4 @@
-"""
-DEPRECATED: Sing-box configuration exporter implementation.
+"""DEPRECATED: Sing-box configuration exporter implementation.
 
 This module is deprecated and will be replaced by the new sing-box exporter
 that uses the modular Pydantic models from src.sboxmgr.models.singbox.
@@ -61,6 +60,7 @@ def kebab_to_snake(d):
     Returns:
         Processed data structure with kebab-case keys converted to snake_case.
         Non-dictionary types are returned unchanged.
+
     """
     if not isinstance(d, dict):
         return d
@@ -79,6 +79,7 @@ def generate_inbounds(profile: ClientProfile) -> list:
         - По умолчанию bind только на localhost (127.0.0.1).
         - Порты по умолчанию безопасные, внешний bind только при явном подтверждении.
         - Валидация через pydantic.
+
     """
     inbounds = []
     for inbound in profile.inbounds:
@@ -120,6 +121,7 @@ def _get_protocol_dispatcher() -> Dict[str, Callable]:
     
     Returns:
         Dict[str, Callable]: Маппинг протокол -> функция экспорта.
+
     """
     return {
         "wireguard": _export_wireguard,
@@ -140,6 +142,7 @@ def _normalize_protocol_type(server_type: str) -> str:
         
     Returns:
         str: Нормализованный тип протокола.
+
     """
     if server_type == "ss":
         return "shadowsocks"
@@ -154,6 +157,7 @@ def _is_supported_protocol(protocol_type: str) -> bool:
         
     Returns:
         bool: True если протокол поддерживается.
+
     """
     supported_types = {
         "vless", "vmess", "trojan", "ss", "shadowsocks", 
@@ -173,6 +177,7 @@ def _create_base_outbound(server: ParsedServer, protocol_type: str) -> Dict[str,
         
     Returns:
         Dict[str, Any]: Базовая структура outbound.
+
     """
     return {
         "type": protocol_type,
@@ -191,6 +196,7 @@ def _process_shadowsocks_config(outbound: Dict[str, Any], server: ParsedServer, 
         
     Returns:
         bool: True если конфигурация валидна, False если нужно пропустить сервер.
+
     """
     method = meta.get("cipher") or meta.get("method") or server.security
     if not method:
@@ -206,6 +212,7 @@ def _process_transport_config(outbound: Dict[str, Any], meta: Dict[str, Any]) ->
     Args:
         outbound (Dict[str, Any]): Outbound конфигурация для модификации.
         meta (Dict[str, Any]): Метаданные сервера для модификации.
+
     """
     network = meta.pop("network", None)
     if network in ("ws", "grpc"):
@@ -224,6 +231,7 @@ def _process_tls_config(outbound: Dict[str, Any], meta: Dict[str, Any], protocol
         outbound (Dict[str, Any]): Outbound конфигурация для модификации.
         meta (Dict[str, Any]): Метаданные сервера для модификации.
         protocol_type (str): Тип протокола.
+
     """
     tls: Dict[str, Any] = {}
     
@@ -276,6 +284,7 @@ def _process_auth_and_flow_config(outbound: Dict[str, Any], meta: Dict[str, Any]
     Args:
         outbound (Dict[str, Any]): Outbound конфигурация для модификации.
         meta (Dict[str, Any]): Метаданные сервера для модификации.
+
     """
     if meta.get("uuid"):
         outbound["uuid"] = meta.pop("uuid")
@@ -291,6 +300,7 @@ def _process_tag_config(outbound: Dict[str, Any], server: ParsedServer, meta: Di
         outbound (Dict[str, Any]): Outbound конфигурация для модификации.
         server (ParsedServer): Исходный сервер.
         meta (Dict[str, Any]): Метаданные сервера для модификации.
+
     """
     # Приоритет: server.tag > meta.label > meta.name > server.address
     if server.tag:
@@ -309,6 +319,7 @@ def _process_additional_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -
     Args:
         outbound (Dict[str, Any]): Outbound конфигурация для модификации.
         meta (Dict[str, Any]): Метаданные сервера.
+
     """
     whitelist = {
         "password", "method", "multiplex", "packet_encoding", 
@@ -328,6 +339,7 @@ def _process_standard_server(server: ParsedServer, protocol_type: str) -> Option
         
     Returns:
         Optional[Dict[str, Any]]: Outbound конфигурация или None если нужно пропустить.
+
     """
     outbound = _create_base_outbound(server, protocol_type)
     meta = dict(server.meta or {})
@@ -355,6 +367,7 @@ def _process_single_server(server: ParsedServer) -> Optional[Dict[str, Any]]:
         
     Returns:
         Optional[Dict[str, Any]]: Outbound конфигурация или None если нужно пропустить.
+
     """
     protocol_type = _normalize_protocol_type(server.type)
     
@@ -381,6 +394,7 @@ def _add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
     
     Args:
         outbounds (List[Dict[str, Any]]): Список outbounds для модификации.
+
     """
     import warnings
     warnings.warn(
@@ -419,6 +433,7 @@ def singbox_export_with_middleware(
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
+
     """
     outbounds = []
     proxy_tags = []
@@ -497,6 +512,7 @@ def singbox_export(
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
+
     """
     outbounds = []
     proxy_tags = []
@@ -559,6 +575,7 @@ def _create_modern_routing_rules(proxy_tags: Optional[List[str]] = None) -> List
         
     Returns:
         List[Dict[str, Any]]: List of routing rules with rule actions
+
     """
     rules = [
         {
@@ -630,6 +647,7 @@ def _export_wireguard(s: ParsedServer) -> dict:
 
     Returns:
         dict: Outbound-конфиг для sing-box или None (если не хватает обязательных полей).
+
     """
     required = [s.address, s.port, s.private_key, s.peer_public_key, s.local_address]
     if not all(required):
@@ -665,10 +683,13 @@ def _export_wireguard(s: ParsedServer) -> dict:
 
 def _export_tuic(s: ParsedServer) -> dict:
     """Генерирует outbound-конфиг для TUIC.
+
     Args:
         s (ParsedServer): Сервер типа tuic.
+
     Returns:
         dict: Outbound-конфиг для sing-box или None (если не хватает обязательных полей).
+
     """
     required = [s.address, s.port, s.uuid, s.password]
     if not all(required):
@@ -705,10 +726,13 @@ def _export_tuic(s: ParsedServer) -> dict:
 
 def _export_shadowtls(s: ParsedServer) -> dict:
     """Генерирует outbound-конфиг для ShadowTLS.
+
     Args:
         s (ParsedServer): Сервер типа shadowtls.
+
     Returns:
         dict: Outbound-конфиг для sing-box или None (если не хватает обязательных полей).
+
     """
     required = [s.address, s.port, s.password, s.version]
     if not all(required):
@@ -739,10 +763,13 @@ def _export_shadowtls(s: ParsedServer) -> dict:
 
 def _export_anytls(s: ParsedServer) -> dict:
     """Генерирует outbound-конфиг для AnyTLS.
+
     Args:
         s (ParsedServer): Сервер типа anytls.
+
     Returns:
         dict: Outbound-конфиг для sing-box или None (если не хватает обязательных полей).
+
     """
     required = [s.address, s.port, s.uuid]
     if not all(required):
@@ -770,10 +797,13 @@ def _export_anytls(s: ParsedServer) -> dict:
 
 def _export_tor(s: ParsedServer) -> dict:
     """Генерирует outbound-конфиг для Tor.
+
     Args:
         s (ParsedServer): Сервер типа tor.
+
     Returns:
         dict: Outbound-конфиг для sing-box или None (если не хватает обязательных полей).
+
     """
     required = [s.address, s.port]
     if not all(required):
@@ -798,10 +828,13 @@ def _export_tor(s: ParsedServer) -> dict:
 
 def _export_ssh(s: ParsedServer) -> dict:
     """Генерирует outbound-конфиг для SSH.
+
     Args:
         s (ParsedServer): Сервер типа ssh.
+
     Returns:
         dict: Outbound-конфиг для sing-box или None (если не хватает обязательных полей).
+
     """
     required = [s.address, s.port, s.username]
     if not all(required):
@@ -833,10 +866,13 @@ def _export_ssh(s: ParsedServer) -> dict:
 
 def _export_hysteria2(server):
     """Генерирует outbound-конфиг для Hysteria2.
+
     Args:
         server (ParsedServer): Сервер типа hysteria2.
+
     Returns:
         dict: Outbound-конфиг для sing-box или None (если не хватает обязательных полей).
+
     """
     required = [server.address, server.port, server.password]
     if not all(required):
@@ -879,6 +915,7 @@ def singbox_export_legacy(
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
+
     """
     import warnings
     warnings.warn(
@@ -968,6 +1005,7 @@ class SingboxExporter(BaseExporter):
             
         Raises:
             ValueError: If server data is invalid or cannot be exported.
+
         """
         config = singbox_export(servers, [])
         return json.dumps(config, indent=2, ensure_ascii=False) 

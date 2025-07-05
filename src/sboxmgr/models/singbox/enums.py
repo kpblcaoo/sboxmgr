@@ -5,6 +5,7 @@ from enum import Enum
 
 class LogLevel(str, Enum):
     """Log level for sing-box."""
+
     trace = "trace"
     debug = "debug"
     info = "info"
@@ -16,6 +17,7 @@ class LogLevel(str, Enum):
 
 class DomainStrategy(str, Enum):
     """Domain resolution strategy."""
+
     prefer_ipv4 = "prefer_ipv4"
     prefer_ipv6 = "prefer_ipv6"
     ipv4_only = "ipv4_only"
@@ -24,6 +26,7 @@ class DomainStrategy(str, Enum):
 
 class Network(str, Enum):
     """Network type for connections."""
+
     tcp = "tcp"
     udp = "udp"
     tcp_udp = "tcp,udp"

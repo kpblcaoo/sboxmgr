@@ -27,6 +27,7 @@ def get_trace_id() -> str:
         >>> trace_id = get_trace_id()
         >>> len(trace_id)
         8
+
     """
     trace_id = trace_id_var.get()
     if not trace_id:
@@ -48,6 +49,7 @@ def set_trace_id(trace_id: str) -> None:
         >>> set_trace_id("abc12345")
         >>> get_trace_id()
         'abc12345'
+
     """
     # Ensure trace ID is max 8 characters for consistency
     normalized_trace_id = str(trace_id)[:8]
@@ -73,6 +75,7 @@ def with_trace_id(trace_id: Optional[str] = None) -> Generator[str, None, None]:
         ...     print(f"Retrieved: {get_trace_id()}")
         Using trace ID: test1234
         Retrieved: test1234
+
     """
     if trace_id is None:
         trace_id = str(uuid.uuid4())[:8]
@@ -99,6 +102,7 @@ def generate_trace_id() -> str:
         >>> tid = generate_trace_id()
         >>> len(tid)
         8
+
     """
     return str(uuid.uuid4())[:8]
 
@@ -115,6 +119,7 @@ def clear_trace_id() -> None:
         'test1234'
         >>> clear_trace_id()
         >>> # Next get_trace_id() will generate new ID
+
     """
     trace_id_var.set('')
 
@@ -131,5 +136,6 @@ def copy_trace_context() -> str:
     Example:
         >>> current_trace = copy_trace_context()
         >>> # Pass to external system or different context
+
     """
     return get_trace_id() 

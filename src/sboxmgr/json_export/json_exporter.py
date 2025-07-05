@@ -1,5 +1,4 @@
-"""
-JSON Export Framework for sboxmgr
+"""JSON Export Framework for sboxmgr
 
 Provides standardized JSON output format for all subbox client configurations
 with metadata, validation, and schema compliance.
@@ -32,8 +31,7 @@ class JSONExporter:
                      subscription_url: Optional[str] = None,
                      metadata: Optional[Dict[str, Any]] = None,
                      validate: Optional[bool] = None) -> Dict[str, Any]:
-        """
-        Export configuration in standardized JSON format
+        """Export configuration in standardized JSON format
         
         Args:
             client_type: Type of client (sing-box, clash, xray, mihomo)
@@ -44,6 +42,7 @@ class JSONExporter:
             
         Returns:
             Standardized JSON configuration
+
         """
         try:
             # Create base export structure
@@ -84,8 +83,7 @@ class JSONExporter:
                       metadata: Optional[Dict[str, Any]] = None,
                       pretty: bool = True,
                       validate: Optional[bool] = None) -> Path:
-        """
-        Export configuration to file
+        """Export configuration to file
         
         Args:
             client_type: Type of client
@@ -98,6 +96,7 @@ class JSONExporter:
             
         Returns:
             Path to created file
+
         """
         try:
             # Ensure output directory exists
@@ -125,8 +124,7 @@ class JSONExporter:
                        output_dir: Path,
                        pretty: bool = True,
                        validate: Optional[bool] = None) -> List[Path]:
-        """
-        Export multiple configurations
+        """Export multiple configurations
         
         Args:
             configs: List of config dicts with keys: client_type, config_data, subscription_url, metadata
@@ -136,6 +134,7 @@ class JSONExporter:
             
         Returns:
             List of created file paths
+
         """
         created_files = []
         
@@ -217,6 +216,7 @@ class JSONExporter:
             
         Raises:
             ConfigValidationError: If validation fails
+
         """
         required_fields = ["client", "version", "created_at", "config", "metadata"]
         for field in required_fields:
@@ -241,6 +241,7 @@ class JSONExporter:
             
         Raises:
             ConfigValidationError: If validation fails
+
         """
         if client_type == "sing-box":
             # Use internal sing-box validator

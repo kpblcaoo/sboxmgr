@@ -35,6 +35,7 @@ class SingBoxParser(BaseParser):
             
         Raises:
             json.JSONDecodeError: If JSON parsing fails.
+
         """
         debug_level = get_debug_level()
         
@@ -82,6 +83,7 @@ class SingBoxParser(BaseParser):
             
         Returns:
             Tuple[str, list]: Clean JSON string and list of removed items.
+
         """
         removed = []
         
@@ -134,6 +136,7 @@ class SingBoxParser(BaseParser):
             
         Returns:
             ParsedServer: Parsed server configuration or None if not a server.
+
         """
         outbound_type = outbound.get("type", "")
         
@@ -196,6 +199,7 @@ class SingBoxParser(BaseParser):
             
         Returns:
             Dict[str, Any]: Clean metadata with only non-None values.
+
         """
         return {k: v for k, v in fields.items() if v is not None}
 

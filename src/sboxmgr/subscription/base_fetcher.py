@@ -30,6 +30,7 @@ class BaseAuthHandler(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class.
+
         """
         pass
 
@@ -53,6 +54,7 @@ class BaseHeaderPlugin(ABC):
             
         Raises:
             NotImplementedError: If called directly on base class.
+
         """
         pass
 
@@ -69,6 +71,7 @@ class BaseFetcher(ABC):
         source: The subscription source configuration.
         auth_handler: Optional authentication handler.
         header_plugins: List of header processing plugins.
+
     """
     
     plugin_type = "fetcher"
@@ -82,6 +85,7 @@ class BaseFetcher(ABC):
             
         Raises:
             ValueError: If URL scheme is not supported.
+
         """
         self.source = source
         self.auth_handler: BaseAuthHandler | None = None
@@ -97,6 +101,7 @@ class BaseFetcher(ABC):
             
         Raises:
             ValueError: If the URL scheme is not supported.
+
         """
         scheme = urlparse(url).scheme
         if scheme not in cls.SUPPORTED_SCHEMES:
@@ -113,6 +118,7 @@ class BaseFetcher(ABC):
             NotImplementedError: If called directly on base class.
             ConnectionError: If unable to connect to the source.
             ValueError: If the source configuration is invalid.
+
         """
         pass
 
@@ -125,5 +131,6 @@ class BaseFetcher(ABC):
         
         Returns:
             Size limit in bytes (default: 2MB).
+
         """
         return get_fetch_size_limit() 

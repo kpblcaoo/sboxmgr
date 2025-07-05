@@ -1,5 +1,4 @@
-"""
-Profile management module for sboxmgr (ADR-0017).
+"""Profile management module for sboxmgr (ADR-0017).
 
 This module provides profile-based configuration management,
 allowing users to define complete configurations in a single JSON file.
