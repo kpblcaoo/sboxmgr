@@ -18,6 +18,8 @@ try:
     from sboxmgr.subscription.models import ClientProfile, InboundProfile
     # New profile models (ADR-0017)
     from sboxmgr.profiles.models import FullProfile, SubscriptionProfile, FilterProfile, RoutingProfile, ExportProfile, AgentProfile, UIProfile, LegacyProfile
+    # Sing-box configuration model
+    from sboxmgr.models.singbox.main import SingBoxConfig
     # Note: ExclusionList and ExclusionRule are dataclasses, not Pydantic models
     # They would need to be converted to Pydantic models to generate schemas
 except ImportError as e:
@@ -50,6 +52,9 @@ def generate_schemas() -> Dict[str, Dict[str, Any]]:
         "agent-profile": AgentProfile.model_json_schema(),
         "ui-profile": UIProfile.model_json_schema(),
         "legacy-profile": LegacyProfile.model_json_schema(),
+        
+        # Sing-box configuration schema (complete)
+        "singbox-config": SingBoxConfig.generate_schema(),
         
         # Note: ExclusionList and ExclusionRule are dataclasses, not Pydantic models
         # They would need to be converted to Pydantic models to generate schemas

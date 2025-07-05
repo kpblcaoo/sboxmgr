@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ClientProfile",
-  "description": "Client configuration profile for export operations.\n\nDefines the client-side configuration including inbound interfaces,\nDNS settings, and additional options for generating proxy client\nconfigurations.\n\nAttributes:\n    inbounds: List of inbound interface configurations.\n    dns_mode: DNS resolution mode (system, tunnel, off).\n    extra: Additional profile parameters.",
+  "description": "Client configuration profile for export operations.\n\nDefines the client-side configuration including inbound interfaces,\nDNS settings, routing overrides, outbound exclusions, and additional \noptions for generating proxy client configurations.\n\nAttributes:\n    inbounds: List of inbound interface configurations.\n    dns_mode: DNS resolution mode (system, tunnel, off).\n    routing: Optional routing configuration overrides.\n    exclude_outbounds: List of outbound types to exclude from export.\n    extra: Additional profile parameters.",
   "generator": "sboxmgr-schema-generator",
   "version": "1.0.0",
   "$defs": {
@@ -83,6 +83,34 @@
       "default": "system",
       "description": "DNS resolution mode.",
       "title": "Dns Mode"
+    },
+    "routing": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Routing configuration overrides.",
+      "title": "Routing"
+    },
+    "exclude_outbounds": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "List of outbound types to exclude.",
+      "title": "Exclude Outbounds"
     },
     "extra": {
       "anyOf": [
