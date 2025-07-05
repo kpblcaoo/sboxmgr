@@ -23,14 +23,23 @@ This document outlines the plan for updating SBoxMgr documentation to reflect th
 - [x] **Category organization** - Created 6 categories with README files
 - [x] **File renaming** - Standardized naming conventions
 
-## 🔄 In Progress
+### Schema Documentation
+- [x] **Schema cleanup** - Removed outdated schema files
+- [x] **Pydantic schema generation** - Updated generator script
+- [x] **Sing-box schema** - Added complete sing-box configuration schema
+- [x] **Schema documentation** - Created comprehensive README
+- [x] **15 schemas generated** - All from Pydantic models
 
-### Russian Documentation Alignment (HIGH PRIORITY)
-- [ ] **docs/ru/README.md** - Completely rewrite to match English version
-- [ ] **docs/ru/SHOWCASE.md** - Update to match current CLI commands
-- [ ] **docs/ru/CHANGELOG.md** - Sync with English changelog
-- [ ] **docs/ru/DEVELOPMENT.md** - Update development guide
-- [ ] **docs/ru/cli_reference.md** - Update CLI reference
+### Russian Documentation Alignment ✅ COMPLETED
+- [x] **docs/ru/README.md** - Completely rewrite to match English version
+- [x] **docs/ru/SHOWCASE.md** - Update to match current CLI commands
+- [x] **docs/ru/CHANGELOG.md** - Sync with English changelog
+- [x] **docs/ru/DEVELOPMENT.md** - Update development guide
+- [x] **docs/ru/cli_reference.md** - Update CLI reference
+- [x] **docs/ru/guides/profile_management.md** - Update profile management guide
+- [x] **docs/ru/tests/edge_cases.md** - Update edge cases documentation
+
+## 🔄 In Progress
 
 ### Documentation Structure
 - [ ] **docs/user-guide/troubleshooting.md** - Update with actual error scenarios
@@ -50,19 +59,15 @@ This document outlines the plan for updating SBoxMgr documentation to reflect th
 - [ ] **docs/developer/plugins.md** - Create plugin development guide
 
 ### Reference Documentation
-- [ ] **schemas/** - Evaluate schema documentation strategy
-  - [ ] Consider separate branch for schema work
-  - [ ] Generate from Pydantic models where possible
-  - [ ] Clean up existing schema files
 - [ ] **docs/reference/examples/** - Add more configuration examples
 - [ ] **docs/CHANGELOG.md** - Review and update changelog format
 
-### Internationalization
-- [ ] **docs/ru/README.md** - Update Russian documentation (PRIORITY)
-- [ ] **docs/ru/CHANGELOG.md** - Update Russian changelog
-- [ ] **docs/ru/DEVELOPMENT.md** - Update Russian development guide
-- [ ] **docs/ru/cli_security.md** - Update CLI security guide
-- [ ] **docs/ru/i18n.md** - Update internationalization guide
+### Internationalization ✅ COMPLETED
+- [x] **docs/ru/README.md** - Update Russian documentation
+- [x] **docs/ru/CHANGELOG.md** - Update Russian changelog
+- [x] **docs/ru/DEVELOPMENT.md** - Update Russian development guide
+- [x] **docs/ru/cli_security.md** - Update CLI security guide
+- [x] **docs/ru/i18n.md** - Update internationalization guide
 
 ## 🎯 Quality Improvements
 
@@ -140,17 +145,17 @@ This document outlines the plan for updating SBoxMgr documentation to reflect th
 - ✅ CLI reference and user guides
 - ✅ Internal documentation reorganization
 
-### Phase 2: Russian Documentation Alignment (Current Priority)
-- 🔄 Update Russian README to match English
-- [ ] Update Russian SHOWCASE and CLI reference
-- [ ] Sync Russian changelog and development docs
-- [ ] Ensure all Russian docs reflect current state
+### Phase 2: Schema Documentation (Completed)
+- ✅ Clean up outdated schema files
+- ✅ Update Pydantic schema generator
+- ✅ Add complete sing-box configuration schema
+- ✅ Create comprehensive schema documentation
 
-### Phase 3: Schema Documentation Strategy (Planned)
-- [ ] Evaluate current schema situation
-- [ ] Decide on separate branch vs main branch
-- [ ] Plan Pydantic model generation
-- [ ] Clean up existing schema files
+### Phase 3: Russian Documentation Alignment ✅ COMPLETED
+- ✅ Update Russian README to match English
+- ✅ Update Russian SHOWCASE and CLI reference
+- ✅ Sync Russian changelog and development docs
+- ✅ Ensure all Russian docs reflect current state
 
 ### Phase 4: Quality and Polish (Planned)
 - [ ] Link validation
@@ -206,5 +211,5 @@ This document outlines the plan for updating SBoxMgr documentation to reflect th
 
 ---
 
-**Last Updated:** 2025-01-05
-**Status:** Phase 1 Complete, Phase 2 (Russian Alignment) In Progress 
+**Last Updated:** 2025-07-05
+**Status:** Phase 1, 2 & 3 Complete, Phase 4 (Quality and Polish) Planned 
