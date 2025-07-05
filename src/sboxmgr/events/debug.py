@@ -9,12 +9,13 @@ class EventStatistics(EventHandler):
     """Event handler that collects statistics about events."""
     
     def __init__(self):
+        """Initialize event statistics collector."""
         self.event_counts = {}
         self.error_counts = {}
         self.source_counts = {}
     
     def can_handle(self, event_data: EventData) -> bool:
-        """Always handle events for statistics."""
+        """Check if event can be handled for statistics collection."""
         return True
     
     def handle(self, event_data: EventData) -> None:

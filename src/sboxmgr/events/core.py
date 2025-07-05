@@ -431,7 +431,7 @@ def get_event_manager() -> EventManager:
 
 def emit_event(event_type: EventType, payload: EventPayload, 
                source: str = "unknown", priority: EventPriority = EventPriority.NORMAL) -> Event:
-    """Convenience function to emit events using global manager.
+    """Emit events using global manager.
     
     Args:
         event_type: Type of event to emit

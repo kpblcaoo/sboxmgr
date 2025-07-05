@@ -1,4 +1,4 @@
-"""JSON Export Framework for sboxmgr
+"""JSON Export Framework for sboxmgr.
 
 Provides standardized JSON output format for all subbox client configurations
 with metadata, validation, and schema compliance.
@@ -18,9 +18,14 @@ logger = get_logger(__name__)
 
 
 class JSONExporter:
-    """Standardized JSON exporter for subbox configurations"""
+    """Standardized JSON exporter for subbox configurations."""
     
     def __init__(self, validate: bool = True):
+        """Initialize JSON exporter.
+        
+        Args:
+            validate: Whether to validate exported configurations.
+        """
         self.version = self._get_version()
         self.logger = logger
         self.validate = validate
@@ -31,7 +36,7 @@ class JSONExporter:
                      subscription_url: Optional[str] = None,
                      metadata: Optional[Dict[str, Any]] = None,
                      validate: Optional[bool] = None) -> Dict[str, Any]:
-        """Export configuration in standardized JSON format
+        """Export configuration in standardized JSON format.
         
         Args:
             client_type: Type of client (sing-box, clash, xray, mihomo)
