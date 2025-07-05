@@ -253,7 +253,7 @@ sboxctl profile list
 sboxctl profile validate profile.json
 
 # Apply profile
-sboxctl profile apply --name my-profile
+sboxctl profile apply my-profile.json
 ```
 
 ### Reporting Issues

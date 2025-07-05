@@ -154,10 +154,17 @@
 sboxctl profile list
 ```
 
-### Применение профиля
+### Применить профиль
 
 ```bash
-sboxctl profile apply --name my-profile
+sboxctl profile apply my-profile.json
+```
+
+### Применить профиль и экспортировать
+
+```bash
+sboxctl profile apply my-profile.json
+sboxctl export -u "https://example.com/subscription" --index 1
 ```
 
 ### Валидация профиля

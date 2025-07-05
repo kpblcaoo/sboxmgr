@@ -169,7 +169,7 @@ sboxctl policy list
 sboxctl policy test --profile profile.json
 
 # Audit servers
-sboxctl policy audit --url "https://example.com/proxy.json"
+sboxctl policy audit --servers servers.json
 ```
 
 ### Language Management

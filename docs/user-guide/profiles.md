@@ -158,6 +158,7 @@ sboxctl profile list
 
 ```bash
 sboxctl profile apply my-profile.json
+sboxctl export -u "https://example.com/subscription" --index 1
 ```
 
 ### Validate Profile
@@ -184,7 +185,7 @@ sboxctl profile diff --name profile1 --name profile2
 
 ```bash
 # Apply profile and export
-sboxctl profile apply --name my-profile
+sboxctl profile apply my-profile.json
 sboxctl export -u "https://example.com/subscription" --index 1
 
 # Or use profile directly
