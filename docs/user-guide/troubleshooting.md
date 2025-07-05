@@ -11,9 +11,6 @@ This guide helps you resolve common issues with SBoxMgr.
 
 **Solutions:**
 ```bash
-# Increase timeout
-sboxctl export --url "https://example.com/subscription" --timeout 60
-
 # Check network connectivity
 curl -I "https://example.com/subscription"
 
@@ -26,11 +23,11 @@ export SBOXMGR_DNS="8.8.8.8"
 
 **Solutions:**
 ```bash
-# Disable SSL verification (not recommended for production)
-export SBOXMGR_SSL_VERIFY=false
-
 # Update CA certificates
 sudo update-ca-certificates
+
+# Check SSL connectivity
+openssl s_client -connect example.com:443
 ```
 
 ### Authentication Issues
@@ -59,10 +56,10 @@ sudo update-ca-certificates
 **Solutions:**
 ```bash
 # Check subscription format
-sboxctl subscription validate --url "https://example.com/subscription"
-
-# View raw data
 curl "https://example.com/subscription" | head -20
+
+# Validate with debug output
+sboxctl export -u "https://example.com/subscription" -d 2
 ```
 
 #### Encoding Issues
@@ -81,13 +78,13 @@ curl "https://example.com/subscription" | head -20
 **Solutions:**
 ```bash
 # Validate configuration
-sboxctl config validate --file config.json
+sboxctl config validate config.json
 
 # Check configuration syntax
 cat config.json | jq .
 
-# Use strict validation
-sboxctl config validate --file config.json --strict
+# Use debug mode for detailed validation
+sboxctl config validate config.json -d 2
 ```
 
 #### Missing Files
@@ -102,7 +99,7 @@ ls -la /path/to/config.json
 chmod 644 config.json
 
 # Use absolute paths
-sboxctl export --config /absolute/path/config.json
+sboxctl export -u "https://example.com/subscription" --output /absolute/path/config.json
 ```
 
 ## Debug Mode
@@ -110,14 +107,14 @@ sboxctl export --config /absolute/path/config.json
 Enable debug output to get detailed information:
 
 ```bash
+# Level 0: Minimal output (default)
+sboxctl export -u "https://example.com/subscription" -d 0
+
 # Level 1: Basic debug info
-sboxctl list-servers -d 1
+sboxctl export -u "https://example.com/subscription" -d 1
 
 # Level 2: Detailed debug info
-sboxctl list-servers -d 2
-
-# Level 3: Verbose debug info
-sboxctl list-servers -d 3
+sboxctl export -u "https://example.com/subscription" -d 2
 ```
 
 ## Log Files
@@ -125,7 +122,7 @@ sboxctl list-servers -d 3
 Check log files for detailed error information:
 
 ```bash
-# View log file
+# View log file (if configured)
 tail -f /var/log/sboxmgr.log
 
 # Search for errors
@@ -141,7 +138,7 @@ Common environment variables for troubleshooting:
 
 ```bash
 # Debug level
-export SBOXMGR_DEBUG=3
+export SBOXMGR_DEBUG=2
 
 # Log file path
 export SBOXMGR_LOG_FILE="/tmp/sboxmgr.log"
@@ -163,14 +160,11 @@ export SBOXMGR_SSL_VERIFY=true
 
 **Solutions:**
 ```bash
-# Use caching
-sboxctl export --cache
-
-# Reduce timeout for faster failure
-sboxctl export --timeout 10
+# Use dry-run mode for testing
+sboxctl export -u "https://example.com/subscription" --dry-run
 
 # Use local subscription file
-sboxctl export --url "file:///path/to/subscription.txt"
+sboxctl export -u "file:///path/to/subscription.txt"
 ```
 
 ### High Memory Usage
@@ -229,16 +223,45 @@ sboxctl --version
 # Show help
 sboxctl --help
 
+# Show command help
+sboxctl export --help
+sboxctl config --help
+sboxctl profile --help
+
 # Validate installation
-sboxctl config validate --file /etc/sing-box/config.json
+sboxctl config validate config.json
+```
+
+### Configuration Validation
+```bash
+# Validate configuration file
+sboxctl config validate config.json
+
+# Dump resolved configuration
+sboxctl config dump config.json
+
+# Show environment info
+sboxctl config env-info
+```
+
+### Profile Management
+```bash
+# List available profiles
+sboxctl profile list
+
+# Validate profile
+sboxctl profile validate profile.json
+
+# Apply profile
+sboxctl profile apply --name my-profile
 ```
 
 ### Reporting Issues
 When reporting issues, include:
-- SBoxMgr version
+- SBoxMgr version (`sboxctl --version`)
 - Operating system
 - Error messages
-- Debug output
+- Debug output (`-d 2`)
 - Configuration files (sanitized)
 
 ### Community Support
