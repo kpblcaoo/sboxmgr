@@ -1,439 +1,271 @@
-# Руководство по управлению профилями
+# Профили
+
+Профили в SBoxMgr позволяют настраивать генерацию конфигурации, фильтрацию и настройки экспорта с помощью JSON-файлов конфигурации.
 
 ## Обзор
 
-Система управления профилями в `sboxmgr` предоставляет мощные инструменты для создания, валидации и управления конфигурационными профилями. Профили позволяют сохранять и переключаться между различными настройками подписок, фильтров, экспорта и других компонентов.
+Профиль — это JSON-файл конфигурации, который определяет:
+- Настройки и предпочтения подписки
+- Конфигурацию экспорта и маршрутизации
+- Правила фильтрации и исключения
+- Пользовательские middleware и постпроцессоры
+- Политики безопасности
 
 ## Структура профиля
 
-Профиль представляет собой JSON файл со следующей структурой (согласно ADR-0017):
-
 ```json
 {
-  "id": "profile-name",
-  "description": "Описание профиля",
-  "subscriptions": [
-    {
-      "id": "sub-id",
-      "enabled": true,
-      "priority": 1
-    }
-  ],
-  "filters": {
-    "exclude_tags": ["slow"],
-    "only_tags": ["premium"],
-    "exclusions": [],
-    "only_enabled": true
-  },
-  "routing": {
-    "by_source": {},
-    "default_route": "tunnel",
-    "custom_routes": {}
+  "id": "my-profile",
+  "name": "Мой пользовательский профиль",
+  "description": "Пользовательский профиль для моих нужд",
+  "subscription": {
+    "url": "https://example.com/subscription",
+    "user_agent": "Custom User-Agent",
+    "timeout": 30
   },
   "export": {
     "format": "sing-box",
-    "outbound_profile": "vless-real",
-    "inbound_profile": "tun",
-    "output_file": "config.json"
+    "inbound_types": ["socks", "http"],
+    "socks_port": 1080,
+    "http_port": 8080
   },
-  "agent": {
-    "auto_restart": false,
-    "monitor_latency": true,
-    "health_check_interval": "30s",
-    "log_level": "info"
+  "filter": {
+    "exclude_tags": ["blocked"],
+    "only_tags": ["premium"],
+    "geo_filter": {
+      "include": ["US", "CA"],
+      "exclude": ["CN", "RU"]
+    }
   },
-  "ui": {
-    "default_language": "ru",
-    "mode": "cli",
-    "theme": null,
-    "show_debug_info": false
-  },
-  "version": "1.0"
+  "routing": {
+    "final": "proxy",
+    "rules": [
+      {
+        "domain_suffix": [".ru"],
+        "outbound": "direct"
+      }
+    ]
+  }
 }
 ```
 
-## CLI команды
+## Секции профиля
 
-### Информация о профиле
+### Секция подписки
 
-```bash
-# Показать краткую информацию о профиле
-sboxmgr profile info /path/to/profile.json
+Определяет источник подписки и настройки:
+
+```json
+{
+  "subscription": {
+    "url": "https://example.com/subscription",
+    "user_agent": "Custom User-Agent",
+    "timeout": 30,
+    "retries": 3,
+    "headers": {
+      "Authorization": "Bearer token"
+    }
+  }
+}
 ```
 
-Выводит:
-- Имя и путь к файлу
-- Размер и время изменения
-- Список секций
-- Статус валидности
-- Ошибки (если есть)
+**Опции:**
+- `url`: URL подписки
+- `user_agent`: Пользовательский заголовок User-Agent
+- `timeout`: Таймаут запроса в секундах
+- `retries`: Количество попыток повтора
+- `headers`: Пользовательские HTTP-заголовки
 
-### Валидация профиля
+### Секция экспорта
 
-```bash
-# Валидация профиля
-sboxmgr profile validate /path/to/profile.json
+Настраивает поведение экспорта и настройки входящих соединений:
 
-# Валидация с автоисправлением
-sboxmgr profile validate /path/to/profile.json --normalize
-
-# Подробная валидация
-sboxmgr profile validate /path/to/profile.json --verbose
+```json
+{
+  "export": {
+    "format": "sing-box",
+    "inbound_types": ["socks", "http", "tun"],
+    "socks_port": 1080,
+    "socks_listen": "127.0.0.1",
+    "http_port": 8080,
+    "tun_address": "172.19.0.1/30",
+    "final_route": "proxy"
+  }
+}
 ```
 
-Флаг `--normalize` автоматически исправляет:
-- Конвертирует строки в списки для тегов
-- Сохраняет существующие списки
-- Обрабатывает отсутствующие секции
+**Опции:**
+- `format`: Формат экспорта (sing-box)
+- `inbound_types`: Список типов входящих соединений для включения
+- `socks_port`, `http_port`, `tproxy_port`: Номера портов
+- `socks_listen`, `http_listen`: Адреса прослушивания
+- `tun_address`: Адрес TUN-интерфейса
+- `final_route`: Финальный пункт назначения маршрутизации
+
+### Секция фильтрации
+
+Определяет правила фильтрации серверов:
+
+```json
+{
+  "filter": {
+    "exclude_tags": ["blocked", "slow"],
+    "only_tags": ["premium", "fast"],
+    "geo_filter": {
+      "include": ["US", "CA"],
+      "exclude": ["CN", "RU"]
+    }
+  }
+}
+```
+
+**Опции:**
+- `exclude_tags`: Теги для исключения
+- `only_tags`: Теги для включения (белый список)
+- `geo_filter`: Правила географической фильтрации
+
+### Секция маршрутизации
+
+Настраивает правила маршрутизации:
+
+```json
+{
+  "routing": {
+    "final": "proxy",
+    "rules": [
+      {
+        "domain_suffix": [".ru", ".рф"],
+        "outbound": "direct"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      }
+    ]
+  }
+}
+```
+
+## Управление профилями
+
+### Список профилей
+
+```bash
+sboxctl profile list
+```
 
 ### Применение профиля
 
 ```bash
-# Применить профиль
-sboxmgr profile apply /path/to/profile.json
+sboxctl profile apply --name my-profile
+```
 
-# Показать что будет применено (без применения)
-sboxmgr profile apply /path/to/profile.json --dry-run
+### Валидация профиля
+
+```bash
+sboxctl profile validate --file profile.json
 ```
 
 ### Объяснение профиля
 
 ```bash
-# Показать подробное объяснение структуры профиля
-sboxmgr profile explain /path/to/profile.json
+sboxctl profile explain --name my-profile
 ```
 
-Выводит детальную информацию по каждой секции:
-- Подписки с приоритетами и статусами
-- Настройки экспорта
-- Фильтры и исключения
-- Маршрутизация
-- Настройки агента и UI
-
-### Сравнение профилей
+### Показать различия между профилями
 
 ```bash
-# Сравнить два профиля
-sboxmgr profile diff /path/to/profile1.json /path/to/profile2.json
+sboxctl profile diff --name profile1 --name profile2
 ```
 
-Показывает:
-- Общие секции
-- Различия между секциями
-- Секции только в одном из профилей
+## Использование профилей
 
-### Список профилей
+### С командой экспорта
 
 ```bash
-# Список всех профилей в директории по умолчанию
-sboxmgr profile list
+# Применить профиль и экспортировать
+sboxctl profile apply --name my-profile
+sboxctl export -u "https://example.com/subscription" --index 1
 
-# Список профилей в указанной директории
-sboxmgr profile list --dir /path/to/profiles
+# Или использовать профиль напрямую
+sboxctl export -u "https://example.com/subscription" --index 1 \
+  --inbound-types socks --socks-port 1080
 ```
 
-### Переключение профиля
+### Примеры профилей
 
-```bash
-# Переключиться на профиль по имени
-sboxmgr profile switch profile-name
-
-# Переключиться на профиль по пути
-sboxmgr profile switch /path/to/profile.json
-```
-
-## Секции профиля
-
-### Subscriptions (Подписки)
-
-Список конфигураций подписок:
-
+#### Базовый домашний профиль
 ```json
-"subscriptions": [
-  {
-    "id": "premium-servers",
-    "enabled": true,
-    "priority": 1
+{
+  "id": "home",
+  "name": "Домашний профиль",
+  "subscription": {
+    "url": "https://example.com/subscription"
   },
-  {
-    "id": "backup-servers", 
-    "enabled": false,
-    "priority": 2
-  }
-]
-```
-
-### Filters (Фильтры)
-
-Настройки фильтрации серверов:
-
-```json
-"filters": {
-  "exclude_tags": ["slow", "unstable"],
-  "only_tags": ["premium", "fast"],
-  "exclusions": ["blocked-server", "geo-restricted"],
-  "only_enabled": true
-}
-```
-
-### Export (Экспорт)
-
-Настройки экспорта конфигурации:
-
-```json
-"export": {
-  "format": "sing-box",
-  "outbound_profile": "vless-real",
-  "inbound_profile": "tun",
-  "output_file": "/etc/sing-box/config.json",
-  "template": "/path/to/custom/template.json"
-}
-```
-
-Поддерживаемые форматы:
-- `sing-box` - для sing-box
-- `clash` - для Clash
-- `json` - сырой JSON
-
-### Routing (Маршрутизация)
-
-Настройки маршрутизации:
-
-```json
-"routing": {
-  "by_source": {
-    "premium-servers": "tunnel",
-    "backup-servers": "direct"
-  },
-  "default_route": "tunnel",
-  "custom_routes": {
-    "example.com": "direct",
-    "*.google.com": "tunnel"
+  "export": {
+    "format": "sing-box",
+    "inbound_types": ["socks"],
+    "socks_port": 1080
   }
 }
 ```
 
-### Agent (Агент)
-
-Настройки агента:
-
-```json
-"agent": {
-  "auto_restart": true,
-  "monitor_latency": true,
-  "health_check_interval": "30s",
-  "log_level": "info"
-}
-```
-
-### UI (Интерфейс)
-
-Настройки пользовательского интерфейса:
-
-```json
-"ui": {
-  "default_language": "ru",
-  "mode": "cli",
-  "theme": "dark",
-  "show_debug_info": false
-}
-```
-
-Поддерживаемые режимы:
-- `cli` - командная строка
-- `tui` - текстовый интерфейс
-- `gui` - графический интерфейс
-
-## Валидация и нормализация
-
-### Автоматическая нормализация
-
-Система может автоматически исправлять типичные ошибки:
-
-```json
-// До нормализации
-"filters": {
-  "exclude_tags": "slow",  // Строка
-  "only_tags": "premium"   // Строка
-}
-
-// После нормализации
-"filters": {
-  "exclude_tags": ["slow"],  // Список
-  "only_tags": ["premium"]   // Список
-}
-```
-
-### Валидаторы секций
-
-Каждая секция имеет специализированный валидатор:
-
-- **SubscriptionSectionValidator** - проверяет подписки
-- **ExportSectionValidator** - проверяет настройки экспорта
-- **FilterSectionValidator** - проверяет фильтры
-
-## Примеры использования
-
-### Создание профиля для разработки
-
+#### Профиль разработчика
 ```json
 {
-  "id": "dev-profile",
-  "description": "Профиль для разработки",
-  "subscriptions": [
-    {
-      "id": "dev-servers",
-      "enabled": true,
-      "priority": 1
-    }
-  ],
-  "filters": {
-    "exclude_tags": ["production"],
-    "only_tags": ["dev", "test"],
-    "exclusions": [],
-    "only_enabled": true
-  },
+  "id": "developer",
+  "name": "Профиль разработчика",
   "export": {
     "format": "sing-box",
-    "output_file": "/tmp/dev-config.json"
+    "inbound_types": ["socks", "http"],
+    "socks_port": 1080,
+    "http_port": 8080
   },
-  "ui": {
-    "default_language": "en",
-    "mode": "cli",
-    "show_debug_info": true
-  },
-  "version": "1.0"
+  "filter": {
+    "exclude_tags": ["slow"]
+  }
 }
 ```
 
-### Профиль для продакшена
-
+#### Серверный профиль
 ```json
 {
-  "id": "prod-profile",
-  "description": "Продакшен профиль",
-  "subscriptions": [
-    {
-      "id": "prod-servers",
-      "enabled": true,
-      "priority": 1
-    },
-    {
-      "id": "backup-servers",
-      "enabled": true,
-      "priority": 2
-    }
-  ],
-  "filters": {
-    "exclude_tags": ["dev", "test"],
-    "only_tags": ["production", "stable"],
-    "exclusions": ["unstable-server"],
-    "only_enabled": true
-  },
+  "id": "server",
+  "name": "Серверный профиль",
   "export": {
     "format": "sing-box",
-    "output_file": "/etc/sing-box/config.json"
+    "inbound_types": ["socks", "http", "tproxy"],
+    "socks_listen": "0.0.0.0",
+    "http_listen": "0.0.0.0",
+    "socks_auth": "admin:password"
   },
-  "agent": {
-    "auto_restart": true,
-    "monitor_latency": true,
-    "health_check_interval": "60s",
-    "log_level": "warn"
-  },
-  "version": "1.0"
+  "routing": {
+    "final": "proxy"
+  }
 }
 ```
 
-## Интеграция с Phase 4
+## Расположение профилей
 
-Профили интегрированы с системой экспорта (Phase 4):
+Профили обычно хранятся в:
+- `~/.config/sboxmgr/profiles/` (Linux/macOS)
+- `%APPDATA%\sboxmgr\profiles\` (Windows)
+- `./profiles/` (текущая директория)
 
-```bash
-# Экспорт с использованием профиля
-sboxmgr export --profile /path/to/profile.json
+## Переменные окружения
 
-# Экспорт с валидацией профиля
-sboxmgr export --profile /path/to/profile.json --validate-profile
-
-# Экспорт с информацией о профиле
-sboxmgr export --profile /path/to/profile.json --profile-info
-```
-
-## Безопасность
-
-### Валидация путей
-
-Система проверяет безопасность путей:
-- Запрещены пути к системным файлам (`/etc/passwd`, `/etc/shadow`)
-- Проверка прав доступа к файлам
-- Валидация шаблонов экспорта
-
-### Контрольные суммы
-
-Для будущих версий планируется:
-- Автоматическое вычисление хешей профилей
-- Проверка целостности при загрузке
-- Подпись профилей
-
-## Расширение системы
-
-### Добавление новых валидаторов
-
-```python
-class CustomSectionValidator(ProfileSectionValidator):
-    def validate(self, section_data: dict) -> list:
-        errors = []
-        # Ваша логика валидации
-        return errors
-
-# Регистрация в SECTION_VALIDATORS
-SECTION_VALIDATORS['custom_section'] = CustomSectionValidator()
-```
-
-### Плагины для секций
-
-Система поддерживает плагинную архитектуру для:
-- Новых типов секций
-- Кастомных валидаторов
-- Расширенных нормализаторов
-
-## Устранение неполадок
-
-### Частые ошибки
-
-1. **"Section 'subscriptions' must be a list"**
-   - Убедитесь, что `subscriptions` это массив, а не объект
-
-2. **"Filter exclude_tags must be a list"**
-   - Используйте `--normalize` для автоисправления
-   - Или исправьте вручную: `"exclude_tags": ["tag"]` вместо `"exclude_tags": "tag"`
-
-3. **"Profile file not found"**
-   - Проверьте путь к файлу
-   - Убедитесь, что файл существует
-
-### Отладка
+Установите переменные окружения, связанные с профилями:
 
 ```bash
-# Подробная валидация
-sboxmgr profile validate profile.json --verbose
+# Директория профилей
+export SBOXMGR_PROFILE_DIR="~/.config/sboxmgr/profiles"
 
-# Объяснение структуры
-sboxmgr profile explain profile.json
-
-# Сравнение с рабочим профилем
-sboxmgr profile diff profile.json working-profile.json
+# Профиль по умолчанию
+export SBOXMGR_DEFAULT_PROFILE="home"
 ```
 
-## Следующие шаги
+## См. также
 
-1. **Phase 1**: Интеграция с Agent Bridge & Event System
-2. **Phase 5**: Улучшения UI/UX
-3. **Phase 6**: Продвинутые функции
-
----
-
-**См. также:**
-- [ADR-0017: Full Profile Architecture](../arch/decisions/ADR-0017-full-profile-architecture.md)
-- [ADR-0018: Subscription Management Architecture](../arch/decisions/ADR-0018-subscription-management-architecture.md)
-- [CLI Reference](../cli_reference.md) 
+- [Справочник CLI](../cli_reference.md) - Интерфейс командной строки
+- [Подписки](../subscriptions.md) - Управление подписками
+- [Конфигурация](../configuration.md) - Системная конфигурация 
