@@ -8,9 +8,9 @@ from typing import List
 
 from textual import on
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Button, Footer, Header, Static
+from textual.widgets import Button, DataTable, Footer, Header, Static
 
 from sboxmgr.tui.components.forms import SubscriptionForm
 from sboxmgr.tui.utils.formatting import format_subscription_info
@@ -120,10 +120,22 @@ class SubscriptionManagerScreen(Screen):
         padding: 1;
         background: $surface;
         border-top: solid $primary;
+        align: center middle;
     }
 
     .action-buttons Button {
         margin: 0 1;
+        min-width: 15;
+    }
+
+    .action-buttons Button#back {
+        background: $surface-lighten-2;
+        border: solid $primary;
+    }
+
+    .action-buttons Button#back:hover {
+        background: $primary-darken-3;
+        color: $text;
     }
 
     .empty-state {
@@ -159,29 +171,74 @@ class SubscriptionManagerScreen(Screen):
             with Vertical(classes="subscription-info"):
                 yield self._create_info_panel()
 
-            # Subscription list or empty state
-            if self._subscriptions:
-                with VerticalScroll(classes="subscription-list"):
-                    yield from self._create_subscription_items()
-            else:
-                with Vertical(classes="empty-state"):
-                    yield Static(
-                        "No subscriptions configured.\nAdd your first subscription to get started."
-                    )
+            # Subscription table
+            with Vertical(classes="subscription-list"):
+                yield DataTable(id="subscription-table")
 
             # Action buttons
             with Horizontal(classes="action-buttons"):
                 yield Button(
-                    "Add Subscription", id="add_subscription", variant="primary"
+                    "➕ Add Subscription", id="add_subscription", variant="primary"
                 )
-                yield Button("Refresh All", id="refresh_all", variant="default")
-                yield Button("Back", id="back", variant="default")
+                yield Button("🔄 Refresh All", id="refresh_all", variant="default")
+                yield Button("← Back", id="back", variant="default")
 
         yield Footer()
 
     def on_mount(self) -> None:
-        """Handle screen mount event."""
-        self._load_subscriptions()
+        """Called when screen is mounted."""
+        self.load_subscriptions()
+
+    def load_subscriptions(self) -> None:
+        """Load subscriptions from state."""
+        table = self.query_one("#subscription-table", DataTable)
+        table.clear()
+
+        # Add columns
+        table.add_columns("№", "URL", "Status", "Type", "Actions")
+
+        # Load from app state (which now uses profiles)
+        subscriptions = self.app.state.subscriptions
+
+        for i, subscription in enumerate(subscriptions):
+            # Get subscription config from profile if available
+            sub_config = None
+            if self.app.state.active_config:
+                subscription_urls = self.app.state.active_config.metadata.get(
+                    "subscription_urls", {}
+                )
+                for sub_id, url in subscription_urls.items():
+                    if url == subscription.url:
+                        # Find corresponding config
+                        for config in self.app.state.active_config.subscriptions:
+                            if config.id == sub_id:
+                                sub_config = config
+                                break
+                        break
+
+            # Determine status
+            enabled = sub_config.enabled if sub_config else True
+            status = "✅ Enabled" if enabled else "❌ Disabled"
+
+            # Truncate URL for display
+            display_url = (
+                subscription.url[:50] + "..."
+                if len(subscription.url) > 50
+                else subscription.url
+            )
+
+            # Add row with action buttons
+            table.add_row(
+                str(i + 1),
+                display_url,
+                status,
+                subscription.source_type or "url",
+                "[Remove] [Toggle]",
+                key=str(i),
+            )
+
+        # Store subscriptions for later use
+        self._subscriptions = subscriptions
 
     def _create_info_panel(self) -> Static:
         """Create the information panel.
@@ -189,14 +246,17 @@ class SubscriptionManagerScreen(Screen):
         Returns:
             Static widget with subscription statistics
         """
-        if not self._subscriptions:
-            return Static("No subscriptions configured")
+        # Get current subscriptions from app state
+        subscriptions = self.app.state.subscriptions
+        total_subs = len(subscriptions) if subscriptions else 0
 
-        total_subs = len(self._subscriptions)
-        active_sub = self._active_subscription
+        if total_subs == 0:
+            return Static("No subscriptions configured")
 
         info_lines = [f"Total Subscriptions: {total_subs}"]
 
+        # Get active subscription
+        active_sub = self.app.state.active_subscription
         if active_sub:
             # Truncate long URLs for display
             display_url = active_sub
@@ -246,15 +306,9 @@ class SubscriptionManagerScreen(Screen):
         """Load subscriptions from the application state."""
         try:
             app_state = self.app.state
-            if hasattr(app_state, "get_subscriptions"):
-                self._subscriptions = app_state.get_subscriptions() or []
-            else:
-                self._subscriptions = []
-
-            if hasattr(app_state, "active_subscription"):
-                self._active_subscription = app_state.active_subscription or ""
-            else:
-                self._active_subscription = ""
+            # Get subscriptions directly from the state
+            self._subscriptions = app_state.subscriptions or []
+            self._active_subscription = app_state.active_subscription or ""
         except Exception:
             self._subscriptions = []
             self._active_subscription = ""
@@ -348,6 +402,38 @@ class SubscriptionManagerScreen(Screen):
         """Handle back button press."""
         self.app.pop_screen()
 
+    @on(DataTable.RowSelected)
+    def on_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        """Handle table row selection."""
+        # Get row from coordinate
+        row = event.coordinate.row
+        try:
+            if 0 <= row < len(self._subscriptions):
+                subscription = self._subscriptions[row]
+                self.app.notify(
+                    f"Selected: {subscription.url[:30]}...", severity="information"
+                )
+        except (ValueError, IndexError):
+            pass
+
+    @on(DataTable.CellSelected)
+    def on_table_cell_selected(self, event: DataTable.CellSelected) -> None:
+        """Handle table cell selection."""
+        # Get row and column from coordinate
+        row = event.coordinate.row
+        column = event.coordinate.column
+
+        # Check if it's the Actions column (column 4)
+        if column == 4:  # Actions column
+            try:
+                index = row  # Row index is the subscription index
+                if 0 <= index < len(self._subscriptions):
+                    subscription = self._subscriptions[index]
+                    # Show action menu
+                    self._show_action_menu(index, subscription)
+            except (ValueError, IndexError):
+                pass
+
     def _handle_subscription_result(self, result: bool | str) -> None:
         """Handle the result from the subscription form.
 
@@ -358,7 +444,13 @@ class SubscriptionManagerScreen(Screen):
         if result is True:
             # Reload subscriptions and refresh display
             self._load_subscriptions()
-            self.refresh()
+            # Pop this screen and push a new one to refresh
+            self.app.pop_screen()
+            from sboxmgr.tui.screens.subscription_manager import (
+                SubscriptionManagerScreen,
+            )
+
+            self.app.push_screen(SubscriptionManagerScreen())
             self.app.notify("Subscription added successfully", severity="success")
         elif isinstance(result, str):
             # Handle error case
@@ -394,18 +486,136 @@ class SubscriptionManagerScreen(Screen):
 
                 # Update application state
                 app_state = self.app.state
-                if hasattr(app_state, "set_active_subscription"):
-                    app_state.set_active_subscription(url)
-                    self._active_subscription = url
+                app_state.active_subscription = url
+                self._active_subscription = url
 
-                    # Refresh display
-                    self.refresh()
-                    self.app.notify("Subscription activated", severity="success")
-                else:
-                    self.app.notify("Activation not available", severity="warning")
+                # Refresh display
+                self.refresh()
+                self.app.notify("Subscription activated", severity="success")
         except (ValueError, IndexError) as e:
             self.app.notify(
                 f"Failed to activate subscription: {str(e)}", severity="error"
+            )
+
+    def _show_action_menu(self, index: int, subscription) -> None:
+        """Show action menu for subscription.
+
+        Args:
+            index: Subscription index
+            subscription: Subscription object
+        """
+        # Store current selection for keyboard actions
+        self._selected_index = index
+        self._selected_subscription = subscription
+
+        # Show notification with available actions
+        url = (
+            subscription.url[:30] + "..."
+            if len(subscription.url) > 30
+            else subscription.url
+        )
+        self.app.notify(
+            f"Selected: {url}\n" "Press 'r' to remove, 't' to toggle, 'a' to activate",
+            severity="information",
+        )
+
+    def on_key(self, event) -> None:
+        """Handle keyboard events."""
+        if hasattr(self, "_selected_index") and hasattr(self, "_selected_subscription"):
+            if event.key == "r":
+                self._handle_remove_subscription_by_index(self._selected_index)
+            elif event.key == "t":
+                self._handle_toggle_subscription(self._selected_index)
+            elif event.key == "a":
+                self._handle_activate_subscription_by_index(self._selected_index)
+
+    def _handle_remove_subscription_by_index(self, index: int) -> None:
+        """Handle subscription removal by index.
+
+        Args:
+            index: Subscription index
+        """
+        try:
+            if 0 <= index < len(self._subscriptions):
+                subscription = self._subscriptions[index]
+                url = subscription.url
+
+                # Remove from app state
+                if self.app.state.remove_subscription(url):
+                    self.app.notify(
+                        f"Removed subscription: {url[:30]}...", severity="success"
+                    )
+                    # Reload the table
+                    self.load_subscriptions()
+                    # Update info panel
+                    info_panel = self.query_one(".subscription-info Static")
+                    if info_panel:
+                        info_panel.update(self._create_info_panel())
+                else:
+                    self.app.notify("Failed to remove subscription", severity="error")
+        except Exception as e:
+            self.app.notify(f"Error removing subscription: {str(e)}", severity="error")
+
+    def _handle_toggle_subscription(self, index: int) -> None:
+        """Handle subscription toggle by index.
+
+        Args:
+            index: Subscription index
+        """
+        try:
+            if 0 <= index < len(self._subscriptions):
+                subscription = self._subscriptions[index]
+                url = subscription.url
+
+                # Toggle in profile if available
+                if self.app.state.active_config:
+                    subscription_urls = self.app.state.active_config.metadata.get(
+                        "subscription_urls", {}
+                    )
+                    for sub_id, stored_url in subscription_urls.items():
+                        if stored_url == url:
+                            # Find and toggle the config
+                            for config in self.app.state.active_config.subscriptions:
+                                if config.id == sub_id:
+                                    config.enabled = not config.enabled
+                                    # Save the config
+                                    self.app.state._save_active_config()
+                                    status = "enabled" if config.enabled else "disabled"
+                                    self.app.notify(
+                                        f"Subscription {status}: {url[:30]}...",
+                                        severity="success",
+                                    )
+                                    # Reload the table
+                                    self.load_subscriptions()
+                                    return
+
+                self.app.notify("Could not toggle subscription", severity="warning")
+        except Exception as e:
+            self.app.notify(f"Error toggling subscription: {str(e)}", severity="error")
+
+    def _handle_activate_subscription_by_index(self, index: int) -> None:
+        """Handle subscription activation by index.
+
+        Args:
+            index: Subscription index
+        """
+        try:
+            if 0 <= index < len(self._subscriptions):
+                subscription = self._subscriptions[index]
+                url = subscription.url
+
+                # Set as active subscription
+                self.app.state.active_subscription = url
+                self.app.notify(
+                    f"Activated subscription: {url[:30]}...", severity="success"
+                )
+                # Update info panel
+                info_panel = self.query_one(".subscription-info Static")
+                if info_panel:
+                    info_panel.update(self._create_info_panel())
+        except Exception as e:
+            self.app.notify(
+                f"Error activating subscription: {str(e)}", severity="error"
             )
 
     def _handle_remove_subscription(self, button_id: str) -> None:
@@ -422,19 +632,14 @@ class SubscriptionManagerScreen(Screen):
 
                 # Update application state
                 app_state = self.app.state
-                if hasattr(app_state, "remove_subscription"):
-                    success = app_state.remove_subscription(url)
-                    if success:
-                        # Reload subscriptions and refresh display
-                        self._load_subscriptions()
-                        self.refresh()
-                        self.app.notify("Subscription removed", severity="success")
-                    else:
-                        self.app.notify(
-                            "Failed to remove subscription", severity="error"
-                        )
+                success = app_state.remove_subscription(url)
+                if success:
+                    # Reload subscriptions and refresh display
+                    self._load_subscriptions()
+                    self.refresh()
+                    self.app.notify("Subscription removed", severity="success")
                 else:
-                    self.app.notify("Removal not available", severity="warning")
+                    self.app.notify("Failed to remove subscription", severity="error")
         except (ValueError, IndexError) as e:
             self.app.notify(
                 f"Failed to remove subscription: {str(e)}", severity="error"

@@ -169,6 +169,11 @@ class MainScreen(Screen):
                 server_info += f" ({excluded_count} excluded)"
             status_lines.append(server_info)
 
+        # Add navigation hints
+        if status_lines:
+            status_lines.append("")  # Empty line
+        status_lines.append("💡 Tip: Press 'Escape' to go back, 'q' to quit")
+
         return Static("\n".join(status_lines))
 
     def _should_show_advanced(self) -> bool:

@@ -166,7 +166,7 @@ class ServerListScreen(Screen):
                 yield Button("Select All", id="select_all", variant="default")
                 yield Button("Select None", id="select_none", variant="default")
                 yield Button("Apply Changes", id="apply_changes", variant="primary")
-                yield Button("Back", id="back", variant="default")
+                yield Button("← Back", id="back", variant="default")
 
         yield Footer()
 

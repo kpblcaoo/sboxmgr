@@ -4,6 +4,8 @@ This module contains form implementations for various user interactions,
 including subscription management and configuration generation.
 """
 
+import logging
+import subprocess
 from pathlib import Path
 
 from textual import on
@@ -19,6 +21,35 @@ from sboxmgr.tui.utils.validation import (
 )
 
 
+# Setup logging
+def setup_form_logging():
+    """Setup logging for forms."""
+    log_file = Path.home() / ".sboxmgr" / "tui_debug.log"
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # Create logger specifically for forms
+    logger = logging.getLogger("tui_forms")
+    logger.setLevel(logging.DEBUG)
+
+    # Remove existing handlers to avoid duplicates
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+
+    # Add file handler only (no console output)
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+    return logger
+
+
+logger = setup_form_logging()
+
+
 class SubscriptionForm(ModalScreen[bool | str]):
     """Form for adding new subscriptions.
 
@@ -30,6 +61,11 @@ class SubscriptionForm(ModalScreen[bool | str]):
         bool: True if subscription was added successfully, False if cancelled
         str: Error message if an error occurred
     """
+
+    BINDINGS = [
+        ("ctrl+v", "paste_clipboard", "Paste from clipboard"),
+        ("escape", "cancel", "Cancel"),
+    ]
 
     CSS = """
     SubscriptionForm {
@@ -60,7 +96,12 @@ class SubscriptionForm(ModalScreen[bool | str]):
     }
 
     .form-field Input {
-        width: 100%;
+        width: 1fr;
+    }
+
+    .form-field Button {
+        width: auto;
+        margin-left: 1;
     }
 
     .form-buttons {
@@ -92,10 +133,12 @@ class SubscriptionForm(ModalScreen[bool | str]):
 
                 with Vertical(classes="form-field"):
                     yield Label("Subscription URL:")
-                    yield Input(
-                        placeholder="https://example.com/subscription or vmess://...",
-                        id="url_input",
-                    )
+                    with Horizontal():
+                        yield Input(
+                            placeholder="https://example.com/subscription or vmess://...",
+                            id="url_input",
+                        )
+                        yield Button("📋 Paste", id="paste_btn", variant="default")
                     yield Static("", id="url_error", classes="error-message")
 
                 with Vertical(classes="form-field"):
@@ -145,44 +188,115 @@ class SubscriptionForm(ModalScreen[bool | str]):
         else:
             error_widget.update("")
 
+    @on(Button.Pressed, "#paste_btn")
+    def on_paste_pressed(self) -> None:
+        """Handle paste button press."""
+        try:
+            # Try different clipboard commands based on available tools
+            clipboard_content = None
+
+            # Try xclip first (most common on Linux)
+            try:
+                result = subprocess.run(
+                    ["xclip", "-selection", "clipboard", "-o"],
+                    capture_output=True,
+                    text=True,
+                    timeout=2,
+                )
+                if result.returncode == 0:
+                    clipboard_content = result.stdout.strip()
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                pass
+
+            # Try xsel as fallback
+            if not clipboard_content:
+                try:
+                    result = subprocess.run(
+                        ["xsel", "--clipboard", "--output"],
+                        capture_output=True,
+                        text=True,
+                        timeout=2,
+                    )
+                    if result.returncode == 0:
+                        clipboard_content = result.stdout.strip()
+                except (subprocess.TimeoutExpired, FileNotFoundError):
+                    pass
+
+            # Try wl-paste for Wayland
+            if not clipboard_content:
+                try:
+                    result = subprocess.run(
+                        ["wl-paste"], capture_output=True, text=True, timeout=2
+                    )
+                    if result.returncode == 0:
+                        clipboard_content = result.stdout.strip()
+                except (subprocess.TimeoutExpired, FileNotFoundError):
+                    pass
+
+            if clipboard_content:
+                url_input = self.query_one("#url_input", Input)
+                url_input.value = clipboard_content
+                url_input.focus()
+                # Clear any previous error
+                self.query_one("#url_error", Static).update("")
+            else:
+                self.app.notify("Could not access clipboard", severity="warning")
+
+        except Exception as e:
+            self.app.notify(f"Paste failed: {str(e)}", severity="error")
+
     @on(Button.Pressed, "#add_btn")
     def on_add_pressed(self) -> None:
         """Handle add button press."""
+        logger.debug("SubscriptionForm.on_add_pressed called")
+
         url_input = self.query_one("#url_input", Input)
         tags_input = self.query_one("#tags_input", Input)
 
         url = url_input.value.strip()
         tags_text = tags_input.value.strip()
 
+        logger.debug(f"Form input - URL: {url}")
+        logger.debug(f"Form input - Tags: {tags_text}")
+
         # Validate URL
         if not url:
+            logger.debug("URL validation failed - empty URL")
             self.query_one("#url_error", Static).update("URL is required")
             url_input.focus()
             return
 
         is_valid, error_msg = validate_subscription_url(url)
+        logger.debug(f"URL validation result: {is_valid}, error: {error_msg}")
+
         if not is_valid:
             self.query_one("#url_error", Static).update(error_msg)
             url_input.focus()
             return
 
         # Validate tags if provided
-        tags = []
         if tags_text:
-            is_valid, error_msg, parsed_tags = validate_tags(tags_text)
+            is_valid, error_msg, _ = validate_tags(tags_text)
+            logger.debug(f"Tags validation result: {is_valid}, error: {error_msg}")
+
             if not is_valid:
                 self.query_one("#tags_error", Static).update(error_msg)
                 tags_input.focus()
                 return
-            tags = parsed_tags
 
         # Try to add subscription
+        logger.debug("Calling app_state.add_subscription...")
         app_state = self.app.state
-        success = app_state.add_subscription(url, tags)
+        success = app_state.add_subscription(
+            url, enabled=True
+        )  # Fixed: removed tags parameter
+        logger.debug(f"add_subscription result: {success}")
 
         if success:
+            logger.debug("Subscription added successfully, dismissing with True")
             self.dismiss(True)
         else:
+            logger.debug("Subscription failed, dismissing with error message")
             self.dismiss(
                 "Failed to add subscription. Please check the URL and try again."
             )
@@ -190,6 +304,14 @@ class SubscriptionForm(ModalScreen[bool | str]):
     @on(Button.Pressed, "#cancel_btn")
     def on_cancel_pressed(self) -> None:
         """Handle cancel button press."""
+        self.dismiss(False)
+
+    def action_paste_clipboard(self) -> None:
+        """Action to paste from clipboard using hotkey."""
+        self.on_paste_pressed()
+
+    def action_cancel(self) -> None:
+        """Action to cancel the form using hotkey."""
         self.dismiss(False)
 
 
@@ -332,14 +454,47 @@ class ConfigGenerationForm(ModalScreen[bool | str]):
             path_input.focus()
             return
 
-        # TODO: Implement actual config generation using orchestrator
-        # For now, just simulate success
+        # Generate configuration using orchestrator
         try:
-            # Create empty file to test path
-            Path(path).touch()
-            self.dismiss(True)
+            app_state = self.app.state
+
+            # Check if we have subscriptions
+            if not app_state.subscriptions:
+                self.query_one("#path_error", Static).update(
+                    "No subscriptions available"
+                )
+                return
+
+            # Get active subscription or use first one
+            active_url = app_state.active_subscription
+            if not active_url and app_state.subscriptions:
+                active_url = app_state.subscriptions[0].url
+
+            if not active_url:
+                self.query_one("#path_error", Static).update("No active subscription")
+                return
+
+            # Use orchestrator to export configuration
+            result = app_state.orchestrator.export_configuration(
+                source_url=active_url,
+                source_type="url_base64",  # Default type
+                export_format="singbox",
+            )
+
+            if result["success"]:
+                # Write configuration to file
+                import json
+
+                with open(path, "w", encoding="utf-8") as f:
+                    json.dump(result["config"], f, indent=2, ensure_ascii=False)
+
+                self.dismiss(True)
+            else:
+                error_msg = result.get("error", "Unknown error occurred")
+                self.dismiss(f"Failed to generate config: {error_msg}")
+
         except Exception as e:
-            self.dismiss(f"Failed to create config file: {str(e)}")
+            self.dismiss(f"Failed to generate config: {str(e)}")
 
     @on(Button.Pressed, "#preview_btn")
     def on_preview_pressed(self) -> None:

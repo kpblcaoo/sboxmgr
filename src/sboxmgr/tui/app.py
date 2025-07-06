@@ -7,7 +7,7 @@ the entire TUI experience, including screen management and state handling.
 from typing import Optional
 
 from textual import on
-from textual.app import App, ComposeResult
+from textual.app import App
 from textual.binding import Binding
 
 from sboxmgr.tui.screens.main import MainScreen
@@ -37,6 +37,7 @@ class SboxmgrTUI(App):
     BINDINGS = [
         Binding("q", "quit", "Quit", priority=True),
         Binding("ctrl+c", "quit", "Quit", priority=True),
+        Binding("escape", "go_back", "Back", priority=True),
         Binding("f1,question_mark", "help", "Help"),
         Binding("f10", "debug_info", "Debug Info", show=False),
     ]
@@ -52,17 +53,14 @@ class SboxmgrTUI(App):
         super().__init__(**kwargs)
         self.state = TUIState(debug=debug, profile=profile)
 
-    def compose(self) -> ComposeResult:
+    def compose(self):
         """Compose the main application layout.
 
         Returns:
-            The composed result containing the initial screen
+            Empty list - we'll install the initial screen in on_mount
         """
-        # Context-aware initial screen selection
-        if not self.state.has_subscriptions():
-            yield WelcomeScreen(id="welcome")
-        else:
-            yield MainScreen(id="main")
+        # Empty compose - we'll install the initial screen in on_mount
+        return []
 
     def on_mount(self) -> None:
         """Handle application mount event."""
@@ -74,6 +72,12 @@ class SboxmgrTUI(App):
         if self.state.debug > 0:
             self.sub_title = f"Subscription Manager (debug: {self.state.debug})"
 
+        # Install initial screen based on context
+        if not self.state.has_subscriptions():
+            self.push_screen(WelcomeScreen(id="welcome"))
+        else:
+            self.push_screen(MainScreen(id="main"))
+
     def action_help(self) -> None:
         """Show help screen."""
         # TODO: Implement help screen in Phase 3
@@ -84,6 +88,16 @@ class SboxmgrTUI(App):
         if self.state.debug > 0:
             # TODO: Implement debug info modal in Phase 3
             self.bell()
+
+    def action_go_back(self) -> None:
+        """Go back to previous screen or main menu."""
+        # If we're not on the main screen or welcome screen, go back
+        current_screen = self.screen
+        if current_screen.id not in ["main", "welcome"]:
+            self.pop_screen()
+        else:
+            # On main/welcome screen, show notification
+            self.notify("Press 'q' to quit", severity="information")
 
     @on(WelcomeScreen.SubscriptionAdded)
     def on_subscription_added(self, event: WelcomeScreen.SubscriptionAdded) -> None:

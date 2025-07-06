@@ -85,7 +85,8 @@ class WelcomeScreen(Screen):
                     yield Static(
                         "This tool helps you generate secure, reliable\n"
                         "configs for VPN proxies (like sing-box).\n\n"
-                        "Let's start by adding your first subscription:",
+                        "Let's start by adding your first subscription:\n\n"
+                        "💡 Tip: Press 'Escape' to go back, 'q' to quit",
                         classes="welcome-description",
                     )
                     with Center(classes="welcome-buttons"):
