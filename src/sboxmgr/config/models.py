@@ -200,8 +200,6 @@ class AppConfig(BaseSettings):
         "case_sensitive": False,
         # Allow population by field name for CLI integration
         "validate_by_name": True,
-        # Allow extra fields for backward compatibility
-        "extra": "allow",
     }
 
     def __init__(self, **kwargs):

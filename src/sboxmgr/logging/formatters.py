@@ -319,7 +319,6 @@ def create_formatter(
     formatters = {
         "json": JSONFormatter,
         "text": HumanFormatter,
-        "human": HumanFormatter,  # Alias for backward compatibility
         "compact": CompactFormatter,
     }
 

@@ -14,7 +14,6 @@ from dotenv import load_dotenv
 
 from sboxmgr.cli import plugin_template
 from sboxmgr.cli.commands.config import app as new_config_app
-from sboxmgr.cli.commands.config import profile_app
 from sboxmgr.cli.commands.exclusions import exclusions
 from sboxmgr.cli.commands.export import export
 from sboxmgr.cli.commands.policy import app as policy_app
@@ -193,14 +192,9 @@ app.command("exclusions")(exclusions)
 # Регистрируем config команды
 app.add_typer(new_config_app, name="config")
 
-# Регистрируем profile команды (deprecated)
-app.add_typer(profile_app, name="profile")
-
 # Регистрируем команду экспорта
 app.command("export", help="Export configurations in standardized formats")(export)
 
-# Регистрируем команды профилей
-app.add_typer(profile_app)
 
 # Регистрируем команды политик
 app.add_typer(policy_app)

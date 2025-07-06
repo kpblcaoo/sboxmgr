@@ -17,10 +17,6 @@ Phase 3 enhancements:
 from .base import BasePostProcessor, ChainablePostProcessor, ProfileAwarePostProcessor
 from .chain import PostProcessorChain
 from .geo_filter import GeoFilterPostProcessor
-
-# Import legacy postprocessors for backward compatibility
-from .geofilterpostprocessor import *
-from .geofilterpostprocessorpostprocessor import *
 from .latency_sort import LatencySortPostProcessor
 from .tag_filter import TagFilterPostProcessor
 
@@ -34,6 +30,4 @@ __all__ = [
     "TagFilterPostProcessor",
     "LatencySortPostProcessor",
     "PostProcessorChain",
-    # Legacy postprocessors (for backward compatibility)
-    "GeoFilterPostProcessorPostprocessor",
 ]

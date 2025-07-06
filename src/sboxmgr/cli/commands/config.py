@@ -320,28 +320,3 @@ def edit(
     except FileNotFoundError:
         rprint(f"[red]❌ Editor not found: {editor_cmd}[/red]")
         raise typer.Exit(1)
-
-
-# Backward compatibility: create alias for profile command
-profile_app = typer.Typer(
-    help="[DEPRECATED] Profile management (use 'config' instead)", deprecated=True
-)
-
-
-@profile_app.callback()
-def profile_deprecated():
-    """Show deprecation warning for profile commands."""
-    rprint(
-        "[yellow]⚠️  Warning: 'profile' commands are deprecated. Use 'config' instead.[/yellow]"
-    )
-
-
-# Add all config commands to profile app for backward compatibility
-# Note: Direct command copying is complex with Typer, so we'll register them manually
-profile_app.command("list")(list)
-profile_app.command("create")(create)
-profile_app.command("apply")(apply)
-profile_app.command("validate")(validate)
-profile_app.command("migrate")(migrate)
-profile_app.command("switch")(switch)
-profile_app.command("edit")(edit)

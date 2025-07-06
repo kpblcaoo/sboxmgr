@@ -11,14 +11,3 @@ __all__ = [
     "ExclusionEntry",
     "ExclusionList",
 ]
-
-
-# Convenience function for backward compatibility
-def get_default_manager() -> ExclusionManager:
-    """Get default ExclusionManager instance.
-
-    Returns:
-        Default ExclusionManager singleton
-
-    """
-    return ExclusionManager.default()

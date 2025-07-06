@@ -166,9 +166,9 @@ class TestProfileCLI:
             json.dump(profile_data, f, indent=2)
 
         # Import CLI command
-        from sboxmgr.cli.commands.profile import _load_profile
+        from sboxmgr.configs.toml_support import load_config_auto
 
         # Test loading the profile
-        profile = _load_profile(str(profile_file))
+        profile = load_config_auto(profile_file)
         assert profile.id == "cli_test"
         assert len(profile.subscriptions) == 1
