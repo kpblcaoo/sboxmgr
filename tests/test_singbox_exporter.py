@@ -1,8 +1,8 @@
 import json
 
 from sboxmgr.subscription.exporters.singbox_exporter import (
-    _export_tuic,
-    _export_wireguard,
+    export_tuic,
+    export_wireguard,
     singbox_export,
 )
 from sboxmgr.subscription.models import ParsedServer
@@ -101,7 +101,7 @@ def test_export_with_none_values():
 
 
 def test_export_outbound_without_tag():
-    """Test that outbound without 'tag' does not cause KeyError and special outbounds are added."""
+    """Test that outbound without 'tag' does not cause KeyError and auto outbound is added."""
     server = ParsedServer(
         type="wireguard",
         address="10.0.0.1",
@@ -113,11 +113,10 @@ def test_export_outbound_without_tag():
     )
     config = singbox_export([server], routes=[])
     outbounds = config.get("outbounds", [])
-    # Должны быть служебные outbounds (direct, block, dns-out)
+    # Должен быть auto outbound и wireguard outbound
     tags = {o.get("tag") for o in outbounds}
-    assert "direct" in tags
-    assert "block" in tags
-    assert "dns-out" in tags
+    assert "auto" in tags
+    assert "wireguard-10.0.0.1" in tags
 
 
 class TestSingboxExporterMetaHandling:
@@ -136,7 +135,7 @@ class TestSingboxExporterMetaHandling:
         )
 
         # Should not raise AttributeError
-        result = _export_wireguard(server)
+        result = export_wireguard(server)
 
         assert result is not None
         assert result["type"] == "wireguard"
@@ -161,7 +160,7 @@ class TestSingboxExporterMetaHandling:
             meta={},  # Empty dict
         )
 
-        result = _export_wireguard(server)
+        result = export_wireguard(server)
 
         assert result is not None
         assert result["type"] == "wireguard"
@@ -181,7 +180,7 @@ class TestSingboxExporterMetaHandling:
             meta={"mtu": "1420", "keepalive": "25"},  # Strings instead of ints
         )
 
-        result = _export_wireguard(server)
+        result = export_wireguard(server)
 
         assert result is not None
         assert result["type"] == "wireguard"
@@ -200,7 +199,7 @@ class TestSingboxExporterMetaHandling:
             meta={"mtu": "0", "keepalive": "false"},  # Strings instead of int/bool
         )
 
-        result = _export_wireguard(server)
+        result = export_wireguard(server)
 
         assert result is not None
         assert result["type"] == "wireguard"
@@ -220,7 +219,7 @@ class TestSingboxExporterMetaHandling:
         )
 
         # Should not raise AttributeError
-        result = _export_tuic(server)
+        result = export_tuic(server)
 
         assert result is not None
         assert result["type"] == "tuic"
@@ -242,7 +241,7 @@ class TestSingboxExporterMetaHandling:
             meta={"udp_relay_mode": "native"},
         )
 
-        result = _export_tuic(server)
+        result = export_tuic(server)
 
         assert result is not None
         assert result["type"] == "tuic"
@@ -259,7 +258,7 @@ class TestSingboxExporterMetaHandling:
             meta={"udp_relay_mode": "false"},  # String instead of bool
         )
 
-        result = _export_tuic(server)
+        result = export_tuic(server)
 
         assert result is not None
         assert result["type"] == "tuic"
@@ -281,7 +280,7 @@ class TestSingboxExporterMetaHandling:
         delattr(server, "meta")
 
         # Should not raise AttributeError
-        result = _export_wireguard(server)
+        result = export_wireguard(server)
 
         assert result is not None
         assert result["type"] == "wireguard"

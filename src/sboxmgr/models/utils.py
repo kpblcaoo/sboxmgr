@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from .config import SingBoxConfig
+from .singbox import SingBoxConfig
 
 
 def validate_singbox_config(config_path: Path) -> bool:
@@ -58,7 +58,6 @@ def create_example_config() -> dict:
                 "server_port": 8388,
                 "method": "aes-256-gcm",
                 "password": "secret",
-                "network": "tcp_udp",
             },
             {
                 "type": "vmess",
@@ -67,8 +66,6 @@ def create_example_config() -> dict:
                 "server_port": 10086,
                 "uuid": "b831381d-6324-4d53-ad4f-8cda48b30811",
                 "security": "auto",
-                "alter_id": 4,
-                "transport": {"network": "ws", "ws_opts": {"path": "/ws"}},
             },
             {
                 "type": "hysteria2",
@@ -76,8 +73,6 @@ def create_example_config() -> dict:
                 "server": "example.com",
                 "server_port": 443,
                 "password": "secret",
-                "obfs": "salamander",
-                "obfs_type": "salamander",
                 "tls": {"enabled": True, "server_name": "example.com"},
             },
         ],

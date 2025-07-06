@@ -2,7 +2,7 @@
 Tests for the new Sing-box exporter using modular Pydantic models.
 
 This module tests the SingboxExporterV2 which uses the modular Pydantic models
-from src.sboxmgr.models.singbox for better validation and type safety.
+from sboxmgr.models.singbox for better validation and type safety.
 """
 
 import json
