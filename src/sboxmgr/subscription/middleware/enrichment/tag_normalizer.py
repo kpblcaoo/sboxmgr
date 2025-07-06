@@ -12,9 +12,13 @@ from ...models import ParsedServer, PipelineContext
 class EnrichmentTagNormalizer:
     """Enrichment-specific tag normalizer for consistent naming across parsers.
 
-    Ensures that all servers have consistent tag naming regardless of
-    the source parser or data format. Prioritizes human-readable names
-    over technical identifiers.
+    Priority order:
+    1. meta['name'] (human-readable from source)
+    2. meta['label'] (alternative human-readable label)
+    3. meta['tag'] (explicit tag from source)
+    4. tag (parser-generated tag)
+    5. address (IP/domain fallback)
+    6. protocol-based fallback (type + object id)
     """
 
     def __init__(self, prefer_names: bool = True):
@@ -51,35 +55,49 @@ class EnrichmentTagNormalizer:
         Returns:
             Normalized tag string
         """
-        # Priority order for tag sources
-        tag_sources = []
+        # Priority 1: meta['name']
+        if server.meta and server.meta.get("name"):
+            name = server.meta["name"]
+            if isinstance(name, str) and name.strip():
+                return self._sanitize_tag(name.strip())
 
-        if self.prefer_names:
-            # Prefer human-readable names
-            tag_sources = [
-                server.meta.get("name"),  # Human-readable name
-                server.meta.get("tag"),  # Original tag
-                server.tag,  # Server tag attribute
-                f"{server.type}-{server.address}",  # Generated fallback
-            ]
-        else:
-            # Prefer technical identifiers
-            tag_sources = [
-                server.tag,  # Server tag attribute
-                server.meta.get("tag"),  # Original tag
-                server.meta.get("name"),  # Human-readable name
-                f"{server.type}-{server.address}",  # Generated fallback
-            ]
+        # Priority 2: meta['label']
+        if server.meta and server.meta.get("label"):
+            label = server.meta["label"]
+            if isinstance(label, str) and label.strip():
+                return self._sanitize_tag(label.strip())
 
-        # Find first non-empty, non-None tag
-        for tag_source in tag_sources:
-            if tag_source and str(tag_source).strip():
-                normalized_tag = str(tag_source).strip()
+        # Priority 3: meta['tag']
+        if server.meta and server.meta.get("tag"):
+            tag = server.meta["tag"]
+            if isinstance(tag, str) and tag.strip():
+                return self._sanitize_tag(tag.strip())
 
-                # Clean up the tag (remove extra spaces, etc.)
-                normalized_tag = " ".join(normalized_tag.split())
+        # Priority 4: tag (parser-generated)
+        if server.tag and server.tag.strip():
+            return self._sanitize_tag(server.tag.strip())
 
-                return normalized_tag
+        # Priority 5: address fallback (only if not None and not empty)
+        if server.address is not None and str(server.address).strip() != "":
+            return f"{server.type}-{server.address}"
 
-        # Fallback to generated tag
-        return f"{server.type}-{server.address}"
+        # Priority 6: protocol-based fallback (if address is empty or None)
+        return f"{server.type}-{id(server)}"
+
+    def _sanitize_tag(self, tag: str) -> str:
+        """Sanitize a tag string.
+
+        Args:
+            tag: The tag string to sanitize
+
+        Returns:
+            Sanitized tag string
+        """
+        # Remove control characters and normalize whitespace
+        import re
+
+        sanitized = re.sub(r"[\x00-\x1f\x7f]", "", tag)
+        sanitized = re.sub(r"\s+", " ", sanitized).strip()
+        if not sanitized:
+            return "unnamed-server"
+        return sanitized

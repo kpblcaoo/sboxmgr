@@ -11,7 +11,6 @@ from .custom import CustomEnricher
 from .geo import GeoEnricher
 from .performance import PerformanceEnricher
 from .security import SecurityEnricher
-from .tag_normalizer import EnrichmentTagNormalizer
 
 
 class EnrichmentMiddleware(TransformMiddleware):
@@ -20,6 +19,9 @@ class EnrichmentMiddleware(TransformMiddleware):
     Enriches server data with additional metadata including geographic
     information, performance metrics, security indicators, and custom
     attributes based on profile configuration.
+
+    Note: Tag normalization is handled by TagNormalizer middleware.
+    This middleware focuses only on data enrichment.
 
     Configuration options:
     - enable_geo_enrichment: Add geographic metadata
@@ -70,7 +72,6 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         # Initialize enrichers
         self.basic_enricher = BasicEnricher()
-        self.tag_normalizer = EnrichmentTagNormalizer(prefer_names=True)
         self.geo_enricher = GeoEnricher(self.geo_database_path)
         self.performance_enricher = PerformanceEnricher(self.performance_cache_duration)
         self.security_enricher = SecurityEnricher()
@@ -105,7 +106,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             try:
                 # Apply enrichment
                 enriched_server = self._enrich_server(
-                    server, context, profile, enrichment_config, enriched_servers
+                    server, context, profile, enrichment_config
                 )
                 enriched_servers.append(enriched_server)
 
@@ -163,7 +164,6 @@ class EnrichmentMiddleware(TransformMiddleware):
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
         enrichment_config: Optional[Dict[str, Any]] = None,
-        enriched_servers: Optional[List[ParsedServer]] = None,
     ) -> ParsedServer:
         """Enrich a single server with metadata.
 
@@ -172,24 +172,18 @@ class EnrichmentMiddleware(TransformMiddleware):
             context: Pipeline context
             profile: Full profile configuration
             enrichment_config: Enrichment configuration
-            enriched_servers: List of already enriched servers (for tag uniqueness)
 
         Returns:
             Enriched server
         """
         if not enrichment_config:
             enrichment_config = self._extract_enrichment_config(profile)
-        if enriched_servers is None:
-            enriched_servers = []
 
         # Apply basic metadata enrichment (always enabled)
         server = self.basic_enricher.enrich(server, context)
 
-        # Apply tag normalization (always enabled) - use full process to ensure uniqueness
-        normalized_tag = self.tag_normalizer._normalize_tag(server)
-        # Ensure uniqueness by checking against other servers in this batch
-        unique_tag = self._ensure_unique_tag(normalized_tag, enriched_servers)
-        server.tag = unique_tag
+        # Note: Tag normalization is handled by TagNormalizer middleware
+        # This middleware focuses only on data enrichment
 
         # Apply geographic enrichment
         if enrichment_config["enable_geo_enrichment"]:
@@ -210,29 +204,3 @@ class EnrichmentMiddleware(TransformMiddleware):
             )
 
         return server
-
-    def _ensure_unique_tag(self, tag: str, existing_servers: List[ParsedServer]) -> str:
-        """Ensure tag is unique by appending suffix if needed.
-
-        Args:
-            tag: Base tag string
-            existing_servers: List of servers already processed
-
-        Returns:
-            Unique tag string
-        """
-        if not tag:
-            return "unnamed-server"
-
-        # Check against existing servers in this batch
-        used_tags = {server.tag for server in existing_servers if server.tag}
-
-        if tag not in used_tags:
-            return tag
-
-        # Find unique suffix using parentheses (safe for JSON/YAML)
-        counter = 1
-        while f"{tag} ({counter})" in used_tags:
-            counter += 1
-
-        return f"{tag} ({counter})"
