@@ -13,29 +13,27 @@ Phase 3 enhancements:
 - Conditional processing
 """
 
+# Import new Phase 3 postprocessors
+from .base import BasePostProcessor, ChainablePostProcessor, ProfileAwarePostProcessor
+from .chain import PostProcessorChain
+from .geo_filter import GeoFilterPostProcessor
+
 # Import legacy postprocessors for backward compatibility
 from .geofilterpostprocessor import *
 from .geofilterpostprocessorpostprocessor import *
-
-# Import new Phase 3 postprocessors
-from .base import BasePostProcessor, ProfileAwarePostProcessor, ChainablePostProcessor
-from .geo_filter import GeoFilterPostProcessor
-from .tag_filter import TagFilterPostProcessor
 from .latency_sort import LatencySortPostProcessor
-from .chain import PostProcessorChain
+from .tag_filter import TagFilterPostProcessor
 
 __all__ = [
     # Base classes
-    'BasePostProcessor',
-    'ProfileAwarePostProcessor', 
-    'ChainablePostProcessor',
-    
+    "BasePostProcessor",
+    "ProfileAwarePostProcessor",
+    "ChainablePostProcessor",
     # Concrete postprocessors
-    'GeoFilterPostProcessor',
-    'TagFilterPostProcessor',
-    'LatencySortPostProcessor',
-    'PostProcessorChain',
-    
+    "GeoFilterPostProcessor",
+    "TagFilterPostProcessor",
+    "LatencySortPostProcessor",
+    "PostProcessorChain",
     # Legacy postprocessors (for backward compatibility)
-    'GeoFilterPostProcessorPostprocessor',
-] 
+    "GeoFilterPostProcessorPostprocessor",
+]

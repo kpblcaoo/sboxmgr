@@ -104,4 +104,4 @@ Internal documentation serves the development team by:
 
 ---
 
-**Note:** This documentation is intended for the development team. For user documentation, see the [user guide](../user-guide/) and [getting started](../getting-started/) sections. 
+**Note:** This documentation is intended for the development team. For user documentation, see the [user guide](../user-guide/) and [getting started](../getting-started/) sections.

@@ -55,10 +55,10 @@ class SecurityContext:
         self.allowed_schemes = {'http', 'https', 'file'}
         self.max_fetch_size = 2 * 1024 * 1024  # 2MB
         self.bind_whitelist = {'127.0.0.1', '::1'}
-        
+
     def validate_url(self, url: str) -> bool:
         # SEC-01, SEC-FETCH-01 implementation
-        
+
     def sanitize_log_data(self, data: dict) -> dict:
         # SEC-06, SEC-15 implementation
 ```
@@ -70,7 +70,7 @@ class ValidationResult:
     is_valid: bool
     errors: List[SecurityError]
     sanitized_data: Optional[dict]
-    
+
 class SecurityValidator:
     def validate_pipeline_input(self, context: PipelineContext) -> ValidationResult:
         # Multi-layer validation

@@ -2,8 +2,8 @@
 
 ## Статус
 
-**Дата:** 2025-06-29  
-**Статус:** ✅ **ПРИНЯТО**  
+**Дата:** 2025-06-29
+**Статус:** ✅ **ПРИНЯТО**
 **Контекст:** Production-ready UX и runtime-аспекты для профилей и подписок
 
 ---
@@ -87,4 +87,4 @@
 - ADR-0018: Subscription Management Architecture
 - ADR-0016: Pydantic Schema Generation
 - ADR-0015: Agent-Installer Separation
-- ADR-0012: Service Architecture 
+- ADR-0012: Service Architecture

@@ -3,19 +3,24 @@ Installation Wizard for sboxmgr (Sing-box config manager)
 
 Dev-mode: set WIZARD_DEV=1 to prevent any real changes to the system (no file writes, no systemd, no chmod, only logging actions).
 """
-import subprocess
-import os
-import sys
-import inquirer
-import re
-import logging
 import hashlib
 import importlib.metadata
+import logging
+import os
+import re
+import subprocess
+import sys
+
+import inquirer
 from inquirer.render.console import ConsoleRender
+
 from sboxmgr.server.exclusions import load_exclusions, view_exclusions
 
 # Configure basic logging for debugging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 
 # Check python-inquirer version
 def check_inquirer_version():
@@ -25,24 +30,34 @@ def check_inquirer_version():
         logging.info(f"Using python-inquirer version {inquirer_version}")
         return True
     except importlib.metadata.PackageNotFoundError:
-        logging.warning("Could not detect python-inquirer version. Assuming it is installed.")
+        logging.warning(
+            "Could not detect python-inquirer version. Assuming it is installed."
+        )
         try:
             import inquirer
+
             logging.info("python-inquirer module is importable, proceeding.")
             return True
         except ImportError:
-            logging.error("python-inquirer is not installed. Please install it with 'pip install python-inquirer'.")
-            print("Error: python-inquirer is not installed. Install it with 'pip install python-inquirer'.")
+            logging.error(
+                "python-inquirer is not installed. Please install it with 'pip install python-inquirer'."
+            )
+            print(
+                "Error: python-inquirer is not installed. Install it with 'pip install python-inquirer'."
+            )
             return False
+
 
 class CustomRender(ConsoleRender):
     """Custom renderer to visually distinguish excluded servers."""
+
     def render_choice(self, choice, pointer=False):
         exclusions = load_exclusions(dry_run=False)
         excluded_names = {ex["name"] for ex in exclusions["exclusions"]}
         if choice in excluded_names:
             return f"\033[90m{choice} (excluded)\033[0m"  # Gray text
         return choice
+
 
 def create_dedicated_user(username):
     try:
@@ -58,10 +73,12 @@ def create_dedicated_user(username):
         sudoers_file.write(sudoers_line)
     print(f"Sudoers file for {username} created.")
 
+
 def set_directory_permissions(username, directories):
     for directory in directories:
         subprocess.run(["chown", "-R", f"{username}:{username}", directory], check=True)
         print(f"Permissions set for {directory}.")
+
 
 def create_virtualenv(path):
     venv_path = os.path.join(path, "venv")
@@ -72,10 +89,12 @@ def create_virtualenv(path):
         print(f"Virtual environment already exists at {venv_path}")
     return venv_path
 
+
 def activate_virtualenv(venv_path):
     activate_script = os.path.join(venv_path, "bin", "activate")
     activate_command = f"source {activate_script}"
     subprocess.run(activate_command, shell=True, executable="/bin/bash")
+
 
 def get_file_hash(file_path):
     """Compute SHA-256 hash of a file."""
@@ -86,6 +105,7 @@ def get_file_hash(file_path):
         for chunk in iter(lambda: f.read(4096), b""):
             sha256.update(chunk)
     return sha256.hexdigest()
+
 
 def copy_files_to_installation_path(source_files, destination_path):
     """Copy files to destination, overwriting if contents differ."""
@@ -121,6 +141,7 @@ def copy_files_to_installation_path(source_files, destination_path):
                 else:
                     print(f"File {dest_file} is unchanged, skipping copy.")
 
+
 def get_server_list(url):
     """Fetch server list using update_singbox.py -l."""
     logging.info(f"Fetching server list using URL: {url}")
@@ -129,10 +150,12 @@ def get_server_list(url):
             ["sudo", "-E", "./update_singbox.py", "-u", url, "-l"],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
     except subprocess.CalledProcessError as e:
-        logging.error(f"Failed to fetch server list. Return code: {e.returncode}, Output: {e.stderr}")
+        logging.error(
+            f"Failed to fetch server list. Return code: {e.returncode}, Output: {e.stderr}"
+        )
         print("Error: Failed to fetch server list. Check URL or network connectivity.")
         return []
     lines = result.stdout.splitlines()
@@ -147,12 +170,13 @@ def get_server_list(url):
         if len(parts) > 1:
             name = parts[1].strip()
             # Clean up name: remove redundant prefixes and special characters
-            name = re.sub(r'➔.*$', '', name).strip()
-            name = re.sub(r'^\W+', '', name)  # Remove leading emojis/non-word chars
+            name = re.sub(r"➔.*$", "", name).strip()
+            name = re.sub(r"^\W+", "", name)  # Remove leading emojis/non-word chars
             if name and name not in seen_names:
                 server_list.append(name)
                 seen_names.add(name)
     return server_list
+
 
 def get_server_list_with_exclusions(url):
     """Fetch server list and mark exclusions."""
@@ -167,16 +191,20 @@ def get_server_list_with_exclusions(url):
         for name in server_list
     ]
 
+
 def validate_url(url):
     regex = re.compile(
-        r'^(?:http|ftp)s?://'
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
-        r'localhost|'
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'
-        r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'
-        r'(?::\d+)?'
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+        r"^(?:http|ftp)s?://"
+        r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"
+        r"localhost|"
+        r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|"
+        r"\[?[A-F0-9]*:[A-F0-9:]+\]?)"
+        r"(?::\d+)?"
+        r"(?:/?|[/?]\S+)$",
+        re.IGNORECASE,
+    )
     return re.match(regex, url) is not None
+
 
 def ensure_install_path(path):
     if not os.path.exists(path):
@@ -185,7 +213,10 @@ def ensure_install_path(path):
     else:
         print(f"Installation path already exists: {path}")
 
-def setup_systemd_service(install_path, timer_frequency, service_verbosity, install_link):
+
+def setup_systemd_service(
+    install_path, timer_frequency, service_verbosity, install_link
+):
     service_path = "/etc/systemd/system/sboxctl.service"
     timer_path = "/etc/systemd/system/sboxctl.timer"
     service_content = f"""
@@ -229,6 +260,7 @@ WantedBy=timers.target
     safe_run(["systemctl", "start", "sboxctl.timer"], check=True)
     print("Systemd timer enabled and started.")
 
+
 def run_installation_wizard():
     main_menu = [
         inquirer.List(
@@ -248,8 +280,17 @@ def run_installation_wizard():
 
         elif answers["action"] == "Get Config":
             config_questions = [
-                inquirer.Text("install_link", message="Enter subscription URL", default=os.getenv("SINGBOX_URL", "https://default.link"), validate=lambda _, x: validate_url(x)),
-                inquirer.List("server_type", message="Select installation type", choices=["Single Server", "Multi-Server"]),
+                inquirer.Text(
+                    "install_link",
+                    message="Enter subscription URL",
+                    default=os.getenv("SINGBOX_URL", "https://default.link"),
+                    validate=lambda _, x: validate_url(x),
+                ),
+                inquirer.List(
+                    "server_type",
+                    message="Select installation type",
+                    choices=["Single Server", "Multi-Server"],
+                ),
             ]
             config_answers = inquirer.prompt(config_questions)
             if not config_answers:
@@ -264,11 +305,21 @@ def run_installation_wizard():
 
             if server_type == "Single Server":
                 server_question = [
-                    inquirer.List("server", message="Select server", choices=server_list, carousel=True)
+                    inquirer.List(
+                        "server",
+                        message="Select server",
+                        choices=server_list,
+                        carousel=True,
+                    )
                 ]
             else:
                 server_question = [
-                    inquirer.Checkbox("servers", message="Select servers", choices=server_list, carousel=True)
+                    inquirer.Checkbox(
+                        "servers",
+                        message="Select servers",
+                        choices=server_list,
+                        carousel=True,
+                    )
                 ]
             server_answers = inquirer.prompt(server_question, render=CustomRender())
             if not server_answers:
@@ -277,19 +328,29 @@ def run_installation_wizard():
             # Map selected servers to indices, ignoring "(excluded)" suffix
             all_servers = get_server_list(install_link)
             if server_type == "Single Server":
-                selected_server = re.sub(r'\s*\(excluded\)$', '', server_answers["server"])
-                if selected_server in [re.sub(r'\s*\(excluded\)$', '', s) for s in server_list if "(excluded)" in s]:
+                selected_server = re.sub(
+                    r"\s*\(excluded\)$", "", server_answers["server"]
+                )
+                if selected_server in [
+                    re.sub(r"\s*\(excluded\)$", "", s)
+                    for s in server_list
+                    if "(excluded)" in s
+                ]:
                     print(f"Error: Cannot select excluded server: {selected_server}")
                     continue
                 selected_indices = [all_servers.index(selected_server)]
             else:
                 selected_servers = [
-                    re.sub(r'\s*\(excluded\)$', '', server)
+                    re.sub(r"\s*\(excluded\)$", "", server)
                     for server in server_answers["servers"]
                 ]
                 selected_indices = []
                 for server in selected_servers:
-                    if server in [re.sub(r'\s*\(excluded\)$', '', s) for s in server_list if "(excluded)" in s]:
+                    if server in [
+                        re.sub(r"\s*\(excluded\)$", "", s)
+                        for s in server_list
+                        if "(excluded)" in s
+                    ]:
                         print(f"Warning: Skipping excluded server: {server}")
                         continue
                     selected_indices.append(all_servers.index(server))
@@ -299,12 +360,22 @@ def run_installation_wizard():
                 continue
 
             # Run sboxctl with selected indices
-            cmd = ["sudo", "-E", "./sboxctl", "-u", install_link, "-i", ",".join(map(str, selected_indices))]
+            cmd = [
+                "sudo",
+                "-E",
+                "./sboxctl",
+                "-u",
+                install_link,
+                "-i",
+                ",".join(map(str, selected_indices)),
+            ]
             try:
                 result = safe_run(cmd, capture_output=True, text=True, check=True)
                 print("Configuration applied successfully at /etc/sing-box/config.json")
                 print("Sing-box service restarted.")
-                logging.info(f"Get Config: Applied configuration with indices {selected_indices}")
+                logging.info(
+                    f"Get Config: Applied configuration with indices {selected_indices}"
+                )
                 if result.stdout:
                     print("Output:", result.stdout)
             except subprocess.CalledProcessError as e:
@@ -313,13 +384,31 @@ def run_installation_wizard():
 
         elif answers["action"] == "Install":
             install_questions = [
-                inquirer.Text("install_path", message="Installation path", default="/opt/sboxmgr/"),
-                inquirer.Text("install_link", message="Subscription URL", default=os.getenv("SINGBOX_URL", "https://default.link"), validate=lambda _, x: validate_url(x)),
-                inquirer.Text("timer_frequency", message="Timer frequency", default="15min"),
-                inquirer.List("debug_level", message="Debug level", choices=[
-                    ("Minimal", 0), ("Detailed", 1), ("Verbose", 2)
-                ], default=1, carousel=True),
-                inquirer.List("server_type", message="Installation type", choices=["Single Server", "Multi-Server"], default="Single Server"),
+                inquirer.Text(
+                    "install_path", message="Installation path", default="/opt/sboxmgr/"
+                ),
+                inquirer.Text(
+                    "install_link",
+                    message="Subscription URL",
+                    default=os.getenv("SINGBOX_URL", "https://default.link"),
+                    validate=lambda _, x: validate_url(x),
+                ),
+                inquirer.Text(
+                    "timer_frequency", message="Timer frequency", default="15min"
+                ),
+                inquirer.List(
+                    "debug_level",
+                    message="Debug level",
+                    choices=[("Minimal", 0), ("Detailed", 1), ("Verbose", 2)],
+                    default=1,
+                    carousel=True,
+                ),
+                inquirer.List(
+                    "server_type",
+                    message="Installation type",
+                    choices=["Single Server", "Multi-Server"],
+                    default="Single Server",
+                ),
             ]
             install_answers = inquirer.prompt(install_questions)
             if not install_answers:
@@ -337,22 +426,44 @@ def run_installation_wizard():
                 continue
             if server_type == "Single Server":
                 server_question = [
-                    inquirer.List("server", message="Select server", choices=server_list, carousel=True)
+                    inquirer.List(
+                        "server",
+                        message="Select server",
+                        choices=server_list,
+                        carousel=True,
+                    )
                 ]
             else:
                 server_question = [
-                    inquirer.Checkbox("servers", message="Select servers", choices=server_list, carousel=True)
+                    inquirer.Checkbox(
+                        "servers",
+                        message="Select servers",
+                        choices=server_list,
+                        carousel=True,
+                    )
                 ]
             server_answers = inquirer.prompt(server_question, render=CustomRender())
             if not server_answers:
                 continue
 
             ensure_install_path(install_path)
-            copy_files_to_installation_path(["sboxctl", "config.template.json", "logging_setup.py"], install_path)
+            copy_files_to_installation_path(
+                ["sboxctl", "config.template.json", "logging_setup.py"], install_path
+            )
             venv_path = create_virtualenv(install_path)
             activate_virtualenv(venv_path)
-            safe_run([os.path.join(venv_path, "bin", "pip"), "install", "-r", "requirements.txt"], check=True)
-            setup_systemd_service(install_path, timer_frequency, debug_level, install_link)
+            safe_run(
+                [
+                    os.path.join(venv_path, "bin", "pip"),
+                    "install",
+                    "-r",
+                    "requirements.txt",
+                ],
+                check=True,
+            )
+            setup_systemd_service(
+                install_path, timer_frequency, debug_level, install_link
+            )
             print("Installation completed.")
 
         elif answers["action"] == "Manage Exclusions":
@@ -360,7 +471,12 @@ def run_installation_wizard():
                 inquirer.List(
                     "exclusion_action",
                     message="Manage exclusions",
-                    choices=["View Exclusions", "Add Exclusions", "Remove Exclusions", "Back"],
+                    choices=[
+                        "View Exclusions",
+                        "Add Exclusions",
+                        "Remove Exclusions",
+                        "Back",
+                    ],
                 )
             ]
             exclusion_answers = inquirer.prompt(exclusion_menu)
@@ -368,9 +484,17 @@ def run_installation_wizard():
                 continue
             if exclusion_answers["exclusion_action"] == "View Exclusions":
                 view_exclusions()
-            elif exclusion_answers["exclusion_action"] in ["Add Exclusions", "Remove Exclusions"]:
+            elif exclusion_answers["exclusion_action"] in [
+                "Add Exclusions",
+                "Remove Exclusions",
+            ]:
                 url_question = [
-                    inquirer.Text("install_link", message="Subscription URL", default=os.getenv("SINGBOX_URL", "https://default.link"), validate=lambda _, x: validate_url(x))
+                    inquirer.Text(
+                        "install_link",
+                        message="Subscription URL",
+                        default=os.getenv("SINGBOX_URL", "https://default.link"),
+                        validate=lambda _, x: validate_url(x),
+                    )
                 ]
                 url_answers = inquirer.prompt(url_question)
                 if not url_answers:
@@ -380,18 +504,39 @@ def run_installation_wizard():
                     print("Error: No servers available.")
                     continue
                 server_question = [
-                    inquirer.Checkbox("servers", message="Select servers to exclude", choices=server_list, carousel=True)
+                    inquirer.Checkbox(
+                        "servers",
+                        message="Select servers to exclude",
+                        choices=server_list,
+                        carousel=True,
+                    )
                 ]
                 server_answers = inquirer.prompt(server_question)
                 if not server_answers:
                     continue
-                exclude_args = server_answers["servers"] if exclusion_answers["exclusion_action"] == "Add Exclusions" else [f"-{s}" for s in server_answers["servers"]]
+                exclude_args = (
+                    server_answers["servers"]
+                    if exclusion_answers["exclusion_action"] == "Add Exclusions"
+                    else [f"-{s}" for s in server_answers["servers"]]
+                )
                 try:
-                    safe_run(["sudo", "-E", "./sboxctl", "-u", url_answers["install_link"], "-e"] + exclude_args, check=True)
+                    safe_run(
+                        [
+                            "sudo",
+                            "-E",
+                            "./sboxctl",
+                            "-u",
+                            url_answers["install_link"],
+                            "-e",
+                        ]
+                        + exclude_args,
+                        check=True,
+                    )
                     print("Exclusions updated successfully.")
                 except subprocess.CalledProcessError as e:
                     logging.error(f"Failed to manage exclusions: {e.stderr}")
                     print(f"Error: Failed to manage exclusions. Details: {e.stderr}")
+
 
 if __name__ == "__main__":
     run_installation_wizard()

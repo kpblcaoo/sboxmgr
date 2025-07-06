@@ -6,16 +6,23 @@ JSON API contract.
 """
 
 from .bridge import AgentBridge, AgentError, AgentNotAvailableError
-from .protocol import AgentRequest, AgentResponse, ValidationRequest, InstallRequest, ClientType, AgentCommand
+from .protocol import (
+    AgentCommand,
+    AgentRequest,
+    AgentResponse,
+    ClientType,
+    InstallRequest,
+    ValidationRequest,
+)
 
 __all__ = [
-    'AgentBridge',
-    'AgentError', 
-    'AgentNotAvailableError',
-    'AgentRequest',
-    'AgentResponse',
-    'ValidationRequest',
-    'InstallRequest',
-    'ClientType',
-    'AgentCommand',
-] 
+    "AgentBridge",
+    "AgentError",
+    "AgentNotAvailableError",
+    "AgentRequest",
+    "AgentResponse",
+    "ValidationRequest",
+    "InstallRequest",
+    "ClientType",
+    "AgentCommand",
+]

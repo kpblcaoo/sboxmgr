@@ -41,7 +41,7 @@ config = singbox_export(servers, client_profile=client_profile)
 
 **Типичные исключения:**
 - `"vmess"` - устаревший VMess
-- `"shadowsocks"` - устаревший Shadowsocks  
+- `"shadowsocks"` - устаревший Shadowsocks
 - `"hysteria"` - устаревший Hysteria (используйте hysteria2)
 - `"anytls"` - экспериментальный AnyTLS
 
@@ -122,7 +122,7 @@ examples/
 Все запрошенные production-ready фичи успешно реализованы:
 
 1. **Override final action** - ✅ Работает, протестировано
-2. **Exclude outbounds** - ✅ Работает, протестировано  
+2. **Exclude outbounds** - ✅ Работает, протестировано
 3. **Современный экспорт по умолчанию** - ✅ Реализован
 
 Код готов к production использованию с полным покрытием тестами и документацией.

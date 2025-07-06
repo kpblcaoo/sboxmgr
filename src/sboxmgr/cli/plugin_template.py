@@ -6,49 +6,64 @@ helps developers create properly structured plugin classes that integrate
 with the sboxmgr plugin registry system.
 """
 
-import typer
 import os
+
+import typer
 
 # Создаем app для тестирования
 app = typer.Typer()
 
+
 @app.command()
 def plugin_template(
-    type: str = typer.Argument(..., help="Type of plugin: fetcher, parser, validator, exporter, postprocessor, parsed_validator"),
+    type: str = typer.Argument(
+        ...,
+        help="Type of plugin: fetcher, parser, validator, exporter, postprocessor, parsed_validator",
+    ),
     name: str = typer.Argument(..., help="Name of the plugin class (CamelCase)"),
-    output_dir: str = typer.Option("plugin_templates", help="Directory to write the template files (will be created if not exists)")
+    output_dir: str = typer.Option(
+        "plugin_templates",
+        help="Directory to write the template files (will be created if not exists)",
+    ),
 ):
     """Generate a plugin template (fetcher/parser/validator/exporter/postprocessor/parsed_validator) with test and Google-style docstring.
 
     By default, templates are written to the 'plugin_templates' directory in the current working directory.
     """
     type = type.lower()
-    supported_types = {"fetcher", "parser", "validator", "exporter", "postprocessor", "parsed_validator"}
+    supported_types = {
+        "fetcher",
+        "parser",
+        "validator",
+        "exporter",
+        "postprocessor",
+        "parsed_validator",
+    }
     if type not in supported_types:
         typer.echo(f"Type must be one of: {', '.join(supported_types)}", err=True)
         raise typer.Exit(1)
-    
+
     # Определяем правильный суффикс для каждого типа
     type_suffix = {
         "fetcher": "Fetcher",
-        "parser": "Parser", 
+        "parser": "Parser",
         "validator": "Validator",
         "exporter": "Exporter",
         "postprocessor": "PostProcessor",
         "parsed_validator": "ParsedValidator",
     }[type]
-    
+
     # Если имя уже заканчивается на нужный суффикс, не добавлять его повторно
     class_name = name if name.endswith(type_suffix) else name + type_suffix
     file_name = f"{name.lower()}.py"
     test_file_name = f"template_test_{name.lower()}.py"
-    
+
     # Base class and import
     if type == "fetcher":
         base = "BaseFetcher"
         base_import = "from ..base_fetcher import BaseFetcher"
         register_import = "from ..registry import register"
-        decorator = f"@register(\"custom_{type}\")"
+        decorator = f'@register("custom_{type}")'
         doc = f"""{class_name} fetches subscription data from custom source.
 
     This fetcher implements the BaseFetcher interface to retrieve subscription
@@ -77,7 +92,7 @@ def plugin_template(
         base = "BaseParser"
         base_import = "from ..base_parser import BaseParser"
         register_import = "from ..registry import register"
-        decorator = f"@register(\"custom_{type}\")"
+        decorator = f'@register("custom_{type}")'
         doc = f"""{class_name} parses subscription data from custom format.
 
     This parser implements the BaseParser interface to convert raw subscription
@@ -134,7 +149,7 @@ def plugin_template(
         base = "BaseParsedValidator"
         base_import = "from ..validators.base import BaseParsedValidator"
         register_import = "from ..validators.base import register_parsed_validator"
-        decorator = f"@register_parsed_validator(\"custom_{type}\")"
+        decorator = f'@register_parsed_validator("custom_{type}")'
         doc = f"""{class_name} validates parsed server configurations.
 
     This validator implements the BaseParsedValidator interface to validate
@@ -163,7 +178,7 @@ def plugin_template(
         base = "BaseExporter"
         base_import = "from ..base_exporter import BaseExporter"
         register_import = "from ..registry import register"
-        decorator = f"@register(\"custom_{type}\")"
+        decorator = f'@register("custom_{type}")'
         doc = f"""{class_name} exports parsed servers to custom configuration format.
 
     This exporter implements the BaseExporter interface to convert parsed
@@ -191,7 +206,7 @@ def plugin_template(
         base = "BasePostProcessor"
         base_import = "from ..postprocessor_base import BasePostProcessor"
         register_import = "from ..registry import register"
-        decorator = f"@register(\"custom_{type}\")"
+        decorator = f'@register("custom_{type}")'
         doc = f"""{class_name} post-processes parsed server configurations.
 
     This post-processor implements the BasePostProcessor interface to modify
@@ -258,14 +273,16 @@ def test_{class_name.lower()}_basic():
     # Example: instantiate and check NotImplementedError
     plugin = {class_name}()
     with pytest.raises(NotImplementedError):
-        {'plugin.fetch(None)' if type == 'fetcher' else 'plugin.parse(b"test")' if type == 'parser' else 'plugin.validate(b"test", None)' if type == 'parsed_validator' else 'plugin.validate(b"test")' if type == 'validator' else 'plugin.export([])' if type == 'exporter' else 'plugin.process([], None)'}
+        {"plugin.fetch(None)" if type == "fetcher" else 'plugin.parse(b"test")' if type == "parser" else 'plugin.validate(b"test", None)' if type == "parsed_validator" else 'plugin.validate(b"test")' if type == "validator" else "plugin.export([])" if type == "exporter" else "plugin.process([], None)"}
 """
 
     # Ensure output_dir exists
     try:
         os.makedirs(output_dir, exist_ok=True)
     except Exception as e:
-        typer.echo(f"[ERROR] Failed to create output directory '{output_dir}': {e}", err=True)
+        typer.echo(
+            f"[ERROR] Failed to create output directory '{output_dir}': {e}", err=True
+        )
         raise typer.Exit(1)
 
     out_path = os.path.join(output_dir, file_name)
@@ -276,14 +293,16 @@ def test_{class_name.lower()}_basic():
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(template)
         typer.echo(f"[DEBUG] Successfully wrote {out_path}")
-        
+
         with open(test_out_path, "w", encoding="utf-8") as f:
             f.write(test_template)
         typer.echo(f"[DEBUG] Successfully wrote {test_out_path}")
-        
+
         typer.echo(f"Created {out_path} and {test_out_path}")
         if decorator:
-            typer.echo("[DX] Don't forget to register your plugin in the registry and add tests!")
+            typer.echo(
+                "[DX] Don't forget to register your plugin in the registry and add tests!"
+            )
     except Exception as e:
         typer.echo(f"[ERROR] Failed to write template files: {e}", err=True)
-        raise typer.Exit(1) 
+        raise typer.Exit(1)

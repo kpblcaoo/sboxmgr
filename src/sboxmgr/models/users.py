@@ -12,13 +12,14 @@ import warnings
 warnings.warn(
     "src.sboxmgr.models.users is deprecated. Use src.sboxmgr.models.singbox.auth instead.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 """User models for different protocols."""
 
-from pydantic import BaseModel, Field
 from typing import Literal
+
+from pydantic import BaseModel, Field
 
 
 class SocksUser(BaseModel):
@@ -66,4 +67,4 @@ class TuicUser(BaseModel):
     """TUIC user configuration."""
 
     uuid: str
-    password: str 
+    password: str

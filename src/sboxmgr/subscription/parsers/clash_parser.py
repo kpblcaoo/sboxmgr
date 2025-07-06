@@ -4,29 +4,32 @@ This module provides the ClashParser class for parsing Clash-format YAML
 subscription data. It converts Clash proxy configurations into standardized
 ParsedServer objects for consistent processing across different client formats.
 """
+
 import yaml
-from ..models import ParsedServer
+
 from ..base_parser import BaseParser
+from ..models import ParsedServer
 from ..registry import register
+
 
 @register("clash")
 class ClashParser(BaseParser):
     """Parser for Clash-format YAML subscription data.
-    
+
     This parser handles Clash-specific proxy configurations and converts them
     into standardized ParsedServer objects. It supports various Clash proxy
     types including shadowsocks, vmess, trojan, and others.
     """
-    
+
     def parse(self, raw: bytes):
         """Parse Clash YAML subscription data into ParsedServer objects.
-        
+
         Args:
             raw: Raw bytes containing Clash YAML configuration data.
-            
+
         Returns:
             List[ParsedServer]: List of parsed server configurations.
-            
+
         Raises:
             yaml.YAMLError: If YAML parsing fails.
             KeyError: If required configuration fields are missing.
@@ -52,12 +55,14 @@ class ClashParser(BaseParser):
             print("[ClashParser] No proxies section found or section is empty.")
             return []
         for p in proxies:
-            servers.append(ParsedServer(
-                type=p.get("type", "unknown"),
-                address=p.get("server", ""),
-                port=int(p.get("port", 0)),
-                security=p.get("cipher", None),
-                meta=p
-            ))
+            servers.append(
+                ParsedServer(
+                    type=p.get("type", "unknown"),
+                    address=p.get("server", ""),
+                    port=int(p.get("port", 0)),
+                    security=p.get("cipher", None),
+                    meta=p,
+                )
+            )
         # Убираем безусловный print - логирование будет в manager.py
-        return servers 
+        return servers

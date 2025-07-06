@@ -59,16 +59,16 @@ if bridge.is_available():
         config_path=Path("/path/to/config.json"),
         client_type=ClientType.SING_BOX
     )
-    
+
     if response.success:
         print("Validation passed!")
     else:
         print(f"Validation failed: {response.errors}")
-    
+
     # Check available clients
     check_response = bridge.check()
     print(f"Available clients: {check_response.clients}")
-    
+
     # Install a client
     install_response = bridge.install(
         client_type=ClientType.SING_BOX,
@@ -278,4 +278,4 @@ The bridge automatically searches for agents in this order:
 2. **Phase 2** ✅: Agent bridge infrastructure
 3. **Phase 3**: sboxagent implementation
 4. **Phase 4**: Service mode integration
-5. **Phase 5**: Event-driven architecture 
+5. **Phase 5**: Event-driven architecture

@@ -104,4 +104,4 @@ sboxctl run -u https://example.com/proxy-config.json --index 99
 
 ---
 
-> Want a visual demo? Suggest a GIF or video in the issues! 
+> Want a visual demo? Suggest a GIF or video in the issues!

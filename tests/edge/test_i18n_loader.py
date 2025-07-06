@@ -1,6 +1,7 @@
+import json
 import os
 import tempfile
-import json
+
 from sboxmgr.i18n.loader import LanguageLoader
 
 
@@ -54,4 +55,4 @@ def test_key_not_found_returns_key():
         with open(test_path, "w", encoding="utf-8") as f:
             json.dump({"test": "ok"}, f)
         lang = LanguageLoader("en", base_dir=tmpdir)
-        assert lang.get("not_found") == "not_found" 
+        assert lang.get("not_found") == "not_found"

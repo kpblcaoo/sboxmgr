@@ -85,4 +85,4 @@
 - [ ] Middleware: hooks/команды — расширить edge-тесты для sandbox изоляции, передачи переменных, bypass
 
 ## Новое поведение
-- Неподдерживаемая схема (ftp, data, chrome-extension): безопасный fail, логирование, partial success (см. SEC-FETCH-01) 
+- Неподдерживаемая схема (ftp, data, chrome-extension): безопасный fail, логирование, partial success (см. SEC-FETCH-01)

@@ -3,7 +3,9 @@
 import logging
 import logging.handlers
 import os
-from sboxmgr.utils.env import get_log_file, get_max_log_size, get_debug_level
+
+from sboxmgr.utils.env import get_debug_level, get_log_file, get_max_log_size
+
 
 def setup_logging(debug_level=None, log_file=None, max_log_size=None):
     """Configure logging with file and syslog handlers."""
@@ -24,7 +26,9 @@ def setup_logging(debug_level=None, log_file=None, max_log_size=None):
         logger.setLevel(logging.WARNING)
 
     file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(logging.Formatter("[%(asctime)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
+    file_handler.setFormatter(
+        logging.Formatter("[%(asctime)s] %(message)s", "%Y-%m-%d %H:%M:%S")
+    )
     logger.addHandler(file_handler)
 
     try:
@@ -36,13 +40,14 @@ def setup_logging(debug_level=None, log_file=None, max_log_size=None):
 
     rotate_logs(log_file, max_log_size)
 
+
 def rotate_logs(log_file, max_log_size):
     """Rotate log file if it exceeds max_log_size.
-    
+
     Args:
         log_file: Path to log file
         max_log_size: Maximum size in bytes before rotation
-        
+
     """
     if not os.path.exists(log_file):
         return
@@ -50,7 +55,7 @@ def rotate_logs(log_file, max_log_size):
     if log_size > max_log_size:
         for i in range(5, 0, -1):
             old_log = f"{log_file}.{i}"
-            new_log = f"{log_file}.{i+1}"
+            new_log = f"{log_file}.{i + 1}"
             if os.path.exists(old_log):
                 os.rename(old_log, new_log)
         os.rename(log_file, f"{log_file}.1")

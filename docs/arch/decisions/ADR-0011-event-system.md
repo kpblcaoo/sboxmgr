@@ -47,10 +47,10 @@ class Event:
 
 class EventBus:
     """Lightweight event bus using pydispatch."""
-    
+
     def __init__(self):
         self.logger = structlog.get_logger("sboxmgr.events")
-    
+
     def emit(self, event: Event) -> None:
         """Emit an event to all registered handlers."""
         self.logger.debug(
@@ -61,18 +61,18 @@ class EventBus:
             component="event_bus",
             operation="emit"
         )
-        
+
         # Dispatch to all handlers
         dispatcher.send(
             signal=event.type,
             sender=event.source,
             event=event
         )
-    
+
     def subscribe(self, event_type: str, handler: Callable[[Event], None]) -> None:
         """Subscribe a handler to an event type."""
         dispatcher.connect(handler, signal=event_type)
-        
+
         self.logger.debug(
             "Event handler subscribed",
             event_type=event_type,
@@ -80,7 +80,7 @@ class EventBus:
             component="event_bus",
             operation="subscribe"
         )
-    
+
     def unsubscribe(self, event_type: str, handler: Callable[[Event], None]) -> None:
         """Unsubscribe a handler from an event type."""
         dispatcher.disconnect(handler, signal=event_type)
@@ -122,7 +122,7 @@ def with_trace_id(trace_id: Optional[str] = None):
     """Context manager for trace ID scoping."""
     if trace_id is None:
         trace_id = str(uuid.uuid4())[:8]
-    
+
     token = trace_id_var.set(trace_id)
     try:
         yield trace_id
@@ -153,12 +153,12 @@ class EventType(Enum):
     SUBSCRIPTION_VALIDATED = "subscription.validated"
     SUBSCRIPTION_PROCESSED = "subscription.processed"
     SUBSCRIPTION_FAILED = "subscription.failed"
-    
+
     # Configuration events
     CONFIG_BUILT = "config.built"
     CONFIG_EXPORTED = "config.exported"
     CONFIG_VALIDATED = "config.validated"
-    
+
     # System events
     APPLICATION_STARTED = "application.started"
     APPLICATION_STOPPED = "application.stopped"
@@ -205,17 +205,17 @@ class Orchestrator:
     def __init__(self, event_bus: Optional[EventBus] = None):
         self.event_bus = event_bus or event_bus
         self.logger = structlog.get_logger("sboxmgr.orchestrator")
-    
+
     def process_subscription(self, url: str) -> PipelineResult:
         """Process subscription with event emission."""
-        
+
         with with_trace_id() as trace_id:
             self.logger.info(
                 "Processing subscription started",
                 url=url,
                 operation="process_subscription"
             )
-            
+
             try:
                 # Emit start event
                 self.event_bus.emit(Event(
@@ -223,10 +223,10 @@ class Orchestrator:
                     source="orchestrator",
                     data={"url": url, "status": "started"}
                 ))
-                
+
                 # Process subscription
                 result = self.subscription_manager.get_servers(url)
-                
+
                 # Emit success event
                 self.event_bus.emit(Event(
                     type=EventType.SUBSCRIPTION_PROCESSED.value,
@@ -237,9 +237,9 @@ class Orchestrator:
                         "success": result.success
                     }
                 ))
-                
+
                 return result
-                
+
             except Exception as e:
                 # Emit error event
                 self.event_bus.emit(Event(
@@ -260,16 +260,16 @@ class Orchestrator:
 ```python
 class AuditLogger:
     """Audit logger that reacts to events."""
-    
+
     def __init__(self, event_bus: EventBus):
         self.logger = structlog.get_logger("sboxmgr.audit")
         self.event_bus = event_bus
-        
+
         # Subscribe to audit-worthy events
         self.event_bus.subscribe(EventType.SUBSCRIPTION_PROCESSED.value, self.log_subscription)
         self.event_bus.subscribe(EventType.CONFIG_EXPORTED.value, self.log_config_export)
         self.event_bus.subscribe(EventType.ERROR_OCCURRED.value, self.log_error)
-    
+
     def log_subscription(self, event: Event) -> None:
         """Log subscription processing for audit trail."""
         self.logger.info(
@@ -279,7 +279,7 @@ class AuditLogger:
             component="audit",
             operation="subscription_audit"
         )
-    
+
     def log_config_export(self, event: Event) -> None:
         """Log configuration export for audit trail."""
         self.logger.info(
@@ -289,7 +289,7 @@ class AuditLogger:
             component="audit",
             operation="config_audit"
         )
-    
+
     def log_error(self, event: Event) -> None:
         """Log errors for audit trail."""
         self.logger.error(
@@ -309,25 +309,25 @@ import time
 
 class MetricsCollector:
     """Collect metrics from events."""
-    
+
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
         self.counters: Dict[str, Counter] = defaultdict(Counter)
         self.timers: Dict[str, list] = defaultdict(list)
-        
+
         # Subscribe to metric events
         self.event_bus.subscribe(EventType.SUBSCRIPTION_PROCESSED.value, self.record_subscription)
         self.event_bus.subscribe(EventType.SUBSCRIPTION_FAILED.value, self.record_failure)
-    
+
     def record_subscription(self, event: Event) -> None:
         """Record subscription processing metrics."""
         self.counters['subscriptions']['processed'] += 1
         self.counters['subscriptions']['servers'] += event.data.get('servers_count', 0)
-    
+
     def record_failure(self, event: Event) -> None:
         """Record failure metrics."""
         self.counters['failures'][event.data.get('error_type', 'unknown')] += 1
-    
+
     def get_metrics(self) -> Dict[str, Any]:
         """Get current metrics snapshot."""
         return {
@@ -398,4 +398,4 @@ class MetricsCollector:
 ## References
 - **Related ADRs**: ADR-0009 (Configuration System), ADR-0010 (Logging Core)
 - **Implementation**: Stage 3 Configuration & Logging Foundation
-- **Dependencies**: pydispatch, structlog 
+- **Dependencies**: pydispatch, structlog

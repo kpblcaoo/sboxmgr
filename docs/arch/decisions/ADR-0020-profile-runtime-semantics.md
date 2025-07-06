@@ -2,8 +2,8 @@
 
 ## Статус
 
-**Дата:** 2025-07-01  
-**Статус:** 🔄 **В РАЗРАБОТКЕ**  
+**Дата:** 2025-07-01
+**Статус:** 🔄 **В РАЗРАБОТКЕ**
 **Контекст:** Runtime семантика профилей, управление outbounds и маршрутизацией
 
 ## TL;DR
@@ -28,7 +28,7 @@
 class FullProfile(BaseModel):
     outbounds: List[OutboundConfig]  # НЕТ!
 
-# ✅ Делаем так  
+# ✅ Делаем так
 class FullProfile(BaseModel):
     outbound_policy: OutboundPolicy
     routing_policy: RoutingPolicy
@@ -187,4 +187,4 @@ class GeoFilterPolicy(BaseModel):
 - ADR-0017: Full Profile Architecture
 - ADR-0019: Full Profile UX & Runtime Management
 - ADR-0016: Pydantic Schema Generation
-- ADR-0008: Defaults and Fail-Tolerance 
+- ADR-0008: Defaults and Fail-Tolerance

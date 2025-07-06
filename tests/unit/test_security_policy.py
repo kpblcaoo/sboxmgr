@@ -1,7 +1,11 @@
 """Unit tests for security policies."""
 
-from src.sboxmgr.policies.security_policy import ProtocolPolicy, EncryptionPolicy, AuthenticationPolicy
 from src.sboxmgr.policies.base import PolicyContext
+from src.sboxmgr.policies.security_policy import (
+    AuthenticationPolicy,
+    EncryptionPolicy,
+    ProtocolPolicy,
+)
 
 
 class TestProtocolPolicy:
@@ -161,7 +165,11 @@ class TestAuthenticationPolicy:
     def test_valid_auth_method_allowed(self):
         """Test that valid authentication method is allowed."""
         policy = AuthenticationPolicy(allowed_auth_methods=["password", "uuid"])
-        server = {"auth_method": "password", "password": "secret123", "name": "test"}  # pragma: allowlist secret
+        server = {
+            "auth_method": "password",
+            "password": "secret123",
+            "name": "test",
+        }  # pragma: allowlist secret
         context = PolicyContext(server=server)
         result = policy.evaluate(context)
         assert result.allowed
@@ -191,8 +199,11 @@ class TestAuthenticationPolicy:
     def test_long_password_allowed(self):
         """Test that long password is allowed."""
         policy = AuthenticationPolicy(min_password_length=5)
-        server = {"password": "very_long_password_123", "name": "test"}  # pragma: allowlist secret
+        server = {
+            "password": "very_long_password_123",
+            "name": "test",
+        }  # pragma: allowlist secret
         context = PolicyContext(server=server)
         result = policy.evaluate(context)
         assert result.allowed
-        assert "requirements met" in result.reason 
+        assert "requirements met" in result.reason

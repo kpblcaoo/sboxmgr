@@ -31,7 +31,7 @@ event = emit_event(
 event = emit_event(
     EventType.ERROR_OCCURRED,
     {
-        "error_type": "ValidationError", 
+        "error_type": "ValidationError",
         "error_message": "Invalid configuration",
         "component": "config.validator"
     },
@@ -58,7 +58,7 @@ def handle_errors(event_data: EventData):
     error_type = event_data.get("error_type", "Unknown")
     error_msg = event_data.get("error_message", "No message")
     component = event_data.get("component", event_data.source)
-    
+
     print(f"ERROR in {component}: {error_type} - {error_msg}")
 ```
 
@@ -93,7 +93,7 @@ def log_config_generation(event_data: EventData):
     server_count = event_data.get("server_count", 0)
     outbound_count = event_data.get("outbound_count", 0)
     status = event_data.get("status", "unknown")
-    
+
     if status == "completed":
         print(f"✅ Generated config with {server_count} servers, {outbound_count} outbounds")
 ```
@@ -105,7 +105,7 @@ def log_config_generation(event_data: EventData):
 def log_agent_validation(event_data: EventData):
     success = event_data.get("success", False)
     client = event_data.get("client_detected", "unknown")
-    
+
     if success:
         print(f"✅ Agent validation passed for {client}")
     else:
@@ -138,14 +138,14 @@ print(f"Error counts by type: {stats['error_counts']}")
 def test_config_event_handler():
     manager = EventManager()
     handled_events = []
-    
+
     @event_handler(EventType.CONFIG_UPDATED, auto_register=False)
     def test_handler(event_data):
         handled_events.append(event_data)
-    
+
     manager.register_handler(test_handler._event_handler)
     event = manager.emit(EventType.CONFIG_UPDATED, {"test": "data"}, source="test")
-    
+
     assert event.success
     assert len(handled_events) == 1
 ```

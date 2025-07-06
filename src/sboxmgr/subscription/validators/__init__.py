@@ -7,5 +7,5 @@ custom business rules).
 """
 
 from .geovalidator import *
+from .protocol_validator import *
 from .required_fields import *
-from .protocol_validator import * 

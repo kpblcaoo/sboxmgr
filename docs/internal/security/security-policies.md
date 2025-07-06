@@ -224,4 +224,4 @@ sboxctl policy test --server server.json --warnings
 **Performance concerns**:
 - Policies are designed to be lightweight
 - Evaluation stops at first denial
-- Use `policy.enabled = False` to disable temporarily 
+- Use `policy.enabled = False` to disable temporarily

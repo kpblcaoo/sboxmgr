@@ -15,4 +15,4 @@ _This ADR was written retrospectively to document a decision made earlier in the
 ## Consequences
 + Унификация и переиспользование моделей
 + Простота тестирования и расширения
-– Требует дисциплины при добавлении новых форматов 
+– Требует дисциплины при добавлении новых форматов

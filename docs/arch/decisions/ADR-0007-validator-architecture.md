@@ -69,7 +69,7 @@ class BaseValidator(ABC):
     @abstractmethod
     def validate(self, data: Any, context: PipelineContext) -> ValidationResult:
         pass
-    
+
     @property
     @abstractmethod
     def validator_type(self) -> str:
@@ -78,7 +78,7 @@ class BaseValidator(ABC):
 
 #### 5. Registry-based Plugin System
 - `RAW_VALIDATOR_REGISTRY` - for raw data validation
-- `PARSED_VALIDATOR_REGISTRY` - for parsed server validation  
+- `PARSED_VALIDATOR_REGISTRY` - for parsed server validation
 - `MIDDLEWARE_REGISTRY` - for pipeline middleware
 - Auto-discovery via decorators and entry points
 

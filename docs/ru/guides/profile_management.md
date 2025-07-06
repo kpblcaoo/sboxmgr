@@ -275,4 +275,4 @@ export SBOXMGR_DEFAULT_PROFILE="home"
 
 - [Справочник CLI](../cli_reference.md) - Интерфейс командной строки
 - [Подписки](../subscriptions.md) - Управление подписками
-- [Конфигурация](../configuration.md) - Системная конфигурация 
+- [Конфигурация](../configuration.md) - Системная конфигурация

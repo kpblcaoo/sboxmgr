@@ -1,16 +1,17 @@
 """Tests for OutboundModel and related functionality."""
 
 import pytest
+
 from src.sboxmgr.subscription.validators.protocol_models import (
-    validate_outbound_config,
-    generate_outbound_schema,
-    convert_protocol_to_outbound,
-    create_outbound_from_dict,
     ShadowsocksConfig,
+    StreamSettings,
     VmessConfig,
     VmessSettings,
     VmessUser,
-    StreamSettings
+    convert_protocol_to_outbound,
+    create_outbound_from_dict,
+    generate_outbound_schema,
+    validate_outbound_config,
 )
 
 
@@ -24,9 +25,9 @@ class TestOutboundModel:
             "server": "example.com",
             "server_port": 8388,
             "method": "aes-256-gcm",
-            "password": "test_password"
+            "password": "test_password",
         }
-        
+
         outbound = validate_outbound_config(config)
         assert outbound.type == "shadowsocks"
         assert outbound.server == "example.com"
@@ -41,9 +42,9 @@ class TestOutboundModel:
             "server": "example.com",
             "server_port": 443,
             "uuid": "12345678-1234-1234-1234-123456789012",
-            "security": "auto"
+            "security": "auto",
         }
-        
+
         outbound = validate_outbound_config(config)
         assert outbound.type == "vmess"
         assert outbound.server == "example.com"
@@ -58,9 +59,9 @@ class TestOutboundModel:
             "server": "example.com",
             "server_port": 443,
             "uuid": "12345678-1234-1234-1234-123456789012",
-            "flow": "xtls-rprx-vision"
+            "flow": "xtls-rprx-vision",
         }
-        
+
         outbound = validate_outbound_config(config)
         assert outbound.type == "vless"
         assert outbound.server == "example.com"
@@ -74,9 +75,9 @@ class TestOutboundModel:
             "type": "trojan",
             "server": "example.com",
             "server_port": 443,
-            "password": "test_password"
+            "password": "test_password",
         }
-        
+
         outbound = validate_outbound_config(config)
         assert outbound.type == "trojan"
         assert outbound.server == "example.com"
@@ -90,9 +91,9 @@ class TestOutboundModel:
             "server": "example.com",
             "server_port": 51820,
             "private_key": "test_private_key",
-            "peer_public_key": "test_public_key"
+            "peer_public_key": "test_public_key",
         }
-        
+
         outbound = validate_outbound_config(config)
         assert outbound.type == "wireguard"
         assert outbound.server == "example.com"
@@ -102,12 +103,8 @@ class TestOutboundModel:
 
     def test_invalid_outbound_type(self):
         """Test validation with invalid outbound type."""
-        config = {
-            "type": "invalid_type",
-            "server": "example.com",
-            "server_port": 443
-        }
-        
+        config = {"type": "invalid_type", "server": "example.com", "server_port": 443}
+
         with pytest.raises(ValueError, match="Unsupported outbound type"):
             validate_outbound_config(config)
 
@@ -115,11 +112,13 @@ class TestOutboundModel:
         """Test validation with missing required fields."""
         config = {
             "type": "shadowsocks",
-            "server": "example.com"
+            "server": "example.com",
             # Missing server_port, method, password
         }
-        
-        with pytest.raises(ValueError, match="validation errors for ShadowsocksOutbound"):
+
+        with pytest.raises(
+            ValueError, match="validation errors for ShadowsocksOutbound"
+        ):
             validate_outbound_config(config)
 
     def test_outbound_with_tls(self):
@@ -132,10 +131,10 @@ class TestOutboundModel:
             "tls": {
                 "enabled": True,
                 "server_name": "example.com",
-                "alpn": ["h2", "http/1.1"]
-            }
+                "alpn": ["h2", "http/1.1"],
+            },
         }
-        
+
         outbound = validate_outbound_config(config)
         assert outbound.tls is not None
         assert outbound.tls.enabled is True
@@ -151,13 +150,10 @@ class TestOutboundModel:
             "uuid": "12345678-1234-1234-1234-123456789012",
             "tls": {
                 "enabled": True,
-                "utls": {
-                    "enabled": True,
-                    "fingerprint": "chrome"
-                }
-            }
+                "utls": {"enabled": True, "fingerprint": "chrome"},
+            },
         }
-        
+
         outbound = validate_outbound_config(config)
         assert outbound.tls is not None
         assert outbound.tls.utls is not None
@@ -175,11 +171,11 @@ class TestOutboundModel:
                 "enabled": True,
                 "reality": {
                     "public_key": "test_public_key",
-                    "short_id": "test_short_id"
-                }
-            }
+                    "short_id": "test_short_id",
+                },
+            },
         }
-        
+
         outbound = validate_outbound_config(config)
         assert outbound.tls is not None
         assert outbound.tls.reality is not None
@@ -196,9 +192,9 @@ class TestOutboundConversion:
             server="example.com",
             server_port=8388,
             method="aes-256-gcm",
-            password="test_password"
+            password="test_password",
         )
-        
+
         outbound = convert_protocol_to_outbound(protocol_config, tag="test_tag")
         assert outbound.type == "shadowsocks"
         assert outbound.tag == "test_tag"
@@ -215,9 +211,9 @@ class TestOutboundConversion:
             settings=VmessSettings(
                 clients=[VmessUser(id="12345678-1234-1234-1234-123456789012")]
             ),
-            streamSettings=StreamSettings()
+            streamSettings=StreamSettings(),
         )
-        
+
         outbound = convert_protocol_to_outbound(protocol_config, tag="test_tag")
         assert outbound.type == "vmess"
         assert outbound.tag == "test_tag"
@@ -231,10 +227,12 @@ class TestOutboundConversion:
             server="example.com",
             server_port=443,
             settings=VmessSettings(clients=[]),
-            streamSettings=StreamSettings()
+            streamSettings=StreamSettings(),
         )
-        
-        with pytest.raises(ValueError, match="VMess configuration must have at least one user"):
+
+        with pytest.raises(
+            ValueError, match="VMess configuration must have at least one user"
+        ):
             convert_protocol_to_outbound(protocol_config)
 
 
@@ -244,7 +242,7 @@ class TestOutboundSchema:
     def test_generate_outbound_schema(self):
         """Test generating outbound schema."""
         schema = generate_outbound_schema()
-        
+
         assert "properties" in schema
         assert "outbound" in schema["properties"]
         assert "discriminator" in schema["properties"]["outbound"]
@@ -260,9 +258,9 @@ class TestOutboundCreation:
             "server": "example.com",
             "server_port": 8388,
             "method": "aes-256-gcm",
-            "password": "test_password"
+            "password": "test_password",
         }
-        
+
         outbound = create_outbound_from_dict(config, tag="test_tag")
         assert outbound.tag == "test_tag"
         assert outbound.type == "shadowsocks"
@@ -274,9 +272,9 @@ class TestOutboundCreation:
             "server": "example.com",
             "server_port": 8388,
             "method": "aes-256-gcm",
-            "password": "test_password"
+            "password": "test_password",
         }
-        
+
         outbound = create_outbound_from_dict(config)
         assert outbound.tag is None
-        assert outbound.type == "shadowsocks" 
+        assert outbound.type == "shadowsocks"

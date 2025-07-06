@@ -8,8 +8,9 @@ Usage:
 Собирает все плагины из PLUGIN_REGISTRY, группирует по plugin_type, формирует markdown-таблицу с именем класса, типом, docstring и путём к файлу.
 SEC: Импортируются только известные модули из src/sboxmgr/subscription/*, сторонние/неизвестные модули не импортируются.
 """
-import os
 import inspect
+import os
+
 from sboxmgr.subscription.registry import PLUGIN_REGISTRY
 
 # SEC: Импортируем только известные модули с плагинами (без динамики)
@@ -29,10 +30,20 @@ for plugin_type, items in sorted(plugins_by_type.items()):
             file = os.path.relpath(file, start=os.path.dirname(__file__))
         except Exception:
             file = "?"
-        rows.append(f"| {plugin_type} | `{cls.__name__}` | {doc.splitlines()[0] if doc else ''} | `{file}` |")
+        rows.append(
+            f"| {plugin_type} | `{cls.__name__}` | {doc.splitlines()[0] if doc else ''} | `{file}` |"
+        )
 
-index_md = """# Индекс зарегистрированных плагинов\n\nАвтоматически сгенерировано. Не редактируйте вручную!\n\n""" + "\n".join(rows) + "\n"
+index_md = (
+    """# Индекс зарегистрированных плагинов\n\nАвтоматически сгенерировано. Не редактируйте вручную!\n\n"""
+    + "\n".join(rows)
+    + "\n"
+)
 
-os.makedirs(os.path.join(os.path.dirname(__file__), '../docs/plugins'), exist_ok=True)
-with open(os.path.join(os.path.dirname(__file__), '../docs/plugins/index.md'), 'w', encoding='utf-8') as f:
-    f.write(index_md) 
+os.makedirs(os.path.join(os.path.dirname(__file__), "../docs/plugins"), exist_ok=True)
+with open(
+    os.path.join(os.path.dirname(__file__), "../docs/plugins/index.md"),
+    "w",
+    encoding="utf-8",
+) as f:
+    f.write(index_md)

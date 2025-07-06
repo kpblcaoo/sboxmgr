@@ -137,10 +137,10 @@ templates/
 class I18nManager:
     def scan_codebase(self) -> Set[str]:
         # Extract all i18n keys from code
-        
+
     def validate_translations(self) -> ValidationReport:
         # Check for missing/unused keys
-        
+
     def update_translations(self, backup: bool = True) -> None:
         # Sync translations safely
 ```

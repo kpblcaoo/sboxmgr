@@ -272,4 +272,4 @@ sboxmgr export --inbound-types tun --debug 1
 - [Export Command Reference](../cli_reference.md#export)
 - [Configuration Profiles](../profiles/README.md)
 - [Security Guidelines](../security.md)
-- [Troubleshooting Guide](../troubleshooting.md) 
+- [Troubleshooting Guide](../troubleshooting.md)

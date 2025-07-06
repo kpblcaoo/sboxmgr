@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 def test_socket_connection():
     """Test basic socket connection to sboxagent."""
     print("🔌 Testing socket connection...")
-    
+
     result = ping_agent()
     if result:
         print("✅ Socket connection successful")
@@ -37,21 +37,23 @@ def test_socket_connection():
 def test_event_sending():
     """Test sending events to sboxagent."""
     print("📡 Testing event sending...")
-    
+
     test_events = [
         ("test_event", {"test": True, "timestamp": time.time()}),
-        ("subscription_updated", {
-            "subscription_url": "https://example.com/sub",
-            "servers_count": 42,
-            "status": "success"
-        }),
-        ("config_generated", {
-            "client_type": "sing-box",
-            "config_size": 1024,
-            "generation_time_ms": 250
-        })
+        (
+            "subscription_updated",
+            {
+                "subscription_url": "https://example.com/sub",
+                "servers_count": 42,
+                "status": "success",
+            },
+        ),
+        (
+            "config_generated",
+            {"client_type": "sing-box", "config_size": 1024, "generation_time_ms": 250},
+        ),
     ]
-    
+
     success_count = 0
     for event_type, event_data in test_events:
         try:
@@ -63,7 +65,7 @@ def test_event_sending():
                 print(f"❌ Event '{event_type}' failed to send")
         except Exception as e:
             print(f"❌ Event '{event_type}' failed with error: {e}")
-    
+
     print(f"📊 Event sending: {success_count}/{len(test_events)} successful")
     return success_count == len(test_events)
 
@@ -71,13 +73,11 @@ def test_event_sending():
 def test_heartbeat():
     """Test heartbeat functionality."""
     print("💓 Testing heartbeat...")
-    
+
     sender = EventSender()
     try:
         result = sender.send_heartbeat(
-            agent_id="integration_test",
-            status="healthy",
-            version="test-1.0.0"
+            agent_id="integration_test", status="healthy", version="test-1.0.0"
         )
         if result:
             print("✅ Heartbeat successful")
@@ -95,14 +95,14 @@ def test_heartbeat():
 def test_command_execution():
     """Test command execution via socket."""
     print("⚡ Testing command execution...")
-    
+
     sender = EventSender()
     try:
         # Test ping command
         response = sender.send_command("ping", {})
         if response and response.get("pong"):
             print("✅ Ping command successful")
-            
+
             # Test status command
             status = sender.get_agent_status()
             if status:
@@ -125,33 +125,30 @@ def test_command_execution():
 def test_framed_json_protocol():
     """Test framed JSON protocol directly."""
     print("📋 Testing framed JSON protocol...")
-    
+
     try:
         client = SocketClient("/tmp/sboxagent.sock", timeout=5.0)
         client.connect()
-        
+
         # Create test message
         message = {
             "id": "test-123",
             "type": "command",
             "timestamp": "2025-01-28T10:00:00Z",
-            "command": {
-                "command": "ping",
-                "params": {}
-            }
+            "command": {"command": "ping", "params": {}},
         }
-        
+
         # Send message
         client.send_message(message)
         print("✅ Message sent successfully")
-        
+
         # Receive response
         response = client.recv_message()
         print(f"✅ Response received: {response.get('type')}")
-        
+
         client.close()
         return True
-        
+
     except Exception as e:
         print(f"❌ Framed JSON protocol test failed: {e}")
         return False
@@ -161,7 +158,7 @@ def main():
     """Run all integration tests."""
     print("🚀 Starting Phase 2 Integration Tests")
     print("=" * 50)
-    
+
     tests = [
         ("Socket Connection", test_socket_connection),
         ("Event Sending", test_event_sending),
@@ -169,14 +166,14 @@ def main():
         ("Command Execution", test_command_execution),
         ("Framed JSON Protocol", test_framed_json_protocol),
     ]
-    
+
     passed = 0
     total = len(tests)
-    
+
     for test_name, test_func in tests:
         print(f"\n🧪 Running test: {test_name}")
         print("-" * 30)
-        
+
         try:
             if test_func():
                 passed += 1
@@ -185,10 +182,10 @@ def main():
                 print(f"❌ {test_name}: FAILED")
         except Exception as e:
             print(f"❌ {test_name}: ERROR - {e}")
-    
+
     print("\n" + "=" * 50)
     print(f"📊 Test Results: {passed}/{total} tests passed")
-    
+
     if passed == total:
         print("🎉 All tests passed! Phase 2 integration is working correctly.")
         return 0
@@ -198,4 +195,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main()) 
+    sys.exit(main())

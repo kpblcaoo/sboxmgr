@@ -1,7 +1,11 @@
 """Unit tests for profile security policies."""
 
-from src.sboxmgr.policies.profile_policy import IntegrityPolicy, PermissionPolicy, LimitPolicy
 from src.sboxmgr.policies.base import PolicyContext
+from src.sboxmgr.policies.profile_policy import (
+    IntegrityPolicy,
+    LimitPolicy,
+    PermissionPolicy,
+)
 
 
 class TestIntegrityPolicy:
@@ -95,7 +99,7 @@ class TestLimitPolicy:
         policy = LimitPolicy(max_servers=100, max_subscriptions=5)
         profile = {
             "servers": [{"name": f"server{i}"} for i in range(50)],
-            "subscriptions": [{"url": f"sub{i}"} for i in range(3)]
+            "subscriptions": [{"url": f"sub{i}"} for i in range(3)],
         }
         context = PolicyContext(profile=profile)
         result = policy.evaluate(context)
@@ -105,9 +109,7 @@ class TestLimitPolicy:
     def test_too_many_servers_denied(self):
         """Test that too many servers are denied."""
         policy = LimitPolicy(max_servers=10)
-        profile = {
-            "servers": [{"name": f"server{i}"} for i in range(15)]
-        }
+        profile = {"servers": [{"name": f"server{i}"} for i in range(15)]}
         context = PolicyContext(profile=profile)
         result = policy.evaluate(context)
         assert not result.allowed
@@ -118,12 +120,10 @@ class TestLimitPolicy:
     def test_too_many_subscriptions_denied(self):
         """Test that too many subscriptions are denied."""
         policy = LimitPolicy(max_subscriptions=2)
-        profile = {
-            "subscriptions": [{"url": f"sub{i}"} for i in range(5)]
-        }
+        profile = {"subscriptions": [{"url": f"sub{i}"} for i in range(5)]}
         context = PolicyContext(profile=profile)
         result = policy.evaluate(context)
         assert not result.allowed
         assert "Too many subscriptions" in result.reason
         assert result.metadata["subscription_count"] == 5
-        assert result.metadata["max_subscriptions"] == 2 
+        assert result.metadata["max_subscriptions"] == 2

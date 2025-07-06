@@ -37,24 +37,24 @@ class LogSink(Enum):
 def detect_available_sinks() -> List[LogSink]:
     """Detect available logging sinks in order of preference."""
     available = []
-    
+
     # Check for systemd/journald
     if os.getenv("INVOCATION_ID") or os.path.exists("/run/systemd/system"):
         available.append(LogSink.JOURNALD)
-    
+
     # Check for syslog
     if os.path.exists("/dev/log") or os.path.exists("/var/run/syslog"):
         available.append(LogSink.SYSLOG)
-    
+
     # Stdout always available
     available.append(LogSink.STDOUT)
-    
+
     return available
 
 def setup_logging_sinks(config: LoggingConfig) -> List[logging.Handler]:
     """Setup logging handlers based on configuration."""
     handlers = []
-    
+
     if LogSink.AUTO in config.sinks:
         # Auto-detection mode
         available = detect_available_sinks()
@@ -69,7 +69,7 @@ def setup_logging_sinks(config: LoggingConfig) -> List[logging.Handler]:
                 # Fallback to stdout if sink fails
                 logging.error(f"Failed to setup {sink} handler: {e}")
                 handlers.append(create_handler(LogSink.STDOUT, config))
-    
+
     return handlers
 ```
 
@@ -105,7 +105,7 @@ def get_trace_id() -> str:
 
 def setup_structured_logging(config: LoggingConfig):
     """Configure structured logging with standard fields."""
-    
+
     def add_standard_fields(logger, method_name, event_dict):
         """Add standard fields to all log entries."""
         event_dict.update({
@@ -116,7 +116,7 @@ def setup_structured_logging(config: LoggingConfig):
             'pid': os.getpid(),
         })
         return event_dict
-    
+
     processors = [
         structlog.stdlib.filter_by_level,
         add_standard_fields,
@@ -127,12 +127,12 @@ def setup_structured_logging(config: LoggingConfig):
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
     ]
-    
+
     if config.format == "json":
         processors.append(structlog.processors.JSONRenderer())
     else:
         processors.append(structlog.dev.ConsoleRenderer())
-    
+
     structlog.configure(
         processors=processors,
         wrapper_class=structlog.stdlib.BoundLogger,
@@ -153,15 +153,15 @@ class LoggingConfig(BaseSettings):
     # Global settings
     level: str = Field(default="INFO", description="Global logging level")
     format: Literal["text", "json"] = Field(default="text")
-    
+
     # Sink configuration
     sinks: List[str] = Field(default=["auto"], description="Logging sinks")
     sink_levels: Dict[str, str] = Field(default={}, description="Per-sink log levels")
-    
+
     # Advanced settings
     max_file_size: int = Field(default=10_000_000, description="Max log file size in bytes")
     backup_count: int = Field(default=5, description="Number of backup files")
-    
+
     class Config:
         env_prefix = "SBOXMGR_LOGGING_"
         env_nested_delimiter = "__"
@@ -187,13 +187,13 @@ from src.sboxmgr.logging import setup_logging
 def initialize_application():
     """Initialize application with configuration-driven logging."""
     config = AppConfig()
-    
+
     # Setup logging based on configuration
     setup_logging(config.logging)
-    
+
     # Get logger for this component
     logger = structlog.get_logger("sboxmgr.main")
-    
+
     # Log with structured context
     logger.info(
         "Application initialized",
@@ -220,7 +220,7 @@ def with_trace_id(trace_id: str):
 class Orchestrator:
     def process_subscription(self, url: str) -> PipelineResult:
         trace_id = str(uuid.uuid4())[:8]
-        
+
         with with_trace_id(trace_id):
             logger = structlog.get_logger("sboxmgr.orchestrator")
             logger.info(
@@ -228,10 +228,10 @@ class Orchestrator:
                 operation="process_subscription",
                 url=url
             )
-            
+
             # All nested calls will inherit the trace_id
             result = self.subscription_manager.get_servers(url)
-            
+
             return result
 ```
 
@@ -241,7 +241,7 @@ class Orchestrator:
 ```python
 def setup_service_logging(config: LoggingConfig):
     """Setup logging optimized for systemd service."""
-    
+
     if config.service_mode:
         # Service mode: structured JSON to journald
         config.format = "json"
@@ -252,7 +252,7 @@ def setup_service_logging(config: LoggingConfig):
         config.format = "text"
         config.sinks = ["stdout"]
         config.level = "INFO"
-    
+
     setup_logging(config)
 ```
 
@@ -268,12 +268,12 @@ def detect_container_environment() -> bool:
 
 def setup_container_logging(config: LoggingConfig):
     """Setup logging optimized for containers."""
-    
+
     if detect_container_environment():
         # Container: JSON to stdout for log aggregation
         config.format = "json"
         config.sinks = ["stdout"]
-        
+
         # Use environment variable for log level
         config.level = os.getenv("LOG_LEVEL", "INFO")
 ```
@@ -340,4 +340,4 @@ def setup_container_logging(config: LoggingConfig):
 ## References
 - **Related ADRs**: ADR-0009 (Configuration System), ADR-0011 (Event System)
 - **Implementation**: Stage 3 Configuration & Logging Foundation
-- **Dependencies**: structlog, systemd-python (optional) 
+- **Dependencies**: structlog, systemd-python (optional)

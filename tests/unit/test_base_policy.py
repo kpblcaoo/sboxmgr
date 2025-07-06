@@ -6,23 +6,24 @@ from src.sboxmgr.policies.engine import PolicyEngine
 
 class AllowAllPolicy(BasePolicy):
     """Test policy that always allows."""
-    
+
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         return PolicyResult.allow("Always allowed")
 
 
 class DenyAllPolicy(BasePolicy):
     """Test policy that always denies."""
-    
+
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         return PolicyResult.deny("Always denied")
 
 
 class CustomNamePolicy(BasePolicy):
     """Test policy with custom name."""
+
     name = "CustomPolicy"
     description = "Policy with custom name"
-    
+
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         return PolicyResult.allow("Custom policy allowed")
 
@@ -65,7 +66,7 @@ def test_policy_result_static_methods():
     assert allow_result.allowed
     assert allow_result.reason == "test allow"
     assert allow_result.metadata["foo"] == "bar"
-    
+
     deny_result = PolicyResult.deny("test deny", baz="qux")
     assert not deny_result.allowed
     assert deny_result.reason == "test deny"
@@ -86,7 +87,9 @@ def test_policy_custom_name():
 
 def test_policy_result_metadata():
     """Test PolicyResult metadata handling."""
-    res = PolicyResult(allowed=True, reason="ok", metadata={"foo": 1}, policy_name="Test")
+    res = PolicyResult(
+        allowed=True, reason="ok", metadata={"foo": 1}, policy_name="Test"
+    )
     assert res.metadata["foo"] == 1
     assert res.policy_name == "Test"
     assert res.allowed
@@ -99,8 +102,8 @@ def test_policy_engine_disabled_policy():
     policy.enabled = False
     engine.register(policy)
     engine.register(AllowAllPolicy())
-    
+
     ctx = PolicyContext()
     result = engine.evaluate(ctx)
     assert result.allowed
-    assert result.reason == "All policies passed" 
+    assert result.reason == "All policies passed"

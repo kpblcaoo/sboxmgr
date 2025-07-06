@@ -5,25 +5,30 @@ from HTTP/HTTPS URLs and local file:// URLs. It includes support for gzip
 decompression, response caching, custom headers, user agents, and size limits
 for secure and efficient subscription data fetching.
 """
-import requests
+
 import gzip
-from ..models import SubscriptionSource
-from ..base_fetcher import BaseFetcher
-from ..registry import register
 import threading
+from typing import Dict, Optional, Tuple
+
+import requests
+
 from sboxmgr.utils.env import get_fetch_timeout
-from typing import Dict, Tuple, Optional
+
+from ..base_fetcher import BaseFetcher
+from ..models import SubscriptionSource
+from ..registry import register
+
 
 @register("url")
 @register("url_base64")
 @register("uri_list")
 class URLFetcher(BaseFetcher):
     """HTTP/HTTPS URL fetcher with caching and compression support.
-    
+
     This fetcher handles HTTP/HTTPS URLs and local file:// URLs with support
     for gzip decompression, response caching, custom headers, and user agents.
     It provides thread-safe caching and respects size limits for security.
-    
+
     Attributes:
         _cache_lock: Thread lock for cache synchronization.
         _fetch_cache: Cache dictionary for storing fetched data.
@@ -35,7 +40,7 @@ class URLFetcher(BaseFetcher):
 
     def __init__(self, source: SubscriptionSource):
         """Initialize URLFetcher.
-        
+
         Args:
             source: Subscription source configuration.
         """
@@ -55,7 +60,11 @@ class URLFetcher(BaseFetcher):
             requests.RequestException: Если не удалось скачать файл.
 
         """
-        key = (self.source.url, getattr(self.source, 'user_agent', None), str(getattr(self.source, 'headers', None)))
+        key = (
+            self.source.url,
+            getattr(self.source, "user_agent", None),
+            str(getattr(self.source, "headers", None)),
+        )
         if force_reload:
             with self._cache_lock:
                 self._fetch_cache.pop(key, None)
@@ -68,7 +77,9 @@ class URLFetcher(BaseFetcher):
             with open(path, "rb") as f:
                 data = f.read(size_limit + 1)
                 if len(data) > size_limit:
-                    print(f"[fetcher][WARN] File size exceeds limit ({size_limit} bytes), skipping.")
+                    print(
+                        f"[fetcher][WARN] File size exceeds limit ({size_limit} bytes), skipping."
+                    )
                     raise ValueError("File size exceeds limit")
                 # Check if data is gzipped and decompress if needed
                 data = self._decompress_if_gzipped(data)
@@ -84,11 +95,15 @@ class URLFetcher(BaseFetcher):
                 headers["User-Agent"] = ua
             # Убираем безусловный print - будет логироваться в manager.py
             timeout = get_fetch_timeout()
-            resp = requests.get(self.source.url, headers=headers, stream=True, timeout=timeout)
+            resp = requests.get(
+                self.source.url, headers=headers, stream=True, timeout=timeout
+            )
             resp.raise_for_status()
             data = resp.raw.read(size_limit + 1)
             if len(data) > size_limit:
-                print(f"[fetcher][WARN] Downloaded data exceeds limit ({size_limit} bytes), skipping.")
+                print(
+                    f"[fetcher][WARN] Downloaded data exceeds limit ({size_limit} bytes), skipping."
+                )
                 raise ValueError("Downloaded data exceeds limit")
             # Check if data is gzipped and decompress if needed
             data = self._decompress_if_gzipped(data)
@@ -98,12 +113,14 @@ class URLFetcher(BaseFetcher):
 
     def _decompress_if_gzipped(self, data: bytes) -> bytes:
         """Check if data is gzipped and decompress if needed."""
-        if data.startswith(b'\x1f\x8b'):  # gzip magic number
+        if data.startswith(b"\x1f\x8b"):  # gzip magic number
             try:
                 decompressed = gzip.decompress(data)
-                print(f"[fetcher] Decompressed gzip data: {len(data)} -> {len(decompressed)} bytes")
+                print(
+                    f"[fetcher] Decompressed gzip data: {len(data)} -> {len(decompressed)} bytes"
+                )
                 return decompressed
             except Exception as e:
                 print(f"[fetcher][WARN] Failed to decompress gzip data: {e}")
                 return data
-        return data 
+        return data

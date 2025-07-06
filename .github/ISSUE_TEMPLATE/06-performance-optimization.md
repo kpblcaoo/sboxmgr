@@ -39,13 +39,13 @@ class CacheManager:
         self.cache = {}
         self.max_size = max_size
         self.ttl = ttl
-        
+
     def get(self, key: str) -> Optional[Any]:
         # Retrieve with TTL check
-        
+
     def set(self, key: str, value: Any) -> None:
         # Store with automatic eviction
-        
+
     def invalidate(self, pattern: str = None) -> None:
         # Smart cache invalidation
 ```
@@ -58,7 +58,7 @@ class ResourceLimits:
     max_concurrent_fetches: int = 10
     request_timeout: int = 30
     total_timeout: int = 300
-    
+
 class ResourceManager:
     def __init__(self, limits: ResourceLimits):
         self.limits = limits
@@ -70,13 +70,13 @@ class ResourceManager:
 class PerformanceMonitor:
     def __init__(self):
         self.metrics = {}
-        
+
     def time_operation(self, operation: str):
         # Context manager for timing operations
-        
+
     def record_cache_hit(self, cache_type: str) -> None:
         # Track cache performance
-        
+
     def get_performance_report(self) -> dict:
         # Generate performance statistics
 ```
@@ -199,13 +199,13 @@ parallel_parsing = true
 class PerformanceBenchmark:
     def benchmark_subscription_processing(self):
         # Measure end-to-end performance
-        
+
     def benchmark_cache_performance(self):
         # Test cache hit rates and timing
-        
+
     def benchmark_memory_usage(self):
         # Monitor memory consumption patterns
-        
+
     def benchmark_concurrent_operations(self):
         # Test parallel processing performance
 ```

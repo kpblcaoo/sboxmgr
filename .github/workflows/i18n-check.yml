@@ -28,4 +28,4 @@ jobs:
           python -m pip install --upgrade pip
       - name: Check i18n keys
         run: |
-          python scripts/i18n/sync_keys.py --check --fail-on-missing --fail-on-unused 
+          python scripts/i18n/sync_keys.py --check --fail-on-missing --fail-on-unused

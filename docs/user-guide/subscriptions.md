@@ -215,4 +215,4 @@ Common providers include:
 
 - [CLI Reference](cli-reference.md) - Command line interface
 - [Profiles](profiles.md) - Profile management
-- [Troubleshooting](troubleshooting.md) - Problem solving 
+- [Troubleshooting](troubleshooting.md) - Problem solving

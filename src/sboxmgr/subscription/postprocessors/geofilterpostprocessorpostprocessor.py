@@ -5,8 +5,9 @@ additional features like distance-based filtering, latency-based geographic
 optimization, and complex geographic rule sets for sophisticated server
 selection strategies based on geographic criteria.
 """
-from ..registry import register
+
 from ..postprocessor_base import BasePostProcessor
+from ..registry import register
 
 
 @register("custom_postprocessor")
@@ -31,4 +32,3 @@ class GeoFilterPostProcessorPostprocessor(BasePostProcessor):
 
         """
         raise NotImplementedError()
-

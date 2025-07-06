@@ -2,8 +2,11 @@
 
 import json
 from pathlib import Path
+
 from pydantic import ValidationError
+
 from .config import SingBoxConfig
+
 
 def validate_singbox_config(config_path: Path) -> bool:
     """Validate sing-box configuration file."""
@@ -16,29 +19,35 @@ def validate_singbox_config(config_path: Path) -> bool:
         print(f"❌ Validation failed: {e}")
         return False
 
+
 def generate_singbox_schema(output_path: Path) -> None:
     """Generate JSON Schema for sing-box configuration."""
     schema = SingBoxConfig.generate_schema()
     output_path.write_text(json.dumps(schema, indent=2))
     print(f"✅ Schema generated: {output_path}")
 
+
 def create_example_config() -> dict:
     """Create an example sing-box configuration for testing."""
     return {
         "log": {"level": "info", "timestamp": True},
         "dns": {
-            "servers": [{"tag": "google", "address": "8.8.8.8", "strategy": "prefer_ipv4"}],
-            "rules": [{"type": "default", "domain": ["example.com"], "server": "google"}],
-            "final": "google"
+            "servers": [
+                {"tag": "google", "address": "8.8.8.8", "strategy": "prefer_ipv4"}
+            ],
+            "rules": [
+                {"type": "default", "domain": ["example.com"], "server": "google"}
+            ],
+            "final": "google",
         },
         "ntp": {"enabled": True, "server": "pool.ntp.org", "server_port": 123},
         "inbounds": [
             {
                 "type": "mixed",
                 "tag": "mixed-in",
-                "listen": "0.0.0.0",
+                "listen": "127.0.0.1",
                 "listen_port": 1080,
-                "users": [{"username": "user", "password": "pass"}]
+                "users": [{"username": "user", "password": "pass"}],
             }
         ],
         "outbounds": [
@@ -49,7 +58,7 @@ def create_example_config() -> dict:
                 "server_port": 8388,
                 "method": "aes-256-gcm",
                 "password": "secret",
-                "network": "tcp_udp"
+                "network": "tcp_udp",
             },
             {
                 "type": "vmess",
@@ -59,7 +68,7 @@ def create_example_config() -> dict:
                 "uuid": "b831381d-6324-4d53-ad4f-8cda48b30811",
                 "security": "auto",
                 "alter_id": 4,
-                "transport": {"network": "ws", "ws_opts": {"path": "/ws"}}
+                "transport": {"network": "ws", "ws_opts": {"path": "/ws"}},
             },
             {
                 "type": "hysteria2",
@@ -69,14 +78,13 @@ def create_example_config() -> dict:
                 "password": "secret",
                 "obfs": "salamander",
                 "obfs_type": "salamander",
-                "tls": {
-                    "enabled": True,
-                    "server_name": "example.com"
-                }
-            }
+                "tls": {"enabled": True, "server_name": "example.com"},
+            },
         ],
         "route": {
-            "rules": [{"type": "default", "domain": ["example.com"], "outbound": "ss-out"}],
-            "final": "ss-out"
-        }
-    } 
+            "rules": [
+                {"type": "default", "domain": ["example.com"], "outbound": "ss-out"}
+            ],
+            "final": "ss-out",
+        },
+    }

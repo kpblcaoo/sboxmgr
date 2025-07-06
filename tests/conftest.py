@@ -1,32 +1,31 @@
 # Инициализируем логирование для тестов ПЕРЕД всеми импортами
-import sys
-import subprocess
 import os
-import pytest
+import subprocess
+import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Добавляем src в путь для импорта
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+import sboxmgr.logging.core
+from sboxmgr.config.models import LoggingConfig
+
 # Импорты sboxmgr
 from sboxmgr.logging.core import initialize_logging
-from sboxmgr.config.models import LoggingConfig
-import sboxmgr.logging.core
-from sboxmgr.subscription.models import ParsedServer, PipelineResult, PipelineContext
+from sboxmgr.subscription.models import ParsedServer, PipelineContext, PipelineResult
 
 # Мокаем get_logger до инициализации логирования
 sboxmgr.logging.core.get_logger = MagicMock(return_value=MagicMock())
 
 # Инициализируем логирование сразу
-logging_config = LoggingConfig(
-    level="DEBUG",
-    sinks=["stdout"],
-    format="text"
-)
+logging_config = LoggingConfig(level="DEBUG", sinks=["stdout"], format="text")
 initialize_logging(logging_config)
 
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
+
 
 def run_cli(args, env=None, cwd=None):
     """Вспомогательная функция для вызова CLI с capture_output.
@@ -42,44 +41,51 @@ def run_cli(args, env=None, cwd=None):
     env["SBOXMGR_LOG_FILE"] = str(Path(cwd) / "test.log")
     result = subprocess.run(
         [sys.executable, "src/sboxmgr/cli/main.py"] + args,
-        capture_output=True, text=True, env=env, cwd=PROJECT_ROOT
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=PROJECT_ROOT,
     )
     return result
+
 
 @pytest.fixture(autouse=True)
 def cleanup_files(tmp_path, monkeypatch):
     """Фикстура: каждый тест работает в своём tmp_path, файлы очищаются автоматически."""
     monkeypatch.chdir(tmp_path)
-    
+
     # Список файлов для очистки
     cleanup_files = [
-        "exclusions.json", 
+        "exclusions.json",
         "selected_config.json",
         "config.json",
         "test_config.json",
-        "test.log"
+        "test.log",
     ]
-    
+
     # Очистка до теста
     for fname in cleanup_files:
         if os.path.exists(fname):
             os.remove(fname)
-    
+
     yield
-    
+
     # Очистка после теста
     for fname in cleanup_files:
         if os.path.exists(fname):
             os.remove(fname)
 
+
 @pytest.fixture(autouse=True)
 def mock_logging_setup():
     """Mock sboxmgr logging setup to prevent initialization errors during test collection."""
-    with patch('sboxmgr.logging.core.initialize_logging') as mock_init, \
-         patch('sboxmgr.logging.core.get_logger') as mock_get_logger:
+    with patch("sboxmgr.logging.core.initialize_logging") as mock_init, patch(
+        "sboxmgr.logging.core.get_logger"
+    ) as mock_get_logger:
         mock_init.return_value = None
         mock_get_logger.return_value = MagicMock()
         yield
+
 
 @pytest.fixture(autouse=True)
 def cleanup_project_root():
@@ -91,11 +97,11 @@ def cleanup_project_root():
         "exclusions.json",
         "selected_config.json",
         "backup.json",
-        "test.log"
+        "test.log",
     ]
-    
+
     yield
-    
+
     # Очистка после теста
     for fname in root_cleanup_files:
         file_path = PROJECT_ROOT / fname
@@ -104,17 +110,18 @@ def cleanup_project_root():
                 file_path.unlink()
                 print(f"Cleaned up: {file_path}")
             except Exception as e:
-                print(f"Failed to clean up {file_path}: {e}") 
+                print(f"Failed to clean up {file_path}: {e}")
+
 
 @pytest.fixture
 def test_subscription_url():
     """Get test subscription URL from environment or use mock data.
-    
+
     Returns:
         str: Real subscription URL if TEST_URL is set, otherwise mock URL.
     """
-    url = os.getenv('TEST_URL')
-    if url and not os.getenv('SKIP_EXTERNAL_TESTS'):
+    url = os.getenv("TEST_URL")
+    if url and not os.getenv("SKIP_EXTERNAL_TESTS"):
         return url
     else:
         return "mock://test-data"
@@ -123,17 +130,17 @@ def test_subscription_url():
 @pytest.fixture
 def real_subscription_available():
     """Check if real subscription URL is available for testing.
-    
+
     Returns:
         bool: True if TEST_URL is set and external tests are enabled.
     """
-    return bool(os.getenv('TEST_URL') and not os.getenv('SKIP_EXTERNAL_TESTS'))
+    return bool(os.getenv("TEST_URL") and not os.getenv("SKIP_EXTERNAL_TESTS"))
 
 
 @pytest.fixture
 def sample_parsed_servers():
     """Provide sample parsed server objects for unit testing.
-    
+
     Returns:
         list: List of ParsedServer objects with realistic test data.
     """
@@ -144,33 +151,33 @@ def sample_parsed_servers():
             port=443,
             uuid="test-uuid-1",
             security="tls",
-            name="Test VMess Server 1"
+            name="Test VMess Server 1",
         ),
         ParsedServer(
             protocol="vless",
-            address="2.2.2.2", 
+            address="2.2.2.2",
             port=443,
             uuid="test-uuid-2",
             security="tls",
-            name="Test VLESS Server 1"
+            name="Test VLESS Server 1",
         ),
         ParsedServer(
             protocol="trojan",
             address="3.3.3.3",
             port=443,
             password="test-password",  # pragma: allowlist secret
-            name="Test Trojan Server 1"
-        )
+            name="Test Trojan Server 1",
+        ),
     ]
 
 
 @pytest.fixture
 def mock_pipeline_result_success(sample_parsed_servers):
     """Create a mock successful pipeline result.
-    
+
     Args:
         sample_parsed_servers: Fixture providing sample server data.
-        
+
     Returns:
         PipelineResult: Mock successful result with sample servers.
     """
@@ -178,14 +185,14 @@ def mock_pipeline_result_success(sample_parsed_servers):
         config=sample_parsed_servers,
         context=PipelineContext(mode="test"),
         errors=[],
-        success=True
+        success=True,
     )
 
 
 @pytest.fixture
 def mock_pipeline_result_failure():
     """Create a mock failed pipeline result.
-    
+
     Returns:
         PipelineResult: Mock failed result.
     """
@@ -193,29 +200,29 @@ def mock_pipeline_result_failure():
         config=None,
         context=PipelineContext(mode="test"),
         errors=["Mock error for testing"],
-        success=False
+        success=False,
     )
 
 
 @pytest.fixture
 def skip_external_tests():
     """Skip tests that require external resources.
-    
+
     This fixture can be used to conditionally skip tests that require
     external subscription URLs or other external dependencies.
     """
-    if os.getenv('SKIP_EXTERNAL_TESTS'):
+    if os.getenv("SKIP_EXTERNAL_TESTS"):
         pytest.skip("External tests disabled")
 
 
 @pytest.fixture
 def require_external_tests():
     """Require external tests to be enabled.
-    
+
     This fixture will skip the test if external tests are disabled
     or if TEST_URL is not set.
     """
-    if not os.getenv('TEST_URL'):
+    if not os.getenv("TEST_URL"):
         pytest.skip("TEST_URL not set")
-    if os.getenv('SKIP_EXTERNAL_TESTS'):
-        pytest.skip("External tests disabled") 
+    if os.getenv("SKIP_EXTERNAL_TESTS"):
+        pytest.skip("External tests disabled")

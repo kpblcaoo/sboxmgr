@@ -2,8 +2,8 @@
 
 ## Статус
 
-**Дата:** 2025-07-03  
-**Статус:** ✅ **ПРИНЯТО**  
+**Дата:** 2025-07-03
+**Статус:** ✅ **ПРИНЯТО**
 **Контекст:** Стандартизация подхода к валидации и генерации схем
 
 ## TL;DR
@@ -125,7 +125,7 @@ def generate_schemas():
         "exclusion": ExclusionList.schema(),
         # ... все модели
     }
-    
+
     for name, schema in schemas.items():
         output_path = f"sbox-common/schemas/{name}.schema.json"
         with open(output_path, 'w') as f:
@@ -203,4 +203,4 @@ def generate_schemas():
 
 - ADR-0007: Validator Architecture and Pipeline Context
 - ADR-0009: Configuration System Architecture
-- ADR-0015: Agent-Installer Separation & Installation Strategy 
+- ADR-0015: Agent-Installer Separation & Installation Strategy

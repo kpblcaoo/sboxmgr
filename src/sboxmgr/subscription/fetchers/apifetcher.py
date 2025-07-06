@@ -5,8 +5,9 @@ from API endpoints with authentication, rate limiting, and error handling.
 It supports various authentication methods and provides robust error recovery
 for production API integrations.
 """
-from ..registry import register
+
 from ..base_fetcher import BaseFetcher
+from ..registry import register
 
 
 @register("custom_fetcher")
@@ -30,4 +31,3 @@ class ApiFetcher(BaseFetcher):
 
         """
         raise NotImplementedError()
-

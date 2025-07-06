@@ -1,1 +1,1 @@
-"""Logging setup package for SBoxMgr.""" 
+"""Logging setup package for SBoxMgr."""

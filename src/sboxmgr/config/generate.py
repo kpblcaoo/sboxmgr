@@ -5,16 +5,18 @@ templates and server lists. It includes functions for merging templates with
 outbound configurations, validating the resulting configuration using internal
 Pydantic schemas, and writing configurations to disk with backup support.
 """
-import os
-import json
-from logging import info, error
-import tempfile
-from typing import List
-import copy
 
-from ..events import emit_event, EventType, EventPriority
+import copy
+import json
+import os
+import tempfile
+from logging import error, info
+from typing import List
+
+from ..events import EventPriority, EventType, emit_event
 from .config_validator import validate_temp_config_json
 from .validation import ConfigValidationError
+
 
 def generate_config(outbounds, template_file, config_file, backup_file, excluded_ips):
     """Generate sing-box configuration from template."""
@@ -36,13 +38,12 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
 
     # Insert provider outbounds after urltest but before direct
     urltest_idx = next(
-        (i for i, o in enumerate(template["outbounds"]) if o.get("tag") == "auto"),
-        0
+        (i for i, o in enumerate(template["outbounds"]) if o.get("tag") == "auto"), 0
     )
     template["outbounds"] = (
-        template["outbounds"][:urltest_idx + 1] +
-        outbounds +
-        template["outbounds"][urltest_idx + 1:]
+        template["outbounds"][: urltest_idx + 1]
+        + outbounds
+        + template["outbounds"][urltest_idx + 1 :]
     )
 
     # Ensure excluded_ips are in CIDR format
@@ -58,12 +59,14 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
 
     # Write the temporary configuration using tempfile
     config = json.dumps(template, indent=2)
-    
+
     # Ensure config_file directory exists
     config_dir = os.path.dirname(config_file)
     if not os.path.isdir(config_dir):
-        error(f"Config directory does not exist: {config_dir}. "
-              f"Set SBOXMGR_CONFIG_FILE to a writable path if your sing-box is installed elsewhere.")
+        error(
+            f"Config directory does not exist: {config_dir}. "
+            f"Set SBOXMGR_CONFIG_FILE to a writable path if your sing-box is installed elsewhere."
+        )
         raise FileNotFoundError(f"Config directory does not exist: {config_dir}")
 
     if os.path.exists(config_file):
@@ -95,17 +98,20 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
     info(f"Configuration updated with {len(outbounds)} outbounds")
     return True
 
-def generate_temp_config(template_data: dict, servers: List[dict], user_routes: List[dict] = None) -> dict:
+
+def generate_temp_config(
+    template_data: dict, servers: List[dict], user_routes: List[dict] = None
+) -> dict:
     """Generate temporary configuration from template and servers.
-    
+
     Args:
         template_data: Configuration template data
         servers: List of server configurations
         user_routes: Optional user-defined routes
-        
+
     Returns:
         Generated configuration dictionary
-        
+
     Raises:
         ValueError: If template is invalid or generation fails
 
@@ -114,79 +120,81 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
     emit_event(
         EventType.CONFIG_GENERATED,
         {
-            "template_keys": list(template_data.keys()) if isinstance(template_data, dict) else [],
+            "template_keys": (
+                list(template_data.keys()) if isinstance(template_data, dict) else []
+            ),
             "server_count": len(servers),
             "user_routes_count": len(user_routes) if user_routes else 0,
-            "status": "started"
+            "status": "started",
         },
         source="config.generate",
-        priority=EventPriority.NORMAL
+        priority=EventPriority.NORMAL,
     )
-    
+
     try:
         if user_routes is None:
             user_routes = []
-        
+
         # Validate template structure
         if not isinstance(template_data, dict):
             raise ValueError("Template data must be a dictionary")
-        
+
         if "outbounds" not in template_data:
             raise ValueError("Template must contain 'outbounds' key")
-        
+
         # Start with template copy
         config = copy.deepcopy(template_data)
-        
+
         # Process servers into outbounds
         outbounds = []
-        
+
         # Add server outbounds
         for i, server in enumerate(servers):
             if not isinstance(server, dict):
                 continue
-                
+
             # Create outbound configuration
             outbound = {
-                "tag": server.get("tag", f"proxy-{i+1}"),
+                "tag": server.get("tag", f"proxy-{i + 1}"),
                 "type": server.get("type", "shadowsocks"),
-                **server
+                **server,
             }
-            
+
             # Remove redundant fields and normalize port field
             outbound.pop("name", None)
-            
+
             # Convert server_port to port if needed
             if "server_port" in outbound and "port" not in outbound:
                 outbound["port"] = outbound.pop("server_port")
             elif "server_port" in outbound:
                 # If both exist, remove server_port and keep port
                 outbound.pop("server_port", None)
-            
+
             outbounds.append(outbound)
-        
+
         # Add user routes if provided
         if user_routes:
             for route in user_routes:
                 if isinstance(route, dict) and "tag" in route:
                     outbounds.append(route)
-        
+
         # Update config with generated outbounds
         config["outbounds"] = outbounds
-        
+
         # Emit successful generation event
         emit_event(
             EventType.CONFIG_GENERATED,
             {
                 "outbound_count": len(outbounds),
                 "config_size": len(str(config)),
-                "status": "completed"
+                "status": "completed",
             },
             source="config.generate",
-            priority=EventPriority.NORMAL
+            priority=EventPriority.NORMAL,
         )
-        
+
         return config
-        
+
     except Exception as e:
         # Emit error event
         emit_event(
@@ -194,19 +202,20 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
             {
                 "error_type": type(e).__name__,
                 "error_message": str(e),
-                "component": "config.generate"
+                "component": "config.generate",
             },
             source="config.generate",
-            priority=EventPriority.HIGH
+            priority=EventPriority.HIGH,
         )
         raise
 
+
 def validate_temp_config_dict(config_data: dict) -> None:
     """Validate temporary configuration dictionary using basic validation.
-    
+
     Args:
         config_data: Configuration dictionary to validate
-        
+
     Raises:
         ValueError: If configuration is invalid
 
@@ -217,34 +226,31 @@ def validate_temp_config_dict(config_data: dict) -> None:
         {
             "config_keys": list(config_data.keys()),
             "status": "started",
-            "validation_type": "basic"
+            "validation_type": "basic",
         },
         source="config.validate",
-        priority=EventPriority.NORMAL
+        priority=EventPriority.NORMAL,
     )
-    
+
     try:
         # Basic validation - check required fields
         if not isinstance(config_data, dict):
             raise ValueError("Configuration must be a dictionary")
-        
+
         if "outbounds" not in config_data:
             raise ValueError("Configuration must contain 'outbounds' key")
-        
+
         if not isinstance(config_data["outbounds"], list):
             raise ValueError("'outbounds' must be a list")
-        
+
         # Emit successful validation event
         emit_event(
             EventType.CONFIG_VALIDATED,
-            {
-                "status": "passed",
-                "validation_type": "basic"
-            },
+            {"status": "passed", "validation_type": "basic"},
             source="config.validate",
-            priority=EventPriority.NORMAL
+            priority=EventPriority.NORMAL,
         )
-        
+
     except Exception as e:
         # Emit error event
         emit_event(
@@ -252,11 +258,12 @@ def validate_temp_config_dict(config_data: dict) -> None:
             {
                 "error_type": type(e).__name__,
                 "error_message": str(e),
-                "component": "config.validate"
+                "component": "config.validate",
             },
             source="config.validate",
-            priority=EventPriority.HIGH
+            priority=EventPriority.HIGH,
         )
         raise
+
 
 # validate_config_file function is now imported from validation.internal module

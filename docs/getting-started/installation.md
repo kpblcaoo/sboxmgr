@@ -201,4 +201,4 @@ After installation:
 
 - [Quick Start](quick-start.md) - First steps
 - [Configuration](configuration.md) - System setup
-- [Troubleshooting](../user-guide/troubleshooting.md) - Problem solving 
+- [Troubleshooting](../user-guide/troubleshooting.md) - Problem solving

@@ -1,5 +1,7 @@
 """Example geo policy for demonstration purposes."""
+
 from .base import BasePolicy, PolicyContext, PolicyResult
+
 
 class GeoTestPolicy(BasePolicy):
     """Test policy for geo group (demo only)."""
@@ -10,12 +12,12 @@ class GeoTestPolicy(BasePolicy):
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         """Evaluate policy context and return result.
-        
+
         Args:
             context: Policy evaluation context.
-            
+
         Returns:
             PolicyResult allowing all requests.
-            
+
         """
-        return PolicyResult.allow("GeoTestPolicy always allows") 
+        return PolicyResult.allow("GeoTestPolicy always allows")

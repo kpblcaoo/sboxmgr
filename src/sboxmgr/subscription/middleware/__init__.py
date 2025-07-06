@@ -16,27 +16,26 @@ Phase 3 enhancements:
 
 from .base import (
     BaseMiddleware,
-    ProfileAwareMiddleware,
     ChainableMiddleware,
     ConditionalMiddleware,
-    TransformMiddleware
+    ProfileAwareMiddleware,
+    TransformMiddleware,
 )
-from .logging import LoggingMiddleware
 from .enrichment import EnrichmentMiddleware
+from .logging import LoggingMiddleware
 from .outbound_filter import OutboundFilterMiddleware
 from .route_config import RouteConfigMiddleware
 
 __all__ = [
     # Base classes
-    'BaseMiddleware',
-    'ProfileAwareMiddleware',
-    'ChainableMiddleware',
-    'ConditionalMiddleware',
-    'TransformMiddleware',
-    
+    "BaseMiddleware",
+    "ProfileAwareMiddleware",
+    "ChainableMiddleware",
+    "ConditionalMiddleware",
+    "TransformMiddleware",
     # Concrete middleware
-    'LoggingMiddleware',
-    'EnrichmentMiddleware',
-    'OutboundFilterMiddleware',
-    'RouteConfigMiddleware',
-] 
+    "LoggingMiddleware",
+    "EnrichmentMiddleware",
+    "OutboundFilterMiddleware",
+    "RouteConfigMiddleware",
+]

@@ -58,7 +58,7 @@ git checkout -b feat/C-01-pydantic-models
 | Workflow | Триггер |
 |----------|---------|
 | `ci.yml` | Pull Request-ы и pushes в `develop` / feature ветки — линтер, тесты, покрытие |
-| `release.yml` | Тегированные коммиты в `main` — сборка, публикация артефактов, PyPI, Docker | 
+| `release.yml` | Тегированные коммиты в `main` — сборка, публикация артефактов, PyPI, Docker |
 
 # Best practices для плагинной архитектуры подписочного пайплайна
 
@@ -182,4 +182,4 @@ sboxctl plugin-template fetcher MyCustomFetcher --output-dir ./src/sboxmgr/subsc
 
 **Расширение:**
 - Для новых типов (exporter, postprocessor и др.) — расширяйте CLI-генератор по аналогии.
-- Документируйте публичные методы и добавляйте примеры использования. 
+- Документируйте публичные методы и добавляйте примеры использования.

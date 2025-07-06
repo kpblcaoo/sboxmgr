@@ -45,7 +45,7 @@ class ExclusionList:
     version: int = 1
     last_modified: str
     exclusions: List[ExclusionEntry]
-    
+
     @classmethod
     def from_dict(cls, data: dict) -> 'ExclusionList':
         # Handle versioning and migration
@@ -57,12 +57,12 @@ class ExclusionManagerInterface(ABC):
     @abstractmethod
     def contains(self, server_id: str) -> bool:
         pass
-        
+
 class ExclusionManager(ExclusionManagerInterface):
     @classmethod
     def default(cls) -> 'ExclusionManager':
         # Singleton instance
-        
+
     def __init__(self, file_path: Path, logger: Logger = None):
         # Custom configuration
 ```

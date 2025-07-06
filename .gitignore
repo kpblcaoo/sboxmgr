@@ -64,6 +64,10 @@ struct_src.json
 struct_src_index.json
 test_subscription.json
 
-
+# User configs (profiles → configs migration)
+configs/
+*.toml
+!config.template.toml
+!pyproject.toml
 
 custom.json

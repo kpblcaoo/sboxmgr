@@ -517,4 +517,4 @@ And system exits with error code
 6. **ADR and security checklist considered** - atomic_write, validate_path_is_safe
 7. **Falsy values fixed** - mtu=0, keepalive=false correctly processed
 
-This Gherkin scenario now matches the actual sboxmgr architecture and covers all edge cases. 
+This Gherkin scenario now matches the actual sboxmgr architecture and covers all edge cases.

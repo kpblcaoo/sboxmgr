@@ -5,11 +5,14 @@ current language setting, and setting a new language preference for the
 sboxmgr CLI interface. Language settings are managed through environment
 variables and the i18n system.
 """
-import typer
+
 from pathlib import Path
+
+import typer
+
+from sboxmgr.cli.utils import detect_lang_source, is_ai_lang
 from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t
-from sboxmgr.cli.utils import is_ai_lang, detect_lang_source
 
 LANG_NAMES = {
     "en": "English",
@@ -25,36 +28,37 @@ LANG_NAMES = {
     "pl": "Polski",
 }
 
+
 def lang_cmd(
     set_lang: str = typer.Option(None, "--set", "-s", help=t("cli.lang.set.help")),
 ):
     """Manage CLI internationalization language settings.
-    
+
     Provides comprehensive language management for the CLI interface including
     displaying current language configuration, listing all available languages
     with metadata, and persistently setting the preferred language.
-    
+
     Language detection priority:
     1. SBOXMGR_LANG environment variable (highest priority)
-    2. Configuration file setting (~/.sboxmgr/config.toml) 
+    2. Configuration file setting (~/.sboxmgr/config.toml)
     3. System locale (LANG environment variable)
     4. Default fallback (English)
-    
+
     Features:
     - Persistent language configuration storage
     - AI-generated translation identification
     - Bilingual help display for system locale scenarios
     - Validation of language availability before setting
     - Human-readable language names display
-    
+
     Args:
         set_lang: Language code to set as default (e.g., 'en', 'ru', 'de', 'zh').
                  If not provided, displays current language information.
-        
+
     Raises:
         typer.Exit: If specified language is not available or configuration
                     file cannot be written.
-                    
+
     Examples:
         sboxmgr lang                    # Show current language and available options
         sboxmgr lang --set ru           # Set Russian as default language
@@ -72,6 +76,7 @@ def lang_cmd(
             raise typer.Exit(1)
         try:
             import toml
+
             with open(config_path, "w") as f:
                 toml.dump({"default_lang": set_lang}, f)
             typer.echo(f"Language set to '{set_lang}' and persisted in {config_path}.")
@@ -90,7 +95,11 @@ def lang_cmd(
             typer.echo(en_loader.get("cli.lang.help"))
             typer.echo(en_loader.get("cli.lang.bilingual_notice"))
             if local_loader:
-                typer.echo("--- Русский ---" if lang_code == "ru" else f"--- {lang_code.upper()} ---")
+                typer.echo(
+                    "--- Русский ---"
+                    if lang_code == "ru"
+                    else f"--- {lang_code.upper()} ---"
+                )
                 typer.echo(local_loader.get("cli.lang.help"))
                 typer.echo(local_loader.get("cli.lang.bilingual_notice"))
         else:
@@ -106,6 +115,8 @@ def lang_cmd(
         for lang_line in langs_out:
             typer.echo(lang_line)
         if any(is_ai_lang(code) for code in langs):
-            typer.echo("Note: [AI] = machine-translated, not reviewed. Contributions welcome!")
+            typer.echo(
+                "Note: [AI] = machine-translated, not reviewed. Contributions welcome!"
+            )
         typer.echo("To set language persistently: sboxctl lang --set ru")
-        typer.echo("Or for one-time use: SBOXMGR_LANG=ru sboxctl ...") 
+        typer.echo("Or for one-time use: SBOXMGR_LANG=ru sboxctl ...")

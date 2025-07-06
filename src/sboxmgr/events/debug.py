@@ -1,35 +1,35 @@
 """Debug event handlers for monitoring and troubleshooting."""
 
-from .types import EventType, EventData
 from .core import EventHandler, get_event_manager
 from .decorators import event_handler
+from .types import EventData, EventType
 
 
 class EventStatistics(EventHandler):
     """Event handler that collects statistics about events."""
-    
+
     def __init__(self):
         """Initialize event statistics collector."""
         self.event_counts = {}
         self.error_counts = {}
         self.source_counts = {}
-    
+
     def can_handle(self, event_data: EventData) -> bool:
         """Check if event can be handled for statistics collection."""
         return True
-    
+
     def handle(self, event_data: EventData) -> None:
         """Collect statistics from the event."""
         event_type = event_data.event_type.value
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
-        
+
         source = event_data.source
         self.source_counts[source] = self.source_counts.get(source, 0) + 1
-        
+
         if event_data.event_type == EventType.ERROR_OCCURRED:
             error_type = event_data.payload.get("error_type", "Unknown")
             self.error_counts[error_type] = self.error_counts.get(error_type, 0) + 1
-    
+
     def get_statistics(self) -> dict:
         """Get collected statistics."""
         return {
@@ -63,4 +63,3 @@ def log_config_events(event_data: EventData) -> None:
 
 # Register global statistics collector
 get_event_manager().register_handler(_stats_collector)
-

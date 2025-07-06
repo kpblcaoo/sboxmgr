@@ -37,10 +37,10 @@ Modernize the CLI interface with comprehensive internationalization, rich output
 class LanguageLoader:
     def __init__(self, lang_dir: Path):
         self.languages = self._load_languages()
-        
+
     def get(self, key: str, **kwargs) -> str:
         # Translation with fallback and formatting
-        
+
     def set_language(self, lang_code: str) -> None:
         # Runtime language switching
 ```
@@ -60,10 +60,10 @@ from rich.progress import Progress
 class RichCLI:
     def __init__(self):
         self.console = Console()
-        
+
     def display_servers(self, servers: List[ParsedServer]) -> None:
         # Rich table display
-        
+
     def show_progress(self, operation: str) -> Progress:
         # Progress bar with status
 ```
