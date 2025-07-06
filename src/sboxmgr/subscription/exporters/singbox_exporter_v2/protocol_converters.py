@@ -214,6 +214,7 @@ def convert_wireguard(
         **base_data,
         "private_key": server.private_key or server.meta.get("private_key"),
         "peer_public_key": getattr(server, "peer_public_key", None)
+        or getattr(server, "public_key", None)
         or server.meta.get("peer_public_key")
         or server.meta.get("public_key"),
     }
