@@ -514,18 +514,18 @@ class ServerListScreen(Screen):
 
             # Добавляем новый контент
             if self._servers:
-                with server_container:
-                    with VerticalScroll(classes="server-list-scroll"):
-                        for item in self._create_server_items():
-                            server_container.mount(item)
+                scroll = VerticalScroll(classes="server-list-scroll")
+                for item in self._create_server_items():
+                    scroll.mount(item)
+                server_container.mount(scroll)
             else:
-                with server_container:
-                    with Vertical(classes="empty-state"):
-                        server_container.mount(
-                            Static(
-                                "No servers available.\nAdd a subscription to see servers here."
-                            )
-                        )
+                empty_state = Vertical(classes="empty-state")
+                empty_state.mount(
+                    Static(
+                        "No servers available.\nAdd a subscription to see servers here."
+                    )
+                )
+                server_container.mount(empty_state)
 
         # Обновляем info panel
         info_panel = self.query_one(".server-list-info Static")
