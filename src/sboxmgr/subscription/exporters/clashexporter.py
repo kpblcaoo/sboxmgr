@@ -76,18 +76,21 @@ def _convert_server_to_clash_proxy(server: ParsedServer) -> Dict[str, Any]:
         Dictionary with Clash proxy configuration.
 
     """
-    if not server or not hasattr(server, "protocol"):
+    if not server or not hasattr(server, "type"):
         return None
 
+    # Use server.tag (normalized by middleware) for name
+    proxy_name = server.tag if server.tag else f"{server.type}-{server.address}"
+
     proxy = {
-        "name": getattr(server, "name", f"{server.protocol}-{server.address}"),
-        "type": server.protocol,
+        "name": proxy_name,
+        "type": server.type,
         "server": server.address,
         "port": server.port,
     }
 
     # Add protocol-specific configuration
-    if server.protocol == "vmess":
+    if server.type == "vmess":
         proxy.update(
             {
                 "uuid": getattr(server, "uuid", ""),
@@ -95,20 +98,70 @@ def _convert_server_to_clash_proxy(server: ParsedServer) -> Dict[str, Any]:
                 "cipher": getattr(server, "security", "auto"),
             }
         )
-    elif server.protocol == "vless":
+    elif server.type == "vless":
+        # VLESS configuration for ClashMeta
+        # Get UUID from meta or server attributes
+        uuid = server.meta.get("uuid") if server.meta else None
+        if not uuid:
+            uuid = getattr(server, "uuid", "")
+
         proxy.update(
             {
-                "uuid": getattr(server, "uuid", ""),
-                "tls": getattr(server, "security", "none") == "tls",
+                "uuid": uuid,
+                "network": server.meta.get("network", "tcp") if server.meta else "tcp",
+                "udp": server.meta.get("udp", True) if server.meta else True,
             }
         )
-    elif server.protocol == "trojan":
+
+        # Handle TLS/Reality
+        # Check for Reality (has tls: true and reality-opts)
+        if server.meta and server.meta.get("tls") and server.meta.get("reality-opts"):
+            reality_opts = server.meta.get("reality-opts", {})
+            proxy.update(
+                {
+                    "tls": True,
+                    "servername": server.meta.get("servername", ""),
+                    "reality-opts": {
+                        "public-key": reality_opts.get("public-key", ""),
+                        "short-id": reality_opts.get("short-id", ""),
+                    },
+                    "client-fingerprint": server.meta.get(
+                        "client-fingerprint", "chrome"
+                    ),
+                }
+            )
+            # Add flow if present
+            if server.meta.get("flow"):
+                proxy["flow"] = server.meta["flow"]
+        elif server.meta and server.meta.get("tls"):
+            # Regular TLS
+            proxy.update(
+                {
+                    "tls": True,
+                    "servername": server.meta.get("servername", ""),
+                }
+            )
+
+        # Add ALPN if present
+        if server.meta and "alpn" in server.meta:
+            proxy["alpn"] = server.meta["alpn"]
+    elif server.type == "trojan":
         proxy.update({"password": getattr(server, "password", "")})
-    elif server.protocol in ["ss", "shadowsocks"]:
+    elif server.type in ["ss", "shadowsocks"]:
+        # Get method from meta or server attributes
+        method = server.meta.get("method") if server.meta else None
+        if not method:
+            method = getattr(server, "method", "chacha20-ietf-poly1305")
+
+        # Get password from meta or server attributes
+        password = server.meta.get("password") if server.meta else None
+        if not password:
+            password = getattr(server, "password", "")
+
         proxy.update(
             {
-                "cipher": getattr(server, "method", ""),
-                "password": getattr(server, "password", ""),
+                "cipher": method,
+                "password": password,
             }
         )
 

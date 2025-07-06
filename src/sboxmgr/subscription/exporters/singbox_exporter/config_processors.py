@@ -153,11 +153,11 @@ def process_tag_config(
         server: Source server.
         meta: Server metadata.
     """
-    # Priority: meta['name'] > server.tag > generated tag
-    if meta.get("name"):
-        outbound["tag"] = meta["name"]
-    elif hasattr(server, "tag") and server.tag:
+    # Priority: server.tag (normalized by middleware) > meta['name'] > generated tag
+    if hasattr(server, "tag") and server.tag:
         outbound["tag"] = server.tag
+    elif meta.get("name"):
+        outbound["tag"] = meta["name"]
     else:
         outbound["tag"] = f"{outbound['type']}-{server.address}"
 

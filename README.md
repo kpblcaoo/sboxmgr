@@ -1,97 +1,100 @@
-# SBoxMgr - Sing-box Configuration Manager
+# sboxmgr — Subbox Configuration Manager
 
-[![Build Status](https://github.com/kpblcaoo/update-singbox/actions/workflows/ci-dev.yml/badge.svg)](https://github.com/kpblcaoo/update-singbox/actions)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/kpblcaoo/update-singbox/actions)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Build Status](https://github.com/kpblcaoo/sboxmgr/actions/workflows/ci-dev.yml/badge.svg)](https://github.com/kpblcaoo/sboxmgr/actions)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/kpblcaoo/sboxmgr/actions)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green.svg)](LICENSE)
 
-A Python CLI tool for managing [sing-box](https://sing-box.sagernet.org/) proxy configurations. Automatically fetches server lists, applies exclusions, generates configs, and supports advanced routing.
+A Python CLI tool for managing configuration files. Part of the subbox ecosystem for configuration management and generation.
 
-## 🚀 Quick Start (3 steps)
+**Note**: This tool is designed for configuration management purposes. Users are responsible for ensuring compliance with local laws and regulations.
+
+## 🚀 Quick Start
 
 ### 1. Install
 ```bash
-# Clone and install
-git clone https://github.com/kpblcaoo/update-singbox.git
-cd update-singbox
+# Install from TestPyPI
+pip install -i https://test.pypi.org/simple sboxmgr
+
+# Or install in development mode
+git clone https://github.com/kpblcaoo/sboxmgr.git
+cd sboxmgr
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install .
+pip install -e .
 ```
 
-### 2. Get your proxy URL
-You need a URL that provides sing-box compatible configuration (Clash, sing-box JSON, etc.). Common sources:
-- Your VPN provider's subscription link
-- A Clash configuration URL
-- A sing-box configuration file
+### 2. Create configuration profile
+Create a profile file with your configuration preferences:
 
-### 3. Generate config
 ```bash
-# List available servers
-sboxctl list-servers -u "YOUR_PROXY_URL_HERE"
-
-# Generate config for server #1
-sboxctl export -u "YOUR_PROXY_URL_HERE" --index 1
-
-# Start sing-box with the generated config
-sing-box run -c config.json
+# Example profile.json
+{
+  "export": {
+    "format": "json",
+    "output": "./config.json"
+  }
+}
 ```
 
-That's it! Your sing-box is now running with the selected server.
+### 3. Generate configuration
+```bash
+# Export configuration using profile
+sboxmgr export -p profile.json
+
+# Or use command line options
+sboxmgr export --format json --output config.json
+```
+
+That's it! Your configuration file is ready.
 
 ## ✨ Key Features
 
-- **Simple CLI**: One command to generate working sing-box configs
-- **Multiple protocols**: VLESS, Shadowsocks, VMess, Trojan, TUIC, Hysteria2
-- **Smart routing**: Direct routing for Russian domains, proxy for others
-- **Server management**: List, select, and exclude servers
-- **Flexible input**: Supports Clash, sing-box JSON, and other formats
-- **Production ready**: 90%+ test coverage, comprehensive error handling
+- **Simple CLI**: One command to generate configuration files
+- **Multiple formats**: JSON, YAML, and other configuration formats
+- **Profile-based**: Use configuration profiles for consistent settings
+- **Plugin system**: Extensible architecture with custom plugins
+- **Flexible input**: Supports various input formats and sources
+- **Production ready**: Comprehensive error handling and validation
 
 ## 📖 Common Usage
 
 ### Basic Operations
 ```bash
-# List all available servers
-sboxctl list-servers -u "https://example.com/proxy.json"
+# Export configuration using profile
+sboxmgr export -p profile.json
 
-# Generate config for specific server
-sboxctl export -u "https://example.com/proxy.json" --index 2
+# Export with command line options
+sboxmgr export --format json --output config.json
 
-# Generate config for server by name
-sboxctl export -u "https://example.com/proxy.json" --remarks "Fast Server"
+# Preview configuration without saving (dry-run)
+sboxmgr export -p profile.json --dry-run
 
-# Preview config without saving (dry-run)
-sboxctl export -u "https://example.com/proxy.json" --index 1 --dry-run
+# List available configuration options
+sboxmgr list --help
 ```
 
-### Server Management
+### Profile Management
 ```bash
-# Add server to exclusions (won't be used)
-sboxctl exclusions -u "https://example.com/proxy.json" --add 3
+# Create a new profile
+sboxmgr profile create my-profile
 
-# Remove server from exclusions
-sboxctl exclusions -u "https://example.com/proxy.json" --remove 3
+# List available profiles
+sboxmgr profile list
 
-# View current exclusions
-sboxctl exclusions --view
-
-# Clear all exclusions
-sboxctl clear-exclusions
+# Export using specific profile
+sboxmgr export --profile my-profile
 ```
 
 ### Advanced Configuration
 ```bash
-# Configure custom inbound (SOCKS proxy on port 1080)
-sboxctl export -u "https://example.com/proxy.json" --index 1 \
-  --inbound-types socks --socks-port 1080
+# Use custom configuration format
+sboxmgr export --format yaml --output config.yaml
 
-# Set custom routing (all traffic through proxy)
-sboxctl export -u "https://example.com/proxy.json" --index 1 \
-  --final-route proxy
+# Set custom output directory
+sboxmgr export -p profile.json --output-dir ./configs/
 
-# Exclude specific outbound types
-sboxctl export -u "https://example.com/proxy.json" --index 1 \
-  --exclude-outbounds block,dns
+# Validate configuration before export
+sboxmgr export -p profile.json --validate
 ```
 
 ## ⚙️ Configuration
@@ -101,13 +104,13 @@ Create a `.env` file in the project root:
 
 ```bash
 # Config file location (default: ./config.json)
-SBOXMGR_CONFIG_FILE=/etc/sing-box/config.json
+SBOXMGR_CONFIG_FILE=./config.json
 
 # Log file location
 SBOXMGR_LOG_FILE=./sboxmgr.log
 
-# Exclusions file
-SBOXMGR_EXCLUSION_FILE=./exclusions.json
+# Profile directory
+SBOXMGR_PROFILE_DIR=./profiles/
 
 # Language (en, ru, de, zh, etc.)
 SBOXMGR_LANG=en
@@ -116,41 +119,40 @@ SBOXMGR_LANG=en
 ### Default Behavior
 - **Config output**: `./config.json` (or `SBOXMGR_CONFIG_FILE`)
 - **Logging**: `./sboxmgr.log` (or `SBOXMGR_LOG_FILE`)
-- **Exclusions**: `./exclusions.json` (or `SBOXMGR_EXCLUSION_FILE`)
+- **Profiles**: `./profiles/` (or `SBOXMGR_PROFILE_DIR`)
 - **Language**: English (or `SBOXMGR_LANG`)
 
 ## 🔧 Advanced Features
 
 ### Plugin System
-Create custom fetchers, parsers, and exporters:
+Create custom plugins for data processing:
 
 ```bash
 # Generate plugin template
-sboxctl plugin-template fetcher MyCustomFetcher --output-dir ./plugins/
+sboxmgr plugin-template fetcher MyCustomFetcher --output-dir ./plugins/
 
 # Use custom plugin
-sboxctl export -u "custom://my-data" --fetcher my-custom-fetcher
+sboxmgr export --fetcher my-custom-fetcher
 ```
 
 ### Policy Engine
-Configure routing policies:
+Configure processing policies:
 
 ```bash
 # List available policies
-sboxctl policy list
+sboxmgr policy list
 
-# Apply geo-based policy
-sboxctl export -u "https://example.com/proxy.json" --index 1 \
-  --policy geo-direct
+# Apply custom policy
+sboxmgr export --policy my-policy
 ```
 
 ### Internationalization
 ```bash
 # Set language
-sboxctl lang --set ru
+sboxmgr lang --set ru
 
 # View available languages
-sboxctl lang
+sboxmgr lang
 ```
 
 ## 🛠 Development
@@ -175,7 +177,7 @@ black src/
 src/sboxmgr/
 ├── cli/          # Command-line interface
 ├── core/         # Core business logic
-├── subscription/ # Subscription management
+├── config/       # Configuration management
 ├── export/       # Configuration export
 ├── models/       # Data models
 ├── i18n/         # Internationalization
@@ -202,13 +204,16 @@ See [CONTRIBUTING.md](docs/developer/contributing.md) for detailed guidelines.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Related Projects
 
-- [sing-box](https://sing-box.sagernet.org/) - Universal proxy platform
-- [Clash](https://github.com/Dreamacro/clash) - Rule-based proxy
-- [sing-box-common](https://github.com/kpblcaoo/sing-box-common) - Common utilities
+- [subbox](https://github.com/kpblcaoo/subbox) - Configuration management ecosystem
+- [sbox-common](https://github.com/kpblcaoo/sbox-common) - Common utilities
+
+## 📚 Legacy
+
+This project supersedes the earlier `update-singbox` script. While some internal components originated from it, `sboxmgr` is a full rewrite and represents a new generation of flexible, extensible configuration generation tools.
 
 ---
 

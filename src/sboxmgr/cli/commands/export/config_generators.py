@@ -20,9 +20,7 @@ from .validators import validate_middleware, validate_postprocessors
 try:
     from sboxmgr.configs.models import FullProfile
 
-    PHASE3_AVAILABLE = True
 except ImportError:
-    PHASE3_AVAILABLE = False
     FullProfile = None
 
 
@@ -106,9 +104,6 @@ def generate_profile_from_cli(
     Raises:
         typer.Exit: If profile generation fails
     """
-    if not PHASE3_AVAILABLE:
-        typer.echo("⚠️  Profile generation requires Phase 3 components", err=True)
-        raise typer.Exit(1)
 
     try:
         # Create basic profile structure

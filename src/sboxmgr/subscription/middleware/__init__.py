@@ -25,6 +25,7 @@ from .enrichment import EnrichmentMiddleware
 from .logging import LoggingMiddleware
 from .outbound_filter import OutboundFilterMiddleware
 from .route_config import RouteConfigMiddleware
+from .tag_normalizer import TagNormalizer
 
 __all__ = [
     # Base classes
@@ -38,4 +39,5 @@ __all__ = [
     "EnrichmentMiddleware",
     "OutboundFilterMiddleware",
     "RouteConfigMiddleware",
+    "TagNormalizer",
 ]

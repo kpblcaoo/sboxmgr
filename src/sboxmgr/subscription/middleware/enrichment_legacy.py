@@ -11,7 +11,7 @@ import hashlib
 import time
 from typing import Any, Dict, List, Optional
 
-from ...profiles.models import FullProfile
+from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
 from .base import TransformMiddleware
 

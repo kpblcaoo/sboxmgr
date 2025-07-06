@@ -3,7 +3,7 @@
 import time
 from typing import Any, Dict, List, Optional
 
-from ....profiles.models import FullProfile
+from ....configs.models import FullProfile
 from ...models import ParsedServer, PipelineContext
 from ..base import TransformMiddleware
 from .basic import BasicEnricher
@@ -19,6 +19,9 @@ class EnrichmentMiddleware(TransformMiddleware):
     Enriches server data with additional metadata including geographic
     information, performance metrics, security indicators, and custom
     attributes based on profile configuration.
+
+    Note: Tag normalization is handled by TagNormalizer middleware.
+    This middleware focuses only on data enrichment.
 
     Configuration options:
     - enable_geo_enrichment: Add geographic metadata
@@ -178,6 +181,9 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         # Apply basic metadata enrichment (always enabled)
         server = self.basic_enricher.enrich(server, context)
+
+        # Note: Tag normalization is handled by TagNormalizer middleware
+        # This middleware focuses only on data enrichment
 
         # Apply geographic enrichment
         if enrichment_config["enable_geo_enrichment"]:
