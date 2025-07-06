@@ -199,5 +199,54 @@ app.command("export", help="Export configurations in standardized formats")(expo
 # Регистрируем команды политик
 app.add_typer(policy_app)
 
+
+@app.command("tui")
+def tui_cmd(
+    debug: int = typer.Option(
+        0, "--debug", "-d", help="Debug level (0-3)", min=0, max=3
+    ),
+    profile: str = typer.Option(None, "--profile", "-p", help="Profile name to use"),
+):
+    """Launch Text User Interface (TUI) mode.
+
+    Opens an interactive text-based interface for managing subscriptions
+    and generating configurations. The TUI provides a user-friendly way
+    to interact with sboxmgr without memorizing CLI commands.
+
+    Features:
+    - Context-aware interface that adapts to your current setup
+    - Step-by-step onboarding for new users
+    - Visual server management with exclusion controls
+    - Real-time validation and error handling
+    - Keyboard shortcuts for efficient navigation
+
+    Args:
+        debug: Debug level (0=off, 1=info, 2=verbose, 3=trace)
+        profile: Profile name to use (defaults to current profile)
+
+    Examples:
+        sboxctl tui                    # Launch TUI with default settings
+        sboxctl tui --debug 1          # Launch with debug info
+        sboxctl tui --profile work     # Launch with specific profile
+    """
+    try:
+        from sboxmgr.tui.app import SboxmgrTUI
+
+        # Create and run the TUI application
+        tui_app = SboxmgrTUI(debug=debug, profile=profile)
+        tui_app.run()
+
+    except ImportError as e:
+        typer.echo(
+            f"TUI dependencies not available: {e}\n"
+            "Please install with: pip install textual>=0.52.0",
+            err=True,
+        )
+        raise typer.Exit(1)
+    except Exception as e:
+        typer.echo(f"TUI error: {e}", err=True)
+        raise typer.Exit(1)
+
+
 if __name__ == "__main__":
     app()

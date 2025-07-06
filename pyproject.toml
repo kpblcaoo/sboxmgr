@@ -16,6 +16,7 @@ dependencies = [
     "pydantic-settings>=2.0",
     "packaging>=21.0",
     "toml>=0.10.2",
+    "textual>=0.52.0",
     "sbox-common @ file:///home/kpblc/projects/subbox/sbox-common",
 ]
 
