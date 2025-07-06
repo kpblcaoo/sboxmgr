@@ -56,7 +56,7 @@ class TestServerListScreen:
         server = {"protocol": "vmess", "address": "test.com", "port": 443}
         server_id = screen._get_server_id(server)
 
-        assert "vmess" in server_id
+        # Server ID should contain address and port
         assert "test.com" in server_id
         assert "443" in server_id
 
@@ -71,7 +71,7 @@ class TestServerListScreen:
 
         display_text = screen._format_server_display(server)
 
-        assert "vmess" in display_text
+        assert "VMESS" in display_text or "vmess" in display_text
         assert "example.com" in display_text
         assert "443" in display_text
         assert "test-server" in display_text
@@ -110,7 +110,8 @@ class TestServerListScreen:
         # Should call toggle_server_exclusion
         mock_app.state.toggle_server_exclusion.assert_called_once()
 
-    def test_select_all_functionality(self, screen):
+    @patch.object(ServerListScreen, 'app')
+    def test_select_all_functionality(self, mock_app, screen):
         """Test select all button functionality."""
         # Setup servers
         screen._servers = [
@@ -118,13 +119,18 @@ class TestServerListScreen:
             {"protocol": "vless", "address": "test2.com", "port": 80}
         ]
 
-        # Mock the screen's query method
-        screen.query = Mock()
+        # Mock the screen's query_one method
         mock_checkboxes = [Mock(), Mock()]
         for i, cb in enumerate(mock_checkboxes):
             cb.id = f"server_{i}"
             cb.value = False
-        screen.query.return_value = mock_checkboxes
+
+        def mock_query_one(selector, widget_type=None):
+            # Extract index from selector like "#server_0"
+            index = int(selector.split('_')[1])
+            return mock_checkboxes[index]
+
+        screen.query_one = Mock(side_effect=mock_query_one)
 
         screen.on_select_all_pressed()
 
@@ -132,7 +138,8 @@ class TestServerListScreen:
         for cb in mock_checkboxes:
             assert cb.value is True
 
-    def test_select_none_functionality(self, screen):
+    @patch.object(ServerListScreen, 'app')
+    def test_select_none_functionality(self, mock_app, screen):
         """Test select none button functionality."""
         # Setup servers
         screen._servers = [
@@ -140,13 +147,18 @@ class TestServerListScreen:
             {"protocol": "vless", "address": "test2.com", "port": 80}
         ]
 
-        # Mock the screen's query method
-        screen.query = Mock()
+        # Mock the screen's query_one method
         mock_checkboxes = [Mock(), Mock()]
         for i, cb in enumerate(mock_checkboxes):
             cb.id = f"server_{i}"
             cb.value = True
-        screen.query.return_value = mock_checkboxes
+
+        def mock_query_one(selector, widget_type=None):
+            # Extract index from selector like "#server_0"
+            index = int(selector.split('_')[1])
+            return mock_checkboxes[index]
+
+        screen.query_one = Mock(side_effect=mock_query_one)
 
         screen.on_select_none_pressed()
 

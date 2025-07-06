@@ -238,7 +238,9 @@ class ServerListScreen(Screen):
         try:
             app_state = self.app.state
             # Get servers from active subscription
-            if hasattr(app_state, "get_servers"):
+            if hasattr(app_state, "servers"):
+                self._servers = app_state.servers or []
+            elif hasattr(app_state, "get_servers"):
                 self._servers = app_state.get_servers() or []
             else:
                 self._servers = []
@@ -249,7 +251,9 @@ class ServerListScreen(Screen):
         """Load current exclusions from the application state."""
         try:
             app_state = self.app.state
-            if hasattr(app_state, "exclusions"):
+            if hasattr(app_state, "excluded_servers"):
+                self._excluded_servers = set(app_state.excluded_servers)
+            elif hasattr(app_state, "exclusions"):
                 self._excluded_servers = set(app_state.exclusions)
             else:
                 self._excluded_servers = set()
@@ -260,12 +264,21 @@ class ServerListScreen(Screen):
         """Get unique identifier for a server.
 
         Args:
-            server: Server object
+            server: Server object or dict
 
         Returns:
             Unique server identifier
         """
-        # Use server address and port as identifier
+        # Handle dict objects
+        if isinstance(server, dict):
+            if "address" in server and "port" in server:
+                return f"{server['address']}:{server['port']}"
+            elif "server" in server and "server_port" in server:
+                return f"{server['server']}:{server['server_port']}"
+            else:
+                return str(server)
+
+        # Handle object attributes
         if hasattr(server, "address") and hasattr(server, "port"):
             return f"{server.address}:{server.port}"
         elif hasattr(server, "server") and hasattr(server, "server_port"):
@@ -278,7 +291,7 @@ class ServerListScreen(Screen):
         """Format server information for display.
 
         Args:
-            server: Server object
+            server: Server object or dict
 
         Returns:
             Formatted server information string
@@ -286,7 +299,19 @@ class ServerListScreen(Screen):
         try:
             return format_server_info(server)
         except Exception:
-            # Fallback formatting
+            # Fallback formatting for dict objects
+            if isinstance(server, dict):
+                protocol = server.get("protocol", server.get("type", "UNKNOWN")).upper()
+                address = server.get("address", server.get("server", "unknown"))
+                port = server.get("port", server.get("server_port", "?"))
+                tag = server.get("tag", server.get("name", ""))
+
+                display = f"[{protocol}] {address}:{port}"
+                if tag:
+                    display += f" ({tag})"
+                return display
+
+            # Fallback for object attributes
             if hasattr(server, "type"):
                 protocol = server.type.upper()
             else:
@@ -350,6 +375,11 @@ class ServerListScreen(Screen):
                     # Exclude server (add to exclusions)
                     self._excluded_servers.add(server_id)
 
+                # Update app state if available
+                app_state = self.app.state
+                if hasattr(app_state, "toggle_server_exclusion"):
+                    app_state.toggle_server_exclusion(server_id)
+
                 # Update visual state
                 self._update_server_item_visual(server_index, not event.value)
         except (ValueError, IndexError):
@@ -411,6 +441,7 @@ class ServerListScreen(Screen):
                 f"Applied changes: {included_count} servers included, {excluded_count} excluded",
                 severity="success",
             )
+            self.app.pop_screen()
         except Exception as e:
             self.app.notify(f"Failed to apply changes: {str(e)}", severity="error")
 

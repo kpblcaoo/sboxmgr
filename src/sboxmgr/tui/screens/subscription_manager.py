@@ -263,12 +263,14 @@ class SubscriptionManagerScreen(Screen):
         """Get URL from subscription object.
 
         Args:
-            subscription: Subscription object
+            subscription: Subscription object or dict
 
         Returns:
             Subscription URL
         """
-        if hasattr(subscription, "url"):
+        if isinstance(subscription, dict):
+            return subscription.get("url", str(subscription))
+        elif hasattr(subscription, "url"):
             return subscription.url
         elif isinstance(subscription, str):
             return subscription
@@ -279,7 +281,7 @@ class SubscriptionManagerScreen(Screen):
         """Format subscription information for display.
 
         Args:
-            subscription: Subscription object
+            subscription: Subscription object or dict
 
         Returns:
             Formatted subscription information string
@@ -296,9 +298,19 @@ class SubscriptionManagerScreen(Screen):
             else:
                 display_url = url
 
-            # Try to get type and tags
-            sub_type = getattr(subscription, "source_type", "unknown")
-            tags = getattr(subscription, "tags", [])
+            # Try to get type and tags - handle both dict and object
+            if isinstance(subscription, dict):
+                sub_type = subscription.get(
+                    "source_type", subscription.get("type", "unknown")
+                )
+                tags = subscription.get("tags", [])
+            else:
+                sub_type = getattr(
+                    subscription,
+                    "source_type",
+                    getattr(subscription, "type", "unknown"),
+                )
+                tags = getattr(subscription, "tags", [])
 
             lines = [f"URL: {display_url}"]
             lines.append(f"Type: {sub_type}")
