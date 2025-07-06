@@ -79,21 +79,27 @@ class TagNormalizer(BaseMiddleware):
             if isinstance(name, str) and name.strip():
                 return self._sanitize_tag(name.strip())
 
-        # Priority 2: meta['tag'] (explicit tag from source)
+        # Priority 2: meta['label'] (human-readable from source - alternative field)
+        if server.meta and server.meta.get("label"):
+            label = server.meta["label"]
+            if isinstance(label, str) and label.strip():
+                return self._sanitize_tag(label.strip())
+
+        # Priority 3: meta['tag'] (explicit tag from source)
         if server.meta and server.meta.get("tag"):
             tag = server.meta["tag"]
             if isinstance(tag, str) and tag.strip():
                 return self._sanitize_tag(tag.strip())
 
-        # Priority 3: tag (parser-generated tag)
+        # Priority 4: tag (parser-generated tag)
         if server.tag and server.tag.strip():
             return self._sanitize_tag(server.tag.strip())
 
-        # Priority 4: address (IP/domain fallback)
+        # Priority 5: address (IP/domain fallback)
         if server.address:
             return f"{server.type}-{server.address}"
 
-        # Priority 5: protocol-based fallback
+        # Priority 6: protocol-based fallback
         return f"{server.type}-{id(server)}"
 
     def _sanitize_tag(self, tag: str) -> str:

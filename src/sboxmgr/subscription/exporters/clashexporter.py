@@ -76,18 +76,21 @@ def _convert_server_to_clash_proxy(server: ParsedServer) -> Dict[str, Any]:
         Dictionary with Clash proxy configuration.
 
     """
-    if not server or not hasattr(server, "protocol"):
+    if not server or not hasattr(server, "type"):
         return None
 
+    # Use server.tag (normalized by middleware) for name
+    proxy_name = server.tag if server.tag else f"{server.type}-{server.address}"
+
     proxy = {
-        "name": getattr(server, "name", f"{server.protocol}-{server.address}"),
-        "type": server.protocol,
+        "name": proxy_name,
+        "type": server.type,
         "server": server.address,
         "port": server.port,
     }
 
     # Add protocol-specific configuration
-    if server.protocol == "vmess":
+    if server.type == "vmess":
         proxy.update(
             {
                 "uuid": getattr(server, "uuid", ""),
@@ -95,20 +98,26 @@ def _convert_server_to_clash_proxy(server: ParsedServer) -> Dict[str, Any]:
                 "cipher": getattr(server, "security", "auto"),
             }
         )
-    elif server.protocol == "vless":
-        proxy.update(
-            {
-                "uuid": getattr(server, "uuid", ""),
-                "tls": getattr(server, "security", "none") == "tls",
-            }
-        )
-    elif server.protocol == "trojan":
+    elif server.type == "vless":
+        # Clash doesn't support VLESS with Reality, skip for now
+        return None
+    elif server.type == "trojan":
         proxy.update({"password": getattr(server, "password", "")})
-    elif server.protocol in ["ss", "shadowsocks"]:
+    elif server.type in ["ss", "shadowsocks"]:
+        # Get method from meta or server attributes
+        method = server.meta.get("method") if server.meta else None
+        if not method:
+            method = getattr(server, "method", "chacha20-ietf-poly1305")
+
+        # Get password from meta or server attributes
+        password = server.meta.get("password") if server.meta else None
+        if not password:
+            password = getattr(server, "password", "")
+
         proxy.update(
             {
-                "cipher": getattr(server, "method", ""),
-                "password": getattr(server, "password", ""),
+                "cipher": method,
+                "password": password,
             }
         )
 
