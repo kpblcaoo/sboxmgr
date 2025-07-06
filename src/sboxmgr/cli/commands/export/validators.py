@@ -62,13 +62,6 @@ def validate_flag_combinations(
         )
         raise typer.Exit(1)
 
-    # NEW: validate-only + dry-run conflict
-    if validate_only and dry_run:
-        typer.echo(
-            "❌ Error: --validate-only and --dry-run are mutually exclusive", err=True
-        )
-        raise typer.Exit(1)
-
     # NEW: user-agent + no-user-agent conflict
     if user_agent and no_user_agent:
         typer.echo(
