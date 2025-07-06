@@ -11,6 +11,9 @@ class BasicEnricher:
 
     Adds fundamental metadata like timestamps, identifiers, and trace information
     that are useful for all types of server processing.
+
+    Note: Tag normalization is handled by TagNormalizer middleware.
+    This enricher focuses only on basic metadata enrichment.
     """
 
     def __init__(self):
@@ -39,10 +42,7 @@ class BasicEnricher:
         if context.source:
             server.meta["source"] = context.source
 
-        # Normalize server tag
-        if not server.tag and "name" in server.meta:
-            server.tag = server.meta["name"]
-        elif not server.tag:
-            server.tag = f"{server.type}-{server.address}"
+        # Note: Tag normalization is handled by TagNormalizer middleware
+        # This enricher preserves existing tags without modification
 
         return server
