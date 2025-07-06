@@ -14,8 +14,8 @@ Phase 4 enhancements:
 
 from typing import Any, Dict, List, Optional, Union
 
+from sboxmgr.configs.models import FullProfile
 from sboxmgr.logging import get_logger
-from sboxmgr.profiles.models import FullProfile
 from sboxmgr.subscription.exporters.clashexporter import clash_export
 from sboxmgr.subscription.exporters.singbox_exporter import singbox_export
 from sboxmgr.subscription.models import ClientProfile, ParsedServer, PipelineContext
