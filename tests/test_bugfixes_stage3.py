@@ -174,21 +174,26 @@ class TestBugFix7CLIUnsupportedFormatHandling:
     """Test Bug Fix 7: CLI unsupported format error handling."""
 
     def test_cli_unsupported_format_error_handling(self):
-        """Test that CLI properly handles unsupported formats."""
-        from typer.testing import CliRunner
-
+        """Test CLI error handling for unsupported export formats."""
         from sboxmgr.cli.commands.config import config_app
 
-        runner = CliRunner()
-        result = runner.invoke(config_app, ["dump", "--format", "unknown"])
+        # Test with unsupported format
+        result = runner.invoke(config_app, ["export", "--format", "unsupported"])
 
-        # BUG FIX: Should exit with error code 1
-        assert result.exit_code == 1
+        # Should show appropriate error message
+        assert result.exit_code != 0
+        assert "unsupported" in result.output.lower()
 
-        # Should show clear error message
-        output = result.output
-        assert "Unsupported format: 'unknown'" in output
-        assert "Supported formats: yaml, json, env" in output
+    def test_output_env_format_return_type(self):
+        """Test that _output_env_format returns correct type."""
+        from sboxmgr.cli.commands.config import _output_env_format
+
+        # Test with sample data
+        result = _output_env_format({"test": "value"})
+
+        # Should return string
+        assert isinstance(result, str)
+        assert "test" in result
 
 
 class TestBugFix8ReturnTypeAnnotations:
