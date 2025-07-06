@@ -5,7 +5,7 @@ including WebSocket, HTTP/2, gRPC, and QUIC transports.
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any, Literal
+from typing import List, Optional, Dict, Literal
 
 
 class RealityConfig(BaseModel):

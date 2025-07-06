@@ -24,10 +24,10 @@ except ImportError:
 
 class SocketClient:
     """Client for framed JSON protocol over Unix socket."""
-    
+
     def __init__(self, socket_path: str, timeout: float = 5.0):
         """Initialize SocketClient.
-        
+
         Args:
             socket_path: Path to Unix socket.
             timeout: Connection timeout in seconds.
@@ -46,10 +46,10 @@ class SocketClient:
 
     def send_message(self, message: Dict[str, Any]) -> None:
         """Send a framed JSON message.
-        
+
         Args:
             message: Message dictionary to send.
-            
+
         Raises:
             RuntimeError: If socket is not connected.
 
@@ -61,10 +61,10 @@ class SocketClient:
 
     def recv_message(self) -> Dict[str, Any]:
         """Receive a framed JSON message.
-        
+
         Returns:
             Received message dictionary.
-            
+
         Raises:
             RuntimeError: If socket is not connected or connection closed.
             ConnectionError: If incomplete data received.
@@ -72,30 +72,30 @@ class SocketClient:
         """
         if not self.sock:
             raise RuntimeError("Socket is not connected")
-        
+
         # Read frame header
         header = self._recv_exact(self.protocol.FRAME_HEADER_SIZE)
         if len(header) != self.protocol.FRAME_HEADER_SIZE:
             raise ConnectionError(f"Connection closed: incomplete header received ({len(header)}/{self.protocol.FRAME_HEADER_SIZE} bytes)")
-        
+
         length, version = self._unpack_header(header)
         if version != self.protocol.PROTOCOL_VERSION:
             raise RuntimeError(f"Unsupported protocol version: {version}")
-        
+
         # Read message body
         body = self._recv_exact(length)
         if len(body) != length:
             raise ConnectionError(f"Connection closed: incomplete message body received ({len(body)}/{length} bytes)")
-        
+
         message, _ = self.protocol.decode_message(header + body)
         return message
 
     def _recv_exact(self, n: int) -> bytes:
         """Receive exactly n bytes from the socket.
-        
+
         Args:
             n: Number of bytes to receive.
-            
+
         Returns:
             Received bytes (may be less than n if connection closed).
 
@@ -116,10 +116,10 @@ class SocketClient:
 
     def _unpack_header(self, header: bytes):
         """Unpack frame header.
-        
+
         Args:
             header: Frame header bytes.
-            
+
         Returns:
             Tuple of (length, version).
 

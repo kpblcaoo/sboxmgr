@@ -11,11 +11,11 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 class ExclusionEntryModel(BaseModel):
     """Single exclusion entry with Pydantic validation.
-    
+
     Implements validation for exclusion entries with proper timestamp handling
     and JSON schema generation capability.
     """
-    
+
     id: str = Field(..., description="Unique identifier for the excluded server")
     name: Optional[str] = Field(None, description="Human-readable name for the exclusion")
     reason: Optional[str] = Field(None, description="Reason for exclusion")
@@ -23,7 +23,7 @@ class ExclusionEntryModel(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp when exclusion was created"
     )
-    
+
     @field_validator('id')
     @classmethod
     def validate_id(cls, v: str) -> str:
@@ -31,7 +31,7 @@ class ExclusionEntryModel(BaseModel):
         if not v.strip():
             raise ValueError("Exclusion ID cannot be empty")
         return v.strip()
-    
+
     @field_validator('timestamp', mode='before')
     @classmethod
     def validate_timestamp(cls, v) -> datetime:
@@ -51,10 +51,10 @@ class ExclusionEntryModel(BaseModel):
             return v
         else:
             raise ValueError(f"Invalid timestamp type: {type(v)}")
-    
+
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization.
-        
+
         Returns:
             Dictionary representation suitable for JSON serialization
 
@@ -65,17 +65,17 @@ class ExclusionEntryModel(BaseModel):
             "reason": self.reason,
             "timestamp": self.timestamp.isoformat().replace("+00:00", "Z")
         }
-    
+
     @classmethod
     def from_dict(cls, data: dict) -> 'ExclusionEntryModel':
         """Create from dictionary (JSON deserialization).
-        
+
         Args:
             data: Dictionary containing exclusion entry data
-            
+
         Returns:
             ExclusionEntryModel instance
-            
+
         Raises:
             ValueError: If required fields are missing or invalid
 
@@ -85,11 +85,11 @@ class ExclusionEntryModel(BaseModel):
 
 class ExclusionListModel(BaseModel):
     """Collection of exclusions with metadata and versioning.
-    
+
     Implements validation for exclusion lists with proper versioning support
     and JSON schema generation capability.
     """
-    
+
     exclusions: List[ExclusionEntryModel] = Field(
         default_factory=list,
         description="List of exclusion entries"
@@ -103,7 +103,7 @@ class ExclusionListModel(BaseModel):
         ge=1,
         description="Schema version for migration support"
     )
-    
+
     @field_validator('version')
     @classmethod
     def validate_version(cls, v: int) -> int:
@@ -111,7 +111,7 @@ class ExclusionListModel(BaseModel):
         if v < 1:
             raise ValueError("Version must be >= 1")
         return v
-    
+
     @field_validator('last_modified', mode='before')
     @classmethod
     def validate_last_modified(cls, v) -> datetime:
@@ -128,7 +128,7 @@ class ExclusionListModel(BaseModel):
             return v
         else:
             raise ValueError(f"Invalid last_modified type: {type(v)}")
-    
+
     @model_validator(mode='after')
     def validate_exclusion_ids_unique(self) -> 'ExclusionListModel':
         """Validate that all exclusion IDs are unique."""
@@ -136,57 +136,57 @@ class ExclusionListModel(BaseModel):
         if len(ids) != len(set(ids)):
             raise ValueError("Duplicate exclusion IDs found")
         return self
-    
+
     def add(self, entry: ExclusionEntryModel) -> bool:
         """Add exclusion entry.
-        
+
         Args:
             entry: Exclusion entry to add
-            
+
         Returns:
             True if added, False if already exists
 
         """
         if any(ex.id == entry.id for ex in self.exclusions):
             return False
-        
+
         self.exclusions.append(entry)
         self.last_modified = datetime.now(timezone.utc)
         return True
-    
+
     def remove(self, server_id: str) -> bool:
         """Remove exclusion by server ID.
-        
+
         Args:
             server_id: ID of server to remove from exclusions
-            
+
         Returns:
             True if removed, False if not found
 
         """
         original_count = len(self.exclusions)
         self.exclusions = [ex for ex in self.exclusions if ex.id != server_id]
-        
+
         if len(self.exclusions) < original_count:
             self.last_modified = datetime.now(timezone.utc)
             return True
         return False
-    
+
     def contains(self, server_id: str) -> bool:
         """Check if server is excluded.
-        
+
         Args:
             server_id: ID of server to check
-            
+
         Returns:
             True if server is excluded, False otherwise
 
         """
         return any(ex.id == server_id for ex in self.exclusions)
-    
+
     def clear(self) -> int:
         """Clear all exclusions.
-        
+
         Returns:
             Number of exclusions cleared
 
@@ -196,19 +196,19 @@ class ExclusionListModel(BaseModel):
         if count > 0:
             self.last_modified = datetime.now(timezone.utc)
         return count
-    
+
     def get_ids(self) -> set[str]:
         """Get set of excluded server IDs.
-        
+
         Returns:
             Set of server IDs that are excluded
 
         """
         return {ex.id for ex in self.exclusions}
-    
+
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization.
-        
+
         Returns:
             Dictionary representation suitable for JSON serialization
 
@@ -218,24 +218,24 @@ class ExclusionListModel(BaseModel):
             "last_modified": self.last_modified.isoformat().replace("+00:00", "Z"),
             "exclusions": [ex.to_dict() for ex in self.exclusions]
         }
-    
+
     @classmethod
     def from_dict(cls, data: dict) -> 'ExclusionListModel':
         """Create from dictionary (JSON deserialization) with version migration.
-        
+
         Args:
             data: Dictionary containing exclusion list data
-            
+
         Returns:
             ExclusionListModel instance
-            
+
         Raises:
             ValueError: If data is invalid or migration fails
 
         """
         # Handle versioning and migrations
         version = data.get("version", 0)  # 0 = legacy format
-        
+
         if version == 0:
             # Legacy format without version - migrate to v1
             version = 1
@@ -243,7 +243,7 @@ class ExclusionListModel(BaseModel):
             # Future version - log warning but try to load
             import logging
             logging.warning(f"Exclusion file version {version} is newer than supported (1). Attempting to load...")
-        
+
         # Prepare data for Pydantic model
         model_data = {
             "version": version,
@@ -253,5 +253,5 @@ class ExclusionListModel(BaseModel):
                 for ex_data in data.get("exclusions", [])
             ]
         }
-        
+
         return cls(**model_data)

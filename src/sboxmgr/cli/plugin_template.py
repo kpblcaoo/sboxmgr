@@ -27,7 +27,7 @@ def plugin_template(
     if type not in supported_types:
         typer.echo(f"Type must be one of: {', '.join(supported_types)}", err=True)
         raise typer.Exit(1)
-    
+
     # Определяем правильный суффикс для каждого типа
     type_suffix = {
         "fetcher": "Fetcher",
@@ -37,12 +37,12 @@ def plugin_template(
         "postprocessor": "PostProcessor",
         "parsed_validator": "ParsedValidator",
     }[type]
-    
+
     # Если имя уже заканчивается на нужный суффикс, не добавлять его повторно
     class_name = name if name.endswith(type_suffix) else name + type_suffix
     file_name = f"{name.lower()}.py"
     test_file_name = f"template_test_{name.lower()}.py"
-    
+
     # Base class and import
     if type == "fetcher":
         base = "BaseFetcher"
@@ -276,11 +276,11 @@ def test_{class_name.lower()}_basic():
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(template)
         typer.echo(f"[DEBUG] Successfully wrote {out_path}")
-        
+
         with open(test_out_path, "w", encoding="utf-8") as f:
             f.write(test_template)
         typer.echo(f"[DEBUG] Successfully wrote {test_out_path}")
-        
+
         typer.echo(f"Created {out_path} and {test_out_path}")
         if decorator:
             typer.echo("[DX] Don't forget to register your plugin in the registry and add tests!")

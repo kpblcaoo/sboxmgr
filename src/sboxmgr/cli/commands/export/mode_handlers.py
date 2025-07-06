@@ -27,26 +27,26 @@ except ImportError:
 
 def run_agent_check(config_file: str, agent_check: bool) -> bool:
     """Run agent validation check if requested.
-    
+
     Args:
         config_file: Path to configuration file
         agent_check: Whether to run agent checks
-        
+
     Returns:
         True if check passed or skipped, False if failed
     """
     if not agent_check:
         return True
-        
+
     try:
         bridge = AgentBridge()
         if not bridge.is_available():
             typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
             return True
-            
+
         # Validate config with agent
         response = bridge.validate(Path(config_file), client_type=ClientType.SING_BOX)
-        
+
         if response.success:
             typer.echo("✅ External validation passed")
             if response.client_detected:
@@ -59,7 +59,7 @@ def run_agent_check(config_file: str, agent_check: bool) -> bool:
             for error in response.errors:
                 typer.echo(f"   • {error}", err=True)
             return False
-                
+
     except AgentNotAvailableError:
         typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
         return True
@@ -74,12 +74,12 @@ def handle_profile_generation(
     middleware: Optional[str]
 ) -> None:
     """Handle profile generation mode.
-    
+
     Args:
         generate_profile: Output path for generated profile
         postprocessors: Comma-separated list of postprocessors
         middleware: Comma-separated list of middleware
-        
+
     Raises:
         typer.Exit: Always exits with code 0
     """
@@ -91,10 +91,10 @@ def handle_profile_generation(
 
 def handle_validate_only_mode(output: str) -> None:
     """Handle validate-only mode.
-    
+
     Args:
         output: Configuration file path to validate
-        
+
     Raises:
         typer.Exit: On validation failure or success
     """
@@ -102,7 +102,7 @@ def handle_validate_only_mode(output: str) -> None:
     if not os.path.exists(config_file):
         typer.echo(f"❌ Configuration file not found: {config_file}", err=True)
         raise typer.Exit(1)
-        
+
     try:
         validate_config_file(config_file)
         typer.echo(f"✅ Configuration is valid: {config_file}")
@@ -132,7 +132,7 @@ def process_export_mode(
     backup: bool
 ) -> None:
     """Process export mode (default, dry-run, or agent-check).
-    
+
     Args:
         url: Subscription URL
         dry_run: Whether to run in dry-run mode
@@ -148,7 +148,7 @@ def process_export_mode(
         postprocessors_list: List of postprocessors
         middleware_list: List of middleware
         backup: Whether to create backup
-        
+
     Raises:
         typer.Exit: On processing failure
     """
@@ -156,10 +156,10 @@ def process_export_mode(
     backup_file = None
     if not dry_run and not agent_check:
         backup_file = create_backup_if_needed(output, backup)
-    
+
     # Determine output format
     output_format = determine_output_format(output, format)
-    
+
     # Generate configuration
     config_data = generate_config_from_subscription(
         url=url,
@@ -170,7 +170,7 @@ def process_export_mode(
         profile=loaded_profile,
         client_profile=loaded_client_profile
     )
-    
+
     # Handle different modes
     if dry_run:
         # Validate configuration without saving
@@ -186,7 +186,7 @@ def process_export_mode(
                 os.remove(temp_file)
             typer.echo(f"❌ Configuration validation failed: {e}", err=True)
             raise typer.Exit(1)
-    
+
     elif agent_check:
         # Check via sboxagent
         temp_file = f"{output}.tmp"
@@ -201,7 +201,7 @@ def process_export_mode(
         finally:
             if os.path.exists(temp_file):
                 os.remove(temp_file)
-    
+
     else:
         # Default mode: save configuration
         try:
@@ -229,7 +229,7 @@ def handle_legacy_modes(
     format: str
 ) -> None:
     """Handle legacy dry-run and agent-check modes from original implementation.
-    
+
     Args:
         dry_run: Whether to run in dry-run mode
         agent_check: Whether to run agent check
@@ -242,7 +242,7 @@ def handle_legacy_modes(
         loaded_client_profile: Loaded client profile
         output: Output file path
         format: Output format
-        
+
     Raises:
         typer.Exit: On processing failure or success
     """
@@ -250,10 +250,10 @@ def handle_legacy_modes(
     config_data = generate_config_from_subscription(
         url, user_agent, no_user_agent, export_format, debug, loaded_profile, loaded_client_profile
     )
-    
+
     # Determine output format
     output_format = determine_output_format(output, format)
-    
+
     # Handle dry-run mode
     if dry_run:
         typer.echo("🔍 " + t("cli.dry_run_mode"))
@@ -264,7 +264,7 @@ def handle_legacy_modes(
                 tmp.write(toml.dumps(config_data))
             else:
                 tmp.write(json.dumps(config_data, indent=2, ensure_ascii=False))
-        
+
         try:
             validate_config_file(temp_path)
             typer.echo("✅ " + t("cli.dry_run_valid"))
@@ -276,21 +276,21 @@ def handle_legacy_modes(
         finally:
             os.unlink(temp_path)
             typer.echo("🗑️  " + t("cli.temp_file_deleted"))
-            
+
         raise typer.Exit(exit_code)
-    
+
     # Handle agent-check mode
     if agent_check:
         typer.echo("🔍 Checking configuration via sboxagent...")
         with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
             temp_path = tmp.name
             tmp.write(json.dumps(config_data, indent=2, ensure_ascii=False))
-        
+
         try:
             success = run_agent_check(temp_path, True)
             exit_code = 0 if success else 1
         finally:
             os.unlink(temp_path)
             typer.echo("🗑️  Temporary file deleted")
-            
+
         raise typer.Exit(exit_code)

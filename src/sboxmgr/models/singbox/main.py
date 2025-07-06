@@ -29,10 +29,10 @@ class LogConfig(BaseModel):
 
 class SingBoxConfig(BaseModel):
     """Complete sing-box configuration model.
-    
+
     This model represents the full sing-box configuration with all supported
     protocols and features. It is validated against sing-box 1.11.13.
-    
+
     Features:
     - 17 inbound protocols (mixed, socks, http, shadowsocks, vmess, vless, 
       trojan, hysteria2, wireguard, tuic, shadowtls, direct, anytls, naive, 
@@ -62,7 +62,7 @@ class SingBoxConfig(BaseModel):
             tags = [o.tag for o in v if o.tag]
             if len(tags) != len(set(tags)):
                 raise ValueError("Duplicate outbound tags found")
-            
+
             # Check unique server/port combinations
             servers = [(o.server, o.server_port) for o in v if o.server and o.server_port]
             if len(servers) != len(set(servers)):
@@ -77,7 +77,7 @@ class SingBoxConfig(BaseModel):
             tags = [i.tag for i in v if i.tag]
             if len(tags) != len(set(tags)):
                 raise ValueError("Duplicate inbound tags found")
-            
+
             # Check unique listen ports
             ports = [i.listen_port for i in v if i.listen_port]
             if len(ports) != len(set(ports)):
@@ -88,20 +88,20 @@ class SingBoxConfig(BaseModel):
     def generate_schema(cls) -> dict:
         """Generate JSON Schema for sing-box configuration."""
         return cls.model_json_schema()
-    
+
     def to_json(self, **kwargs) -> str:
         """Convert configuration to JSON string."""
         return self.model_dump_json(**kwargs)
-    
+
     def to_dict(self, **kwargs) -> dict:
         """Convert configuration to dictionary."""
         return self.model_dump(**kwargs)
-    
+
     @classmethod
     def from_dict(cls, data: dict):
         """Create configuration from dictionary."""
         return cls(**data)
-    
+
     @classmethod
     def from_json(cls, json_str: str):
         """Create configuration from JSON string."""

@@ -33,7 +33,7 @@ __all__ = [
     'ChainableMiddleware',
     'ConditionalMiddleware',
     'TransformMiddleware',
-    
+
     # Concrete middleware
     'LoggingMiddleware',
     'EnrichmentMiddleware',

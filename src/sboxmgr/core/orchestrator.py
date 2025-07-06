@@ -20,10 +20,10 @@ from sboxmgr.subscription.models import SubscriptionSource, PipelineContext, Pip
 
 class OrchestratorConfig(BaseModel):
     """Configuration for Orchestrator operations.
-    
+
     Centralizes configuration management for consistent behavior
     across all coordinated operations.
-    
+
     Attributes:
         default_mode: Default pipeline execution mode.
         debug_level: Default debug verbosity level.
@@ -32,9 +32,9 @@ class OrchestratorConfig(BaseModel):
         fail_safe: Whether to use fail-safe error handling.
 
     """
-    
+
     model_config = ConfigDict(extra='forbid')
-    
+
     default_mode: str = "tolerant"
     debug_level: int = 0
     cache_enabled: bool = True
@@ -44,14 +44,14 @@ class OrchestratorConfig(BaseModel):
 
 class OrchestratorError(Exception):
     """Base exception for Orchestrator operations.
-    
+
     Provides a consistent exception hierarchy for all orchestrator-level
     errors with context preservation and error chaining support.
     """
-    
+
     def __init__(self, message: str, operation: str = None, cause: Exception = None):
         """Initialize orchestrator error.
-        
+
         Args:
             message: Human-readable error description.
             operation: Name of operation that failed.
@@ -65,16 +65,16 @@ class OrchestratorError(Exception):
 
 class Orchestrator:
     """Central facade for coordinating all sboxmgr operations.
-    
+
     The Orchestrator provides a unified interface for subscription management,
     configuration export, and exclusion management. It implements dependency
     injection pattern for testability and uses consistent error handling
     and logging across all operations.
-    
+
     This class serves as the single point of coordination between CLI commands
     and the various manager components, eliminating direct dependencies and
     enabling proper architectural separation.
-    
+
     Attributes:
         config: Configuration settings for orchestrator operations.
         logger: Logger instance for operation tracking.
@@ -83,7 +83,7 @@ class Orchestrator:
         exclusion_manager: Injected server exclusion service.
 
     """
-    
+
     def __init__(self,
                  subscription_manager: Optional[SubscriptionManagerInterface] = None,
                  export_manager: Optional[ExportManagerInterface] = None,
@@ -91,7 +91,7 @@ class Orchestrator:
                  config: Optional[OrchestratorConfig] = None,
                  logger: Optional[logging.Logger] = None):
         """Initialize Orchestrator with dependency injection.
-        
+
         Args:
             subscription_manager: Service for subscription operations.
             export_manager: Service for configuration export.
@@ -102,19 +102,19 @@ class Orchestrator:
         """
         self.config = config or OrchestratorConfig()
         self.logger = logger or logging.getLogger(__name__)
-        
+
         # Dependency injection - will be resolved by factory if None
         self._subscription_manager = subscription_manager
         self._export_manager = export_manager
         self._exclusion_manager = exclusion_manager
-    
+
     @property
     def subscription_manager(self) -> SubscriptionManagerInterface:
         """Get subscription manager instance with lazy loading.
-        
+
         Returns:
             Subscription manager instance.
-            
+
         Raises:
             OrchestratorError: If subscription manager cannot be resolved.
 
@@ -123,14 +123,14 @@ class Orchestrator:
             from .factory import create_default_subscription_manager
             self._subscription_manager = create_default_subscription_manager()
         return self._subscription_manager
-    
+
     @property
     def export_manager(self) -> ExportManagerInterface:
         """Get export manager instance with lazy loading.
-        
+
         Returns:
             Export manager instance.
-            
+
         Raises:
             OrchestratorError: If export manager cannot be resolved.
 
@@ -139,14 +139,14 @@ class Orchestrator:
             from .factory import create_default_export_manager
             self._export_manager = create_default_export_manager()
         return self._export_manager
-    
+
     @property
     def exclusion_manager(self) -> ExclusionManagerInterface:
         """Get exclusion manager instance with lazy loading.
-        
+
         Returns:
             Exclusion manager instance.
-            
+
         Raises:
             OrchestratorError: If exclusion manager cannot be resolved.
 
@@ -155,7 +155,7 @@ class Orchestrator:
             from .factory import create_default_exclusion_manager
             self._exclusion_manager = create_default_exclusion_manager()
         return self._exclusion_manager
-    
+
     def get_subscription_servers(self, url: str,
                                 source_type: str = "url_base64",
                                 user_routes: Optional[List[str]] = None,
@@ -164,11 +164,11 @@ class Orchestrator:
                                 force_reload: bool = False,
                                 **kwargs) -> PipelineResult:
         """Retrieve and process servers from subscription source.
-        
+
         Provides a unified interface for subscription processing that coordinates
         between subscription management and exclusion filtering. Handles error
         reporting and logging consistently across the operation.
-        
+
         Args:
             url: Subscription URL to fetch from.
             source_type: Type of subscription source (url_base64, url_json, etc.).
@@ -177,20 +177,20 @@ class Orchestrator:
             mode: Pipeline execution mode (strict, tolerant).
             force_reload: Whether to bypass cache and force fresh data retrieval.
             **kwargs: Additional arguments passed to subscription manager.
-            
+
         Returns:
             PipelineResult containing processed servers and execution metadata.
-            
+
         Raises:
             OrchestratorError: If subscription processing fails critically.
 
         """
         try:
             self.logger.info(f"Processing subscription from {url}")
-            
+
             # Create subscription source
             source = SubscriptionSource(url=url, source_type=source_type)
-            
+
             # Create pipeline context
             context = PipelineContext(
                 mode=mode or self.config.default_mode,
@@ -201,7 +201,7 @@ class Orchestrator:
             # it for different URLs as it would fetch from the wrong source
             from sboxmgr.subscription.manager import SubscriptionManager
             sub_manager = SubscriptionManager(source)
-            
+
             # Get servers through pipeline
             result = sub_manager.get_servers(
                 user_routes=user_routes,
@@ -210,7 +210,7 @@ class Orchestrator:
                 context=context,
                 force_reload=force_reload
             )
-            
+
             # Apply exclusion filtering if exclusion manager is available
             if result.success and result.config:
                 try:
@@ -222,10 +222,10 @@ class Orchestrator:
                     self.logger.warning(f"Exclusion filtering failed: {e}")
                     if not self.config.fail_safe:
                         raise
-            
+
             self.logger.info(f"Subscription processing completed: {result.success}")
             return result
-            
+
         except Exception as e:
             error_msg = f"Failed to process subscription from {url}: {str(e)}"
             self.logger.error(error_msg)
@@ -236,58 +236,58 @@ class Orchestrator:
                 return PipelineResult(config=None, context=context, errors=[str(e)], success=False)
             else:
                 raise OrchestratorError(error_msg, operation="get_subscription_servers", cause=e)
-    
+
     def manage_exclusions(self, action: str, **kwargs) -> Dict[str, Any]:
         """Unified interface for exclusion management operations.
-        
+
         Provides a single entry point for all exclusion-related operations
         including add, remove, list, and clear with consistent error handling
         and result formatting.
-        
+
         Args:
             action: The exclusion action to perform (add, remove, list, clear).
             **kwargs: Action-specific arguments.
-            
+
         Returns:
             Dictionary containing operation result and metadata.
-            
+
         Raises:
             OrchestratorError: If exclusion operation fails.
 
         """
         try:
             self.logger.info(f"Managing exclusions: {action}")
-            
+
             result = {"action": action, "success": False, "message": "", "data": None}
-            
+
             if action == "add":
                 server_id = kwargs.get("server_id")
                 name = kwargs.get("name")
                 reason = kwargs.get("reason")
-                
+
                 if not server_id:
                     raise ValueError("server_id is required for add action")
-                
+
                 success = self.exclusion_manager.add(server_id, name, reason)
                 result.update({
                     "success": success,
                     "message": f"Server {server_id} {'added to' if success else 'already in'} exclusions",
                     "data": {"server_id": server_id, "added": success}
                 })
-                
+
             elif action == "remove":
                 server_id = kwargs.get("server_id")
-                
+
                 if not server_id:
                     raise ValueError("server_id is required for remove action")
-                
+
                 success = self.exclusion_manager.remove(server_id)
                 result.update({
                     "success": success,
                     "message": f"Server {server_id} {'removed from' if success else 'not found in'} exclusions",
                     "data": {"server_id": server_id, "removed": success}
                 })
-                
+
             elif action == "list":
                 exclusions = self.exclusion_manager.list_all()
                 result.update({
@@ -295,7 +295,7 @@ class Orchestrator:
                     "message": f"Found {len(exclusions)} exclusions",
                     "data": {"exclusions": exclusions, "count": len(exclusions)}
                 })
-                
+
             elif action == "clear":
                 count = self.exclusion_manager.clear()
                 result.update({
@@ -303,13 +303,13 @@ class Orchestrator:
                     "message": f"Cleared {count} exclusions",
                     "data": {"cleared_count": count}
                 })
-                
+
             else:
                 raise ValueError(f"Unknown exclusion action: {action}")
-            
+
             self.logger.info(f"Exclusion operation completed: {result['message']}")
             return result
-            
+
         except Exception as e:
             error_msg = f"Failed to manage exclusions (action={action}): {str(e)}"
             self.logger.error(error_msg)
@@ -323,7 +323,7 @@ class Orchestrator:
                 }
             else:
                 raise OrchestratorError(error_msg, operation="manage_exclusions", cause=e)
-    
+
     def export_configuration(self, source_url: str,
                            source_type: str = "url_base64",
                            export_format: str = "singbox",
@@ -331,10 +331,10 @@ class Orchestrator:
                            user_routes: Optional[List[str]] = None,
                            **kwargs) -> Dict[str, Any]:
         """Export subscription to client configuration format.
-        
+
         Coordinates the complete process from subscription fetching through
         final configuration export with unified error handling and logging.
-        
+
         Args:
             source_url: Subscription URL to process.
             source_type: Type of subscription source.
@@ -342,17 +342,17 @@ class Orchestrator:
             exclusions: Optional list of server addresses to exclude.
             user_routes: Optional list of custom routing rules.
             **kwargs: Additional arguments for export customization.
-            
+
         Returns:
             Dictionary containing the exported configuration and metadata.
-            
+
         Raises:
             OrchestratorError: If export process fails.
 
         """
         try:
             self.logger.info(f"Exporting configuration from {source_url} to {export_format}")
-            
+
             # First get servers from subscription
             servers_result = self.get_subscription_servers(
                 url=source_url,
@@ -361,13 +361,13 @@ class Orchestrator:
                 exclusions=exclusions,
                 **kwargs
             )
-            
+
             if not servers_result.success:
                 raise OrchestratorError(
                     f"Failed to retrieve servers: {servers_result.errors}",
                     operation="get_servers"
                 )
-            
+
             # Export configuration using export manager
             # user_routes should be List[Dict] with proper routing rule structure
             # DefaultRouter expects full routing rule dicts, not just {"tag": route}
@@ -380,13 +380,13 @@ class Orchestrator:
                     elif isinstance(route, dict):
                         # Already a routing rule dict
                         user_routes_dicts.append(route)
-            
+
             config = self.export_manager.export(
                 servers=servers_result.config,
                 exclusions=exclusions,
                 user_routes=user_routes_dicts
             )
-            
+
             result = {
                 "success": True,
                 "format": export_format,
@@ -398,10 +398,10 @@ class Orchestrator:
                     "pipeline_errors": len(servers_result.errors)
                 }
             }
-            
+
             self.logger.info(f"Configuration export completed: {result['server_count']} servers")
             return result
-            
+
         except Exception as e:
             error_msg = f"Failed to export configuration: {str(e)}"
             self.logger.error(error_msg)
@@ -414,33 +414,33 @@ class Orchestrator:
                 }
             else:
                 raise OrchestratorError(error_msg, operation="export_configuration", cause=e)
-    
+
     @classmethod
     def create_default(cls, **config_overrides) -> 'Orchestrator':
         """Create Orchestrator with default dependencies.
-        
+
         Provides a convenient way to create a fully configured Orchestrator
         instance with default implementations for all dependencies.
-        
+
         Args:
             **config_overrides: Configuration values to override defaults.
-            
+
         Returns:
             Fully configured Orchestrator instance.
 
         """
         config = OrchestratorConfig(**config_overrides)
         return cls(config=config)
-    
+
     def with_custom_managers(self, **managers) -> 'Orchestrator':
         """Builder pattern for creating Orchestrator with custom managers.
-        
+
         Enables flexible customization of dependencies while preserving
         existing configuration and other dependencies.
-        
+
         Args:
             **managers: Custom manager instances to inject.
-            
+
         Returns:
             New Orchestrator instance with custom managers.
 

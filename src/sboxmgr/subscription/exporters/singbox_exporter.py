@@ -6,10 +6,7 @@ All functions are now imported from the modular singbox_exporter package.
 For new code, consider importing directly from the singbox_exporter package modules.
 """
 
-import warnings
-from typing import List, Dict, Any, Optional
 
-from sboxmgr.subscription.models import ParsedServer, ClientProfile, PipelineContext
 
 # Import all functions from the new modular structure
 from .singbox_exporter import (
@@ -20,10 +17,10 @@ from .singbox_exporter import (
     is_supported_protocol,
     create_urltest_outbound,
     create_modern_routing_rules,
-    
+
     # Inbound generation
     generate_inbounds,
-    
+
     # Protocol handlers
     export_wireguard,
     export_hysteria2,
@@ -33,12 +30,12 @@ from .singbox_exporter import (
     export_tor,
     export_ssh,
     get_protocol_dispatcher,
-    
+
     # Config processors
     normalize_protocol_type,
     process_standard_server,
     create_base_outbound,
-    
+
     # Constants
     SUPPORTED_PROTOCOLS,
     PROTOCOL_NORMALIZATION,
@@ -86,7 +83,7 @@ __all__ = [
     "singbox_export_with_middleware",
     "singbox_export_legacy",
     "generate_inbounds",
-    
+
     # Protocol handlers
     "export_wireguard",
     "export_hysteria2",
@@ -95,7 +92,7 @@ __all__ = [
     "export_anytls",
     "export_tor",
     "export_ssh",
-    
+
     # Internal functions (kept for compatibility)
     "_export_wireguard",
     "_export_hysteria2",
@@ -119,7 +116,7 @@ __all__ = [
     "_create_modern_routing_rules",
     "_add_special_outbounds",
     "_create_enhanced_routing_rules",
-    
+
     # Public utility functions
     "get_protocol_dispatcher",
     "normalize_protocol_type",
@@ -131,7 +128,7 @@ __all__ = [
     "create_urltest_outbound",
     "add_special_outbounds",
     "create_enhanced_routing_rules",
-    
+
     # Constants
     "SUPPORTED_PROTOCOLS",
     "PROTOCOL_NORMALIZATION",

@@ -71,17 +71,17 @@ def export(
     exclude_outbounds: str = typer.Option(None, "--exclude-outbounds", help="Comma-separated list of outbound types to exclude (e.g., direct,block,dns)")
 ):
     """Export configuration with various modes.
-    
+
     This unified command replaces the previous run and dry-run commands while
     following ADR-0014 principles. It generates configurations from subscriptions
     and exports them to various formats without managing services directly.
-    
+
     Modes:
     - Default: Generate and save config to output file
     - --dry-run: Validate without saving (uses temporary file)  
     - --agent-check: Check via sboxagent without saving
     - --validate-only: Validate existing config file only
-    
+
     Args:
         url: Subscription URL to fetch from
         debug: Debug verbosity level (0-2)
@@ -114,34 +114,34 @@ def export(
         dns_mode: DNS resolution mode (system,tunnel,off, default: system)
         final_route: Set final routing destination (e.g., proxy, direct, block)
         exclude_outbounds: Comma-separated list of outbound types to exclude (e.g., direct,block,dns)
-        
+
     Raises:
         typer.Exit: On validation failure or processing errors
     """
     # Setup logging
     setup_logging(debug_level=debug)
-    
+
     # Handle profile generation mode (early exit)
     if generate_profile:
         handle_profile_generation(generate_profile, postprocessors, middleware)
-    
+
     # Validate flag combinations
     validate_flag_combinations(dry_run, agent_check, validate_only, url)
-    
+
     # Handle validate-only mode
     if validate_only:
         handle_validate_only_mode(output)
-    
+
     # URL is required for other modes
     if not url:
         typer.echo(f"❌ {t('cli.error.subscription_url_required')}", err=True)
         raise typer.Exit(1)
-    
+
     # Validate and parse CLI parameters
     postprocessors_list, middleware_list = validate_and_parse_cli_parameters(
         postprocessors, middleware, final_route, exclude_outbounds
     )
-    
+
     # Load profiles
     loaded_profile, loaded_client_profile = load_profiles(
         profile, client_profile, inbound_types,
@@ -151,33 +151,33 @@ def export(
         tproxy_port=tproxy_port, tproxy_listen=tproxy_listen,
         dns_mode=dns_mode
     )
-    
+
     # Apply routing and filtering parameters if provided
     if final_route or exclude_outbounds:
         # Use existing client profile or create new one
         if not loaded_client_profile:
             loaded_client_profile = ClientProfile()
-        
+
         # Set final route if provided
         if final_route:
             if not loaded_client_profile.routing:
                 loaded_client_profile.routing = {}
             loaded_client_profile.routing["final"] = final_route
-        
+
         # Set exclude outbounds if provided
         if exclude_outbounds:
             exclude_list = [o.strip() for o in exclude_outbounds.split(',') if o.strip()]
             loaded_client_profile.exclude_outbounds = exclude_list
-        
+
         typer.echo("✅ Applied routing and filtering parameters")
-    
+
     # Create postprocessor and middleware chains if provided
     if postprocessors_list:
         create_postprocessor_chain_from_list(postprocessors_list)
-    
+
     if middleware_list:
         create_middleware_chain_from_list(middleware_list)
-    
+
     # Handle different execution modes
     if dry_run or agent_check:
         # Use legacy mode handlers for compatibility
@@ -189,20 +189,20 @@ def export(
     else:
         # Default mode: Generate and save configuration
         from .file_handlers import determine_output_format
-        
+
         # Create backup if requested
         create_backup_if_needed(output, backup)
-        
+
         # Generate configuration
         config_data = generate_config_from_subscription(
             url, user_agent, no_user_agent, export_format, debug,
             loaded_profile, loaded_client_profile
         )
-        
+
         # Determine output format and write
         output_format = determine_output_format(output, format)
         write_config_to_file(config_data, output, output_format)
-        
+
         # Note: Following ADR-0014, we do NOT restart services here
         # That's sboxagent's responsibility
         typer.echo("✅ " + t("cli.update_completed"))

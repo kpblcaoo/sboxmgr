@@ -8,20 +8,20 @@ import logging
 
 def handle_temp_file(content, target_path, validate_fn=None):
     """Write content to temporary file with validation and atomic move.
-    
+
     Provides safe file operations by writing to a temporary location,
     optionally validating the content, then atomically moving to the
     target path. Ensures data integrity and prevents corruption.
-    
+
     Args:
         content: Data to write (will be JSON-serialized).
         target_path: Final destination path for the file.
         validate_fn: Optional validation function that takes file path
                     and returns True if content is valid.
-                    
+
     Returns:
         True if operation completed successfully.
-        
+
     Raises:
         ValueError: If validation fails.
         Exception: For file I/O errors or other failures.
@@ -42,21 +42,21 @@ def handle_temp_file(content, target_path, validate_fn=None):
 
 def atomic_write_json(data, path):
     """Atomically write JSON data to file with rollback on failure.
-    
+
     Uses temporary file with atomic rename to ensure the target file
     is never left in a partially written state. Provides data integrity
     guarantees for configuration files and other critical data.
-    
+
     Args:
         data: Python object to serialize as JSON.
         path: Target file path for the JSON data.
-        
+
     Returns:
         True if write completed successfully.
-        
+
     Raises:
         Exception: For JSON serialization errors or file I/O failures.
-        
+
     Note:
         Temporary file is automatically cleaned up on failure.
 
@@ -75,16 +75,16 @@ def atomic_write_json(data, path):
 
 def atomic_remove(path):
     """Safely remove file with error handling and logging.
-    
+
     Removes the specified file if it exists, with proper error handling
     and audit logging. Safe to call on non-existent files.
-    
+
     Args:
         path: File path to remove.
-        
+
     Raises:
         Exception: For file system errors preventing removal.
-        
+
     Note:
         This function does not return a value. Check for exceptions
         to determine success or failure.
@@ -100,10 +100,10 @@ def atomic_remove(path):
 
 def file_exists(path):
     """Check if file exists at the specified path.
-    
+
     Args:
         path: File path to check.
-        
+
     Returns:
         True if file exists, False otherwise.
 
@@ -112,13 +112,13 @@ def file_exists(path):
 
 def read_json(path):
     """Read and parse JSON data from file.
-    
+
     Args:
         path: Path to JSON file to read.
-        
+
     Returns:
         Parsed JSON data as Python object.
-        
+
     Raises:
         FileNotFoundError: If file does not exist.
         json.JSONDecodeError: If file contains invalid JSON.
@@ -129,14 +129,14 @@ def read_json(path):
 
 def write_json(data, path):
     """Write Python object to file as formatted JSON.
-    
+
     Args:
         data: Python object to serialize as JSON.
         path: Target file path for JSON output.
-        
+
     Raises:
         Exception: For file I/O errors or JSON serialization failures.
-        
+
     Note:
         This function does not return a value and does not provide
         atomic write guarantees. Use atomic_write_json for safer operations.

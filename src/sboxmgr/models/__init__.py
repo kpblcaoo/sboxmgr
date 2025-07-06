@@ -10,10 +10,10 @@ This module contains Pydantic models for different proxy configuration formats:
 from .singbox import (
     # Main config
     SingBoxConfig,
-    
+
     # Enums
     LogLevel, Network, DomainStrategy,
-    
+
     # Common
     TlsConfig, MultiplexConfig, TransportConfig,
     # DNS

@@ -9,7 +9,7 @@ PLUGIN_REGISTRY: Dict[str, Type] = {}
 
 def register(source_type: str):
     """Register a plugin class for a specific source type.
-    
+
     Args:
         source_type: Type of subscription source
 
@@ -23,10 +23,10 @@ def register(source_type: str):
 
 def get_plugin(source_type: str):
     """Get plugin class for a specific source type.
-    
+
     Args:
         source_type: Type of subscription source
-        
+
     Returns:
         Plugin class or None if not found
 

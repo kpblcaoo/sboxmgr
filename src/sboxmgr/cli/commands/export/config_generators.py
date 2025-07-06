@@ -30,7 +30,7 @@ def generate_config_from_subscription(
     client_profile: Optional['ClientProfile'] = None
 ) -> dict:
     """Generate configuration from subscription data.
-    
+
     Args:
         url: Subscription URL
         user_agent: Custom User-Agent header
@@ -39,10 +39,10 @@ def generate_config_from_subscription(
         debug: Debug level
         profile: Optional FullProfile for configuration
         client_profile: Optional ClientProfile for inbound configuration
-        
+
     Returns:
         Generated configuration data
-        
+
     Raises:
         typer.Exit: On processing errors
     """
@@ -50,13 +50,13 @@ def generate_config_from_subscription(
     # Используем автоопределение как в list-servers, а не жесткое кодирование форматов
     # source_type должен определяться по содержимому, а не по формату вывода
     source_type = "file" if url.startswith('file://') else "url"
-    
+
     source = SubscriptionSource(
         url=url,
         source_type=source_type,
         user_agent=user_agent if not no_user_agent else None
     )
-    
+
     # Create managers
     subscription_manager = SubscriptionManager(source)
     export_manager = ExportManager(
@@ -64,25 +64,25 @@ def generate_config_from_subscription(
         client_profile=client_profile,
         profile=profile
     )
-    
+
     # Create pipeline context with debug level
     context = PipelineContext(debug_level=debug, source=url)
-    
+
     # Process subscription
     try:
         result = subscription_manager.export_config(
             export_manager=export_manager,
             context=context
         )
-        
+
         if not result.success:
             typer.echo(f"❌ {t('cli.error.subscription_processing_failed')}", err=True)
             for error in result.errors:
                 typer.echo(f"  - {error.message}", err=True)
             raise typer.Exit(1)
-        
+
         return result.config
-        
+
     except Exception as e:
         typer.echo(f"❌ {t('cli.error.subscription_processing_failed')}: {e}", err=True)
         raise typer.Exit(1)
@@ -94,19 +94,19 @@ def generate_profile_from_cli(
     output_path: str = "profile.json"
 ) -> None:
     """Generate FullProfile JSON from CLI parameters.
-    
+
     Args:
         postprocessors: List of postprocessor names
         middleware: List of middleware names  
         output_path: Output path for generated profile
-        
+
     Raises:
         typer.Exit: If profile generation fails
     """
     if not PHASE3_AVAILABLE:
         typer.echo("⚠️  Profile generation requires Phase 3 components", err=True)
         raise typer.Exit(1)
-    
+
     try:
         # Create basic profile structure
         profile_data = {
@@ -126,7 +126,7 @@ def generate_profile_from_cli(
             },
             "metadata": {}
         }
-        
+
         # Add postprocessor configuration
         if postprocessors:
             validate_postprocessors(postprocessors)
@@ -135,20 +135,20 @@ def generate_profile_from_cli(
                 "execution_mode": "sequential",
                 "error_strategy": "continue"
             }
-        
+
         # Add middleware configuration
         if middleware:
             validate_middleware(middleware)
             profile_data["metadata"]["middleware"] = {
                 "chain": [{"type": mw, "config": {}} for mw in middleware]
             }
-        
+
         # Write profile to file
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(profile_data, f, indent=2, ensure_ascii=False)
-        
+
         typer.echo(f"✅ {t('cli.success.profile_generated').format(path=output_path)}")
-        
+
     except Exception as e:
         typer.echo(f"❌ Failed to generate profile: {e}", err=True)
         raise typer.Exit(1)

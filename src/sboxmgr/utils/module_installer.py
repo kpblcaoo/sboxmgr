@@ -8,14 +8,14 @@ import logging
 
 def install_dependencies():
     """Install Python dependencies from requirements.txt file.
-    
+
     Executes pip install command to install all packages listed in
     requirements.txt using the current Python interpreter.
-    
+
     Raises:
         subprocess.CalledProcessError: If pip install command fails.
         Exception: For other installation errors.
-        
+
     Note:
         This function logs success/failure messages and does not return
         a value. Check logs for installation status.

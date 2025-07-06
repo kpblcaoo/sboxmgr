@@ -27,13 +27,13 @@ def convert_shadowsocks(server: ParsedServer, base_data: Dict[str, Any]) -> Opti
     if not method:
         logger.warning(f"Shadowsocks server without method: {server.address}:{server.port}")
         return None
-    
+
     outbound_data = {
         **base_data,
         "method": method,
         "password": server.password or server.meta.get("password")
     }
-    
+
     # Add optional fields
     if server.meta.get("plugin"):
         outbound_data["plugin"] = server.meta["plugin"]
@@ -41,7 +41,7 @@ def convert_shadowsocks(server: ParsedServer, base_data: Dict[str, Any]) -> Opti
         outbound_data["plugin_opts"] = server.meta["plugin_opts"]
     if server.meta.get("udp_over_tcp"):
         outbound_data["udp_over_tcp"] = server.meta["udp_over_tcp"]
-    
+
     return ShadowsocksOutbound(**outbound_data)
 
 
@@ -51,13 +51,13 @@ def convert_vmess(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[V
         **base_data,
         "uuid": server.uuid or server.meta.get("uuid"),
     }
-    
+
     # Add security only if it's a valid value
     valid_security = {"auto", "aes-128-gcm", "chacha20-poly1305", "none"}
     sec = server.meta.get("security")
     if sec in valid_security:
         outbound_data["security"] = sec
-    
+
     # Add optional fields
     if server.meta.get("alter_id"):
         outbound_data["alter_id"] = server.meta["alter_id"]
@@ -67,19 +67,19 @@ def convert_vmess(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[V
         outbound_data["authenticated_length"] = server.meta["authenticated_length"]
     if server.meta.get("packet_encoding"):
         outbound_data["packet_encoding"] = server.meta["packet_encoding"]
-    
+
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
         tls_config = convert_tls_config(server)
         if tls_config:
             outbound_data["tls"] = tls_config
-    
+
     # Add transport if present
     if server.meta.get("network") in ["ws", "grpc", "http"]:
         transport_config = convert_transport_config(server)
         if transport_config:
             outbound_data["transport"] = transport_config
-    
+
     return VmessOutbound(**outbound_data)
 
 
@@ -90,23 +90,23 @@ def convert_vless(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[V
         "uuid": server.uuid or server.meta.get("uuid"),
         "flow": server.meta.get("flow")
     }
-    
+
     # Add optional fields
     if server.meta.get("packet_encoding"):
         outbound_data["packet_encoding"] = server.meta["packet_encoding"]
-    
+
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
         tls_config = convert_tls_config(server)
         if tls_config:
             outbound_data["tls"] = tls_config
-    
+
     # Add transport if present
     if server.meta.get("network") in ["ws", "grpc", "http"]:
         transport_config = convert_transport_config(server)
         if transport_config:
             outbound_data["transport"] = transport_config
-    
+
     return VlessOutbound(**outbound_data)
 
 
@@ -116,23 +116,23 @@ def convert_trojan(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[
         **base_data,
         "password": server.password or server.meta.get("password")
     }
-    
+
     # Add optional fields
     if server.meta.get("fallback"):
         outbound_data["fallback"] = server.meta["fallback"]
-    
+
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
         tls_config = convert_tls_config(server)
         if tls_config:
             outbound_data["tls"] = tls_config
-    
+
     # Add transport if present
     if server.meta.get("network") in ["ws", "grpc", "http"]:
         transport_config = convert_transport_config(server)
         if transport_config:
             outbound_data["transport"] = transport_config
-    
+
     return TrojanOutbound(**outbound_data)
 
 
@@ -142,7 +142,7 @@ def convert_hysteria2(server: ParsedServer, base_data: Dict[str, Any]) -> Option
         **base_data,
         "password": server.password or server.meta.get("password")
     }
-    
+
     # Add optional fields
     if server.meta.get("up_mbps"):
         outbound_data["up_mbps"] = server.meta["up_mbps"]
@@ -152,13 +152,13 @@ def convert_hysteria2(server: ParsedServer, base_data: Dict[str, Any]) -> Option
         outbound_data["obfs"] = server.meta["obfs"]
     if server.meta.get("obfs_password"):
         outbound_data["obfs_password"] = server.meta["obfs_password"]
-    
+
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
         tls_config = convert_tls_config(server)
         if tls_config:
             outbound_data["tls"] = tls_config
-    
+
     return Hysteria2Outbound(**outbound_data)
 
 
@@ -169,7 +169,7 @@ def convert_wireguard(server: ParsedServer, base_data: Dict[str, Any]) -> Option
         "private_key": server.private_key or server.meta.get("private_key"),
         "peer_public_key": server.public_key or server.meta.get("peer_public_key") or server.meta.get("public_key")
     }
-    
+
     # Add optional fields
     if server.meta.get("local_address"):
         outbound_data["local_address"] = server.meta["local_address"]
@@ -181,7 +181,7 @@ def convert_wireguard(server: ParsedServer, base_data: Dict[str, Any]) -> Option
         outbound_data["mtu"] = server.meta["mtu"]
     if server.meta.get("workers"):
         outbound_data["workers"] = server.meta["workers"]
-    
+
     return WireGuardOutbound(**outbound_data)
 
 
@@ -192,7 +192,7 @@ def convert_tuic(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[Tu
         "uuid": server.uuid or server.meta.get("uuid"),
         "password": server.password or server.meta.get("password")
     }
-    
+
     # Add optional fields
     if server.meta.get("congestion_control"):
         outbound_data["congestion_control"] = server.meta["congestion_control"]
@@ -202,13 +202,13 @@ def convert_tuic(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[Tu
         outbound_data["zero_rtt_handshake"] = server.meta["zero_rtt_handshake"]
     if server.meta.get("heartbeat"):
         outbound_data["heartbeat"] = server.meta["heartbeat"]
-    
+
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
         tls_config = convert_tls_config(server)
         if tls_config:
             outbound_data["tls"] = tls_config
-    
+
     return TuicOutbound(**outbound_data)
 
 
@@ -218,7 +218,7 @@ def convert_shadowtls(server: ParsedServer, base_data: Dict[str, Any]) -> Option
         **base_data,
         "password": server.password or server.meta.get("password")
     }
-    
+
     # Add optional fields
     if server.meta.get("version"):
         outbound_data["version"] = server.meta["version"]
@@ -228,13 +228,13 @@ def convert_shadowtls(server: ParsedServer, base_data: Dict[str, Any]) -> Option
         outbound_data["handshake_for_server_name"] = server.meta["handshake_for_server_name"]
     if server.meta.get("strict_mode"):
         outbound_data["strict_mode"] = server.meta["strict_mode"]
-    
+
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
         tls_config = convert_tls_config(server)
         if tls_config:
             outbound_data["tls"] = tls_config
-    
+
     return ShadowTlsOutbound(**outbound_data)
 
 
@@ -244,7 +244,7 @@ def convert_anytls(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[
         **base_data,
         "password": server.password or server.meta.get("password")
     }
-    
+
     # Add optional fields
     if server.meta.get("idle_session_check_interval"):
         outbound_data["idle_session_check_interval"] = server.meta["idle_session_check_interval"]
@@ -252,14 +252,14 @@ def convert_anytls(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[
         outbound_data["idle_session_timeout"] = server.meta["idle_session_timeout"]
     if server.meta.get("min_idle_session"):
         outbound_data["min_idle_session"] = server.meta["min_idle_session"]
-    
+
     return AnyTlsOutbound(**outbound_data)
 
 
 def convert_tor(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[TorOutbound]:
     """Convert ParsedServer to TorOutbound."""
     outbound_data = base_data.copy()
-    
+
     # Add optional fields
     if server.meta.get("executable_path"):
         outbound_data["executable_path"] = server.meta["executable_path"]
@@ -269,7 +269,7 @@ def convert_tor(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[Tor
         outbound_data["data_directory"] = server.meta["data_directory"]
     if server.meta.get("torrc"):
         outbound_data["torrc"] = server.meta["torrc"]
-    
+
     return TorOutbound(**outbound_data)
 
 
@@ -279,7 +279,7 @@ def convert_ssh(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[Ssh
         **base_data,
         "user": server.username or server.meta.get("user")
     }
-    
+
     # Add optional fields
     if server.password or server.meta.get("password"):
         outbound_data["password"] = server.password or server.meta.get("password")
@@ -295,14 +295,14 @@ def convert_ssh(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[Ssh
         outbound_data["host_key_algorithms"] = server.meta["host_key_algorithms"]
     if server.meta.get("client_version"):
         outbound_data["client_version"] = server.meta["client_version"]
-    
+
     return SshOutbound(**outbound_data)
 
 
 def convert_http(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[HttpOutbound]:
     """Convert ParsedServer to HttpOutbound."""
     outbound_data = base_data.copy()
-    
+
     # Add optional fields
     if server.username or server.meta.get("username"):
         outbound_data["username"] = server.username or server.meta.get("username")
@@ -310,14 +310,14 @@ def convert_http(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[Ht
         outbound_data["password"] = server.password or server.meta.get("password")
     if server.meta.get("path"):
         outbound_data["path"] = server.meta["path"]
-    
+
     return HttpOutbound(**outbound_data)
 
 
 def convert_socks(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[SocksOutbound]:
     """Convert ParsedServer to SocksOutbound."""
     outbound_data = base_data.copy()
-    
+
     # Add optional fields
     if server.username or server.meta.get("username"):
         outbound_data["username"] = server.username or server.meta.get("username")
@@ -325,14 +325,14 @@ def convert_socks(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[S
         outbound_data["password"] = server.password or server.meta.get("password")
     if server.meta.get("version"):
         outbound_data["version"] = server.meta["version"]
-    
+
     return SocksOutbound(**outbound_data)
 
 
 def convert_direct(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[DirectOutbound]:
     """Convert ParsedServer to DirectOutbound."""
     outbound_data = base_data.copy()
-    
+
     # Add optional fields
     if server.meta.get("override_address"):
         outbound_data["override_address"] = server.meta["override_address"]
@@ -340,5 +340,5 @@ def convert_direct(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[
         outbound_data["override_port"] = server.meta["override_port"]
     if server.meta.get("proxy"):
         outbound_data["proxy"] = server.meta["proxy"]
-    
+
     return DirectOutbound(**outbound_data)

@@ -19,19 +19,19 @@ from pathlib import Path
 
 def get_log_file():
     """Get log file path with safe defaults.
-    
+
     Priority:
     1. SBOXMGR_LOG_FILE environment variable (explicit path)
     2. ~/.local/share/sboxmgr/sboxmgr.log (user data directory)
     3. ./sboxmgr.log (current directory fallback)
-    
+
     Returns:
         str: Log file path
 
     """
     if os.getenv("SBOXMGR_LOG_FILE"):
         return os.getenv("SBOXMGR_LOG_FILE")
-    
+
     # Try user data directory first (XDG Base Directory spec)
     try:
         user_data_dir = Path.home() / ".local" / "share" / "sboxmgr"
@@ -48,7 +48,7 @@ def get_log_file():
 
 def get_config_file():
     """Get sing-box configuration file path.
-    
+
     Returns:
         str: Configuration file path from SBOXMGR_CONFIG_FILE environment
              variable or default '/etc/sing-box/config.json'.
@@ -59,7 +59,7 @@ def get_config_file():
 
 def get_backup_file():
     """Get backup configuration file path.
-    
+
     Returns:
         str: Backup file path from SBOXMGR_BACKUP_FILE environment
              variable or default '/etc/sing-box/config.json.bak'.
@@ -70,7 +70,7 @@ def get_backup_file():
 
 def get_template_file():
     """Get configuration template file path.
-    
+
     Returns:
         str: Template file path from SBOXMGR_TEMPLATE_FILE environment
              variable or default './config.template.json'.
@@ -80,7 +80,7 @@ def get_template_file():
 
 def get_exclusion_file():
     """Get server exclusions file path.
-    
+
     Returns:
         str: Exclusions file path from SBOXMGR_EXCLUSION_FILE environment
              variable or default './exclusions.json'.
@@ -90,7 +90,7 @@ def get_exclusion_file():
 
 def get_selected_config_file():
     """Get selected configuration file path.
-    
+
     Returns:
         str: Selected config file path from SBOXMGR_SELECTED_CONFIG_FILE
              environment variable or default './selected_config.json'.
@@ -100,7 +100,7 @@ def get_selected_config_file():
 
 def get_max_log_size():
     """Get maximum log file size in bytes.
-    
+
     Returns:
         int: Maximum log size from SBOXMGR_MAX_LOG_SIZE environment
              variable or default 1048576 (1MB).
@@ -110,10 +110,10 @@ def get_max_log_size():
 
 def get_debug_level(default=0):
     """Get debug verbosity level.
-    
+
     Args:
         default: Default debug level if environment variable not set.
-        
+
     Returns:
         int: Debug level from SBOXMGR_DEBUG environment variable or default.
 
@@ -122,10 +122,10 @@ def get_debug_level(default=0):
 
 def get_fetch_timeout():
     """Get HTTP request timeout in seconds.
-    
+
     Environment variable: SBOXMGR_FETCH_TIMEOUT
     Default: 30 seconds
-    
+
     Returns:
         int: Request timeout in seconds
 
@@ -137,10 +137,10 @@ def get_fetch_timeout():
 
 def get_fetch_size_limit():
     """Get maximum fetch size limit in bytes.
-    
+
     Environment variable: SBOXMGR_FETCH_SIZE_LIMIT  
     Default: 2MB (2097152 bytes)
-    
+
     Returns:
         int: Size limit in bytes
 
@@ -152,10 +152,10 @@ def get_fetch_size_limit():
 
 def get_url():
     """Get subscription URL from environment variables.
-    
+
     Checks multiple environment variables in order of preference:
     SBOXMGR_URL, SINGBOX_URL, TEST_URL.
-    
+
     Returns:
         str or None: Subscription URL if found in environment variables.
 

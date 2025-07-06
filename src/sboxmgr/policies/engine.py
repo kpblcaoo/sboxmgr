@@ -11,16 +11,16 @@ import logging
 
 class PolicyEngine:
     """Engine for evaluating multiple policies.
-    
+
     The PolicyEngine maintains a list of policies and evaluates them
     in order until one denies the action or all policies pass.
-    
+
     Attributes:
         policies: List of registered policies
         logger: Logger for policy evaluation events
 
     """
-    
+
     def __init__(self):
         """Initialize the policy engine."""
         self.policies: List[BasePolicy] = []
@@ -28,7 +28,7 @@ class PolicyEngine:
 
     def register(self, policy: BasePolicy) -> None:
         """Register a policy with the engine.
-        
+
         Args:
             policy: Policy to register
 
@@ -38,7 +38,7 @@ class PolicyEngine:
 
     def enable(self, name: str) -> bool:
         """Enable a policy by name.
-        
+
         Args:
             name: Name of the policy to enable
         Returns:
@@ -53,7 +53,7 @@ class PolicyEngine:
 
     def disable(self, name: str) -> bool:
         """Disable a policy by name.
-        
+
         Args:
             name: Name of the policy to disable
         Returns:
@@ -68,13 +68,13 @@ class PolicyEngine:
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         """Evaluate policies until first denial or all pass.
-        
+
         This method evaluates policies in order and returns the first
         denial result or allows if all policies pass.
-        
+
         Args:
             context: Context to evaluate against
-            
+
         Returns:
             PolicyResult from first denying policy or allow result
 
@@ -83,25 +83,25 @@ class PolicyEngine:
             if not policy.enabled:
                 self.logger.debug(f"Skipping disabled policy: {policy.name}")
                 continue
-                
+
             result = policy.evaluate(context)
             result.policy_name = getattr(policy, "name", policy.__class__.__name__)
-            
+
             if not result.allowed:
                 self.logger.info(f"Policy {result.policy_name} denied: {result.reason}")
                 return result
-                
+
         return PolicyResult.allow("All policies passed")
 
     def evaluate_all(self, context: PolicyContext) -> PolicyEvaluationResult:
         """Evaluate all policies and return aggregated results.
-        
+
         This method evaluates all enabled policies and collects their
         results, providing detailed information about all decisions.
-        
+
         Args:
             context: Context to evaluate against
-            
+
         Returns:
             PolicyEvaluationResult containing all policy results
 
@@ -109,19 +109,19 @@ class PolicyEngine:
         evaluation_result = PolicyEvaluationResult(
             server_identifier=context.get_server_identifier()
         )
-        
+
         for policy in self.policies:
             if not policy.enabled:
                 self.logger.debug(f"Skipping disabled policy: {policy.name}")
                 continue
-                
+
             try:
                 result = policy.evaluate(context)
                 result.policy_name = getattr(policy, "name", policy.__class__.__name__)
                 evaluation_result.add_result(result)
-                
+
                 self.logger.debug(f"Policy {result.policy_name}: {result.severity.value} - {result.reason}")
-                
+
             except Exception as e:
                 # Fail-secure: treat policy errors as denials
                 error_result = PolicyResult.deny(
@@ -131,7 +131,7 @@ class PolicyEngine:
                 )
                 evaluation_result.add_result(error_result)
                 self.logger.error(f"Policy {policy.name} evaluation failed: {e}")
-        
+
         # Log summary
         if evaluation_result.has_denials:
             self.logger.info(f"Server {evaluation_result.server_identifier} denied by {len(evaluation_result.denials)} policy(ies)")
@@ -139,16 +139,16 @@ class PolicyEngine:
             self.logger.info(f"Server {evaluation_result.server_identifier} allowed with {len(evaluation_result.warnings)} warning(s)")
         else:
             self.logger.debug(f"Server {evaluation_result.server_identifier} allowed by all policies")
-            
+
         return evaluation_result
 
     def get_policies(self, group: str = None, enabled_only: bool = True) -> List[BasePolicy]:
         """Get policies with optional filtering.
-        
+
         Args:
             group: Optional group filter
             enabled_only: Whether to return only enabled policies
-            
+
         Returns:
             List of matching policies
 
@@ -164,10 +164,10 @@ class PolicyEngine:
 
     def get_policy(self, name: str) -> BasePolicy:
         """Get a specific policy by name.
-        
+
         Args:
             name: Name of the policy to find
-            
+
         Returns:
             Policy object or None if not found
 

@@ -40,10 +40,10 @@ def load_selected_config():
 
 def save_selected_config(selected):
     """Save selected server configuration to persistent storage.
-    
+
     Saves the selected server configuration with a timestamp and performs
     atomic file operations to ensure data integrity during writes.
-    
+
     Args:
         selected: Dictionary containing selected server configuration data.
 

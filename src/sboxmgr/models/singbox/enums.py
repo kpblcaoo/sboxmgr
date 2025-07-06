@@ -30,7 +30,7 @@ class Network(str, Enum):
     tcp = "tcp"
     udp = "udp"
     tcp_udp = "tcp,udp"
-    
+
     @classmethod
     def from_string(cls, value: str) -> "Network":
         """Convert string to Network enum, handling legacy formats."""

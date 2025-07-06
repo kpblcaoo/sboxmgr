@@ -13,13 +13,13 @@ import logging
 
 def is_ai_lang(code):
     """Check if language file contains AI-generated translations.
-    
+
     Examines the language file's metadata to determine if it contains
     AI-generated translations that may need human review and improvement.
-    
+
     Args:
         code: Language code to check (e.g., 'en', 'ru', 'de').
-        
+
     Returns:
         True if the language file is marked as AI-generated in its metadata,
         False otherwise or if the file doesn't exist.
@@ -38,16 +38,16 @@ def is_ai_lang(code):
 
 def detect_lang_source():
     """Detect current language setting and its configuration source.
-    
+
     Determines the active language code by checking configuration sources
     in priority order: environment variable, config file, system locale,
     and finally default fallback.
-    
+
     Returns:
         Tuple containing:
         - Language code string (e.g., 'en', 'ru', 'de')
         - Source description string indicating where the setting came from
-        
+
     Note:
         Priority order:
         1. SBOXMGR_LANG environment variable

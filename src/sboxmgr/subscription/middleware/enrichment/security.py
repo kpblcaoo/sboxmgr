@@ -7,27 +7,27 @@ from ...models import ParsedServer, PipelineContext
 
 class SecurityEnricher:
     """Provides security-related metadata enrichment for servers.
-    
+
     Adds security indicators like encryption level, port classification,
     protocol vulnerabilities, and recommended security settings.
     """
-    
+
     def __init__(self):
         """Initialize security enricher."""
         pass
-    
+
     def enrich(self, server: ParsedServer, context: PipelineContext) -> ParsedServer:
         """Apply security enrichment to a server.
-        
+
         Args:
             server: Server to enrich
             context: Pipeline context
-            
+
         Returns:
             Server with security enrichment applied
         """
         security_info = {}
-        
+
         try:
             security_info.update({
                 'encryption_level': self._get_encryption_level(server),
@@ -35,21 +35,21 @@ class SecurityEnricher:
                 'protocol_vulnerabilities': self._get_protocol_vulnerabilities(server.type),
                 'recommended_settings': self._get_recommended_settings(server)
             })
-            
+
         except Exception as e:
             security_info['error'] = str(e)
-        
+
         if security_info:
             server.meta['security'] = security_info
-        
+
         return server
-    
+
     def _get_encryption_level(self, server: ParsedServer) -> str:
         """Get encryption level for server.
-        
+
         Args:
             server: Server to analyze
-            
+
         Returns:
             Encryption level ('strong', 'moderate', 'weak', 'none')
         """
@@ -66,7 +66,7 @@ class SecurityEnricher:
             # Weak encryption (deprecated methods)
             else:
                 return 'weak'
-        
+
         # Default based on protocol
         protocol_encryption = {
             'wireguard': 'strong',
@@ -82,15 +82,15 @@ class SecurityEnricher:
             'socks': 'none',
             'socks5': 'none'
         }
-        
+
         return protocol_encryption.get(server.type.lower(), 'weak')
-    
+
     def _classify_port(self, port: int) -> str:
         """Classify port type for security analysis.
-        
+
         Args:
             port: Port number
-            
+
         Returns:
             Port classification
         """
@@ -116,13 +116,13 @@ class SecurityEnricher:
             return 'system'
         else:
             return 'unknown'
-    
+
     def _get_protocol_vulnerabilities(self, protocol_type: str) -> List[str]:
         """Get known vulnerabilities for protocol.
-        
+
         Args:
             protocol_type: Protocol type
-            
+
         Returns:
             List of vulnerability descriptions
         """
@@ -153,21 +153,21 @@ class SecurityEnricher:
                 'connection_tracking'
             ]
         }
-        
+
         return vulnerabilities.get(protocol_type.lower(), [])
-    
+
     def _get_recommended_settings(self, server: ParsedServer) -> Dict[str, Any]:
         """Get recommended security settings for server.
-        
+
         Args:
             server: Server to analyze
-            
+
         Returns:
             Dictionary with recommended settings
         """
         recommendations = {}
         protocol = server.type.lower()
-        
+
         if protocol == 'vmess':
             recommendations.update({
                 'alterId': 0,  # Disable deprecated alterId
@@ -208,12 +208,12 @@ class SecurityEnricher:
                 'obfuscation': 'salamander',
                 'bandwidth_limit': 'auto'
             })
-        
+
         # General security recommendations
         recommendations.update({
             'use_cdn': True if server.port in [80, 443, 8080, 8443] else False,
             'enable_mux': True,
             'test_url': 'https://www.gstatic.com/generate_204'
         })
-        
+
         return recommendations

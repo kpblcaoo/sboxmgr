@@ -18,11 +18,11 @@ from sboxmgr.utils.env import get_config_file, get_backup_file
 
 def _create_orchestrator(debug_level: int = 0, fail_safe: bool = False) -> Orchestrator:
     """Create orchestrator instance.
-    
+
     Args:
         debug_level: Debug verbosity level (0-2).
         fail_safe: Whether to use fail-safe mode.
-        
+
     Returns:
         Orchestrator: Configured orchestrator instance.
 
@@ -40,11 +40,11 @@ def _setup_user_agent(user_agent: Optional[str], no_user_agent: bool) -> Optiona
 def _validate_config_with_temp_file(config_json: str) -> tuple[bool, str]:
     """Validate configuration using temporary file."""
     from sboxmgr.config.generate import validate_config_file
-    
+
     with tempfile.NamedTemporaryFile("w+", suffix=".json", delete=False) as tmp:
         temp_path = tmp.name
         tmp.write(config_json)
-    
+
     try:
         valid, output = validate_config_file(temp_path)
         return valid, output
@@ -65,7 +65,7 @@ def run_orchestrated(
     exclusions: str = typer.Option(None, "--exclusions", help="Comma-separated list of servers to exclude")
 ):
     """Update configuration from subscription using Orchestrator.
-    
+
     Args:
         url: Subscription URL to fetch from.
         debug: Debug verbosity level (0-2).
@@ -77,21 +77,21 @@ def run_orchestrated(
         format: Export format (singbox, clash, v2ray).
         user_routes: Comma-separated route tags to include.
         exclusions: Comma-separated servers to exclude.
-        
+
     Raises:
         typer.Exit: On validation failure or processing errors.
 
     """
     from logsetup.setup import setup_logging
     setup_logging(debug_level=debug)
-    
+
     orchestrator = _create_orchestrator(debug_level=debug)
     ua = _setup_user_agent(user_agent, no_user_agent)
-    
+
     # Parse user_routes and exclusions
     user_routes_list = [x.strip() for x in user_routes.split(",")] if user_routes else None
     exclusions_list = [x.strip() for x in exclusions.split(",")] if exclusions else None
-    
+
     try:
         # Export configuration through orchestrator
         export_result = orchestrator.export_configuration(
@@ -102,51 +102,51 @@ def run_orchestrated(
             user_routes=user_routes_list,
             exclusions=exclusions_list
         )
-        
+
         if not export_result["success"]:
             typer.echo(f"ERROR: {export_result.get('error', 'Export failed')}", err=True)
             raise typer.Exit(1)
-        
+
         config_json = json.dumps(export_result["config"], indent=2, ensure_ascii=False)
-        
+
     except Exception as e:
         typer.echo(f"{t('error.subscription_failed')}: {e}", err=True)
         raise typer.Exit(1)
-    
+
     # Handle dry run
     if dry_run:
         typer.echo(t("cli.dry_run_mode"))
         valid, output = _validate_config_with_temp_file(config_json)
-        
+
         if valid:
             typer.echo(t("cli.dry_run_valid"))
         else:
             typer.echo(f"{t('cli.config_invalid')}\n{output}", err=True)
-        
+
         typer.echo(t("cli.temp_file_deleted"))
         raise typer.Exit(0 if valid else 1)
-    
+
     # Write configuration files
     config_file = config_file or get_config_file()
     backup_file = backup_file or get_backup_file()
-    
+
     try:
         with open(config_file, "w", encoding="utf-8") as f:
             f.write(config_json)
-        
+
         if backup_file:
             import shutil
             shutil.copy2(config_file, backup_file)
-        
+
         # Note: Service management has been moved to sboxagent
         # according to ADR-0015. sboxmgr only generates configuration.
         if debug >= 1:
             typer.echo("Configuration generated successfully. Use sboxagent to apply and restart service.")
-            
+
     except Exception as e:
         typer.echo(f"{t('cli.error_config_update')}: {e}", err=True)
         raise typer.Exit(1)
-    
+
     typer.echo(t("cli.update_completed"))
 
 
@@ -160,9 +160,9 @@ def exclusions_orchestrated(
     """Manage server exclusions using Orchestrator."""
     from logsetup.setup import setup_logging
     setup_logging(debug_level=debug)
-    
+
     orchestrator = _create_orchestrator(debug_level=debug)
-    
+
     try:
         result = orchestrator.manage_exclusions(
             action=action,
@@ -170,10 +170,10 @@ def exclusions_orchestrated(
             name=name,
             reason=reason
         )
-        
+
         if result["success"]:
             typer.echo(result["message"])
-            
+
             if action == "list" and result["data"] and result["data"]["exclusions"]:
                 typer.echo(f"\nExclusions ({result['data']['count']}):")
                 for excl in result["data"]["exclusions"]:
@@ -185,7 +185,7 @@ def exclusions_orchestrated(
         else:
             typer.echo(f"ERROR: {result['message']}", err=True)
             raise typer.Exit(1)
-        
+
     except Exception as e:
         typer.echo(f"ERROR: {e}", err=True)
         raise typer.Exit(1)
@@ -204,11 +204,11 @@ def dry_run_orchestrated(
     exclusions: str = typer.Option(None, "--exclusions", help="Comma-separated list of servers to exclude")
 ):
     """Validate subscription configuration without making changes (Orchestrated).
-    
+
     Uses the Orchestrator facade to perform validation with consistent error
     handling and logging. This eliminates code duplication between run and
     dry-run operations.
-    
+
     Args:
         url: Subscription URL to validate.
         debug: Debug verbosity level (0-2).
@@ -217,7 +217,7 @@ def dry_run_orchestrated(
         format: Export format for validation.
         user_routes: Comma-separated route tags to include.
         exclusions: Comma-separated servers to exclude.
-        
+
     Raises:
         typer.Exit: Exit code 0 if valid, 1 if invalid.
 
@@ -250,11 +250,11 @@ def list_servers_orchestrated(
     exclusions: str = typer.Option(None, "--exclusions", help="Comma-separated servers to exclude")
 ):
     """List servers from subscription using Orchestrator facade.
-    
+
     Retrieves and displays server information from subscription source with
     optional filtering and formatting. Uses Orchestrator for consistent
     error handling and pipeline processing.
-    
+
     Args:
         url: Subscription URL to fetch from.
         debug: Debug verbosity level (0-2).
@@ -265,22 +265,22 @@ def list_servers_orchestrated(
         filter_protocol: Filter servers by protocol type.
         user_routes: Comma-separated route tags to include.
         exclusions: Comma-separated servers to exclude.
-        
+
     Raises:
         typer.Exit: On fetch or processing failure.
 
     """
     from logsetup.setup import setup_logging
     setup_logging(debug_level=debug)
-    
+
     # Create orchestrator
     orchestrator = _create_orchestrator(debug_level=debug, fail_safe=False)
-    
+
     # Parse CLI arguments
     ua = _setup_user_agent(user_agent, no_user_agent)
     user_routes_list = [x.strip() for x in user_routes.split(",")] if user_routes else None
     exclusions_list = [x.strip() for x in exclusions.split(",")] if exclusions else None
-    
+
     try:
         # Get servers through orchestrator
         result = orchestrator.get_subscription_servers(
@@ -292,20 +292,20 @@ def list_servers_orchestrated(
             force_reload=False,
             user_agent=ua
         )
-        
+
         if not result.success or not result.config:
             typer.echo("ERROR: Failed to retrieve servers from subscription.", err=True)
             if result.errors:
                 for error in result.errors:
                     typer.echo(f"  - {error}", err=True)
             raise typer.Exit(1)
-        
+
         servers = result.config
-        
+
         # Apply protocol filter if specified
         if filter_protocol:
             servers = [s for s in servers if s.get('type') == filter_protocol]
-        
+
         # Display results
         if format_output == "json":
             import json
@@ -318,16 +318,16 @@ def list_servers_orchestrated(
             if not servers:
                 typer.echo("No servers found matching criteria.")
                 raise typer.Exit(0)
-            
+
             typer.echo(f"Found {len(servers)} servers:")
             typer.echo("-" * 80)
-            
+
             for i, server in enumerate(servers, 1):
                 protocol = server.get('type', 'unknown')
                 server_name = server.get('tag', f'server-{i}')
                 server_addr = server.get('server', 'unknown')
                 server_port = server.get('server_port', 'unknown')
-                
+
                 if show_details:
                     typer.echo(f"{i:3d}. [{protocol:8s}] {server_name}")
                     typer.echo(f"      Address: {server_addr}:{server_port}")
@@ -338,7 +338,7 @@ def list_servers_orchestrated(
                     typer.echo()
                 else:
                     typer.echo(f"{i:3d}. [{protocol:8s}] {server_name:30s} {server_addr}:{server_port}")
-        
+
     except Exception as e:
         typer.echo(f"{t('error.subscription_failed')}: {e}", err=True)
         raise typer.Exit(1)

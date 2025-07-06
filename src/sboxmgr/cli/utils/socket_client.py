@@ -14,13 +14,13 @@ MAX_MESSAGE_SIZE = 1024 * 1024
 
 class SocketClient:
     """Unix socket client for communicating with sboxagent."""
-    
+
     def __init__(self, socket_path: str = SOCKET_PATH):
         """Initialize socket client.
-        
+
         Args:
             socket_path: Path to Unix socket.
-            
+
         """
         self.socket_path = socket_path
         self.sock = None
@@ -38,26 +38,26 @@ class SocketClient:
 
     def send_message(self, message: Dict[str, Any]):
         """Send message through socket.
-        
+
         Args:
             message: Message data to send.
-            
+
         Raises:
             NotImplementedError: Method not yet implemented.
-            
+
         """
         # TODO: framed JSON encode
         raise NotImplementedError
 
     def receive_message(self) -> Optional[Dict[str, Any]]:
         """Receive message from socket.
-        
+
         Returns:
             Received message data or None.
-            
+
         Raises:
             NotImplementedError: Method not yet implemented.
-            
+
         """
         # TODO: framed JSON decode
         raise NotImplementedError

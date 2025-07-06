@@ -13,11 +13,11 @@ from pydantic import BaseModel, Field, ConfigDict
 
 class ErrorType(Enum):
     """Enumeration of pipeline error types.
-    
+
     Defines the different categories of errors that can occur during
     the subscription processing pipeline.
     """
-    
+
     VALIDATION = "validation"
     FETCH = "fetch"
     PARSE = "parse"
@@ -26,10 +26,10 @@ class ErrorType(Enum):
 
 class PipelineError(BaseModel):
     """Represents an error that occurred during pipeline execution.
-    
+
     This class encapsulates error information including type, stage,
     message, context, and timestamp for debugging and error reporting.
-    
+
     Attributes:
         type: The category of error that occurred.
         stage: The pipeline stage where the error occurred.
@@ -38,9 +38,9 @@ class PipelineError(BaseModel):
         timestamp: When the error occurred (UTC).
 
     """
-    
+
     model_config = ConfigDict(extra='allow')
-    
+
     type: ErrorType
     stage: str
     message: str

@@ -1,7 +1,7 @@
 """Configuration processors for sing-box exporter."""
 
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 from sboxmgr.subscription.models import ParsedServer
 from .constants import CONFIG_WHITELIST, PROTOCOL_NORMALIZATION, TLS_CONFIG_FIELDS
@@ -11,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 def create_base_outbound(server: ParsedServer, protocol_type: str) -> Dict[str, Any]:
     """Create base outbound structure.
-    
+
     Args:
         server: ParsedServer object.
         protocol_type: Normalized protocol type.
-        
+
     Returns:
         Base outbound configuration dictionary.
     """
@@ -28,10 +28,10 @@ def create_base_outbound(server: ParsedServer, protocol_type: str) -> Dict[str, 
 
 def normalize_protocol_type(server_type: str) -> str:
     """Normalize protocol type for sing-box.
-    
+
     Args:
         server_type: Original protocol type.
-        
+
     Returns:
         Normalized protocol type.
     """
@@ -44,12 +44,12 @@ def process_shadowsocks_config(
     meta: Dict[str, Any]
 ) -> bool:
     """Process Shadowsocks configuration.
-    
+
     Args:
         outbound: Outbound configuration to modify.
         server: Source server.
         meta: Server metadata.
-        
+
     Returns:
         True if configuration is valid, False if server should be skipped.
     """
@@ -59,10 +59,10 @@ def process_shadowsocks_config(
             f"WARNING: shadowsocks outbound without method/cipher, skipping: {server.address}:{server.port}"
         )
         return False
-    
+
     # Add required fields
     outbound["method"] = method
-    
+
     # Add password - required field for shadowsocks
     password = server.password or meta.get("password")
     if not password:
@@ -71,13 +71,13 @@ def process_shadowsocks_config(
         )
         return False
     outbound["password"] = password
-    
+
     return True
 
 
 def process_transport_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
     """Process transport configuration (ws, grpc, tcp, udp).
-    
+
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata to modify.
@@ -100,7 +100,7 @@ def process_tls_config(
     protocol_type: str
 ) -> None:
     """Process TLS configuration.
-    
+
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata to modify.
@@ -110,7 +110,7 @@ def process_tls_config(
         # These protocols handle TLS at transport level
         if meta.get("security") == "tls":
             outbound["tls"] = {"enabled": True}
-            
+
             # Process TLS-specific fields
             for field in TLS_CONFIG_FIELDS:
                 if field in meta and field != "tls":
@@ -123,14 +123,14 @@ def process_tls_config(
             for key in ["public_key", "short_id", "spx"]:
                 if key in meta:
                     outbound["tls"][key] = meta.pop(key)
-    
+
     # Remove processed security field
     meta.pop("security", None)
 
 
 def process_auth_and_flow_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
     """Process authentication and flow configuration.
-    
+
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata to modify.
@@ -138,7 +138,7 @@ def process_auth_and_flow_config(outbound: Dict[str, Any], meta: Dict[str, Any])
     # UUID for authentication
     if meta.get("uuid"):
         outbound["uuid"] = meta.pop("uuid")
-    
+
     # Flow control
     if meta.get("flow"):
         outbound["flow"] = meta.pop("flow")
@@ -150,7 +150,7 @@ def process_tag_config(
     meta: Dict[str, Any]
 ) -> None:
     """Process tag configuration.
-    
+
     Args:
         outbound: Outbound configuration to modify.
         server: Source server.
@@ -167,7 +167,7 @@ def process_tag_config(
 
 def process_additional_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
     """Process additional configuration parameters.
-    
+
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata.
@@ -180,27 +180,27 @@ def process_additional_config(outbound: Dict[str, Any], meta: Dict[str, Any]) ->
 
 def process_standard_server(server: ParsedServer, protocol_type: str) -> Optional[Dict[str, Any]]:
     """Process standard server (non-special protocol).
-    
+
     Args:
         server: ParsedServer to process.
         protocol_type: Normalized protocol type.
-        
+
     Returns:
         Outbound configuration or None if server should be skipped.
     """
     outbound = create_base_outbound(server, protocol_type)
     meta = dict(server.meta or {})
-    
+
     # Process Shadowsocks configuration
     if protocol_type == "shadowsocks":
         if not process_shadowsocks_config(outbound, server, meta):
             return None
-    
+
     # Process various configuration aspects
     process_transport_config(outbound, meta)
     process_tls_config(outbound, meta, protocol_type)
     process_auth_and_flow_config(outbound, meta)
     process_tag_config(outbound, server, meta)
     process_additional_config(outbound, meta)
-    
+
     return outbound

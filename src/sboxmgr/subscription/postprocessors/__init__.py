@@ -29,13 +29,13 @@ __all__ = [
     'BasePostProcessor',
     'ProfileAwarePostProcessor',
     'ChainablePostProcessor',
-    
+
     # Concrete postprocessors
     'GeoFilterPostProcessor',
     'TagFilterPostProcessor',
     'LatencySortPostProcessor',
     'PostProcessorChain',
-    
+
     # Legacy postprocessors (for backward compatibility)
     'GeoFilterPostProcessorPostprocessor',
 ]

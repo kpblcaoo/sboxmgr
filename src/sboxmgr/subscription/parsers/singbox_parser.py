@@ -17,43 +17,43 @@ from ..registry import register
 @register("singbox")
 class SingBoxParser(BaseParser):
     """Parser for sing-box JSON configuration format.
-    
+
     This parser handles sing-box JSON configuration files and extracts
     server configurations from the outbounds section. It supports both
     modern and legacy sing-box syntax with safe field injection and
     fail-tolerance.
     """
-    
+
     def parse(self, raw: bytes) -> List[ParsedServer]:
         """Parse sing-box JSON configuration into ParsedServer objects.
-        
+
         Args:
             raw: Raw bytes containing sing-box JSON configuration.
-            
+
         Returns:
             List[ParsedServer]: List of parsed server configurations.
-            
+
         Raises:
             json.JSONDecodeError: If JSON parsing fails.
 
         """
         debug_level = get_debug_level()
-        
+
         try:
             # Clean and parse JSON
             clean_json, removed = self._strip_comments_and_validate(raw.decode("utf-8"))
             if removed and debug_level > 0:
                 print(f"[SingBoxParser] Removed comments/fields: {removed}")
-            
+
             config = json.loads(clean_json)
-            
+
             # Extract outbounds
             outbounds = config.get("outbounds", [])
             if not outbounds:
                 if debug_level > 0:
                     print("[SingBoxParser] No outbounds found in configuration")
                 return []
-            
+
             servers = []
             for i, outbound in enumerate(outbounds):
                 try:
@@ -64,12 +64,12 @@ class SingBoxParser(BaseParser):
                     if debug_level > 0:
                         print(f"[SingBoxParser] Failed to parse outbound {i}: {e}")
                     continue
-            
+
             if debug_level > 0:
                 print(f"[SingBoxParser] Parsed {len(servers)} servers from {len(outbounds)} outbounds")
-            
+
             return servers
-            
+
         except Exception as e:
             if debug_level > 0:
                 print(f"[SingBoxParser] Parse error: {e}")
@@ -77,21 +77,21 @@ class SingBoxParser(BaseParser):
 
     def _strip_comments_and_validate(self, raw_data: str) -> Tuple[str, list]:
         """Strip comments and validate JSON data.
-        
+
         Args:
             raw_data: Raw JSON string with potential comments.
-            
+
         Returns:
             Tuple[str, list]: Clean JSON string and list of removed items.
 
         """
         removed = []
-        
+
         # Remove leading comments and noise before first { or [
         lines = raw_data.splitlines()
         clean_lines = []
         found_json_start = False
-        
+
         for line in lines:
             stripped_line = line.strip()
             if not found_json_start:
@@ -101,12 +101,12 @@ class SingBoxParser(BaseParser):
                 else:
                     removed.append(line)
                 continue
-            
+
             # After JSON start - normal cleaning
             if stripped_line.startswith("//") or stripped_line.startswith("#"):
                 removed.append(line)
                 continue
-            
+
             # Remove inline // and # comments
             if '//' in line:
                 idx = line.index('//')
@@ -116,43 +116,43 @@ class SingBoxParser(BaseParser):
                 idx = line.index('#')
                 removed.append(line[idx:])
                 line = line[:idx]
-            
+
             clean_lines.append(line)
-        
+
         clean_json = '\n'.join(clean_lines)
-        
+
         # Remove _comment fields and trailing commas
         clean_json = re.sub(r'"_comment"\s*:\s*".*?",?', '', clean_json)
         clean_json = re.sub(r',\s*([}\]])', r'\1', clean_json)
-        
+
         return clean_json, removed
 
     def _parse_outbound(self, outbound: dict, index: int = 0) -> Optional[ParsedServer]:
         """Parse a single outbound configuration into ParsedServer.
-        
+
         Args:
             outbound: Outbound configuration dictionary.
             index: Index of outbound for tracing.
-            
+
         Returns:
             ParsedServer: Parsed server configuration or None if not a server.
 
         """
         outbound_type = outbound.get("type", "")
-        
+
         # Skip non-server outbounds (based on validator structure)
         if outbound_type in ["direct", "block", "dns", "urltest", "selector"]:
             return None
-        
+
         # Extract common fields with fail-tolerance
         tag = outbound.get("tag", "")
         server = outbound.get("server", "")
         port_raw = outbound.get("server_port")
-        
+
         # Fail-tolerance: require server and port
         if not server or not port_raw:
             return None
-        
+
         # Validate port type and convert
         try:
             port = int(port_raw)
@@ -160,7 +160,7 @@ class SingBoxParser(BaseParser):
                 return None
         except (ValueError, TypeError):
             return None
-        
+
         # Parse by protocol type (based on validator structure)
         if outbound_type == "shadowsocks":
             return self._parse_shadowsocks_outbound(outbound, tag, server, port, index)
@@ -193,10 +193,10 @@ class SingBoxParser(BaseParser):
 
     def _create_safe_meta(self, fields: Dict[str, Any]) -> Dict[str, Any]:
         """Create safe metadata dictionary filtering out None values.
-        
+
         Args:
             fields: Dictionary of potential metadata fields.
-            
+
         Returns:
             Dict[str, Any]: Clean metadata with only non-None values.
 
@@ -207,7 +207,7 @@ class SingBoxParser(BaseParser):
         """Parse shadowsocks outbound configuration."""
         method = outbound.get("method", "")
         password = outbound.get("password", "")
-        
+
         meta = self._create_safe_meta({
             "password": password,
             "tag": tag,
@@ -215,7 +215,7 @@ class SingBoxParser(BaseParser):
             "chain": "outbound",
             "server_id": f"ss_{index}"
         })
-        
+
         return ParsedServer(
             type="ss",
             address=server,
@@ -228,7 +228,7 @@ class SingBoxParser(BaseParser):
         """Parse vmess outbound configuration."""
         uuid = outbound.get("uuid", "")
         security = outbound.get("security", "auto")
-        
+
         meta = self._create_safe_meta({
             "uuid": uuid,
             "security": security,
@@ -237,7 +237,7 @@ class SingBoxParser(BaseParser):
             "chain": "outbound",
             "server_id": f"vmess_{index}"
         })
-        
+
         return ParsedServer(
             type="vmess",
             address=server,
@@ -251,7 +251,7 @@ class SingBoxParser(BaseParser):
         uuid = outbound.get("uuid", "")
         security = outbound.get("security", "none")
         flow = outbound.get("flow", "")
-        
+
         meta = self._create_safe_meta({
             "uuid": uuid,
             "security": security,
@@ -261,7 +261,7 @@ class SingBoxParser(BaseParser):
             "chain": "outbound",
             "server_id": f"vless_{index}"
         })
-        
+
         return ParsedServer(
             type="vless",
             address=server,
@@ -274,7 +274,7 @@ class SingBoxParser(BaseParser):
         """Parse trojan outbound configuration."""
         password = outbound.get("password", "")
         flow = outbound.get("flow", "")
-        
+
         meta = self._create_safe_meta({
             "password": password,
             "flow": flow,
@@ -283,7 +283,7 @@ class SingBoxParser(BaseParser):
             "chain": "outbound",
             "server_id": f"trojan_{index}"
         })
-        
+
         return ParsedServer(
             type="trojan",
             address=server,
@@ -297,7 +297,7 @@ class SingBoxParser(BaseParser):
         auth = outbound.get("auth", "")
         up_mbps = outbound.get("up_mbps", 100)
         down_mbps = outbound.get("down_mbps", 100)
-        
+
         meta = self._create_safe_meta({
             "auth": auth,
             "up_mbps": up_mbps,
@@ -307,7 +307,7 @@ class SingBoxParser(BaseParser):
             "chain": "outbound",
             "server_id": f"hysteria_{index}"
         })
-        
+
         return ParsedServer(
             type="hysteria",
             address=server,
@@ -321,7 +321,7 @@ class SingBoxParser(BaseParser):
         uuid = outbound.get("uuid", "")
         password = outbound.get("password", "")
         congestion_control = outbound.get("congestion_control", "bbr")
-        
+
         meta = self._create_safe_meta({
             "uuid": uuid,
             "password": password,
@@ -331,7 +331,7 @@ class SingBoxParser(BaseParser):
             "chain": "outbound",
             "server_id": f"tuic_{index}"
         })
-        
+
         return ParsedServer(
             type="tuic",
             address=server,
@@ -345,7 +345,7 @@ class SingBoxParser(BaseParser):
         private_key = outbound.get("private_key", "")
         peer_public_key = outbound.get("peer_public_key", "")
         pre_shared_key = outbound.get("pre_shared_key", "")
-        
+
         meta = self._create_safe_meta({
             "private_key": private_key,
             "peer_public_key": peer_public_key,
@@ -355,7 +355,7 @@ class SingBoxParser(BaseParser):
             "chain": "outbound",
             "server_id": f"wireguard_{index}"
         })
-        
+
         return ParsedServer(
             type="wireguard",
             address=server,
@@ -368,7 +368,7 @@ class SingBoxParser(BaseParser):
         """Parse http outbound configuration."""
         username = outbound.get("username", "")
         password = outbound.get("password", "")
-        
+
         meta = self._create_safe_meta({
             "username": username,
             "password": password,
@@ -377,7 +377,7 @@ class SingBoxParser(BaseParser):
             "chain": "outbound",
             "server_id": f"http_{index}"
         })
-        
+
         return ParsedServer(
             type="http",
             address=server,
@@ -390,7 +390,7 @@ class SingBoxParser(BaseParser):
         """Parse socks outbound configuration."""
         username = outbound.get("username", "")
         password = outbound.get("password", "")
-        
+
         meta = self._create_safe_meta({
             "username": username,
             "password": password,
@@ -399,7 +399,7 @@ class SingBoxParser(BaseParser):
             "chain": "outbound",
             "server_id": f"socks_{index}"
         })
-        
+
         return ParsedServer(
             type="socks",
             address=server,

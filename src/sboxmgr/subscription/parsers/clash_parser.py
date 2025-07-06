@@ -12,21 +12,21 @@ from ..registry import register
 @register("clash")
 class ClashParser(BaseParser):
     """Parser for Clash-format YAML subscription data.
-    
+
     This parser handles Clash-specific proxy configurations and converts them
     into standardized ParsedServer objects. It supports various Clash proxy
     types including shadowsocks, vmess, trojan, and others.
     """
-    
+
     def parse(self, raw: bytes):
         """Parse Clash YAML subscription data into ParsedServer objects.
-        
+
         Args:
             raw: Raw bytes containing Clash YAML configuration data.
-            
+
         Returns:
             List[ParsedServer]: List of parsed server configurations.
-            
+
         Raises:
             yaml.YAMLError: If YAML parsing fails.
             KeyError: If required configuration fields are missing.

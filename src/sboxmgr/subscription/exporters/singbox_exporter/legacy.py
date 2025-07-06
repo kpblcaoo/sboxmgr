@@ -10,7 +10,7 @@ from .inbound_generator import generate_inbounds
 
 def add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
     """Add special outbounds for legacy compatibility.
-    
+
     Args:
         outbounds: List of outbounds to modify.
     """
@@ -19,13 +19,13 @@ def add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
         "type": "direct",
         "tag": "direct"
     })
-    
+
     # Add block outbound
     outbounds.append({
         "type": "block",
         "tag": "block"
     })
-    
+
     # Add DNS outbound
     outbounds.append({
         "type": "dns",
@@ -35,7 +35,7 @@ def add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
 
 def create_enhanced_routing_rules() -> List[Dict[str, Any]]:
     """Create enhanced routing rules for legacy compatibility.
-    
+
     Returns:
         List of routing rules.
     """
@@ -70,15 +70,15 @@ def singbox_export_legacy(
     client_profile: Optional[ClientProfile] = None
 ) -> Dict[str, Any]:
     """Export parsed servers to sing-box configuration format (legacy approach).
-    
+
     DEPRECATED: This function uses legacy special outbounds (direct, block, dns)
     which are deprecated in sing-box 1.11.0. Use singbox_export() instead.
-    
+
     Args:
         servers: List of ParsedServer objects to export.
         routes: Routing rules configuration.
         client_profile: Optional client profile for inbound generation.
-        
+
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
@@ -88,31 +88,31 @@ def singbox_export_legacy(
         DeprecationWarning,
         stacklevel=2
     )
-    
+
     outbounds = []
     proxy_tags = []
-    
+
     # Process each server
     for server in servers:
         outbound = process_single_server(server)
         if outbound:
             outbounds.append(outbound)
             proxy_tags.append(outbound["tag"])
-    
+
     # Add URLTest outbound if there are proxy servers
     if proxy_tags:
         urltest_outbound = create_urltest_outbound(proxy_tags)
         outbounds.insert(0, urltest_outbound)
-    
+
     # Add special outbounds for backward compatibility
     add_special_outbounds(outbounds)
-    
+
     # Use provided routing rules or create enhanced defaults
     if routes:
         routing_rules = routes
     else:
         routing_rules = create_enhanced_routing_rules()
-    
+
     # Build final configuration
     config = {
         "outbounds": outbounds,
@@ -135,9 +135,9 @@ def singbox_export_legacy(
             }
         }
     }
-    
+
     # Add inbounds if client profile provided
     if client_profile is not None:
         config["inbounds"] = generate_inbounds(client_profile)
-    
+
     return config

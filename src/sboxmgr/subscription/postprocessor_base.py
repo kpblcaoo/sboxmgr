@@ -12,7 +12,7 @@ import inspect
 
 class BasePostProcessor(ABC):
     """Abstract base class for subscription data postprocessors.
-    
+
     Postprocessors transform or enhance parsed server data after the parsing
     stage. They can add geographic information, apply filtering rules,
     optimize server lists, or perform custom transformations.
@@ -22,14 +22,14 @@ class BasePostProcessor(ABC):
     @abstractmethod
     def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
         """Process and transform parsed server data.
-        
+
         Args:
             servers: List of ParsedServer objects to process.
             context: Pipeline context containing processing configuration.
-            
+
         Returns:
             List[ParsedServer]: Processed servers after transformation.
-            
+
         Raises:
             NotImplementedError: If called directly on base class.
 
@@ -38,14 +38,14 @@ class BasePostProcessor(ABC):
 
 class DedupPostProcessor(BasePostProcessor):
     """Remove duplicate servers based on type, address, port, and tag."""
-    
+
     def process(self, servers: List[ParsedServer], context: PipelineContext | None = None) -> List[ParsedServer]:
         """Remove duplicate servers from the list.
-        
+
         Args:
             servers: List of ParsedServer objects to deduplicate.
             context: Pipeline context (unused in this implementation).
-            
+
         Returns:
             List[ParsedServer]: Deduplicated server list.
         """
@@ -72,7 +72,7 @@ class PostProcessorChain(BasePostProcessor):
 
     def __init__(self, processors: list):
         """Initialize postprocessor chain.
-        
+
         Args:
             processors: List of postprocessor instances to chain.
         """

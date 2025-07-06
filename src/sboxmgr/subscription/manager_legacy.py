@@ -22,25 +22,25 @@ import threading
 
 class ParserProtocol(Protocol):
     """Protocol for parser objects that can parse subscription data."""
-    
+
     def parse(self, raw: bytes) -> List[Any]:
         """Parse raw subscription data into server configurations."""
         ...
 
 def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
     """Auto-detect appropriate parser based on data content.
-    
+
     Args:
         raw: Raw subscription data bytes.
         source_type: Subscription source type hint.
-        
+
     Returns:
         Parser instance or None if detection fails.
 
     """
     # Декодируем данные
     text = raw.decode('utf-8', errors='ignore')
-    
+
     # Если source_type явно указан, используем соответствующий парсер
     if source_type == "url_json" or source_type == "file_json":
         from .parsers.singbox_parser import SingBoxParser
@@ -51,7 +51,7 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
     elif source_type == "uri_list" or source_type == "file_uri_list":
         from .parsers.uri_list_parser import URIListParser
         return URIListParser()
-    
+
     # Автоопределение по содержимому (fallback)
     # 1. Пробуем JSON (SingBox)
     try:
@@ -93,13 +93,13 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
 
 class SubscriptionManager:
     """Manages subscription data processing pipeline.
-    
+
     This class orchestrates the complete subscription processing workflow
     including fetching, validation, parsing, middleware processing, and
     server selection. It provides a unified interface for handling various
     subscription formats and sources with comprehensive error handling
     and caching support.
-    
+
     The pipeline stages are:
     1. Fetch raw data from source
     2. Validate raw data
@@ -107,7 +107,7 @@ class SubscriptionManager:
     4. Apply middleware transformations
     5. Post-process and deduplicate
     6. Select servers based on criteria
-    
+
     Attributes:
         fetcher: Plugin for fetching subscription data.
         postprocessor: Chain of post-processing plugins.
@@ -116,7 +116,7 @@ class SubscriptionManager:
         detect_parser: Function for auto-detecting parsers.
 
     """
-    
+
     _cache_lock = threading.Lock()
     _get_servers_cache: Dict[Tuple, Any] = {}
 
@@ -128,7 +128,7 @@ class SubscriptionManager:
             detect_parser: Optional custom parser detection function.
             postprocessor_chain: Optional custom post-processor chain.
             middleware_chain: Optional custom middleware chain.
-            
+
         Raises:
             ValueError: If source_type is unknown or unsupported.
 
@@ -157,14 +157,14 @@ class SubscriptionManager:
 
     def _create_cache_key(self, mode: str, context: PipelineContext) -> tuple:
         """Create cache key for get_servers results.
-        
+
         Generates a unique cache key based on subscription source parameters
         and execution context to ensure proper cache differentiation.
-        
+
         Args:
             mode: Pipeline execution mode.
             context: Pipeline execution context.
-            
+
         Returns:
             Tuple representing the unique cache key.
 
@@ -176,19 +176,19 @@ class SubscriptionManager:
             str(getattr(context, 'tag_filters', None)),
             str(mode),
         )
-    
+
     def _create_pipeline_error(self, error_type: ErrorType, stage: str, message: str, context_data: dict = None) -> PipelineError:
         """Create standardized pipeline error.
-        
+
         Centralizes pipeline error creation with consistent structure
         and timestamp handling.
-        
+
         Args:
             error_type: Type of error that occurred.
             stage: Pipeline stage where error occurred.
             message: Human-readable error description.
             context_data: Optional additional context information.
-            
+
         Returns:
             Formatted PipelineError object.
 
@@ -200,16 +200,16 @@ class SubscriptionManager:
             context=context_data or {},
             timestamp=datetime.now(timezone.utc)
         )
-    
+
     def _fetch_and_validate_raw(self, context: PipelineContext) -> tuple[bytes, bool]:
         """Fetch and validate raw subscription data.
-        
+
         Handles the initial data fetching and raw validation stages
         of the subscription processing pipeline.
-        
+
         Args:
             context: Pipeline execution context for logging and error tracking.
-            
+
         Returns:
             Tuple of (raw_data, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
@@ -226,19 +226,19 @@ class SubscriptionManager:
                     print(f"[fetcher] Using User-Agent: {ua}")
                 else:
                     print("[fetcher] Using User-Agent: ClashMeta/1.0")
-            
+
             raw = self.fetcher.fetch()
-            
+
             # Отладочные print в зависимости от debug_level
             if debug_level >= 2:
                 print(f"[debug] Fetched {len(raw)} bytes. First 200 bytes: {raw[:200]!r}")
-            
+
             # Raw validation
             from .validators.base import RAW_VALIDATOR_REGISTRY
             validator_cls = RAW_VALIDATOR_REGISTRY.get("noop")
             validator = validator_cls()
             result = validator.validate(raw, context)
-            
+
             if not result.valid:
                 err = self._create_pipeline_error(
                     ErrorType.VALIDATION,
@@ -248,9 +248,9 @@ class SubscriptionManager:
                 )
                 context.metadata['errors'].append(err)
                 return raw, False
-            
+
             return raw, True
-            
+
         except Exception as e:
             err = self._create_pipeline_error(
                 ErrorType.INTERNAL,
@@ -259,17 +259,17 @@ class SubscriptionManager:
             )
             context.metadata['errors'].append(err)
             return b"", False
-    
+
     def _parse_servers(self, raw_data: bytes, context: PipelineContext) -> tuple[list, bool]:
         """Parse raw data into server configurations.
-        
+
         Handles parser detection and server parsing with comprehensive
         error handling and debug logging.
-        
+
         Args:
             raw_data: Raw subscription data to parse.
             context: Pipeline execution context.
-            
+
         Returns:
             Tuple of (servers_list, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
@@ -277,12 +277,12 @@ class SubscriptionManager:
         """
         try:
             debug_level = getattr(context, 'debug_level', 0)
-            
+
             # Parser detection
             parser = self.detect_parser(raw_data, self.fetcher.source.source_type)
             if debug_level >= 2:
                 print(f"[debug] Selected parser: {getattr(parser, '__class__', type(parser)).__name__}")
-            
+
             if not parser:
                 err = self._create_pipeline_error(
                     ErrorType.PARSE,
@@ -292,14 +292,14 @@ class SubscriptionManager:
                 )
                 context.metadata['errors'].append(err)
                 return [], False
-            
+
             # Parse servers
             servers = parser.parse(raw_data)
             if debug_level >= 1:
                 print(f"[info] Parsed {len(servers)} servers from subscription")
-            
+
             return servers, True
-            
+
         except Exception as e:
             err = self._create_pipeline_error(
                 ErrorType.PARSE,
@@ -309,17 +309,17 @@ class SubscriptionManager:
             )
             context.metadata['errors'].append(err)
             return [], False
-    
+
     def _validate_parsed_servers(self, servers: list, context: PipelineContext) -> tuple[list, bool]:
         """Validate parsed server configurations.
-        
+
         Applies parsed validation rules to ensure server configurations
         meet minimum requirements for further processing.
-        
+
         Args:
             servers: List of parsed server objects to validate.
             context: Pipeline execution context.
-            
+
         Returns:
             Tuple of (validated_servers, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
@@ -327,19 +327,19 @@ class SubscriptionManager:
         """
         try:
             debug_level = getattr(context, 'debug_level', 0)
-            
+
             # Parsed validation
             from .validators.base import PARSED_VALIDATOR_REGISTRY
             parsed_validator_cls = PARSED_VALIDATOR_REGISTRY.get("required_fields")
             if not parsed_validator_cls:
                 return servers, True  # No validator available
-            
+
             parsed_validator = parsed_validator_cls()
             parsed_result = parsed_validator.validate(servers, context)
-            
+
             if debug_level >= 2:
                 print(f"[DEBUG] ParsedValidator valid_servers: {getattr(parsed_result, 'valid_servers', None)} errors: {parsed_result.errors}")
-            
+
             # В strict режиме возвращаем все сервера (включая невалидные) с ошибками
             # В tolerant режиме возвращаем только валидные сервера
             if context.mode == 'strict':
@@ -352,10 +352,10 @@ class SubscriptionManager:
             else:
                 validated_servers = getattr(parsed_result, 'valid_servers', servers)
                 success = bool(validated_servers)
-            
+
             if debug_level >= 2:
                 print(f"[DEBUG] servers after validation: {validated_servers}")
-            
+
             if not validated_servers:
                 err = self._create_pipeline_error(
                     ErrorType.VALIDATION,
@@ -365,7 +365,7 @@ class SubscriptionManager:
                 )
                 context.metadata['errors'].append(err)
                 return [], False
-            
+
             if parsed_result.errors:
                 err = self._create_pipeline_error(
                     ErrorType.VALIDATION,
@@ -374,9 +374,9 @@ class SubscriptionManager:
                     {"source_type": self.fetcher.source.source_type}
                 )
                 context.metadata['errors'].append(err)
-            
+
             return validated_servers, success
-            
+
         except Exception as e:
             err = self._create_pipeline_error(
                 ErrorType.VALIDATION,
@@ -386,10 +386,10 @@ class SubscriptionManager:
             )
             context.metadata['errors'].append(err)
             return servers, False
-    
+
     def _apply_policies(self, servers: list, context: PipelineContext) -> list:
         """Apply security and policy engine to each server.
-        
+
         Args:
             servers: List of ParsedServer objects.
             context: PipelineContext for tracing and audit.
@@ -404,17 +404,17 @@ class SubscriptionManager:
         context.metadata.setdefault("policy_violations", [])
         context.metadata.setdefault("policy_warnings", [])
         context.metadata.setdefault("policy_info", [])
-        
+
         for s in servers:
             pol_ctx = PolCtx(server=s, profile=getattr(context, 'profile', None), user=getattr(context, 'user', None), env=getattr(context, 'env', {}))
-            
+
             try:
                 # Use evaluate_all() to get comprehensive results
                 evaluation_result = policy_registry.evaluate_all(pol_ctx)
-                
+
                 # Get server identifier consistently
                 server_id = pol_ctx.get_server_identifier()
-                
+
                 # Process all results
                 if evaluation_result.has_denials:
                     # Server is denied - add all denials to violations
@@ -426,7 +426,7 @@ class SubscriptionManager:
                             "metadata": denial.metadata
                         })
                     continue  # Exclude server
-                
+
                 # Server is allowed - add warnings and info
                 if evaluation_result.has_warnings:
                     for warning in evaluation_result.warnings:
@@ -436,7 +436,7 @@ class SubscriptionManager:
                             "reason": warning.reason,
                             "metadata": warning.metadata
                         })
-                
+
                 for info_result in evaluation_result.info_results:
                     context.metadata["policy_info"].append({
                         "server": server_id,
@@ -444,11 +444,11 @@ class SubscriptionManager:
                         "reason": info_result.reason,
                         "metadata": info_result.metadata
                     })
-                
+
                 # Add server to result if allowed
                 if evaluation_result.is_allowed:
                     result.append(s)
-                    
+
             except Exception as e:
                 # Fail-secure: treat as DENY
                 server_id = pol_ctx.get_server_identifier()
@@ -459,19 +459,19 @@ class SubscriptionManager:
                     "metadata": {"error_type": "system_exception"}
                 })
                 continue  # Exclude server
-        
+
         return result
-    
+
     def _process_middleware(self, servers: list, context: PipelineContext) -> tuple[list, bool]:
         """Process servers through middleware chain.
-        
+
         Applies middleware transformations to server configurations
         with comprehensive error handling.
-        
+
         Args:
             servers: List of server objects to process.
             context: Pipeline execution context.
-            
+
         Returns:
             Tuple of (processed_servers, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
@@ -479,14 +479,14 @@ class SubscriptionManager:
         """
         try:
             debug_level = getattr(context, 'debug_level', 0)
-            
+
             processed_servers = self.middleware_chain.process(servers, context=context)
-            
+
             if debug_level >= 2:
                 print(f"[debug] servers after middleware: {processed_servers[:2]}{' ...' if len(processed_servers) > 3 else ''}")
-            
+
             return processed_servers, True
-            
+
         except Exception as e:
             err = self._create_pipeline_error(
                 ErrorType.INTERNAL,
@@ -495,19 +495,19 @@ class SubscriptionManager:
             )
             context.metadata['errors'].append(err)
             return servers, False
-    
+
     def _postprocess_and_select(self, servers: list, user_routes: list, exclusions: list, mode: str) -> tuple[list, bool]:
         """Apply post-processing and server selection.
-        
+
         Handles the final stages of server processing including
         post-processing filters and server selection logic.
-        
+
         Args:
             servers: List of processed server objects.
             user_routes: Optional list of route tags to include.
             exclusions: Optional list of route tags to exclude.
             mode: Selection mode for server filtering.
-            
+
         Returns:
             Tuple of (selected_servers, success_flag). Selection failures
             are not considered critical errors.
@@ -516,7 +516,7 @@ class SubscriptionManager:
         try:
             # Post-processing
             processed_servers = self.postprocessor.process(servers)
-            
+
             # Server selection
             selected_servers = self.selector.select(
                 processed_servers,
@@ -524,9 +524,9 @@ class SubscriptionManager:
                 exclusions=exclusions,
                 mode=mode
             )
-            
+
             return selected_servers, True
-            
+
         except Exception:
             # Post-processing errors are not critical - return original servers
             return servers, True
@@ -551,11 +551,11 @@ class SubscriptionManager:
             - context: Execution context with trace information
             - errors: List of PipelineError objects for any issues encountered
             - success: Boolean indicating overall pipeline success
-            
+
         Note:
             In 'tolerant' mode, partial failures may still return success=True with
             warnings in the errors list. In 'strict' mode, any error causes failure.
-            
+
             Results are cached based on source URL, headers, filters, and mode to
             improve performance for repeated requests.
 
@@ -566,19 +566,19 @@ class SubscriptionManager:
             context.mode = mode
         if 'errors' not in context.metadata:
             context.metadata['errors'] = []
-        
+
         # Handle caching
         key = self._create_cache_key(mode, context)
         if force_reload:
             with self._cache_lock:
                 self._get_servers_cache.pop(key, None)
-        
+
         with self._cache_lock:
             if key in self._get_servers_cache:
                 result = self._get_servers_cache[key]
                 if result.success:
                     return result
-        
+
         # Execute pipeline stages
         try:
             # Stage 1: Fetch and validate raw data
@@ -588,7 +588,7 @@ class SubscriptionManager:
                     return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
                 else:
                     return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
-            
+
             # Stage 2: Parse servers
             servers, success = self._parse_servers(raw_data, context)
             if not success:
@@ -596,7 +596,7 @@ class SubscriptionManager:
                     return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
                 else:
                     return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
-            
+
             # Stage 3: Validate parsed servers
             servers, success = self._validate_parsed_servers(servers, context)
             if not success:
@@ -611,20 +611,20 @@ class SubscriptionManager:
                 # Middleware errors are not critical in tolerant mode
                 if context.mode == 'strict':
                     return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
-            
+
             # Stage 5: Post-process and select
             servers, success = self._postprocess_and_select(servers, user_routes, exclusions, mode)
-            
+
             # Create successful result - even if all servers were blocked by policies
             # This is not a pipeline failure, but a policy decision
             result = PipelineResult(config=servers, context=context, errors=context.metadata['errors'], success=True)
-            
+
             # Cache successful result
             with self._cache_lock:
                 self._get_servers_cache[key] = result
-            
+
             return result
-            
+
         except Exception as e:
             # Handle unexpected errors
             err = self._create_pipeline_error(
@@ -655,10 +655,10 @@ class SubscriptionManager:
             - context: Execution context with processing details
             - errors: List of any errors encountered during export
             - success: Boolean indicating export success
-            
+
         Raises:
             None: All errors are captured in the PipelineResult.errors list.
-            
+
         Note:
             This method combines get_servers() with format-specific export logic.
             The export format is determined by the export_manager configuration.
@@ -672,7 +672,7 @@ class SubscriptionManager:
         servers_result = self.get_servers(user_routes=user_routes, exclusions=exclusions, mode=context.mode, context=context)
         if not servers_result.success:
             return PipelineResult(config=None, context=servers_result.context, errors=servers_result.errors, success=False)
-        
+
         # Используем переданный ExportManager или создаём дефолтный
         mgr = export_manager or ExportManager(routing_plugin=routing_plugin)
         try:

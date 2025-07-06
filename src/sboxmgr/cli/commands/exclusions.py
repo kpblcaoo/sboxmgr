@@ -43,41 +43,41 @@ def exclusions(
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
 ):
     """Manage server exclusions for subscription-based proxy configurations.
-    
+
     Supports adding, removing, viewing exclusions with interactive selection,
     wildcard patterns, and JSON export capabilities.
     """
     manager = ExclusionManager.default()
-    
+
     # Handle view-only operations first (no URL needed)
     if view:
         _view_exclusions(manager, json_output)
         return
-    
+
     if clear:
         _handle_clear_operation(manager, json_output, yes)
         return
-    
+
     # For operations requiring server data, fetch and cache it
     if any([add, remove, list_servers, interactive]):
         json_data = _fetch_and_validate_subscription(url, json_output)
         _cache_server_data(manager, json_data, json_output)
-    
+
     # Handle operations that require server data
     if list_servers:
         _list_servers(manager, json_output, show_excluded)
         return
-    
+
     if interactive:
         _interactive_exclusions(manager, json_output, reason)
         return
-    
+
     if add:
         _add_exclusions(manager, add, reason, json_output)
-    
+
     if remove:
         _remove_exclusions(manager, remove, json_output)
-    
+
     # Show help if no action specified
     if not any([add, remove, view, clear, list_servers, interactive]):
         _show_usage_help()
@@ -87,7 +87,7 @@ def _handle_clear_operation(manager: ExclusionManager, json_output: bool, yes: b
     if not yes and not Confirm.ask(f"[bold red]{t('cli.clear_exclusions.confirm')}[/bold red]"):
         rprint(f"[yellow]{t('cli.operation_cancelled')}[/yellow]")
         return
-    
+
     count = manager.clear()
     if json_output:
         print(json.dumps({"action": "clear", "removed_count": count}))
@@ -96,14 +96,14 @@ def _handle_clear_operation(manager: ExclusionManager, json_output: bool, yes: b
 
 def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
     """Fetch and validate subscription data from URL.
-    
+
     Args:
         url: Subscription URL to fetch from
         json_output: Whether to output errors in JSON format
-        
+
     Returns:
         Parsed JSON data from subscription
-        
+
     Raises:
         typer.Exit: If fetching or parsing fails
 
@@ -130,12 +130,12 @@ def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
 
 def _cache_server_data(manager: ExclusionManager, json_data: dict, json_output: bool) -> None:
     """Cache server data in exclusion manager.
-    
+
     Args:
         manager: ExclusionManager instance
         json_data: Server data to cache
         json_output: Whether to output errors in JSON format
-        
+
     Raises:
         typer.Exit: If server data format is invalid
 
@@ -158,14 +158,14 @@ def _show_usage_help() -> None:
 
 def _view_exclusions(manager: ExclusionManager, json_output: bool) -> None:
     """Display current exclusions in table or JSON format.
-    
+
     Args:
         manager: ExclusionManager instance for data access.
         json_output: If True, output JSON format; otherwise rich table format.
 
     """
     exclusions = manager.list_all()
-    
+
     if json_output:
         data = {
             "total": len(exclusions),
@@ -173,17 +173,17 @@ def _view_exclusions(manager: ExclusionManager, json_output: bool) -> None:
         }
         print(json.dumps(data, indent=2))
         return
-    
+
     if not exclusions:
         rprint("[dim]📝 No exclusions found.[/dim]")
         return
-    
+
     table = Table(title=f"🚫 Current Exclusions ({len(exclusions)})")
     table.add_column("ID", style="cyan", no_wrap=True)
     table.add_column("Name", style="white")
     table.add_column("Reason", style="yellow")
     table.add_column("Added", style="dim")
-    
+
     for exc in exclusions:
         table.add_row(
             exc["id"][:12] + "...",
@@ -191,12 +191,12 @@ def _view_exclusions(manager: ExclusionManager, json_output: bool) -> None:
             exc.get("reason", "N/A"),
             exc.get("timestamp", "N/A")[:10]
         )
-    
+
     console.print(table)
 
 def _list_servers(manager: ExclusionManager, json_output: bool, show_excluded: bool) -> None:
     """Display server list with indices, status, and exclusion information.
-    
+
     Args:
         manager: ExclusionManager instance with cached server data.
         json_output: If True, output JSON format; otherwise rich table format.
@@ -204,7 +204,7 @@ def _list_servers(manager: ExclusionManager, json_output: bool, show_excluded: b
 
     """
     servers_info = manager.list_servers(show_excluded=show_excluded)
-    
+
     if json_output:
         data = {
             "total": len(servers_info),
@@ -223,22 +223,22 @@ def _list_servers(manager: ExclusionManager, json_output: bool, show_excluded: b
         }
         print(json.dumps(data, indent=2))
         return
-    
+
     if not servers_info:
         rprint("[dim]📡 No servers found.[/dim]")
         return
-    
+
     table = Table(title=f"📡 Available Servers ({len(servers_info)})")
     table.add_column("Index", style="cyan", justify="right")
     table.add_column("Tag", style="white")
     table.add_column("Type", style="blue")
     table.add_column("Server:Port", style="green")
     table.add_column("Status", style="bold")
-    
+
     for idx, server, is_excluded in servers_info:
         status = "🚫 EXCLUDED" if is_excluded else "✅ Available"
         status_style = "red" if is_excluded else "green"
-        
+
         table.add_row(
             str(idx),
             server.get("tag", "N/A"),
@@ -246,9 +246,9 @@ def _list_servers(manager: ExclusionManager, json_output: bool, show_excluded: b
             f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}",
             f"[{status_style}]{status}[/{status_style}]"
         )
-    
+
     console.print(table)
-    
+
     # Show summary
     excluded_count = sum(1 for _, _, is_excluded in servers_info if is_excluded)
     available_count = len(servers_info) - excluded_count
@@ -257,20 +257,20 @@ def _list_servers(manager: ExclusionManager, json_output: bool, show_excluded: b
 def _interactive_exclusions(manager: ExclusionManager, json_output: bool, reason: str) -> None:
     """Interactive server selection for exclusions."""
     servers_info = manager.list_servers(show_excluded=True)
-    
+
     if not servers_info:
         rprint("[red]❌ No servers found.[/red]")
         return
-    
+
     # Show available servers
     _list_servers(manager, False, True)
-    
+
     while True:
         rprint("\n[bold blue]🎯 Interactive Exclusion Manager[/bold blue]")
         rprint("[dim]Commands: add <indices>, remove <indices>, wildcard <pattern>, view, clear, quit[/dim]")
-        
+
         command = Prompt.ask("Enter command", default="quit").strip().lower()
-        
+
         if command in ["quit", "q", "exit"]:
             break
         elif command == "view":
@@ -300,20 +300,20 @@ def _interactive_exclusions(manager: ExclusionManager, json_output: bool, reason
 def _add_exclusions(manager: ExclusionManager, add_str: str, reason: str, json_output: bool) -> None:
     """Add exclusions by indices, names, or wildcards."""
     items = [x.strip() for x in add_str.split(",") if x.strip()]
-    
+
     indices = []
     patterns = []
-    
+
     # Separate indices from patterns
     for item in items:
         if item.isdigit():
             indices.append(int(item))
         else:
             patterns.append(item)
-    
+
     added_ids = []
     errors = []
-    
+
     # Add by indices
     if indices:
         # Use cached servers data instead of re-caching
@@ -324,16 +324,16 @@ def _add_exclusions(manager: ExclusionManager, add_str: str, reason: str, json_o
             else:
                 rprint(f"[red]❌ {error_msg}[/red]")
             raise typer.Exit(1)
-        
+
         servers = manager._servers_cache['servers']
         protocols = manager._servers_cache['supported_protocols']
         supported_servers = manager._servers_cache['supported_servers']
-        
+
         # Check for invalid indices before adding
         for index in indices:
             if index < 0 or index >= len(supported_servers):
                 errors.append(f"Invalid server index: {index} (max: {len(supported_servers)-1})")
-        
+
         if errors:
             if json_output:
                 print(json.dumps({"error": "; ".join(errors)}))
@@ -341,10 +341,10 @@ def _add_exclusions(manager: ExclusionManager, add_str: str, reason: str, json_o
                 for error in errors:
                     rprint(f"[red]❌ {error}[/red]")
             raise typer.Exit(1)
-        
+
         added_by_index = manager.add_by_index(servers, indices, protocols, reason)
         added_ids.extend(added_by_index)
-    
+
     # Add by wildcard patterns
     if patterns:
         # Use cached servers data instead of re-caching
@@ -355,12 +355,12 @@ def _add_exclusions(manager: ExclusionManager, add_str: str, reason: str, json_o
             else:
                 rprint(f"[red]❌ {error_msg}[/red]")
             raise typer.Exit(1)
-            
+
         servers = manager._servers_cache['servers']
         protocols = manager._servers_cache['supported_protocols']
         added_by_pattern = manager.add_by_wildcard(servers, patterns, protocols, reason)
         added_ids.extend(added_by_pattern)
-    
+
     if json_output:
         print(json.dumps({
             "action": "add",
@@ -377,20 +377,20 @@ def _add_exclusions(manager: ExclusionManager, add_str: str, reason: str, json_o
 def _remove_exclusions(manager: ExclusionManager, remove_str: str, json_output: bool) -> None:
     """Remove exclusions by indices or IDs."""
     items = [x.strip() for x in remove_str.split(",") if x.strip()]
-    
+
     indices = []
     server_ids = []
-    
+
     # Separate indices from server IDs
     for item in items:
         if item.isdigit():
             indices.append(int(item))
         else:
             server_ids.append(item)
-    
+
     removed_ids = []
     errors = []
-    
+
     # Remove by indices
     if indices:
         # Use cached servers data instead of re-caching
@@ -401,16 +401,16 @@ def _remove_exclusions(manager: ExclusionManager, remove_str: str, json_output: 
             else:
                 rprint(f"[red]❌ {error_msg}[/red]")
             raise typer.Exit(1)
-            
+
         servers = manager._servers_cache['servers']
         protocols = manager._servers_cache['supported_protocols']
         supported_servers = manager._servers_cache['supported_servers']
-        
+
         # Check for invalid indices before removing
         for index in indices:
             if index < 0 or index >= len(supported_servers):
                 errors.append(f"Invalid server index: {index} (max: {len(supported_servers)-1})")
-        
+
         if errors:
             if json_output:
                 print(json.dumps({"error": "; ".join(errors)}))
@@ -418,15 +418,15 @@ def _remove_exclusions(manager: ExclusionManager, remove_str: str, json_output: 
                 for error in errors:
                     rprint(f"[red]❌ {error}[/red]")
             raise typer.Exit(1)
-        
+
         removed_by_index = manager.remove_by_index(servers, indices, protocols)
         removed_ids.extend(removed_by_index)
-    
+
     # Remove by server IDs
     for server_id in server_ids:
         if manager.remove(server_id):
             removed_ids.append(server_id)
-    
+
     if json_output:
         print(json.dumps({
             "action": "remove",

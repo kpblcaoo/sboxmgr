@@ -41,13 +41,13 @@ SUPPORTED_PROTOCOLS = {"vless", "shadowsocks", "vmess", "trojan", "tuic", "hyste
 
 def is_ai_lang(code):
     """Check if language is AI-generated based on metadata.
-    
+
     Examines the language file's metadata to determine if it contains
     AI-generated translations that may need human review.
-    
+
     Args:
         code: Language code to check (e.g., 'en', 'ru', 'de').
-        
+
     Returns:
         True if language is marked as AI-generated, False otherwise.
 
@@ -70,20 +70,20 @@ def lang_cmd(
     set_lang: str = typer.Option(None, "--set", "-s", help=lang.get("cli.lang.set.help")),
 ):
     """Manage CLI internationalization language settings.
-    
+
     Provides language management functionality including displaying current
     language, listing available languages, and persistently setting the
     preferred language for CLI output.
-    
+
     The language priority is:
     1. SBOXMGR_LANG environment variable
     2. Configuration file setting (~/.sboxmgr/config.toml)
     3. System locale (LANG)
     4. Default (English)
-    
+
     Args:
         set_lang: Language code to set as default (e.g., 'en', 'ru', 'de').
-        
+
     Raises:
         typer.Exit: If specified language is not available or config write fails.
 

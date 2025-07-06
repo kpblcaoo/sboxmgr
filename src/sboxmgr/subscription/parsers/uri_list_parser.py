@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 @register("parser_uri_list")
 class URIListParser(BaseParser):
     """Parser for URI list format subscription data.
-    
+
     This parser handles subscription data consisting of newline-separated
     proxy URIs. Each URI represents a single server configuration in a
     standardized URI format (vless://, vmess://, trojan://, ss://, etc.).
-    
+
     Enhanced features:
     - Unicode/emoji support in tags, passwords, and usernames
     - Proper handling of spaces in passwords and usernames
@@ -36,16 +36,16 @@ class URIListParser(BaseParser):
     - Improved query parameter parsing
     - Better error recovery and fallback mechanisms
     """
-    
+
     def parse(self, raw: bytes) -> List[ParsedServer]:
         """Parse URI list subscription data into ParsedServer objects.
-        
+
         Args:
             raw: Raw bytes containing newline-separated proxy URIs.
-            
+
         Returns:
             List[ParsedServer]: List of parsed server configurations.
-            
+
         Raises:
             ValueError: If URI format is invalid or unsupported.
             UnicodeDecodeError: If raw data cannot be decoded as UTF-8.
@@ -56,21 +56,21 @@ class URIListParser(BaseParser):
         except UnicodeDecodeError:
             # Fallback to latin-1 for very old or corrupted files
             lines = raw.decode("latin-1").splitlines()
-            
+
         servers = []
         debug_level = get_debug_level()
-        
+
         for line_num, line in enumerate(lines, 1):
             line = line.strip()
             if not line or line.startswith('#'):
                 continue
-                
+
             # Handle very long lines
             if len(line) > 10000:  # 10KB limit
                 if debug_level > 0:
                     logger.warning(f"Line {line_num} too long ({len(line)} chars), truncating")
                 line = line[:10000]
-            
+
             try:
                 if line.startswith('ss://'):
                     ss = self._parse_ss(line)
@@ -108,22 +108,22 @@ class URIListParser(BaseParser):
                 if debug_level > 0:
                     logger.error(f"Error parsing line {line_num}: {str(e)}")
                 servers.append(ParsedServer(type="unknown", address=line, port=0, meta={"error": str(e)}))
-                
+
         return servers
 
     def _parse_ss(self, line: str) -> Optional[ParsedServer]:
         """Parse shadowsocks URI into ParsedServer object.
-        
+
         Enhanced support for:
         - Unicode/emoji in tags and passwords
         - Spaces in passwords and usernames
         - Escaped characters
         - Various query parameter formats
         - Base64 and plain text formats
-        
+
         Args:
             line: Shadowsocks URI string
-            
+
         Returns:
             ParsedServer object with parsed configuration or None if parsing fails
 
@@ -137,7 +137,7 @@ class URIListParser(BaseParser):
                 scheme_part = line[:hash_pos]
                 fragment_part = line[hash_pos+1:query_pos]
                 query_part = line[query_pos+1:]
-                
+
                 # Создаём правильный URL для парсинга
                 corrected_line = f"{scheme_part}?{query_part}#{fragment_part}"
                 parsed = urlparse(corrected_line)
@@ -153,24 +153,24 @@ class URIListParser(BaseParser):
             parsed = urlparse(line)
             tag = self._safe_unquote(parsed.fragment) if parsed.fragment else ""
             query = parse_qs(parsed.query)
-        
+
         uri = parsed.netloc + parsed.path
-        
+
         try:
             method_pass, host_port = self._extract_ss_components(uri, line)
             if not method_pass or not host_port:
                 return self._create_invalid_ss_server("failed to extract components")
-                
+
             method, password = self._parse_ss_credentials(method_pass, line)
             if not method or not password:
                 return self._create_invalid_ss_server("failed to parse credentials")
-                
+
             host, port, endpoint_error = self._parse_ss_endpoint(host_port, line)
             if not host or port == 0:
                 return self._create_invalid_ss_server(endpoint_error or "failed to parse endpoint")
-                
+
             return self._create_ss_server(method, password, host, port, tag, query)
-            
+
         except (ValueError, AttributeError, IndexError) as e:
             # Fallback to regex parsing if structured parsing fails
             return self._parse_ss_with_regex(uri, tag, query, line, str(e))
@@ -185,7 +185,7 @@ class URIListParser(BaseParser):
 
     def _extract_ss_components(self, uri: str, line: str) -> Tuple[str, str]:
         """Extract method:password and host:port components from SS URI.
-        
+
         Enhanced to handle:
         - Unicode/emoji in passwords
         - Spaces in passwords
@@ -193,7 +193,7 @@ class URIListParser(BaseParser):
         - Various encoding issues
         """
         debug_level = get_debug_level()
-        
+
         # Try base64 decoding first
         if '@' in uri:
             b64, after = uri.split('@', 1)
@@ -208,7 +208,7 @@ class URIListParser(BaseParser):
             except (binascii.Error, UnicodeDecodeError):
                 # Fallback: treat as plain text
                 decoded = b64
-                
+
             if '@' in decoded:
                 # Base64 decoded format: method:password@host:port
                 parts = decoded.split('@', 1)
@@ -228,7 +228,7 @@ class URIListParser(BaseParser):
                 decoded = base64.urlsafe_b64decode(uri_padded).decode('utf-8')
             except (binascii.Error, UnicodeDecodeError):
                 decoded = uri  # fallback: not base64
-            
+
             if '@' in decoded:
                 parts = decoded.split('@', 1)
                 return parts[0], parts[1]
@@ -239,45 +239,45 @@ class URIListParser(BaseParser):
 
     def _parse_ss_credentials(self, method_pass: str, line: str) -> Tuple[str, str]:
         """Parse method and password from method:password string.
-        
+
         Enhanced to handle:
         - Unicode/emoji in passwords
         - Spaces in passwords
         - Escaped characters
         """
         debug_level = get_debug_level()
-        
+
         if ':' not in method_pass:
             if debug_level > 0:
                 logger.warning(f"ss:// parse failed (no colon in method:pass): {line[:100]}...")
             return "", ""
-        
+
         parts = method_pass.split(':', 1)
         method, password = parts[0], parts[1]
-        
+
         # Handle URL-encoded passwords
         try:
             password = self._safe_unquote(password)
         except Exception:
             pass  # Keep original if unquote fails
-            
+
         return method, password
 
     def _parse_ss_endpoint(self, host_port: str, line: str) -> Tuple[str, int, str]:
         """Parse host and port from host:port string.
-        
+
         Enhanced to handle:
         - IPv6 addresses
         - Unicode in hostnames
         - Various port formats
         """
         debug_level = get_debug_level()
-        
+
         if ':' not in host_port:
             if debug_level > 0:
                 logger.warning(f"ss:// parse failed (no port specified): {line[:100]}...")
             return "", 0, "no port specified"
-        
+
         # Handle IPv6 addresses
         if host_port.startswith('[') and ']' in host_port:
             # IPv6 format: [::1]:port
@@ -288,7 +288,7 @@ class URIListParser(BaseParser):
             # Regular format: host:port
             parts = host_port.split(':', 1)
             host, port_str = parts[0], parts[1]
-        
+
         try:
             port = int(port_str)
             if port <= 0 or port > 65535:
@@ -301,17 +301,17 @@ class URIListParser(BaseParser):
 
     def _create_ss_server(self, method: str, password: str, host: str, port: int, tag: str, query: dict) -> ParsedServer:
         """Create ParsedServer object for shadowsocks configuration.
-        
+
         Enhanced to handle:
         - Unicode/emoji in tags
         - Complex query parameters
         - Various metadata formats
         """
         meta = {"password": password}  # pragma: allowlist secret
-        
+
         if tag:
             meta["tag"] = tag
-            
+
         # Process query parameters
         for k, v in query.items():
             if v:
@@ -322,7 +322,7 @@ class URIListParser(BaseParser):
                     meta[k] = v  # Keep as list if multiple values
             else:
                 meta[k] = ""
-        
+
         return ParsedServer(
             type="ss",
             address=host,
@@ -337,17 +337,17 @@ class URIListParser(BaseParser):
 
     def _parse_ss_with_regex(self, uri: str, tag: str, query: dict, line: str, error: str) -> ParsedServer:
         """Fallback SS parsing using regex pattern matching.
-        
+
         Enhanced regex patterns for better edge case handling.
         """
         debug_level = get_debug_level()
-        
+
         # Try multiple regex patterns for different formats
         patterns = [
             r'(?P<method>[^:]+):(?P<password>[^@]+)@(?P<host>[^:]+):(?P<port>\d+)',  # Standard
             r'(?P<method>[^:]+):(?P<password>[^@]+)@\[(?P<host>[^\]]+)\]:?(?P<port>\d+)',  # IPv6
         ]
-        
+
         for pattern in patterns:
             match = re.match(pattern, uri)
             if match:
@@ -363,7 +363,7 @@ class URIListParser(BaseParser):
                     security=match.group('method'),
                     meta=meta
                 )
-        
+
         if debug_level > 0:
             logger.warning(f"ss:// totally failed to parse: {line[:100]}... (error: {error})")
         return self._create_invalid_ss_server(f"parse failed: {error}")
@@ -376,12 +376,12 @@ class URIListParser(BaseParser):
             password = self._safe_unquote(parsed.username or "")
             params = parse_qs(parsed.query)
             tag = self._safe_unquote(parsed.fragment) if parsed.fragment else ""
-            
+
             meta = {"tag": tag} if tag else {}
             meta["password"] = password
             for k, v in params.items():
                 meta[k] = v[0] if v else ""
-                
+
             return ParsedServer(
                 type="trojan",
                 address=host or "",
@@ -401,11 +401,11 @@ class URIListParser(BaseParser):
             uuid = self._safe_unquote(parsed.username or "")
             params = parse_qs(parsed.query)
             label = self._safe_unquote(parsed.fragment) if parsed.fragment else ""
-            
+
             meta = {"uuid": uuid, "label": label}  # pragma: allowlist secret
             for k, v in params.items():
                 meta[k] = v[0] if v else ""
-                
+
             return ParsedServer(
                 type="vless",
                 address=host or "",
@@ -427,10 +427,10 @@ class URIListParser(BaseParser):
                 b64_padded = b64 + '=' * (4 - padding_needed)
             else:
                 b64_padded = b64
-                
+
             decoded = base64.urlsafe_b64decode(b64_padded).decode('utf-8')
             data = json.loads(decoded)
-            
+
             return ParsedServer(
                 type="vmess",
                 address=data.get("add", ""),

@@ -24,15 +24,15 @@ def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
     WireGuardInbound, TuicInbound, ShadowTlsInbound, DirectInbound
 ]]:
     """Convert ClientProfile to list of sing-box inbound configurations.
-    
+
     Args:
         profile: ClientProfile object to convert
-        
+
     Returns:
         List of appropriate inbound model instances
     """
     inbounds = []
-    
+
     try:
         # Handle inbounds configuration
         if hasattr(profile, 'inbounds') and profile.inbounds:
@@ -40,7 +40,7 @@ def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
                 inbound = _convert_single_inbound(inbound_config)
                 if inbound:
                     inbounds.append(inbound)
-        
+
         # Default mixed inbound if no inbounds specified
         if not inbounds:
             default_inbound = MixedInbound(
@@ -50,7 +50,7 @@ def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
                 listen_port=7890
             )
             inbounds.append(default_inbound)
-            
+
     except Exception as e:
         logger.error(f"Failed to convert client profile to inbounds: {e}")
         # Return default mixed inbound on error
@@ -60,7 +60,7 @@ def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
             listen="127.0.0.1",
             listen_port=7890
         )]
-    
+
     return inbounds
 
 
@@ -71,16 +71,16 @@ def _convert_single_inbound(inbound_config: dict) -> Union[
     None
 ]:
     """Convert a single inbound configuration to appropriate model.
-    
+
     Args:
         inbound_config: Dictionary containing inbound configuration
-        
+
     Returns:
         Appropriate inbound model instance or None if conversion fails
     """
     try:
         inbound_type = inbound_config.get("type", "mixed")
-        
+
         # Base configuration
         base_config = {
             "type": inbound_type,
@@ -88,7 +88,7 @@ def _convert_single_inbound(inbound_config: dict) -> Union[
             "listen": inbound_config.get("listen", "127.0.0.1"),
             "listen_port": inbound_config.get("listen_port", 7890)
         }
-        
+
         # Add optional fields if present
         if "sniff" in inbound_config:
             base_config["sniff"] = inbound_config["sniff"]
@@ -96,7 +96,7 @@ def _convert_single_inbound(inbound_config: dict) -> Union[
             base_config["sniff_override_destination"] = inbound_config["sniff_override_destination"]
         if "domain_strategy" in inbound_config:
             base_config["domain_strategy"] = inbound_config["domain_strategy"]
-        
+
         # Type-specific conversion
         if inbound_type == "mixed":
             return MixedInbound(**base_config)
@@ -172,7 +172,7 @@ def _convert_single_inbound(inbound_config: dict) -> Union[
         else:
             logger.warning(f"Unsupported inbound type: {inbound_type}")
             return None
-            
+
     except Exception as e:
         logger.error(f"Failed to convert inbound configuration: {e}")
         return None

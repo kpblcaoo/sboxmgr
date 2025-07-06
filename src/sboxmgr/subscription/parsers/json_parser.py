@@ -16,21 +16,21 @@ from ..registry import register
 @register("json")
 class JSONParser(BaseParser):
     """Parser for native JSON subscription format.
-    
+
     This parser handles JSON subscription data with server arrays and
     converts them into ParsedServer objects. It supports various JSON
     subscription formats and provides robust error handling.
     """
-    
+
     def parse(self, raw: bytes) -> List[ParsedServer]:
         """Parse JSON subscription data into ParsedServer objects.
-        
+
         Args:
             raw: Raw bytes containing JSON subscription data.
-            
+
         Returns:
             List[ParsedServer]: List of parsed server configurations.
-            
+
         Raises:
             json.JSONDecodeError: If JSON parsing fails.
             KeyError: If required JSON fields are missing.
@@ -49,21 +49,21 @@ class JSONParser(BaseParser):
 @register("tolerant_json")
 class TolerantJSONParser(BaseParser):
     """Parser for JSON data with comments and formatting tolerance.
-    
+
     This parser handles JSON subscription data that may contain comments,
     trailing commas, or other non-standard JSON formatting. It cleans
     the data before parsing to improve compatibility with various sources.
     """
-    
+
     def parse(self, raw: bytes) -> List[ParsedServer]:
         """Parse tolerant JSON subscription data into ParsedServer objects.
-        
+
         Args:
             raw: Raw bytes containing JSON data with potential formatting issues.
-            
+
         Returns:
             List[ParsedServer]: List of parsed server configurations.
-            
+
         Raises:
             json.JSONDecodeError: If JSON parsing fails after cleaning.
 
@@ -119,21 +119,21 @@ class TolerantJSONParser(BaseParser):
 @register("ssr_json")
 class SSRJSONParser(BaseParser):
     """Parser for ShadowsocksR (SSR) JSON subscription format.
-    
+
     This parser handles SSR-specific JSON format with SSR protocol
     configurations and converts them into standardized ParsedServer
     objects for compatibility with other subscription formats.
     """
-    
+
     def parse(self, raw: bytes):
         """Parse SSR JSON subscription data into ParsedServer objects.
-        
+
         Args:
             raw: Raw bytes containing SSR JSON subscription data.
-            
+
         Returns:
             List[ParsedServer]: List of parsed SSR server configurations.
-            
+
         Raises:
             json.JSONDecodeError: If JSON parsing fails.
             KeyError: If required SSR fields are missing.

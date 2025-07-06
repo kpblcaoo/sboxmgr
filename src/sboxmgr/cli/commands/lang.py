@@ -29,32 +29,32 @@ def lang_cmd(
     set_lang: str = typer.Option(None, "--set", "-s", help=t("cli.lang.set.help")),
 ):
     """Manage CLI internationalization language settings.
-    
+
     Provides comprehensive language management for the CLI interface including
     displaying current language configuration, listing all available languages
     with metadata, and persistently setting the preferred language.
-    
+
     Language detection priority:
     1. SBOXMGR_LANG environment variable (highest priority)
     2. Configuration file setting (~/.sboxmgr/config.toml) 
     3. System locale (LANG environment variable)
     4. Default fallback (English)
-    
+
     Features:
     - Persistent language configuration storage
     - AI-generated translation identification
     - Bilingual help display for system locale scenarios
     - Validation of language availability before setting
     - Human-readable language names display
-    
+
     Args:
         set_lang: Language code to set as default (e.g., 'en', 'ru', 'de', 'zh').
                  If not provided, displays current language information.
-        
+
     Raises:
         typer.Exit: If specified language is not available or configuration
                     file cannot be written.
-                    
+
     Examples:
         sboxmgr lang                    # Show current language and available options
         sboxmgr lang --set ru           # Set Russian as default language

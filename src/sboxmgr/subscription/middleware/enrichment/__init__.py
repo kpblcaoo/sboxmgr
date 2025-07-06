@@ -15,7 +15,7 @@ from .custom import CustomEnricher
 __all__ = [
     # Main middleware class
     "EnrichmentMiddleware",
-    
+
     # Individual enrichers
     "BasicEnricher",
     "GeoEnricher",

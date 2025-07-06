@@ -15,7 +15,7 @@ from .pipeline_coordinator import PipelineCoordinator
 __all__ = [
     # Main manager class
     "SubscriptionManager",
-    
+
     # Individual components
     "detect_parser",
     "CacheManager",

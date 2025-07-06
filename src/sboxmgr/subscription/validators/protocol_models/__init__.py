@@ -18,7 +18,7 @@ Example usage:
         VmessConfig,
         OutboundModel
     )
-    
+
     # Validate a protocol configuration
     config = validate_protocol_config(config_dict, "shadowsocks")
 """

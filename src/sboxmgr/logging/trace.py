@@ -16,13 +16,13 @@ trace_id_var: ContextVar[str] = ContextVar('trace_id', default='')
 
 def get_trace_id() -> str:
     """Get current trace ID or generate new one.
-    
+
     Automatically generates a new trace ID if none exists in current context.
     Uses short 8-character UUID for readability in logs.
-    
+
     Returns:
         str: Current trace ID (8 characters)
-        
+
     Example:
         >>> trace_id = get_trace_id()
         >>> len(trace_id)
@@ -38,13 +38,13 @@ def get_trace_id() -> str:
 
 def set_trace_id(trace_id: str) -> None:
     """Set trace ID for current context.
-    
+
     Manually sets trace ID for current execution context.
     Useful for external requests or when inheriting trace ID from upstream.
-    
+
     Args:
         trace_id: Trace ID to set (will be truncated to 8 characters)
-        
+
     Example:
         >>> set_trace_id("abc12345")
         >>> get_trace_id()
@@ -59,16 +59,16 @@ def set_trace_id(trace_id: str) -> None:
 @contextmanager
 def with_trace_id(trace_id: Optional[str] = None) -> Generator[str, None, None]:
     """Context manager for trace ID scoping.
-    
+
     Creates isolated trace ID scope that automatically resets when exiting.
     Generates new trace ID if none provided.
-    
+
     Args:
         trace_id: Optional trace ID to use. If None, generates new one.
-        
+
     Yields:
         str: The trace ID being used in this scope
-        
+
     Example:
         >>> with with_trace_id("test1234") as tid:
         ...     print(f"Using trace ID: {tid}")
@@ -81,7 +81,7 @@ def with_trace_id(trace_id: Optional[str] = None) -> Generator[str, None, None]:
         trace_id = str(uuid.uuid4())[:8]
     else:
         trace_id = str(trace_id)[:8]
-    
+
     token = trace_id_var.set(trace_id)
     try:
         yield trace_id
@@ -91,13 +91,13 @@ def with_trace_id(trace_id: Optional[str] = None) -> Generator[str, None, None]:
 
 def generate_trace_id() -> str:
     """Generate new trace ID without setting it.
-    
+
     Creates a new 8-character trace ID based on UUID4.
     Does not modify current context.
-    
+
     Returns:
         str: New trace ID (8 characters)
-        
+
     Example:
         >>> tid = generate_trace_id()
         >>> len(tid)
@@ -109,10 +109,10 @@ def generate_trace_id() -> str:
 
 def clear_trace_id() -> None:
     """Clear trace ID from current context.
-    
+
     Removes trace ID from current context. Next call to get_trace_id()
     will generate a new one.
-    
+
     Example:
         >>> set_trace_id("test1234")
         >>> get_trace_id()
@@ -126,13 +126,13 @@ def clear_trace_id() -> None:
 
 def copy_trace_context() -> str:
     """Copy current trace ID for passing to other contexts.
-    
+
     Useful for manual trace ID propagation to external systems
     or when crossing context boundaries.
-    
+
     Returns:
         str: Current trace ID, or new one if none exists
-        
+
     Example:
         >>> current_trace = copy_trace_context()
         >>> # Pass to external system or different context

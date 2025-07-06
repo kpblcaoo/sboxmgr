@@ -20,33 +20,33 @@ def generate_inbounds(profile: ClientProfile) -> List[Dict[str, Any]]:
         - Validation through pydantic.
     """
     inbounds = []
-    
+
     for inbound in profile.inbounds:
         # Create base inbound structure
         inb = {
             "type": inbound.type,
             "tag": _get_inbound_tag(inbound)
         }
-        
+
         # Special handling for tun
         if inbound.type == "tun":
             _configure_tun_inbound(inb, inbound)
         else:
             _configure_regular_inbound(inb, inbound)
-        
+
         # Remove None fields for compactness
         inb = {k: v for k, v in inb.items() if v is not None}
         inbounds.append(inb)
-    
+
     return inbounds
 
 
 def _get_inbound_tag(inbound) -> str:
     """Get inbound tag from options or generate default.
-    
+
     Args:
         inbound: Inbound configuration object.
-        
+
     Returns:
         Inbound tag string.
     """
@@ -57,7 +57,7 @@ def _get_inbound_tag(inbound) -> str:
 
 def _configure_tun_inbound(inb: Dict[str, Any], inbound) -> None:
     """Configure TUN inbound with special handling.
-    
+
     Args:
         inb: Inbound configuration to modify.
         inbound: Source inbound object.
@@ -71,7 +71,7 @@ def _configure_tun_inbound(inb: Dict[str, Any], inbound) -> None:
 
 def _configure_regular_inbound(inb: Dict[str, Any], inbound) -> None:
     """Configure regular (non-TUN) inbound.
-    
+
     Args:
         inb: Inbound configuration to modify.
         inbound: Source inbound object.
@@ -81,7 +81,7 @@ def _configure_regular_inbound(inb: Dict[str, Any], inbound) -> None:
         inb["listen"] = inbound.listen
     if hasattr(inbound, 'port') and inbound.port:
         inb["listen_port"] = inbound.port
-    
+
     # Add other fields from options
     if inbound.options:
         for key, value in inbound.options.items():

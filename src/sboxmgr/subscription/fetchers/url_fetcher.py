@@ -19,11 +19,11 @@ from typing import Dict, Tuple, Optional
 @register("uri_list")
 class URLFetcher(BaseFetcher):
     """HTTP/HTTPS URL fetcher with caching and compression support.
-    
+
     This fetcher handles HTTP/HTTPS URLs and local file:// URLs with support
     for gzip decompression, response caching, custom headers, and user agents.
     It provides thread-safe caching and respects size limits for security.
-    
+
     Attributes:
         _cache_lock: Thread lock for cache synchronization.
         _fetch_cache: Cache dictionary for storing fetched data.
@@ -35,7 +35,7 @@ class URLFetcher(BaseFetcher):
 
     def __init__(self, source: SubscriptionSource):
         """Initialize URLFetcher.
-        
+
         Args:
             source: Subscription source configuration.
         """

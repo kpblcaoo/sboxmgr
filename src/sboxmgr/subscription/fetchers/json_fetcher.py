@@ -13,11 +13,11 @@ from typing import Dict, Tuple, Optional
 @register("url_json")
 class JSONFetcher(BaseFetcher):
     """Fetcher for JSON-based subscription APIs.
-    
+
     This fetcher specializes in handling JSON API endpoints with proper
     content-type validation, JSON parsing, and error handling. It provides
     thread-safe caching and supports various JSON subscription formats.
-    
+
     Attributes:
         _cache_lock: Thread lock for cache synchronization.
         _fetch_cache: Cache dictionary for storing fetched JSON data.
@@ -70,7 +70,7 @@ class JSONFetcher(BaseFetcher):
             print(f"[fetcher] Using User-Agent: {headers.get('User-Agent', '[none]')}")
             resp = requests.get(self.source.url, headers=headers, stream=True, timeout=30)
             resp.raise_for_status()
-            
+
             # Используем iter_content для правильной обработки сжатых данных
             data = b""
             for chunk in resp.iter_content(chunk_size=8192):
@@ -78,9 +78,9 @@ class JSONFetcher(BaseFetcher):
                     print(f"[fetcher][WARN] Downloaded data exceeds limit ({size_limit} bytes), skipping.")
                     raise ValueError("Downloaded data exceeds limit")
                 data += chunk
-            
+
             with self._cache_lock:
                 self._fetch_cache[key] = data
             return data
 
- 
+

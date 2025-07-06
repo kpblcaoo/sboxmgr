@@ -2,12 +2,12 @@
 
 def load_outbounds(json_data, supported_protocols):
     """Load outbounds that are supported by the specified protocols.
-    
+
     Args:
         json_data: JSON data containing outbounds, either dict with 'outbounds' key
                   or list of outbound objects.
         supported_protocols: List of protocol types to filter by.
-        
+
     Returns:
         List of outbound objects that match the supported protocols.
 

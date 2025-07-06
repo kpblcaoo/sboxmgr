@@ -32,7 +32,7 @@ __all__ = [
     'initialize_logging',
     'get_logger',
     'reconfigure_logging',
-    
+
     # Trace ID system
     'get_trace_id',
     'set_trace_id',
@@ -40,7 +40,7 @@ __all__ = [
     'generate_trace_id',
     'clear_trace_id',
     'copy_trace_context',
-    
+
     # Sinks and formatters
     'LogSink',
     'detect_available_sinks',

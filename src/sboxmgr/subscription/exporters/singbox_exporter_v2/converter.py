@@ -35,10 +35,10 @@ def convert_parsed_server_to_outbound(server: ParsedServer) -> Optional[Union[
     AnyTlsOutbound, SshOutbound, TorOutbound
 ]]:
     """Convert ParsedServer to appropriate sing-box outbound model.
-    
+
     Args:
         server: ParsedServer object to convert
-        
+
     Returns:
         Appropriate outbound model instance or None if conversion fails
     """
@@ -47,14 +47,14 @@ def convert_parsed_server_to_outbound(server: ParsedServer) -> Optional[Union[
         protocol_type = server.type
         if protocol_type == "ss":
             protocol_type = "shadowsocks"
-        
+
         # Create base outbound data
         outbound_data = {
             "type": protocol_type,
             "server": server.address,
             "server_port": server.port,
         }
-        
+
         # Add tag
         if server.tag:
             outbound_data["tag"] = server.tag
@@ -62,7 +62,7 @@ def convert_parsed_server_to_outbound(server: ParsedServer) -> Optional[Union[
             outbound_data["tag"] = server.meta["name"]
         else:
             outbound_data["tag"] = f"{protocol_type}-{server.address}"
-        
+
         # Protocol-specific conversion
         converter_map = {
             "shadowsocks": convert_shadowsocks,
@@ -80,14 +80,14 @@ def convert_parsed_server_to_outbound(server: ParsedServer) -> Optional[Union[
             "socks": convert_socks,
             "direct": convert_direct,
         }
-        
+
         converter = converter_map.get(protocol_type)
         if converter:
             return converter(server, outbound_data)
         else:
             logger.warning(f"Unsupported protocol type: {protocol_type}")
             return None
-            
+
     except Exception as e:
         logger.error(f"Failed to convert server {server.address}:{server.port}: {e}")
         return None

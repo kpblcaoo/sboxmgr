@@ -21,7 +21,7 @@ def list(
     if not policies:
         typer.echo(t("No policies found matching criteria"))
         return
-    
+
     typer.echo(t("Registered policies:"))
     for policy in policies:
         status = "enabled" if policy.enabled else "disabled"
@@ -41,7 +41,7 @@ def test(
     if not policy_registry.policies:
         typer.echo(t("No policies registered"))
         return
-    
+
     # Parse server from file or inline JSON
     server_obj = None
     if server:
@@ -54,7 +54,7 @@ def test(
         except Exception as e:
             typer.echo(f"Error parsing server: {e}")
             raise typer.Exit(1)
-    
+
     context = PolicyContext(
         profile=profile,
         server=server_obj,
@@ -62,14 +62,14 @@ def test(
         env={},
         metadata={"test": True}
     )
-    
+
     # Use evaluate_all() for comprehensive results
     try:
         evaluation_result = policy_registry.evaluate_all(context)
     except Exception as e:
         typer.echo(f"Error during policy evaluation: {e}")
         raise typer.Exit(1)
-    
+
     # Display results
     typer.echo(t("Policy evaluation results:"))
     typer.echo(f"Server: {evaluation_result.server_identifier}")
@@ -77,11 +77,11 @@ def test(
     typer.echo(f"Reason: {evaluation_result.overall_reason}")
     typer.echo(f"Total policies evaluated: {evaluation_result.total_policies}")
     typer.echo()
-    
+
     if detailed:
         typer.echo(t("Detailed results:"))
         typer.echo()
-        
+
         # Show denials
         if evaluation_result.has_denials:
             typer.echo(t("❌ DENIALS:"))
@@ -91,7 +91,7 @@ def test(
                     for key, value in denial.metadata.items():
                         typer.echo(f"    {key}: {value}")
             typer.echo()
-        
+
         # Show warnings
         if evaluation_result.has_warnings and show_warnings:
             typer.echo(t("⚠️ WARNINGS:"))
@@ -101,7 +101,7 @@ def test(
                     for key, value in warning.metadata.items():
                         typer.echo(f"    {key}: {value}")
             typer.echo()
-        
+
         # Show info results
         if evaluation_result.info_results and show_info:
             typer.echo(t("ℹ️ INFO:"))
@@ -117,12 +117,12 @@ def test(
             typer.echo(t("❌ Denials:"))
             for denial in evaluation_result.denials:
                 typer.echo(f"  {denial.policy_name}: {denial.reason}")
-        
+
         if evaluation_result.has_warnings and show_warnings:
             typer.echo(t("⚠️ Warnings:"))
             for warning in evaluation_result.warnings:
                 typer.echo(f"  {warning.policy_name}: {warning.reason}")
-        
+
         if evaluation_result.info_results and show_info:
             typer.echo(t("ℹ️ Info:"))
             for info_result in evaluation_result.info_results:
@@ -140,7 +140,7 @@ def audit(
     if not policy_registry.policies:
         typer.echo(t("No policies registered"))
         return
-    
+
     # Load servers from file
     servers = []
     if server_file:
@@ -168,9 +168,9 @@ def audit(
             {"type": "http", "address": "proxy.example.com", "port": 8080},
             {"type": "ss", "address": "ss.example.com", "port": 8388}
         ]
-    
+
     typer.echo(t("Auditing {count} servers...").format(count=len(servers)))
-    
+
     audit_results = []
     for i, server in enumerate(servers):
         context = PolicyContext(
@@ -180,7 +180,7 @@ def audit(
             env={},
             metadata={"audit": True, "server_index": i}
         )
-        
+
         try:
             evaluation_result = policy_registry.evaluate_all(context)
             audit_results.append(evaluation_result.to_dict())
@@ -191,7 +191,7 @@ def audit(
                 "overall_reason": f"Evaluation error: {e}",
                 "error": str(e)
             })
-    
+
     # Output results
     if format == "json":
         output_data = {
@@ -204,7 +204,7 @@ def audit(
             },
             "results": audit_results
         }
-        
+
         if output:
             with open(output, 'w') as f:
                 json.dump(output_data, f, indent=2)
@@ -215,25 +215,25 @@ def audit(
         # Text format
         typer.echo(t("Audit Results:"))
         typer.echo("=" * 50)
-        
+
         allowed_count = sum(1 for r in audit_results if r.get("is_allowed", False))
         denied_count = len(servers) - allowed_count
-        
+
         typer.echo(t("Summary: {allowed} allowed, {denied} denied").format(
             allowed=allowed_count, denied=denied_count
         ))
         typer.echo()
-        
+
         for result in audit_results:
             status = "✅ ALLOWED" if result.get("is_allowed", False) else "❌ DENIED"
             typer.echo(f"{result['server_identifier']}: {status}")
             typer.echo(f"  Reason: {result.get('overall_reason', 'Unknown')}")
-            
+
             if result.get("denials"):
                 typer.echo("  Denials:")
                 for denial in result["denials"]:
                     typer.echo(f"    - {denial['policy']}: {denial['reason']}")
-            
+
             if result.get("warnings"):
                 typer.echo("  Warnings:")
                 for warning in result["warnings"]:
@@ -251,39 +251,39 @@ def enable(
         # Enable all policies
         enabled_count = 0
         total_count = len(policy_registry.policies)
-        
+
         for policy in policy_registry.policies:
             if not policy.enabled:
                 policy.enabled = True
                 enabled_count += 1
-        
+
         if enabled_count > 0:
             typer.echo(t("Enabled {count} policies").format(count=enabled_count))
         else:
             typer.echo(t("All policies were already enabled"))
-        
+
         typer.echo(t("Total policies: {total}").format(total=total_count))
         return
-    
+
     # Enable specific policies
     if not policy_names:
         typer.echo(t("No policy names provided"))
         raise typer.Exit(1)
-    
+
     # Split policy names by space
     names = policy_names.split()
-    
+
     results = []
     for policy_name in names:
         if policy_registry.enable(policy_name):
             results.append(("✅", policy_name, "enabled"))
         else:
             results.append(("❌", policy_name, "not found"))
-    
+
     # Display results
     for status, name, message in results:
         typer.echo(f"{status} {name}: {message}")
-    
+
     # Exit with error if any policy was not found
     failed_count = sum(1 for status, _, _ in results if status == "❌")
     if failed_count > 0:
@@ -301,39 +301,39 @@ def disable(
         # Disable all policies
         disabled_count = 0
         total_count = len(policy_registry.policies)
-        
+
         for policy in policy_registry.policies:
             if policy.enabled:
                 policy.enabled = False
                 disabled_count += 1
-        
+
         if disabled_count > 0:
             typer.echo(t("Disabled {count} policies").format(count=disabled_count))
         else:
             typer.echo(t("All policies were already disabled"))
-        
+
         typer.echo(t("Total policies: {total}").format(total=total_count))
         return
-    
+
     # Disable specific policies
     if not policy_names:
         typer.echo(t("No policy names provided"))
         raise typer.Exit(1)
-    
+
     # Split policy names by space
     names = policy_names.split()
-    
+
     results = []
     for policy_name in names:
         if policy_registry.disable(policy_name):
             results.append(("✅", policy_name, "disabled"))
         else:
             results.append(("❌", policy_name, "not found"))
-    
+
     # Display results
     for status, name, message in results:
         typer.echo(f"{status} {name}: {message}")
-    
+
     # Exit with error if any policy was not found
     failed_count = sum(1 for status, _, _ in results if status == "❌")
     if failed_count > 0:
@@ -347,7 +347,7 @@ def info():
     typer.echo(t("Policy System Information"))
     typer.echo("=" * 40)
     typer.echo()
-    
+
     typer.echo(t("Available Policy Groups:"))
     groups = {}
     for policy in policy_registry.policies:
@@ -355,10 +355,10 @@ def info():
         if group not in groups:
             groups[group] = []
         groups[group].append(policy.name)
-    
+
     for group, policies in groups.items():
         typer.echo(f"  {group}: {', '.join(policies)}")
-    
+
     typer.echo()
     typer.echo(t("Security Policy Examples:"))
     typer.echo("  ProtocolPolicy: blocks http, socks5; allows vless, hysteria2")

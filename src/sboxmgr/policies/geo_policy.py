@@ -11,7 +11,7 @@ from .utils import extract_metadata_field, validate_mode
 
 class CountryPolicy(BasePolicy):
     """Policy for country-based restrictions.
-    
+
     Allows or denies servers based on their country code.
     Supports both whitelist and blacklist modes.
     """
@@ -24,12 +24,12 @@ class CountryPolicy(BasePolicy):
                  blocked_countries: Optional[List[str]] = None,
                  mode: str = "whitelist"):
         """Initialize country policy.
-        
+
         Args:
             allowed_countries: List of allowed country codes (whitelist mode)
             blocked_countries: List of blocked country codes (blacklist mode)
             mode: 'whitelist' or 'blacklist'
-            
+
         Raises:
             ValueError: If mode is not 'whitelist' or 'blacklist'
 
@@ -42,24 +42,24 @@ class CountryPolicy(BasePolicy):
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         """Evaluate country restrictions.
-        
+
         Args:
             context: Context containing server information
-            
+
         Returns:
             PolicyResult indicating if server is allowed
 
         """
         server = context.server
-        
+
         if not server:
             return PolicyResult.allow("No server to check")
-        
+
         # Extract country from server
         country = self._extract_country(server)
         if not country:
             return PolicyResult.allow("No country information available")
-        
+
         # Apply policy based on mode
         if self.mode == "whitelist":
             if self.allowed_countries and country not in self.allowed_countries:
@@ -75,15 +75,15 @@ class CountryPolicy(BasePolicy):
                     country=country,
                     blocked_countries=list(self.blocked_countries)
                 )
-        
+
         return PolicyResult.allow(f"Country {country} is allowed")
 
     def _extract_country(self, server: Any) -> Optional[str]:
         """Extract country code from server object.
-        
+
         Args:
             server: Server object to extract country from
-            
+
         Returns:
             Country code or None if not found
 
@@ -98,7 +98,7 @@ class CountryPolicy(BasePolicy):
 
 class ASNPolicy(BasePolicy):
     """Policy for ASN-based restrictions.
-    
+
     Allows or denies servers based on their Autonomous System Number.
     Useful for blocking specific ISPs or network providers.
     """
@@ -111,12 +111,12 @@ class ASNPolicy(BasePolicy):
                  blocked_asns: Optional[List[int]] = None,
                  mode: str = "blacklist"):
         """Initialize ASN policy.
-        
+
         Args:
             allowed_asns: List of allowed ASN numbers (whitelist mode)
             blocked_asns: List of blocked ASN numbers (blacklist mode)
             mode: 'whitelist' or 'blacklist'
-            
+
         Raises:
             ValueError: If mode is not 'whitelist' or 'blacklist'
 
@@ -129,24 +129,24 @@ class ASNPolicy(BasePolicy):
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         """Evaluate ASN restrictions.
-        
+
         Args:
             context: Context containing server information
-            
+
         Returns:
             PolicyResult indicating if server is allowed
 
         """
         server = context.server
-        
+
         if not server:
             return PolicyResult.allow("No server to check")
-        
+
         # Extract ASN from server
         asn = self._extract_asn(server)
         if not asn:
             return PolicyResult.allow("No ASN information available")
-        
+
         # Apply policy based on mode
         if self.mode == "whitelist":
             if self.allowed_asns and asn not in self.allowed_asns:
@@ -162,15 +162,15 @@ class ASNPolicy(BasePolicy):
                     asn=asn,
                     blocked_asns=list(self.blocked_asns)
                 )
-        
+
         return PolicyResult.allow(f"ASN {asn} is allowed")
 
     def _extract_asn(self, server: Any) -> Optional[int]:
         """Extract ASN from server object.
-        
+
         Args:
             server: Server object to extract ASN from
-            
+
         Returns:
             ASN number or None if not found
 

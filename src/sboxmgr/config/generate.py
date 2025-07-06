@@ -58,7 +58,7 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
 
     # Write the temporary configuration using tempfile
     config = json.dumps(template, indent=2)
-    
+
     # Ensure config_file directory exists
     config_dir = os.path.dirname(config_file)
     if not os.path.isdir(config_dir):
@@ -97,15 +97,15 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
 
 def generate_temp_config(template_data: dict, servers: List[dict], user_routes: List[dict] = None) -> dict:
     """Generate temporary configuration from template and servers.
-    
+
     Args:
         template_data: Configuration template data
         servers: List of server configurations
         user_routes: Optional user-defined routes
-        
+
     Returns:
         Generated configuration dictionary
-        
+
     Raises:
         ValueError: If template is invalid or generation fails
 
@@ -122,57 +122,57 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
         source="config.generate",
         priority=EventPriority.NORMAL
     )
-    
+
     try:
         if user_routes is None:
             user_routes = []
-        
+
         # Validate template structure
         if not isinstance(template_data, dict):
             raise ValueError("Template data must be a dictionary")
-        
+
         if "outbounds" not in template_data:
             raise ValueError("Template must contain 'outbounds' key")
-        
+
         # Start with template copy
         config = copy.deepcopy(template_data)
-        
+
         # Process servers into outbounds
         outbounds = []
-        
+
         # Add server outbounds
         for i, server in enumerate(servers):
             if not isinstance(server, dict):
                 continue
-                
+
             # Create outbound configuration
             outbound = {
                 "tag": server.get("tag", f"proxy-{i+1}"),
                 "type": server.get("type", "shadowsocks"),
                 **server
             }
-            
+
             # Remove redundant fields and normalize port field
             outbound.pop("name", None)
-            
+
             # Convert server_port to port if needed
             if "server_port" in outbound and "port" not in outbound:
                 outbound["port"] = outbound.pop("server_port")
             elif "server_port" in outbound:
                 # If both exist, remove server_port and keep port
                 outbound.pop("server_port", None)
-            
+
             outbounds.append(outbound)
-        
+
         # Add user routes if provided
         if user_routes:
             for route in user_routes:
                 if isinstance(route, dict) and "tag" in route:
                     outbounds.append(route)
-        
+
         # Update config with generated outbounds
         config["outbounds"] = outbounds
-        
+
         # Emit successful generation event
         emit_event(
             EventType.CONFIG_GENERATED,
@@ -184,9 +184,9 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
             source="config.generate",
             priority=EventPriority.NORMAL
         )
-        
+
         return config
-        
+
     except Exception as e:
         # Emit error event
         emit_event(
@@ -203,10 +203,10 @@ def generate_temp_config(template_data: dict, servers: List[dict], user_routes: 
 
 def validate_temp_config_dict(config_data: dict) -> None:
     """Validate temporary configuration dictionary using basic validation.
-    
+
     Args:
         config_data: Configuration dictionary to validate
-        
+
     Raises:
         ValueError: If configuration is invalid
 
@@ -222,18 +222,18 @@ def validate_temp_config_dict(config_data: dict) -> None:
         source="config.validate",
         priority=EventPriority.NORMAL
     )
-    
+
     try:
         # Basic validation - check required fields
         if not isinstance(config_data, dict):
             raise ValueError("Configuration must be a dictionary")
-        
+
         if "outbounds" not in config_data:
             raise ValueError("Configuration must contain 'outbounds' key")
-        
+
         if not isinstance(config_data["outbounds"], list):
             raise ValueError("'outbounds' must be a list")
-        
+
         # Emit successful validation event
         emit_event(
             EventType.CONFIG_VALIDATED,
@@ -244,7 +244,7 @@ def validate_temp_config_dict(config_data: dict) -> None:
             source="config.validate",
             priority=EventPriority.NORMAL
         )
-        
+
     except Exception as e:
         # Emit error event
         emit_event(

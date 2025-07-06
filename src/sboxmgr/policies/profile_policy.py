@@ -10,7 +10,7 @@ from .base import BasePolicy, PolicyContext, PolicyResult
 
 class IntegrityPolicy(BasePolicy):
     """Policy for checking profile integrity.
-    
+
     Validates that profiles are not corrupted and contain valid data.
     Checks for required fields, data types, and structural integrity.
     """
@@ -21,7 +21,7 @@ class IntegrityPolicy(BasePolicy):
 
     def __init__(self, required_fields: Optional[list] = None):
         """Initialize integrity policy.
-        
+
         Args:
             required_fields: List of required fields in profile
 
@@ -31,35 +31,35 @@ class IntegrityPolicy(BasePolicy):
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         """Evaluate profile integrity.
-        
+
         Args:
             context: Context containing profile to validate
-            
+
         Returns:
             PolicyResult indicating if profile is valid
 
         """
         profile = context.profile
-        
+
         if not profile:
             return PolicyResult.allow("No profile to validate")
-        
+
         # Check if profile is a dict/object
         if not isinstance(profile, dict) and not hasattr(profile, 'get'):
             return PolicyResult.deny("Profile must be a dictionary or object")
-        
+
         # Check required fields (universal getter)
         getter = getattr(profile, 'get', lambda x: None)
         for field in self.required_fields:
             if getter(field) is None:
                 return PolicyResult.deny(f"Missing required field: {field}")
-        
+
         return PolicyResult.allow("Profile integrity check passed")
 
 
 class PermissionPolicy(BasePolicy):
     """Policy for checking profile permissions.
-    
+
     Validates that the current user has permission to access/modify
     the profile based on ownership and access rules.
     """
@@ -70,7 +70,7 @@ class PermissionPolicy(BasePolicy):
 
     def __init__(self, allowed_users: Optional[list] = None, admin_users: Optional[list] = None):
         """Initialize permission policy.
-        
+
         Args:
             allowed_users: List of users allowed to access profiles
             admin_users: List of admin users with full access
@@ -82,33 +82,33 @@ class PermissionPolicy(BasePolicy):
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         """Evaluate profile permissions.
-        
+
         Args:
             context: Context containing user and profile information
-            
+
         Returns:
             PolicyResult indicating if access is allowed
 
         """
         user = context.user
-        
+
         if not user:
             return PolicyResult.allow("No user specified, allowing access")
-        
+
         # Admin users have full access
         if user in self.admin_users:
             return PolicyResult.allow("Admin user access granted")
-        
+
         # Check if user is in allowed list
         if self.allowed_users and user not in self.allowed_users:
             return PolicyResult.deny(f"User {user} not in allowed users list")
-        
+
         return PolicyResult.allow("User permission check passed")
 
 
 class LimitPolicy(BasePolicy):
     """Policy for enforcing resource limits on profiles.
-    
+
     Limits the number of servers, subscriptions, and other resources
     that can be included in a profile.
     """
@@ -119,7 +119,7 @@ class LimitPolicy(BasePolicy):
 
     def __init__(self, max_servers: int = 1000, max_subscriptions: int = 10, max_size_mb: int = 10):
         """Initialize limit policy.
-        
+
         Args:
             max_servers: Maximum number of servers allowed
             max_subscriptions: Maximum number of subscriptions allowed
@@ -133,19 +133,19 @@ class LimitPolicy(BasePolicy):
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         """Evaluate resource limits.
-        
+
         Args:
             context: Context containing profile to check
-            
+
         Returns:
             PolicyResult indicating if limits are within bounds
 
         """
         profile = context.profile
-        
+
         if not profile:
             return PolicyResult.allow("No profile to check limits")
-        
+
         # Check server count
         if hasattr(profile, 'get'):
             servers = profile.get('servers', [])
@@ -155,7 +155,7 @@ class LimitPolicy(BasePolicy):
                     server_count=len(servers),
                     max_servers=self.max_servers
                 )
-        
+
         # Check subscription count
         if hasattr(profile, 'get'):
             subscriptions = profile.get('subscriptions', [])
@@ -165,7 +165,7 @@ class LimitPolicy(BasePolicy):
                     subscription_count=len(subscriptions),
                     max_subscriptions=self.max_subscriptions
                 )
-        
+
         # Check profile size (rough estimate)
         try:
             import json
@@ -179,5 +179,5 @@ class LimitPolicy(BasePolicy):
                 )
         except Exception as e:
             return PolicyResult.allow("Could not calculate profile size", error=str(e))
-        
+
         return PolicyResult.allow("Resource limits check passed")
