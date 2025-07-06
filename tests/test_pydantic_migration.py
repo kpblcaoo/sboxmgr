@@ -48,17 +48,17 @@ class TestPydanticMigration:
         entry1 = ExclusionEntry(id="server1", name="Server 1")
         entry2 = ExclusionEntry(id="server2", name="Server 2")
 
-        assert exc_list.add(entry1) == True
-        assert exc_list.add(entry2) == True
-        assert exc_list.add(entry1) == False  # Duplicate
+        assert exc_list.add(entry1)
+        assert exc_list.add(entry2)
+        assert not exc_list.add(entry1)  # Duplicate
 
         # Test contains
-        assert exc_list.contains("server1") == True
-        assert exc_list.contains("server3") == False
+        assert exc_list.contains("server1")
+        assert not exc_list.contains("server3")
 
         # Test remove
-        assert exc_list.remove("server1") == True
-        assert exc_list.remove("server1") == False  # Already removed
+        assert exc_list.remove("server1")
+        assert not exc_list.remove("server1")  # Already removed
 
         # Test serialization (JSON mode)
         data = exc_list.model_dump(mode="json")
@@ -79,15 +79,15 @@ class TestPydanticMigration:
             manager = ExclusionManager(file_path=file_path)
 
             # Test add
-            assert manager.add("server1", "Test Server 1", "Testing") == True
-            assert manager.add("server2", "Test Server 2", "Testing") == True
+            assert manager.add("server1", "Test Server 1", "Testing")
+            assert manager.add("server2", "Test Server 2", "Testing")
             assert (
-                manager.add("server1", "Test Server 1", "Testing") == False
+                not manager.add("server1", "Test Server 1", "Testing")
             )  # Duplicate
 
             # Test contains
-            assert manager.contains("server1") == True
-            assert manager.contains("server3") == False
+            assert manager.contains("server1")
+            assert not manager.contains("server3")
 
             # Test list
             exclusions = manager.list_all()
@@ -96,8 +96,8 @@ class TestPydanticMigration:
 
             # Test persistence (reload)
             manager2 = ExclusionManager(file_path=file_path)
-            assert manager2.contains("server1") == True
-            assert manager2.contains("server2") == True
+            assert manager2.contains("server1")
+            assert manager2.contains("server2")
 
     def test_subscription_models_pydantic(self):
         """Test subscription models with Pydantic."""
@@ -163,7 +163,7 @@ class TestPydanticMigration:
         event_dump = event.model_dump()
         assert len(event_dump["results"]) == 1
         assert event_dump["results"][0] == "success"
-        assert event_dump["cancelled"] == False
+        assert not event_dump["cancelled"]
 
     def test_errors_pydantic(self):
         """Test error models with Pydantic."""
@@ -191,8 +191,8 @@ class TestPydanticMigration:
         assert data["default_mode"] == "strict"
         assert data["debug_level"] == 2
         assert data["timeout_seconds"] == 60
-        assert data["cache_enabled"] == True  # Default
-        assert data["fail_safe"] == True  # Default
+        assert data["cache_enabled"]  # Default
+        assert data["fail_safe"]  # Default
 
     def test_profiles_pydantic(self):
         """Test profile models with Pydantic."""
@@ -203,7 +203,7 @@ class TestPydanticMigration:
 
         data = sub_profile.model_dump()
         assert data["id"] == "test-subscription"
-        assert data["enabled"] == True
+        assert data["enabled"]
         assert data["priority"] == 2
 
         # Test FullProfile with SubscriptionProfile list

@@ -22,7 +22,7 @@ class TestCLIRoutingFlags:
         ) as mock_generate:
             mock_generate.return_value = {"test": "config"}
 
-            result = self.runner.invoke(
+            self.runner.invoke(
                 app,
                 [
                     "export",
@@ -51,7 +51,7 @@ class TestCLIRoutingFlags:
         ) as mock_generate:
             mock_generate.return_value = {"test": "config"}
 
-            result = self.runner.invoke(
+            self.runner.invoke(
                 app,
                 [
                     "export",
@@ -81,7 +81,7 @@ class TestCLIRoutingFlags:
         ) as mock_generate:
             mock_generate.return_value = {"test": "config"}
 
-            result = self.runner.invoke(
+            self.runner.invoke(
                 app,
                 [
                     "export",
@@ -126,7 +126,7 @@ class TestCLIRoutingFlags:
             ) as mock_generate:
                 mock_generate.return_value = {"test": "config"}
 
-                result = self.runner.invoke(
+                self.runner.invoke(
                     app,
                     [
                         "export",

@@ -406,7 +406,7 @@ class TestPostProcessorChain:
 
         servers = [Mock(spec=ParsedServer)]
         context = PipelineContext()
-        result = chain.process(servers, context)
+        chain.process(servers, context)
 
         # Should continue processing despite error
         success_processor.process.assert_called_once()

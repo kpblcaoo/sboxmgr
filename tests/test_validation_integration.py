@@ -154,7 +154,7 @@ def test_uri_list_parser_with_real_data(test_subscription_url, require_external_
             # Try different encodings
             for encoding in ["utf-8", "latin-1"]:
                 try:
-                    text_data = raw_data.decode(encoding)
+                    raw_data.decode(encoding)
                     break
                 except UnicodeDecodeError:
                     continue
@@ -162,9 +162,9 @@ def test_uri_list_parser_with_real_data(test_subscription_url, require_external_
                 # If all encodings fail, try base64 decode first
                 try:
                     decoded_data = base64.b64decode(raw_data)
-                    text_data = decoded_data.decode("utf-8")
+                    decoded_data.decode("utf-8")
                 except:
-                    text_data = raw_data.decode("utf-8", errors="ignore")
+                    raw_data.decode("utf-8", errors="ignore")
 
             parser = URIListParser()
 

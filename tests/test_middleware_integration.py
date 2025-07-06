@@ -141,7 +141,7 @@ class TestMiddlewareIntegration:
         assert filtered_servers[0].type == "vless"
 
         # Apply route config
-        processed_servers = route_config.process(filtered_servers, context, profile)
+        route_config.process(filtered_servers, context, profile)
 
         # Check routing metadata
         assert "routing" in context.metadata

@@ -102,7 +102,7 @@ def add_output_args(args, tmp_path):
         if "--output" not in args:
             args += ["--output", str(tmp_path / "config.json")]
         if "--backup" in args:
-            idx = args.index("--backup")
+            args.index("--backup")
             # SBOXMGR_BACKUP_FILE уже указывает на tmp_path/backup.json
     return args
 

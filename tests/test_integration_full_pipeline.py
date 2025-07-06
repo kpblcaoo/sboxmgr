@@ -182,7 +182,7 @@ def test_pipeline_performance(test_subscription_url, require_external_tests):
         export_manager = ExportManager(export_format="singbox")
 
         start_time = time.time()
-        config = export_manager.export(result.config)
+        export_manager.export(result.config)
         export_time = time.time() - start_time
 
         print(f"Export took {export_time:.2f} seconds")

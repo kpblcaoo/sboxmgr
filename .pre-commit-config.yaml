@@ -19,25 +19,64 @@ repos:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
         types: [python]
+        exclude: |
+          (?x)^(
+              archive/.*|
+              examples/.*|
+              scripts/.*|
+              tests/.*
+          )$
       - id: ruff-format
         types: [python]
+        exclude: |
+          (?x)^(
+              archive/.*|
+              examples/.*|
+              scripts/.*|
+              tests/.*
+          )$
 
-  # 2. BLACK - Code formatter (backup)
-  - repo: https://github.com/psf/black
-    rev: 23.12.1
-    hooks:
-      - id: black
-        language_version: python3
-        args: [--line-length=88]
-
-  # 3. ISORT - Import sorting
+  # 2. ISORT - Import sorting
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
         args: [--profile=black, --line-length=88]
+        exclude: |
+          (?x)^(
+              archive/.*|
+              examples/.*|
+              scripts/.*|
+              tests/.*
+          )$
 
-  # 4. Basic cleanup hooks
+  # 3. DETECT-SECRETS - Security scanning
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args:
+          - "--baseline"
+          - ".secrets.baseline"
+        exclude: |
+          (?x)^(
+              \.secrets\.baseline$|
+              tests/.*|
+              examples/.*|
+              docs/.*
+          )$
+
+  # 4. I18N - Internationalization check
+  - repo: local
+    hooks:
+      - id: check-i18n
+        name: Check i18n keys
+        entry: python scripts/i18n/sync_keys.py --check --fail-on-missing
+        language: system
+        files: ^src/
+        pass_filenames: false
+
+  # 5. Basic cleanup hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:

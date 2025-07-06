@@ -86,7 +86,7 @@ class TestExportManagerPhase4:
             mock_registry.__getitem__ = Mock(return_value=mock_export_func)
             mock_registry.get = Mock(return_value=mock_export_func)
 
-            result = export_mgr.export(SAMPLE_SERVERS)
+            export_mgr.export(SAMPLE_SERVERS)
 
             # Verify export was called with filtered servers
             mock_export_func.assert_called_once()
@@ -128,7 +128,7 @@ class TestExportManagerPhase4:
             {"singbox": mock_singbox_export},
         ):
             context = PipelineContext(mode="test")
-            result = export_mgr.export(SAMPLE_SERVERS, context=context)
+            export_mgr.export(SAMPLE_SERVERS, context=context)
 
             # Verify export was called
             mock_singbox_export.assert_called_once()
@@ -167,7 +167,7 @@ class TestExportManagerPhase4:
                 {"singbox": mock_singbox_export},
             ):
                 context = PipelineContext(mode="test")
-                result = export_mgr.export(SAMPLE_SERVERS, context=context)
+                export_mgr.export(SAMPLE_SERVERS, context=context)
 
                 # Verify export was called
                 mock_singbox_export.assert_called_once()

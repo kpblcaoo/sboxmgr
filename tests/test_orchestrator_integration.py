@@ -221,7 +221,7 @@ def test_orchestrator_performance_with_real_data(
 
     # Measure time for server retrieval
     start_time = time.time()
-    result = orchestrator.get_subscription_servers(
+    orchestrator.get_subscription_servers(
         url=test_subscription_url, source_type="url_base64"
     )
     retrieval_time = time.time() - start_time
@@ -231,7 +231,7 @@ def test_orchestrator_performance_with_real_data(
 
     # Measure time for full export
     start_time = time.time()
-    export_result = orchestrator.export_configuration(
+    orchestrator.export_configuration(
         source_url=test_subscription_url, export_format="singbox"
     )
     export_time = time.time() - start_time

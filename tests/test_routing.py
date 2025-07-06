@@ -128,7 +128,7 @@ def test_default_router_complete_rule_set():
     assert routes[0]["action"] == "hijack-dns"
 
     # Check private IPs rule
-    assert routes[1]["ip_is_private"] == True
+    assert routes[1]["ip_is_private"]
     assert routes[1]["outbound"] == "direct"
 
     # Check exclusions (IP)

@@ -248,7 +248,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
                 timeout_sec = config["timeout_ms"] / 1000
                 cmd = ["ping", "-c", "1", "-W", str(timeout_sec), server.address]
 
-            start_time = time.time()
+            time.time()
             result = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=timeout_sec
             )
@@ -318,7 +318,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             url = f"http://{server.address}:{server.port}"
 
             start_time = time.time()
-            response = requests.head(
+            requests.head(
                 url, timeout=config["timeout_ms"] / 1000, allow_redirects=False
             )
             end_time = time.time()

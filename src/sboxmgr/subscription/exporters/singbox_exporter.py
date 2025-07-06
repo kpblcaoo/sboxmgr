@@ -53,14 +53,32 @@ _get_protocol_dispatcher = get_protocol_dispatcher
 _normalize_protocol_type = normalize_protocol_type
 _is_supported_protocol = is_supported_protocol
 _create_base_outbound = create_base_outbound
-_process_shadowsocks_config = (
-    lambda o, s, m: process_standard_server(s, "shadowsocks") is not None
-)
-_process_transport_config = lambda o, m: None  # Handled internally now
-_process_tls_config = lambda o, m, p: None  # Handled internally now
-_process_auth_and_flow_config = lambda o, m: None  # Handled internally now
-_process_tag_config = lambda o, s, m: None  # Handled internally now
-_process_additional_config = lambda o, m: None  # Handled internally now
+
+
+def _process_shadowsocks_config(o, s, m):
+    return process_standard_server(s, "shadowsocks") is not None
+
+
+def _process_transport_config(o, m):
+    return None  # Handled internally now
+
+
+def _process_tls_config(o, m, p):
+    return None  # Handled internally now
+
+
+def _process_auth_and_flow_config(o, m):
+    return None  # Handled internally now
+
+
+def _process_tag_config(o, s, m):
+    return None  # Handled internally now
+
+
+def _process_additional_config(o, m):
+    return None  # Handled internally now
+
+
 _process_standard_server = process_standard_server
 _process_single_server = process_single_server
 _create_modern_routing_rules = create_modern_routing_rules

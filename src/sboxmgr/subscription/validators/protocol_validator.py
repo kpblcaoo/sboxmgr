@@ -57,7 +57,7 @@ class ProtocolSpecificValidator(BaseParsedValidator):
                 server_dict = self._parsed_server_to_dict(server)
 
                 # Validate using protocol-specific models
-                validated_config = validate_protocol_config(server_dict, server.type)
+                validate_protocol_config(server_dict, server.type)
 
                 # If validation passes, add to valid servers
                 valid_servers.append(server)

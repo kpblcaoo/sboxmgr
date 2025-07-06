@@ -185,7 +185,7 @@ class TestExportManagerMiddlewareIntegration:
 
         # Export configuration
         context = PipelineContext(mode="test")
-        config = export_mgr.export(servers, context=context)
+        export_mgr.export(servers, context=context)
 
         # Check that middleware metadata is preserved
         assert "outbound_filter" in context.metadata
