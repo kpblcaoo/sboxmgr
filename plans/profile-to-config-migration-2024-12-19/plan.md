@@ -14,55 +14,48 @@
 
 ## 📋 **ПЛАН ВЫПОЛНЕНИЯ**
 
-### Этап 1: Переименование классов и моделей
-- [ ] `FullProfile` → `UserConfig`
-- [ ] `SubscriptionProfile` → `SubscriptionConfig`
-- [ ] `FilterProfile` → `FilterConfig`
-- [ ] `RoutingProfile` → `RoutingConfig`
-- [ ] `ExportProfile` → `ExportConfig`
-- [ ] `AgentProfile` → `AgentConfig`
-- [ ] `UIProfile` → `UIConfig`
-- [ ] `ClientProfile` → `ClientConfig` (остается JSON)
-- [ ] `InboundProfile` → `InboundConfig` (остается JSON)
+### Этап 1: Переименование классов и моделей ✅
+- [x] `FullProfile` → `UserConfig`
+- [x] `SubscriptionProfile` → `SubscriptionConfig`
+- [x] `FilterProfile` → `FilterConfig`
+- [x] `RoutingProfile` → `RoutingConfig`
+- [x] `ExportProfile` → `ExportConfig`
+- [x] `AgentProfile` → `AgentConfig`
+- [x] `UIProfile` → `UIConfig`
+- [x] `ClientProfile` → `ClientConfig` (остается JSON)
+- [x] `InboundProfile` → `InboundConfig` (остается JSON)
 
-### Этап 2: Переименование модулей и пакетов
-- [ ] `src/sboxmgr/profiles/` → `src/sboxmgr/configs/`
-- [ ] `src/sboxmgr/profiles/models.py` → `src/sboxmgr/configs/models.py`
-- [ ] `src/sboxmgr/profiles/loader.py` → `src/sboxmgr/configs/loader.py`
-- [ ] `src/sboxmgr/profiles/manager.py` → `src/sboxmgr/configs/manager.py`
-- [ ] `src/sboxmgr/profiles/cli.py` → `src/sboxmgr/configs/cli.py`
+### Этап 2: Переименование модулей и пакетов ✅
+- [x] `src/sboxmgr/profiles/` → `src/sboxmgr/configs/`
+- [x] `src/sboxmgr/profiles/models.py` → `src/sboxmgr/configs/models.py`
+- [x] `src/sboxmgr/profiles/loader.py` → `src/sboxmgr/configs/loader.py`
+- [x] `src/sboxmgr/profiles/manager.py` → `src/sboxmgr/configs/manager.py`
+- [x] `src/sboxmgr/profiles/cli.py` → `src/sboxmgr/configs/cli.py`
 
-### Этап 3: Добавление TOML поддержки
-- [ ] Расширить ConfigLoader для поддержки TOML
-- [ ] Добавить зависимость toml в pyproject.toml
-- [ ] Создать TOML сериализацию/десериализацию
-- [ ] Добавить валидацию TOML файлов
+### Этап 3: Добавление TOML поддержки ✅
+- [x] Расширить ConfigLoader для поддержки TOML
+- [x] Добавить зависимость toml в pyproject.toml
+- [x] Создать TOML сериализацию/десериализацию
+- [x] Добавить валидацию TOML файлов
 
-### Этап 4: Обновление CLI команд
-- [ ] `sboxctl profile` → `sboxctl config`
-- [ ] `sboxctl config list` - показать все конфигурации
-- [ ] `sboxctl config apply home.toml` - применить конфигурацию
-- [ ] `sboxctl config switch work` - переключить конфигурацию
-- [ ] `sboxctl config edit home` - редактировать конфигурацию
-- [ ] `sboxctl config create` - создать новую конфигурацию
+### Этап 4: Обновление документации ✅
+- [x] Обновить все ссылки profile → config
+- [x] Переименовать `docs/user-guide/profiles.md` → `docs/user-guide/configs.md`
+- [x] Обновить CLI reference с новыми командами
+- [x] Обновить README с новыми ссылками
+- [x] Обновить схемы в `schemas/README.md`
+- [x] Создать примеры TOML конфигураций
+- [x] Обновить ссылки в `docs/user-guide/subscriptions.md`
 
-### Этап 5: Изменение структуры хранилища
-- [ ] `~/.config/sboxmgr/profiles/` → `~/.config/sboxmgr/configs/`
-- [ ] Поддержка формата: `configs/{name}.toml`
-- [ ] Создать default.toml как базовую конфигурацию
-- [ ] Миграция существующих JSON профилей в TOML
-
-### Этап 6: Обновление документации
-- [ ] Обновить все ссылки profile → config
-- [ ] Создать примеры TOML конфигураций
-- [ ] Обновить CLI справку
-- [ ] Создать миграционное руководство
-
-### Этап 7: Тестирование
-- [ ] Обновить все тесты с новой терминологией
-- [ ] Тесты TOML загрузки/сохранения
-- [ ] Тесты миграции JSON → TOML
-- [ ] Интеграционные тесты CLI команд
+### Этап 5: Тестирование ✅
+- [x] Обновить все тесты с новой терминологией
+- [x] Тесты TOML загрузки/сохранения
+- [x] Тесты enum-сериализации (обе стороны)
+- [x] Тесты валидации при switch (TOML синтаксис + UserConfig.validate())
+- [x] Тесты CLI fallback (--config и SBOXMGR_ACTIVE_CONFIG)
+- [x] Тесты edge cases: no configs, corrupted .active_config, invalid enum
+- [x] Комплексные тесты CLI команд: list, switch, status, validate
+- [x] Создан test_config_management.py с 17 тестами
 
 ## 🗂️ **СТРУКТУРА ПОСЛЕ РЕФАКТОРИНГА**
 

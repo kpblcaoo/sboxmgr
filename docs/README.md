@@ -10,9 +10,11 @@
 - [Configuration](getting-started/configuration.md) - System setup and environment variables
 
 ### 👥 User Guide
-- [CLI Reference](user-guide/cli-reference.md) - All commands and parameters
-- [Profiles](user-guide/profiles.md) - Working with configuration profiles
-- [Subscriptions](user-guide/subscriptions.md) - Subscription management
+- [Getting Started](getting-started/) - Installation and quick start
+- [CLI Reference](user-guide/cli-reference.md) - Command line interface
+- [Configurations](user-guide/configs.md) - Working with configuration files
+- [Subscriptions](user-guide/subscriptions.md) - Managing subscription sources
+- [Security](security.md) - Security considerations
 - [Troubleshooting](user-guide/troubleshooting.md) - Problem solving guide
 
 ### 👨‍💻 Developer Documentation
@@ -23,7 +25,6 @@
 
 ### 📖 Reference
 - [Schemas](schemas/) - JSON schemas for configuration validation
-- [Security](security.md) - Security model and considerations
 - [Changelog](CHANGELOG.md) - Version history and changes
 
 ### 🏗️ Architecture Decisions

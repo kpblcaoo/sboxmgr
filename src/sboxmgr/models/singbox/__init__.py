@@ -18,7 +18,12 @@ from .dns import DnsConfig, DnsRule, DnsServer
 from .enums import DomainStrategy, LogLevel, Network
 
 # Experimental models
-from .experimental import ClashApiConfig, ExperimentalConfig, V2RayApiConfig
+from .experimental import (
+    CacheFileConfig,
+    ClashApiConfig,
+    ExperimentalConfig,
+    V2RayApiConfig,
+)
 
 # Inbound models
 from .inbounds import (
@@ -147,6 +152,7 @@ __all__ = [
     "ExperimentalConfig",
     "ClashApiConfig",
     "V2RayApiConfig",
+    "CacheFileConfig",
     # Observatory
     "ObservatoryConfig",
     # Main

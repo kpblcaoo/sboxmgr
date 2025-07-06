@@ -77,6 +77,12 @@ def export(
     profile: str = typer.Option(
         None, "--profile", help="Profile JSON file for Phase 3 processing configuration"
     ),
+    config: str = typer.Option(
+        None,
+        "--config",
+        help="User configuration file to use (TOML/JSON)",
+        envvar="SBOXMGR_ACTIVE_CONFIG",
+    ),
     client_profile: str = typer.Option(
         None,
         "--client-profile",
@@ -238,6 +244,18 @@ def export(
         postprocessors, middleware, final_route, exclude_outbounds
     )
 
+    # Load user config if provided
+    user_config = None
+    if config:
+        try:
+            from sboxmgr.configs.toml_support import load_config_auto
+
+            user_config = load_config_auto(config)
+            typer.echo(f"✅ Loaded user config: {user_config.id}")
+        except Exception as e:
+            typer.echo(f"❌ Failed to load user config '{config}': {e}", err=True)
+            raise typer.Exit(1)
+
     # Load profiles
     loaded_profile, loaded_client_profile = load_profiles(
         profile,
@@ -255,6 +273,7 @@ def export(
         tproxy_port=tproxy_port,
         tproxy_listen=tproxy_listen,
         dns_mode=dns_mode,
+        user_config=user_config,
     )
 
     # Apply routing and filtering parameters if provided

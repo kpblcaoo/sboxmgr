@@ -51,7 +51,7 @@ sboxctl list-servers -u "https://username:password@example.com/subscription"
 ```
 
 ### Custom Headers
-Use environment variables or profiles to set custom headers:
+Use environment variables or configurations to set custom headers:
 ```bash
 # Set custom User-Agent
 export SBOXMGR_USER_AGENT="Custom User-Agent"
@@ -214,5 +214,5 @@ Common providers include:
 ## See Also
 
 - [CLI Reference](cli-reference.md) - Command line interface
-- [Profiles](profiles.md) - Profile management
+- [Configurations](configs.md) - Configuration management
 - [Troubleshooting](troubleshooting.md) - Problem solving
