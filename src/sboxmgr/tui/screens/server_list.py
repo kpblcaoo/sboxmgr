@@ -163,6 +163,7 @@ class ServerListScreen(Screen):
 
             # Action buttons
             with Horizontal(classes="action-buttons"):
+                yield Button("Refresh Servers", id="refresh_servers", variant="default")
                 yield Button("Select All", id="select_all", variant="default")
                 yield Button("Select None", id="select_none", variant="default")
                 yield Button("Apply Changes", id="apply_changes", variant="primary")
@@ -172,8 +173,13 @@ class ServerListScreen(Screen):
 
     def on_mount(self) -> None:
         """Handle screen mount event."""
+        # Always refresh servers from orchestrator/state
+        if hasattr(self.app.state, "refresh_servers"):
+            self.app.state.refresh_servers()
         self._load_servers()
         self._load_exclusions()
+        # Обновляем layout с новыми данными
+        self._update_server_layout()
 
     def _create_info_panel(self) -> Static:
         """Create the information panel.
@@ -449,3 +455,79 @@ class ServerListScreen(Screen):
     def on_back_pressed(self) -> None:
         """Handle back button press."""
         self.app.pop_screen()
+
+    @on(Button.Pressed, "#refresh_servers")
+    def on_refresh_servers_pressed(self) -> None:
+        """Handle refresh servers button press."""
+        if hasattr(self.app.state, "refresh_servers"):
+            self.app.state.refresh_servers()
+        self._load_servers()
+        # Обновляем layout с новыми данными
+        self._update_server_layout()
+        self.app.notify("Servers refreshed", severity="info")
+
+    def on_key(self, event) -> None:
+        """Handle arrow key navigation for checkboxes."""
+        if not self._servers:
+            return
+        focused = self.focused
+        # Find currently focused checkbox
+        current_index = None
+        for i in range(len(self._servers)):
+            try:
+                checkbox = self.query_one(f"#server_{i}", Checkbox)
+            except Exception:
+                continue
+            if checkbox is focused:
+                current_index = i
+                break
+        if event.key == "down":
+            next_index = (current_index + 1) if current_index is not None else 0
+            if next_index < len(self._servers):
+                try:
+                    self.query_one(f"#server_{next_index}", Checkbox).focus()
+                except Exception:
+                    pass
+        elif event.key == "up":
+            prev_index = (
+                (current_index - 1)
+                if current_index is not None
+                else len(self._servers) - 1
+            )
+            if prev_index >= 0:
+                try:
+                    self.query_one(f"#server_{prev_index}", Checkbox).focus()
+                except Exception:
+                    pass
+
+    def _update_server_layout(self) -> None:
+        """Update server list layout after data changes."""
+        # Удаляем старый контент
+        server_container = self.query_one(".server-list-container")
+        if server_container:
+            # Удаляем старые виджеты серверов
+            for child in server_container.children:
+                if hasattr(child, "classes") and "server-list-scroll" in child.classes:
+                    child.remove()
+                elif hasattr(child, "classes") and "empty-state" in child.classes:
+                    child.remove()
+
+            # Добавляем новый контент
+            if self._servers:
+                with server_container:
+                    with VerticalScroll(classes="server-list-scroll"):
+                        for item in self._create_server_items():
+                            server_container.mount(item)
+            else:
+                with server_container:
+                    with Vertical(classes="empty-state"):
+                        server_container.mount(
+                            Static(
+                                "No servers available.\nAdd a subscription to see servers here."
+                            )
+                        )
+
+        # Обновляем info panel
+        info_panel = self.query_one(".server-list-info Static")
+        if info_panel:
+            info_panel.update(self._create_info_panel())

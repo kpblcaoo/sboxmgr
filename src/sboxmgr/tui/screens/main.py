@@ -224,3 +224,26 @@ class MainScreen(Screen):
     def on_exit_pressed(self) -> None:
         """Handle exit button press."""
         self.app.exit()
+
+    def on_key(self, event) -> None:
+        """Handle arrow key navigation for menu buttons."""
+        # Собираем все кнопки меню
+        buttons = [w for w in self.query(".menu-buttons Button")]
+        if not buttons:
+            return
+        focused = self.focused
+        current_index = None
+        for i, btn in enumerate(buttons):
+            if btn is focused:
+                current_index = i
+                break
+        if event.key == "down":
+            next_index = (current_index + 1) if current_index is not None else 0
+            if next_index < len(buttons):
+                buttons[next_index].focus()
+        elif event.key == "up":
+            prev_index = (
+                (current_index - 1) if current_index is not None else len(buttons) - 1
+            )
+            if prev_index >= 0:
+                buttons[prev_index].focus()

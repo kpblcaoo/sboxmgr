@@ -674,3 +674,18 @@ class TUIState:
             "output_file": "config.json",
             "outbound_profile": "vless-real",
         }
+
+    def refresh_servers(self) -> None:
+        """Refresh servers from the active subscription."""
+        self.servers.clear()
+        if not self.subscriptions:
+            return
+        for subscription in self.subscriptions:
+            try:
+                result = self.orchestrator.get_subscription_servers(
+                    url=subscription.url, source_type=subscription.source_type or "url"
+                )
+                if result.success and result.config:
+                    self.servers.extend(result.config)
+            except Exception as e:
+                logger.error(f"Error refreshing servers from {subscription.url}: {e}")
