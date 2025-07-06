@@ -13,9 +13,7 @@ from sboxmgr.subscription.models import ClientProfile, InboundProfile
 try:
     from sboxmgr.configs.models import FullProfile
 
-    PHASE3_AVAILABLE = True
 except ImportError:
-    PHASE3_AVAILABLE = False
     FullProfile = None
 
 
@@ -31,9 +29,6 @@ def load_profile_from_file(profile_path: str) -> Optional["FullProfile"]:
     Raises:
         typer.Exit: If profile loading fails
     """
-    if not PHASE3_AVAILABLE:
-        typer.echo("⚠️  Profile support requires Phase 3 components", err=True)
-        return None
 
     if not os.path.exists(profile_path):
         typer.echo(

@@ -18,9 +18,7 @@ try:
         TagFilterPostProcessor,
     )
 
-    PHASE3_AVAILABLE = True
 except ImportError:
-    PHASE3_AVAILABLE = False
     PostProcessorChain = None
     GeoFilterPostProcessor = None
     TagFilterPostProcessor = None
@@ -43,9 +41,6 @@ def create_postprocessor_chain_from_list(
     Raises:
         typer.Exit: If invalid processor names found
     """
-    if not PHASE3_AVAILABLE:
-        typer.echo("⚠️  PostProcessor chains require Phase 3 components", err=True)
-        return None
 
     # Validate processor names
     validate_postprocessors(processors)
@@ -83,9 +78,6 @@ def create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
     Raises:
         typer.Exit: If invalid middleware names found
     """
-    if not PHASE3_AVAILABLE:
-        typer.echo("⚠️  Middleware chains require Phase 3 components", err=True)
-        return []
 
     # Validate middleware names
     validate_middleware(middleware)

@@ -38,9 +38,7 @@ try:
         TagFilterPostProcessor,
     )
 
-    PHASE3_AVAILABLE = True
 except ImportError:
-    PHASE3_AVAILABLE = False
     FullProfile = None
 
 
@@ -121,7 +119,6 @@ def _create_backup_if_needed(output_file: str, backup: bool) -> Optional[str]:
         shutil.copy2(output_file, backup_file)
         typer.echo(f"📁 Backup created: {backup_file}")
         return backup_file
-    return None
 
 
 def _run_agent_check(config_file: str, delete_after: bool = False) -> bool:
@@ -174,9 +171,6 @@ def _load_profile_from_file(profile_path: str) -> Optional[FullProfile]:
     Raises:
         typer.Exit: If profile loading fails
     """
-    if not PHASE3_AVAILABLE:
-        typer.echo("⚠️  Profile support requires Phase 3 components", err=True)
-        return None
 
     if not os.path.exists(profile_path):
         typer.echo(f"❌ Profile file not found: {profile_path}", err=True)
@@ -207,9 +201,6 @@ def _create_postprocessor_chain_from_list(
     Returns:
         Configured PostProcessorChain or None
     """
-    if not PHASE3_AVAILABLE:
-        typer.echo("⚠️  PostProcessor chains require Phase 3 components", err=True)
-        return None
 
     processor_instances = []
     processor_map = {
@@ -232,7 +223,6 @@ def _create_postprocessor_chain_from_list(
             {"execution_mode": "sequential", "error_strategy": "continue"},
         )
 
-    return None
 
 
 def _create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
@@ -244,9 +234,6 @@ def _create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
     Returns:
         List of configured middleware instances
     """
-    if not PHASE3_AVAILABLE:
-        typer.echo("⚠️  Middleware chains require Phase 3 components", err=True)
-        return []
 
     middleware_instances = []
     middleware_map = {"logging": LoggingMiddleware, "enrichment": EnrichmentMiddleware}
@@ -543,9 +530,9 @@ def export(
     # That's sboxagent's responsibility
     typer.echo("✅ " + t("cli.update_completed"))
 
-    # Show Phase 3 processing summary if used
-    if PHASE3_AVAILABLE and (profile_obj or postprocessors_list or middleware_list):
-        typer.echo("\n🔧 Phase 3 Processing Summary:")
+    # Show processing summary if used
+    if profile_obj or postprocessors_list or middleware_list:
+        typer.echo("\n🔧 Processing Summary:")
         if profile_obj:
             typer.echo(f"   - Profile: {profile}")
         if postprocessors_list:

@@ -18,20 +18,11 @@ from sboxmgr.configs.models import FullProfile
 from sboxmgr.logging import get_logger
 from sboxmgr.subscription.exporters.clashexporter import clash_export
 from sboxmgr.subscription.exporters.singbox_exporter import singbox_export
+from sboxmgr.subscription.middleware import BaseMiddleware
 from sboxmgr.subscription.models import ClientProfile, ParsedServer, PipelineContext
+from sboxmgr.subscription.postprocessors import PostProcessorChain
 
 from .routing.default_router import DefaultRouter
-
-# Import Phase 3 components
-try:
-    from sboxmgr.subscription.middleware import BaseMiddleware
-    from sboxmgr.subscription.postprocessors import PostProcessorChain
-
-    PHASE3_AVAILABLE = True
-except ImportError:
-    PHASE3_AVAILABLE = False
-    PostProcessorChain = None
-    BaseMiddleware = None
 
 
 # Lazy logger initialization to avoid import-time dependency issues
@@ -48,14 +39,14 @@ EXPORTER_REGISTRY = {
 
 
 class ExportManager:
-    """Manages configuration export for various proxy clients with Phase 3 integration.
+    """Manages configuration export for various proxy clients with middleware integration.
 
     This class handles the export of parsed server configurations to different
     client formats (sing-box, Clash, v2ray, etc.) with routing rules generation,
-    client profile customization, version compatibility checks, and Phase 3
-    postprocessor/middleware chain processing.
+    client profile customization, version compatibility checks, and middleware
+    postprocessor chain processing.
 
-    Phase 4 enhancements:
+    Features:
     - Integrated PostProcessorChain for server filtering and enhancement
     - MiddlewareChain support for data enrichment and logging
     - Profile-based configuration of processing chains
@@ -80,7 +71,7 @@ class ExportManager:
         middleware_chain: Optional[List["BaseMiddleware"]] = None,
         profile: Optional[FullProfile] = None,
     ):
-        """Initialize export manager with configuration and Phase 3 components.
+        """Initialize export manager with configuration and middleware components.
 
         Args:
             routing_plugin: Optional routing plugin for rule generation.
@@ -100,11 +91,11 @@ class ExportManager:
         self.profile = profile
 
         # Always add TagNormalizer if no manual middleware chain provided
-        if PHASE3_AVAILABLE and not middleware_chain:
+        if not middleware_chain:
             self._ensure_tag_normalizer()
 
         # Auto-configure middleware from client_profile if available and no manual chain
-        if client_profile and PHASE3_AVAILABLE and not middleware_chain:
+        if client_profile and not middleware_chain:
             self._auto_configure_middleware_from_client_profile(client_profile)
 
     def export(
@@ -116,7 +107,7 @@ class ExportManager:
         client_profile: Optional[ClientProfile] = None,
         profile: Optional[FullProfile] = None,
     ) -> Dict:
-        """Export servers to configuration format with optional Phase 3 processing.
+        """Export servers to configuration format with optional middleware processing.
 
         Args:
             servers: List of server configurations to export.
@@ -154,39 +145,38 @@ class ExportManager:
                 _get_logger().warning(f"Routing plugin failed: {e}")
                 routes = []
 
-        # Apply Phase 3 processing if available
+        # Apply middleware and postprocessor processing
         processed_servers = filtered_servers
         active_profile = profile or self.profile
 
-        if PHASE3_AVAILABLE:
-            # Apply middleware
-            if self.middleware_chain:
-                _get_logger().debug(
-                    f"Applying {len(self.middleware_chain)} middleware components"
-                )
-                for middleware in self.middleware_chain:
-                    try:
-                        _get_logger().debug(
-                            f"Applying middleware: {middleware.__class__.__name__}"
-                        )
-                        processed_servers = middleware.process(
-                            processed_servers, context, active_profile
-                        )
-                    except Exception as e:
-                        _get_logger().warning(
-                            f"Middleware {middleware.__class__.__name__} failed: {e}"
-                        )
-            else:
-                _get_logger().debug("No middleware chain configured")
-
-            # Apply postprocessor chain
-            if self.postprocessor_chain:
+        # Apply middleware
+        if self.middleware_chain:
+            _get_logger().debug(
+                f"Applying {len(self.middleware_chain)} middleware components"
+            )
+            for middleware in self.middleware_chain:
                 try:
-                    processed_servers = self.postprocessor_chain.process(
+                    _get_logger().debug(
+                        f"Applying middleware: {middleware.__class__.__name__}"
+                    )
+                    processed_servers = middleware.process(
                         processed_servers, context, active_profile
                     )
                 except Exception as e:
-                    _get_logger().warning(f"PostProcessor chain failed: {e}")
+                    _get_logger().warning(
+                        f"Middleware {middleware.__class__.__name__} failed: {e}"
+                    )
+        else:
+            _get_logger().debug("No middleware chain configured")
+
+        # Apply postprocessor chain
+        if self.postprocessor_chain:
+            try:
+                processed_servers = self.postprocessor_chain.process(
+                    processed_servers, context, active_profile
+                )
+            except Exception as e:
+                _get_logger().warning(f"PostProcessor chain failed: {e}")
 
         # Export with format-specific handling
         exporter_func = EXPORTER_REGISTRY.get(self.export_format)
@@ -198,7 +188,7 @@ class ExportManager:
 
         if self.export_format == "singbox":
             # Use middleware-aware export if middleware is configured
-            if self.middleware_chain and PHASE3_AVAILABLE:
+            if self.middleware_chain:
                 try:
                     from sboxmgr.subscription.exporters.singbox_exporter import (
                         singbox_export_with_middleware,
@@ -232,9 +222,9 @@ class ExportManager:
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
     ) -> Dict:
-        """Simplified method for exporting to sing-box format with Phase 3 support.
+        """Simplified method for exporting to sing-box format with middleware support.
 
-        Provides a direct interface for sing-box export with optional Phase 3
+        Provides a direct interface for sing-box export with optional middleware
         postprocessor and middleware processing. Useful for cases where routing
         rules are already prepared or not needed.
 
@@ -242,7 +232,7 @@ class ExportManager:
             servers: List of server configurations to export.
             routes: Optional pre-prepared routing rules.
             client_profile: Optional client configuration profile.
-            apply_phase3_processing: Whether to apply Phase 3 processing.
+            apply_phase3_processing: Whether to apply middleware processing.
             context: Optional pipeline context.
             profile: Optional profile for processing.
 
@@ -254,9 +244,9 @@ class ExportManager:
         client_profile = client_profile or self.client_profile
         active_profile = profile or self.profile
 
-        # Apply Phase 3 processing if requested and available
+        # Apply middleware and postprocessor processing if requested
         processed_servers = servers
-        if apply_phase3_processing and PHASE3_AVAILABLE:
+        if apply_phase3_processing:
             pipeline_context = context or PipelineContext(mode="direct_export")
 
             # Apply middleware
@@ -284,7 +274,7 @@ class ExportManager:
         return exporter_func(processed_servers, routes, client_profile=client_profile)
 
     def configure_from_profile(self, profile: FullProfile) -> "ExportManager":
-        """Configure ExportManager from FullProfile with Phase 3 components.
+        """Configure ExportManager from FullProfile with middleware components.
 
         Creates and configures PostProcessorChain and MiddlewareChain based on
         profile configuration. Returns a new ExportManager instance with the
@@ -297,14 +287,6 @@ class ExportManager:
             New ExportManager instance configured from profile.
 
         """
-        if not PHASE3_AVAILABLE:
-            # Return current instance if Phase 3 not available
-            return ExportManager(
-                routing_plugin=self.routing_plugin,
-                export_format=self.export_format,
-                client_profile=self.client_profile,
-                profile=profile,
-            )
 
         # Configure PostProcessorChain from profile
         postprocessor_chain = None
@@ -382,8 +364,6 @@ class ExportManager:
             Configured PostProcessorChain or None.
 
         """
-        if not PHASE3_AVAILABLE:
-            return None
 
         from sboxmgr.subscription.postprocessors import (
             GeoFilterPostProcessor,
@@ -425,8 +405,6 @@ class ExportManager:
             List of configured middleware components.
 
         """
-        if not PHASE3_AVAILABLE:
-            return []
 
         middleware_chain = []
 
@@ -461,16 +439,14 @@ class ExportManager:
         return middleware_chain
 
     @property
-    def has_phase3_components(self) -> bool:
-        """Check if Phase 3 components are available and configured.
+    def has_processing_components(self) -> bool:
+        """Check if processing components are available and configured.
 
         Returns:
-            True if Phase 3 components are available and configured.
+            True if processing components are available and configured.
 
         """
-        return PHASE3_AVAILABLE and (
-            self.postprocessor_chain is not None or len(self.middleware_chain) > 0
-        )
+        return self.postprocessor_chain is not None or len(self.middleware_chain) > 0
 
     def get_processing_metadata(self) -> Dict[str, Any]:
         """Get metadata about configured processing components.
@@ -483,7 +459,6 @@ class ExportManager:
             "export_format": self.export_format,
             "has_routing_plugin": self.routing_plugin is not None,
             "has_client_profile": self.client_profile is not None,
-            "phase3_available": PHASE3_AVAILABLE,
             "has_postprocessor_chain": self.postprocessor_chain is not None,
             "middleware_count": len(self.middleware_chain),
             "has_profile": self.profile is not None,
@@ -511,8 +486,6 @@ class ExportManager:
             client_profile: Client profile with configuration
 
         """
-        if not PHASE3_AVAILABLE:
-            return
 
         try:
             from sboxmgr.subscription.middleware import (
@@ -555,8 +528,6 @@ class ExportManager:
         TagNormalizer is always added to provide consistent server naming
         across different User-Agent types and parsers.
         """
-        if not PHASE3_AVAILABLE:
-            return
 
         try:
             from sboxmgr.subscription.middleware import TagNormalizer

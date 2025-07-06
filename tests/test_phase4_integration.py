@@ -55,19 +55,16 @@ class TestExportManagerPhase4:
         assert export_mgr.middleware_chain == []
         assert export_mgr.profile is None
 
-        # Test initialization with Phase 3 components
-        from sboxmgr.export.export_manager import PHASE3_AVAILABLE
+        # Test initialization with processing components
+        from sboxmgr.subscription.postprocessors import (
+            GeoFilterPostProcessor,
+            PostProcessorChain,
+        )
 
-        if PHASE3_AVAILABLE:
-            from sboxmgr.subscription.postprocessors import (
-                GeoFilterPostProcessor,
-                PostProcessorChain,
-            )
-
-            postprocessor_chain = PostProcessorChain([GeoFilterPostProcessor({})], {})
-            export_mgr = ExportManager(postprocessor_chain=postprocessor_chain)
-            assert export_mgr.postprocessor_chain is not None
-            assert export_mgr.has_phase3_components
+        postprocessor_chain = PostProcessorChain([GeoFilterPostProcessor({})], {})
+        export_mgr = ExportManager(postprocessor_chain=postprocessor_chain)
+        assert export_mgr.postprocessor_chain is not None
+        assert export_mgr.has_processing_components
 
     def test_export_backward_compatibility(self):
         """Test that export works without Phase 3 components (backward compatibility)."""
@@ -95,7 +92,7 @@ class TestExportManagerPhase4:
             assert args[1] == []  # Empty routes
 
     @pytest.mark.skipif(
-        not hasattr(ExportManager, "has_phase3_components"),
+        not hasattr(ExportManager, "has_processing_components"),
         reason="Phase 3 components not available",
     )
     def test_export_with_postprocessor_chain(self):
@@ -135,10 +132,10 @@ class TestExportManagerPhase4:
 
             # Verify that postprocessor chain was applied
             # (geo filter should have filtered servers)
-            assert export_mgr.has_phase3_components
+            assert export_mgr.has_processing_components
 
     @pytest.mark.skipif(
-        not hasattr(ExportManager, "has_phase3_components"),
+        not hasattr(ExportManager, "has_processing_components"),
         reason="Phase 3 components not available",
     )
     def test_export_with_middleware_chain(self):
@@ -173,17 +170,13 @@ class TestExportManagerPhase4:
                 mock_singbox_export.assert_called_once()
 
                 # Verify that middleware was applied
-                assert export_mgr.has_phase3_components
+                assert export_mgr.has_processing_components
 
         except ImportError:
             pytest.skip("Middleware components not available")
 
     def test_configure_from_profile(self):
         """Test configuring ExportManager from FullProfile."""
-        from sboxmgr.export.export_manager import PHASE3_AVAILABLE
-
-        if not PHASE3_AVAILABLE:
-            pytest.skip("Phase 3 components not available")
 
         try:
             from sboxmgr.profiles.models import FilterProfile, FullProfile
@@ -222,7 +215,7 @@ class TestExportManagerPhase4:
         assert metadata["export_format"] == "singbox"
         assert metadata["has_routing_plugin"] is True
         assert metadata["has_client_profile"] is False
-        assert "phase3_available" in metadata
+        assert "has_postprocessor_chain" in metadata
         assert metadata["has_postprocessor_chain"] is False
         assert metadata["middleware_count"] == 0
         assert metadata["has_profile"] is False
@@ -282,10 +275,6 @@ class TestPhase4ErrorHandling:
 
     def test_export_with_failing_postprocessor(self):
         """Test export continues when postprocessor fails."""
-        from sboxmgr.export.export_manager import PHASE3_AVAILABLE
-
-        if not PHASE3_AVAILABLE:
-            pytest.skip("Phase 3 components not available")
 
         # Create mock postprocessor that fails
         mock_postprocessor_chain = Mock()
@@ -316,10 +305,6 @@ class TestPhase4ErrorHandling:
 
     def test_export_with_failing_middleware(self):
         """Test export continues when middleware fails."""
-        from sboxmgr.export.export_manager import PHASE3_AVAILABLE
-
-        if not PHASE3_AVAILABLE:
-            pytest.skip("Phase 3 components not available")
 
         # Create mock middleware that fails
         mock_middleware = Mock()
@@ -355,7 +340,7 @@ class TestPhase4EndToEnd:
     """End-to-end integration tests for Phase 4."""
 
     @pytest.mark.skipif(
-        not hasattr(ExportManager, "has_phase3_components"),
+        not hasattr(ExportManager, "has_processing_components"),
         reason="Phase 3 components not available",
     )
     def test_full_pipeline_integration(self):

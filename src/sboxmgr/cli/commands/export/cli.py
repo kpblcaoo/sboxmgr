@@ -25,15 +25,6 @@ from .validators import (
     validate_output_format,
 )
 
-# Import Phase 3 components
-try:
-    from sboxmgr.configs.models import FullProfile
-
-    PHASE3_AVAILABLE = True
-except ImportError:
-    PHASE3_AVAILABLE = False
-    FullProfile = None
-
 
 def export(
     url: str = typer.Option(
