@@ -5,9 +5,10 @@ sboxagent (Go/Ruby/other). All communication happens through JSON messages with
 well-defined schemas.
 """
 
-from typing import Any, Dict, List, Optional, Union
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, Field
 
 
 class AgentCommand(str, Enum):
@@ -123,7 +124,9 @@ class AgentResponse(BaseModel):
     success: bool = Field(..., description="Operation success status")
     message: str = Field(..., description="Human-readable message")
     trace_id: Optional[str] = Field(None, description="Trace ID from request")
-    error_code: Optional[str] = Field(None, description="Error code for programmatic handling")
+    error_code: Optional[str] = Field(
+        None, description="Error code for programmatic handling"
+    )
 
 
 class ValidationResponse(AgentResponse):
@@ -147,7 +150,9 @@ class ValidationResponse(AgentResponse):
     """
 
     errors: List[str] = Field(default_factory=list, description="Validation errors")
-    client_detected: Optional[ClientType] = Field(None, description="Detected client type")
+    client_detected: Optional[ClientType] = Field(
+        None, description="Detected client type"
+    )
     client_version: Optional[str] = Field(None, description="Detected client version")
 
 
@@ -179,8 +184,7 @@ class CheckResponse(AgentResponse):
     """
 
     clients: Dict[str, Dict[str, Any]] = Field(
-        default_factory=dict,
-        description="Client availability status"
+        default_factory=dict, description="Client availability status"
     )
 
 

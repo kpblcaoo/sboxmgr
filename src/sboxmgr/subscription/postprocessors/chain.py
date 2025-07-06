@@ -8,12 +8,13 @@ and sophisticated error recovery strategies.
 Implements Phase 3 architecture with profile integration.
 """
 
-from typing import List, Optional, Dict, Any, Union
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Dict, List, Optional, Union
+
+from ...profiles.models import FullProfile
+from ..models import ParsedServer, PipelineContext
 from ..registry import register
 from .base import BasePostProcessor, ProfileAwarePostProcessor
-from ..models import ParsedServer, PipelineContext
-from ...profiles.models import FullProfile
 
 
 @register("postprocessor_chain")
@@ -49,7 +50,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
     def __init__(
         self,
         processors: List[BasePostProcessor],
-        config: Optional[Dict[str, Any]] = None
+        config: Optional[Dict[str, Any]] = None,
     ):
         """Initialize postprocessor chain.
 
@@ -60,20 +61,20 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         """
         super().__init__(config)
         self.processors = processors
-        self.execution_mode = self.config.get('execution_mode', 'sequential')
-        self.error_strategy = self.config.get('error_strategy', 'continue')
-        self.max_retries = self.config.get('max_retries', 2)
-        self.retry_delay_seconds = self.config.get('retry_delay_seconds', 1.0)
-        self.parallel_workers = self.config.get('parallel_workers', 4)
-        self.collect_metadata = self.config.get('collect_metadata', True)
-        self.timeout_seconds = self.config.get('timeout_seconds', 300)
+        self.execution_mode = self.config.get("execution_mode", "sequential")
+        self.error_strategy = self.config.get("error_strategy", "continue")
+        self.max_retries = self.config.get("max_retries", 2)
+        self.retry_delay_seconds = self.config.get("retry_delay_seconds", 1.0)
+        self.parallel_workers = self.config.get("parallel_workers", 4)
+        self.collect_metadata = self.config.get("collect_metadata", True)
+        self.timeout_seconds = self.config.get("timeout_seconds", 300)
         self._execution_metadata: Dict[str, Any] = {}
 
     def process(
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Execute postprocessor chain on servers.
 
@@ -91,50 +92,51 @@ class PostProcessorChain(ProfileAwarePostProcessor):
 
         # Initialize execution metadata
         import time
+
         self._execution_metadata = {
-            'start_time': time.time(),
-            'processors_executed': [],
-            'processors_failed': [],
-            'processors_skipped': [],
-            'total_processors': len(self.processors),
-            'execution_mode': self.execution_mode
+            "start_time": time.time(),
+            "processors_executed": [],
+            "processors_failed": [],
+            "processors_skipped": [],
+            "total_processors": len(self.processors),
+            "execution_mode": self.execution_mode,
         }
 
         try:
-            if self.execution_mode == 'sequential':
+            if self.execution_mode == "sequential":
                 result = self._execute_sequential(servers, context, profile)
-            elif self.execution_mode == 'parallel':
+            elif self.execution_mode == "parallel":
                 result = self._execute_parallel(servers, context, profile)
-            elif self.execution_mode == 'conditional':
+            elif self.execution_mode == "conditional":
                 result = self._execute_conditional(servers, context, profile)
             else:
                 raise ValueError(f"Unknown execution mode: {self.execution_mode}")
 
-            self._execution_metadata['success'] = True
+            self._execution_metadata["success"] = True
             return result
 
         except Exception as e:
-            self._execution_metadata['success'] = False
-            self._execution_metadata['error'] = str(e)
+            self._execution_metadata["success"] = False
+            self._execution_metadata["error"] = str(e)
 
-            if self.error_strategy == 'fail_fast':
+            if self.error_strategy == "fail_fast":
                 raise
             else:
                 # Return original servers on error
                 return servers
         finally:
             import time
-            self._execution_metadata['end_time'] = time.time()
-            self._execution_metadata['duration'] = (
-                self._execution_metadata.get('end_time', 0) -
-                self._execution_metadata.get('start_time', 0)
-            )
+
+            self._execution_metadata["end_time"] = time.time()
+            self._execution_metadata["duration"] = self._execution_metadata.get(
+                "end_time", 0
+            ) - self._execution_metadata.get("start_time", 0)
 
     def _execute_sequential(
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Execute processors sequentially.
 
@@ -153,11 +155,13 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             try:
                 # Check if processor can handle current servers
                 if not processor.can_process(current_servers, context):
-                    self._execution_metadata['processors_skipped'].append({
-                        'index': i,
-                        'name': processor.__class__.__name__,
-                        'reason': 'cannot_process'
-                    })
+                    self._execution_metadata["processors_skipped"].append(
+                        {
+                            "index": i,
+                            "name": processor.__class__.__name__,
+                            "reason": "cannot_process",
+                        }
+                    )
                     continue
 
                 # Execute processor with retry logic
@@ -171,22 +175,24 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                 # Collect metadata
                 if self.collect_metadata:
                     processor_metadata = processor.get_metadata()
-                    self._execution_metadata['processors_executed'].append({
-                        'index': i,
-                        'name': processor.__class__.__name__,
-                        'metadata': processor_metadata,
-                        'input_count': len(servers) if i == 0 else len(current_servers),
-                        'output_count': len(current_servers)
-                    })
+                    self._execution_metadata["processors_executed"].append(
+                        {
+                            "index": i,
+                            "name": processor.__class__.__name__,
+                            "metadata": processor_metadata,
+                            "input_count": (
+                                len(servers) if i == 0 else len(current_servers)
+                            ),
+                            "output_count": len(current_servers),
+                        }
+                    )
 
             except Exception as e:
-                self._execution_metadata['processors_failed'].append({
-                    'index': i,
-                    'name': processor.__class__.__name__,
-                    'error': str(e)
-                })
+                self._execution_metadata["processors_failed"].append(
+                    {"index": i, "name": processor.__class__.__name__, "error": str(e)}
+                )
 
-                if self.error_strategy == 'fail_fast':
+                if self.error_strategy == "fail_fast":
                     raise
                 # Continue with next processor on error
 
@@ -196,7 +202,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Execute processors in parallel (each on original servers).
 
@@ -215,16 +221,17 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             for i, processor in enumerate(self.processors):
                 if processor.can_process(servers, context):
                     future = executor.submit(
-                        self._execute_with_retry,
-                        processor, servers, context, profile
+                        self._execute_with_retry, processor, servers, context, profile
                     )
                     future_to_processor[future] = (i, processor)
                 else:
-                    self._execution_metadata['processors_skipped'].append({
-                        'index': i,
-                        'name': processor.__class__.__name__,
-                        'reason': 'cannot_process'
-                    })
+                    self._execution_metadata["processors_skipped"].append(
+                        {
+                            "index": i,
+                            "name": processor.__class__.__name__,
+                            "reason": "cannot_process",
+                        }
+                    )
 
             # Collect results
             all_results = []
@@ -236,22 +243,26 @@ class PostProcessorChain(ProfileAwarePostProcessor):
 
                     if self.collect_metadata:
                         processor_metadata = processor.get_metadata()
-                        self._execution_metadata['processors_executed'].append({
-                            'index': i,
-                            'name': processor.__class__.__name__,
-                            'metadata': processor_metadata,
-                            'input_count': len(servers),
-                            'output_count': len(result)
-                        })
+                        self._execution_metadata["processors_executed"].append(
+                            {
+                                "index": i,
+                                "name": processor.__class__.__name__,
+                                "metadata": processor_metadata,
+                                "input_count": len(servers),
+                                "output_count": len(result),
+                            }
+                        )
 
                 except Exception as e:
-                    self._execution_metadata['processors_failed'].append({
-                        'index': i,
-                        'name': processor.__class__.__name__,
-                        'error': str(e)
-                    })
+                    self._execution_metadata["processors_failed"].append(
+                        {
+                            "index": i,
+                            "name": processor.__class__.__name__,
+                            "error": str(e),
+                        }
+                    )
 
-                    if self.error_strategy == 'fail_fast':
+                    if self.error_strategy == "fail_fast":
                         raise
 
             # Merge results (simple concatenation, could be more sophisticated)
@@ -265,7 +276,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Execute processors conditionally based on results.
 
@@ -288,11 +299,13 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                 )
 
                 if not should_execute:
-                    self._execution_metadata['processors_skipped'].append({
-                        'index': i,
-                        'name': processor.__class__.__name__,
-                        'reason': 'conditional_skip'
-                    })
+                    self._execution_metadata["processors_skipped"].append(
+                        {
+                            "index": i,
+                            "name": processor.__class__.__name__,
+                            "reason": "conditional_skip",
+                        }
+                    )
                     continue
 
                 # Execute processor
@@ -306,22 +319,24 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                 # Collect metadata
                 if self.collect_metadata:
                     processor_metadata = processor.get_metadata()
-                    self._execution_metadata['processors_executed'].append({
-                        'index': i,
-                        'name': processor.__class__.__name__,
-                        'metadata': processor_metadata,
-                        'input_count': len(servers) if i == 0 else len(current_servers),
-                        'output_count': len(current_servers)
-                    })
+                    self._execution_metadata["processors_executed"].append(
+                        {
+                            "index": i,
+                            "name": processor.__class__.__name__,
+                            "metadata": processor_metadata,
+                            "input_count": (
+                                len(servers) if i == 0 else len(current_servers)
+                            ),
+                            "output_count": len(current_servers),
+                        }
+                    )
 
             except Exception as e:
-                self._execution_metadata['processors_failed'].append({
-                    'index': i,
-                    'name': processor.__class__.__name__,
-                    'error': str(e)
-                })
+                self._execution_metadata["processors_failed"].append(
+                    {"index": i, "name": processor.__class__.__name__, "error": str(e)}
+                )
 
-                if self.error_strategy == 'fail_fast':
+                if self.error_strategy == "fail_fast":
                     raise
 
         return current_servers
@@ -331,7 +346,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         processor: BasePostProcessor,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> bool:
         """Determine if processor should be executed conditionally.
 
@@ -350,7 +365,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             return False
 
         # Check profile-specific conditions
-        if profile and hasattr(processor, 'extract_filter_config'):
+        if profile and hasattr(processor, "extract_filter_config"):
             filter_config = processor.extract_filter_config(profile)
             if not filter_config:
                 return False
@@ -362,7 +377,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         processor: BasePostProcessor,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Execute processor with retry logic.
 
@@ -386,6 +401,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                 if attempt < self.max_retries:
                     # Wait before retry
                     import time
+
                     time.sleep(self.retry_delay_seconds)
                 else:
                     # Max retries exceeded
@@ -394,7 +410,9 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         # Should not reach here
         raise last_exception
 
-    def can_process(self, servers: List[ParsedServer], context: Optional[PipelineContext] = None) -> bool:
+    def can_process(
+        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+    ) -> bool:
         """Check if chain can process servers.
 
         Args:
@@ -423,12 +441,14 @@ class PostProcessorChain(ProfileAwarePostProcessor):
 
         """
         metadata = super().get_metadata()
-        metadata.update({
-            'processors_count': len(self.processors),
-            'execution_mode': self.execution_mode,
-            'error_strategy': self.error_strategy,
-            'execution_metadata': self._execution_metadata
-        })
+        metadata.update(
+            {
+                "processors_count": len(self.processors),
+                "execution_mode": self.execution_mode,
+                "error_strategy": self.error_strategy,
+                "execution_metadata": self._execution_metadata,
+            }
+        )
         return metadata
 
     def get_processor_by_name(self, name: str) -> Optional[BasePostProcessor]:
@@ -446,7 +466,9 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                 return processor
         return None
 
-    def add_processor(self, processor: BasePostProcessor, index: Optional[int] = None) -> None:
+    def add_processor(
+        self, processor: BasePostProcessor, index: Optional[int] = None
+    ) -> None:
         """Add processor to chain.
 
         Args:

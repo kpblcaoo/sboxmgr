@@ -138,10 +138,10 @@ SBoxMgr uses a plugin-based architecture for extensibility:
    ```python
    from sboxmgr.subscription.fetchers.base_fetcher import BaseFetcher
    from sboxmgr.subscription.models import SubscriptionData
-   
+
    class MyCustomFetcher(BaseFetcher):
        """Custom fetcher for special subscription format."""
-       
+
        def fetch(self, url: str, **kwargs) -> SubscriptionData:
            """Fetch subscription data from custom source."""
            # Implementation here
@@ -151,7 +151,7 @@ SBoxMgr uses a plugin-based architecture for extensibility:
 3. **Register the plugin:**
    ```python
    from sboxmgr.subscription.registry import register
-   
+
    @register("my_custom")
    class MyCustomFetcher(BaseFetcher):
        # Implementation
@@ -186,7 +186,7 @@ from sboxmgr.subscription.middleware.base import BaseMiddleware
 
 class CustomMiddleware(BaseMiddleware):
     """Custom middleware for server processing."""
-    
+
     def process(self, servers: List[ParsedServer], context: Context) -> List[ParsedServer]:
         """Process server list."""
         # Implementation here
@@ -299,4 +299,4 @@ By contributing to SBoxMgr, you agree that your contributions will be licensed u
 
 ---
 
-For more detailed information, see the [internal development documentation](../internal/development/contributing.md). 
+For more detailed information, see the [internal development documentation](../internal/development/contributing.md).

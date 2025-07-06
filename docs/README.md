@@ -47,4 +47,4 @@ See [LICENSE](../LICENSE) for details.
 
 ---
 
-**Last updated**: 2025-01-05 
+**Last updated**: 2025-01-05

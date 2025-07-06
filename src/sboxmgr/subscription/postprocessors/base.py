@@ -9,9 +9,10 @@ Implements Phase 3 of architectural improvements with profile integration.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
+
+from ...profiles.models import FilterProfile, FullProfile
 from ..models import ParsedServer, PipelineContext
-from ...profiles.models import FullProfile, FilterProfile
 
 
 class BasePostProcessor(ABC):
@@ -44,7 +45,7 @@ class BasePostProcessor(ABC):
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Process and transform parsed server data.
 
@@ -62,7 +63,9 @@ class BasePostProcessor(ABC):
         """
         pass
 
-    def can_process(self, servers: List[ParsedServer], context: Optional[PipelineContext] = None) -> bool:
+    def can_process(
+        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+    ) -> bool:
         """Check if this postprocessor can process the given servers.
 
         Args:
@@ -85,7 +88,7 @@ class BasePostProcessor(ABC):
         return {
             "name": self.__class__.__name__,
             "type": self.plugin_type,
-            "config": self.config
+            "config": self.config,
         }
 
 
@@ -96,7 +99,9 @@ class ProfileAwarePostProcessor(BasePostProcessor):
     from profiles and applying profile-based transformations.
     """
 
-    def extract_filter_config(self, profile: Optional[FullProfile]) -> Optional[FilterProfile]:
+    def extract_filter_config(
+        self, profile: Optional[FullProfile]
+    ) -> Optional[FilterProfile]:
         """Extract filter configuration from profile.
 
         Args:
@@ -108,7 +113,9 @@ class ProfileAwarePostProcessor(BasePostProcessor):
         """
         return profile.filters if profile else None
 
-    def should_exclude_server(self, server: ParsedServer, filter_config: Optional[FilterProfile]) -> bool:
+    def should_exclude_server(
+        self, server: ParsedServer, filter_config: Optional[FilterProfile]
+    ) -> bool:
         """Check if server should be excluded based on filter configuration.
 
         Args:
@@ -123,7 +130,7 @@ class ProfileAwarePostProcessor(BasePostProcessor):
             return False
 
         # Check tag-based exclusions
-        server_tag = server.tag or server.meta.get('tag', '')
+        server_tag = server.tag or server.meta.get("tag", "")
 
         # Exclude if server tag is in exclude_tags
         if server_tag and server_tag in filter_config.exclude_tags:
@@ -152,7 +159,7 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> None:
         """Called before main processing. Override for setup logic.
 
@@ -168,7 +175,7 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> None:
         """Called after main processing. Override for cleanup logic.
 
@@ -184,7 +191,7 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Process servers with pre/post hooks.
 
@@ -207,7 +214,7 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Main processing logic. Override this method.
 

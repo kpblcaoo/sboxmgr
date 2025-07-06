@@ -1,19 +1,25 @@
 """Configuration generators for export command."""
 
 import json
-from typing import Optional, List
+from typing import List, Optional
 
 import typer
 
+from sboxmgr.export.export_manager import ExportManager
 from sboxmgr.i18n.t import t
 from sboxmgr.subscription.manager import SubscriptionManager
-from sboxmgr.subscription.models import SubscriptionSource, ClientProfile, PipelineContext
-from sboxmgr.export.export_manager import ExportManager
-from .validators import validate_postprocessors, validate_middleware
+from sboxmgr.subscription.models import (
+    ClientProfile,
+    PipelineContext,
+    SubscriptionSource,
+)
+
+from .validators import validate_middleware, validate_postprocessors
 
 # Import Phase 3 components
 try:
     from sboxmgr.profiles.models import FullProfile
+
     PHASE3_AVAILABLE = True
 except ImportError:
     PHASE3_AVAILABLE = False
@@ -26,8 +32,8 @@ def generate_config_from_subscription(
     no_user_agent: bool,
     export_format: str,
     debug: int,
-    profile: Optional['FullProfile'] = None,
-    client_profile: Optional['ClientProfile'] = None
+    profile: Optional["FullProfile"] = None,
+    client_profile: Optional["ClientProfile"] = None,
 ) -> dict:
     """Generate configuration from subscription data.
 
@@ -49,20 +55,18 @@ def generate_config_from_subscription(
     # Create subscription source
     # Используем автоопределение как в list-servers, а не жесткое кодирование форматов
     # source_type должен определяться по содержимому, а не по формату вывода
-    source_type = "file" if url.startswith('file://') else "url"
+    source_type = "file" if url.startswith("file://") else "url"
 
     source = SubscriptionSource(
         url=url,
         source_type=source_type,
-        user_agent=user_agent if not no_user_agent else None
+        user_agent=user_agent if not no_user_agent else None,
     )
 
     # Create managers
     subscription_manager = SubscriptionManager(source)
     export_manager = ExportManager(
-        export_format=export_format,
-        client_profile=client_profile,
-        profile=profile
+        export_format=export_format, client_profile=client_profile, profile=profile
     )
 
     # Create pipeline context with debug level
@@ -71,8 +75,7 @@ def generate_config_from_subscription(
     # Process subscription
     try:
         result = subscription_manager.export_config(
-            export_manager=export_manager,
-            context=context
+            export_manager=export_manager, context=context
         )
 
         if not result.success:
@@ -91,13 +94,13 @@ def generate_config_from_subscription(
 def generate_profile_from_cli(
     postprocessors: Optional[List[str]] = None,
     middleware: Optional[List[str]] = None,
-    output_path: str = "profile.json"
+    output_path: str = "profile.json",
 ) -> None:
     """Generate FullProfile JSON from CLI parameters.
 
     Args:
         postprocessors: List of postprocessor names
-        middleware: List of middleware names  
+        middleware: List of middleware names
         output_path: Output path for generated profile
 
     Raises:
@@ -116,15 +119,15 @@ def generate_profile_from_cli(
                 "exclude_tags": [],
                 "only_tags": [],
                 "exclusions": [],
-                "only_enabled": True
+                "only_enabled": True,
             },
             "export": {
                 "format": "sing-box",
                 "outbound_profile": "vless-real",
                 "inbound_profile": "tun",
-                "output_file": "config.json"
+                "output_file": "config.json",
             },
-            "metadata": {}
+            "metadata": {},
         }
 
         # Add postprocessor configuration
@@ -133,7 +136,7 @@ def generate_profile_from_cli(
             profile_data["metadata"]["postprocessors"] = {
                 "chain": [{"type": proc, "config": {}} for proc in postprocessors],
                 "execution_mode": "sequential",
-                "error_strategy": "continue"
+                "error_strategy": "continue",
             }
 
         # Add middleware configuration
@@ -144,7 +147,7 @@ def generate_profile_from_cli(
             }
 
         # Write profile to file
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(profile_data, f, indent=2, ensure_ascii=False)
 
         typer.echo(f"✅ {t('cli.success.profile_generated').format(path=output_path)}")

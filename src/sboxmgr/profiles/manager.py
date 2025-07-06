@@ -5,14 +5,14 @@ including creation, loading, validation, and active profile management.
 """
 
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
-from datetime import datetime
 
 from pydantic import ValidationError
 
-from ..profiles.models import FullProfile
 from ..logging.core import get_logger
+from ..profiles.models import FullProfile
 
 logger = get_logger(__name__)
 
@@ -30,8 +30,15 @@ class ProfileInfo:
 
     """
 
-    def __init__(self, path: str, name: str, size: int, modified: datetime,
-                 valid: bool = True, error: Optional[str] = None):
+    def __init__(
+        self,
+        path: str,
+        name: str,
+        size: int,
+        modified: datetime,
+        valid: bool = True,
+        error: Optional[str] = None,
+    ):
         """Initialize ProfileInfo.
 
         Args:
@@ -61,8 +68,12 @@ class ValidationResult:
 
     """
 
-    def __init__(self, valid: bool = True, errors: Optional[List[str]] = None,
-                 warnings: Optional[List[str]] = None):
+    def __init__(
+        self,
+        valid: bool = True,
+        errors: Optional[List[str]] = None,
+        warnings: Optional[List[str]] = None,
+    ):
         """Initialize ValidationResult.
 
         Args:
@@ -96,13 +107,17 @@ class ProfileManager:
             profiles_dir: Directory for storing profiles. If None, uses default.
 
         """
-        self.profiles_dir = Path(profiles_dir or "~/.config/sboxmgr/profiles").expanduser()
+        self.profiles_dir = Path(
+            profiles_dir or "~/.config/sboxmgr/profiles"
+        ).expanduser()
         self.profiles_dir.mkdir(parents=True, exist_ok=True)
 
         self.active_profile: Optional[FullProfile] = None
         self.profile_cache: Dict[str, FullProfile] = {}
 
-        logger.info(f"ProfileManager initialized with profiles directory: {self.profiles_dir}")
+        logger.info(
+            f"ProfileManager initialized with profiles directory: {self.profiles_dir}"
+        )
 
     def create_profile(self, profile_data: dict) -> FullProfile:
         """Create a new profile from dictionary data.
@@ -119,7 +134,9 @@ class ProfileManager:
         """
         try:
             profile = FullProfile(**profile_data)
-            logger.info(f"Created new profile: {profile.name if hasattr(profile, 'name') else 'unnamed'}")
+            logger.info(
+                f"Created new profile: {profile.name if hasattr(profile, 'name') else 'unnamed'}"
+            )
             return profile
         except ValidationError as e:
             logger.error(f"Failed to create profile: {e}")
@@ -151,7 +168,7 @@ class ProfileManager:
             return self.profile_cache[cache_key]
 
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, "r", encoding="utf-8") as f:
                 profile_data = json.load(f)
 
             profile = self.create_profile(profile_data)
@@ -185,9 +202,9 @@ class ProfileManager:
 
         try:
             # Convert to dict with JSON-compatible values
-            profile_dict = profile.model_dump(mode='json')
+            profile_dict = profile.model_dump(mode="json")
 
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(profile_dict, f, indent=2, ensure_ascii=False)
 
             # Update cache
@@ -218,27 +235,27 @@ class ProfileManager:
             profile.model_validate(profile.model_dump())
 
             # Custom validation rules
-            if hasattr(profile, 'subscriptions') and profile.subscriptions:
+            if hasattr(profile, "subscriptions") and profile.subscriptions:
                 # Validate subscription sources
                 for subscription in profile.subscriptions:
-                    if not hasattr(subscription, 'id') or not subscription.id:
+                    if not hasattr(subscription, "id") or not subscription.id:
                         errors.append("Subscription must have valid ID")
 
-            if hasattr(profile, 'export') and profile.export:
+            if hasattr(profile, "export") and profile.export:
                 # Validate export settings
-                if profile.export.format not in ['sing-box', 'clash', 'json']:
+                if profile.export.format not in ["sing-box", "clash", "json"]:
                     errors.append(f"Unsupported output format: {profile.export.format}")
 
-            logger.debug(f"Profile validation completed: {len(errors)} errors, {len(warnings)} warnings")
+            logger.debug(
+                f"Profile validation completed: {len(errors)} errors, {len(warnings)} warnings"
+            )
 
         except ValidationError as e:
             errors.extend([str(error) for error in e.errors()])
             logger.error(f"Profile validation failed: {e}")
 
         return ValidationResult(
-            valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings
+            valid=len(errors) == 0, errors=errors, warnings=warnings
         )
 
     def get_active_profile(self) -> Optional[FullProfile]:
@@ -258,7 +275,9 @@ class ProfileManager:
 
         """
         self.active_profile = profile
-        logger.info(f"Set active profile: {profile.name if hasattr(profile, 'name') else 'unnamed'}")
+        logger.info(
+            f"Set active profile: {profile.name if hasattr(profile, 'name') else 'unnamed'}"
+        )
 
     def list_profiles(self) -> List[ProfileInfo]:
         """List all available profiles in the profiles directory.
@@ -292,7 +311,7 @@ class ProfileManager:
                     size=stat.st_size,
                     modified=datetime.fromtimestamp(stat.st_mtime),
                     valid=valid,
-                    error=error
+                    error=error,
                 )
 
                 profiles.append(profile_info)

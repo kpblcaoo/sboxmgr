@@ -1,20 +1,19 @@
 """Core subscription manager implementation."""
 
-from typing import Optional, List
+from typing import List, Optional
 
-from ..models import SubscriptionSource, PipelineContext, PipelineResult
-from ..registry import get_plugin, load_entry_points
 from ..base_selector import DefaultSelector
-from ..postprocessor_base import DedupPostProcessor, PostProcessorChain
-from ..middleware_base import MiddlewareChain
 
 # Import fetchers and parsers for plugin registration
 from ..fetchers import *  # noqa: F401
+from ..middleware_base import MiddlewareChain
+from ..models import PipelineContext, PipelineResult, SubscriptionSource
 from ..parsers import *  # noqa: F401
-
+from ..postprocessor_base import DedupPostProcessor, PostProcessorChain
+from ..registry import get_plugin, load_entry_points
 from .cache import CacheManager
-from .error_handler import ErrorHandler
 from .data_processor import DataProcessor
+from .error_handler import ErrorHandler
 from .pipeline_coordinator import PipelineCoordinator
 
 
@@ -30,7 +29,7 @@ class SubscriptionManager:
     The pipeline stages are:
     1. Fetch raw data from source
     2. Validate raw data
-    3. Parse into server configurations  
+    3. Parse into server configurations
     4. Apply middleware transformations
     5. Post-process and deduplicate
     6. Select servers based on criteria
@@ -48,7 +47,7 @@ class SubscriptionManager:
         source: SubscriptionSource,
         detect_parser=None,
         postprocessor_chain=None,
-        middleware_chain=None
+        middleware_chain=None,
     ):
         """Initialize subscription manager with configuration.
 
@@ -77,7 +76,9 @@ class SubscriptionManager:
         self.data_processor = DataProcessor(self.fetcher, self.error_handler)
 
         # Setup pipeline components
-        self.postprocessor = postprocessor_chain or PostProcessorChain([DedupPostProcessor()])
+        self.postprocessor = postprocessor_chain or PostProcessorChain(
+            [DedupPostProcessor()]
+        )
         self.middleware_chain = middleware_chain or MiddlewareChain([])
         self.selector = DefaultSelector()
 
@@ -86,7 +87,7 @@ class SubscriptionManager:
             middleware_chain=self.middleware_chain,
             postprocessor=self.postprocessor,
             selector=self.selector,
-            error_handler=self.error_handler
+            error_handler=self.error_handler,
         )
 
         # Setup parser detection
@@ -98,7 +99,7 @@ class SubscriptionManager:
         exclusions: Optional[List[str]] = None,
         mode: Optional[str] = None,
         context: Optional[PipelineContext] = None,
-        force_reload: bool = False
+        force_reload: bool = False,
     ) -> PipelineResult:
         """Execute subscription processing pipeline to get servers.
 
@@ -118,7 +119,7 @@ class SubscriptionManager:
         # Setup defaults
         user_routes = user_routes or []
         exclusions = exclusions or []
-        mode = mode or 'tolerant'
+        mode = mode or "tolerant"
 
         # Create or update context
         if context is None:
@@ -127,14 +128,16 @@ class SubscriptionManager:
             context.mode = mode
 
         # Initialize context metadata
-        if not hasattr(context, 'metadata'):
+        if not hasattr(context, "metadata"):
             context.metadata = {}
-        if 'errors' not in context.metadata:
-            context.metadata['errors'] = []
+        if "errors" not in context.metadata:
+            context.metadata["errors"] = []
 
         # Check cache unless force_reload
         if not force_reload:
-            cache_key = self.cache_manager.create_cache_key(mode, context, self.fetcher.source)
+            cache_key = self.cache_manager.create_cache_key(
+                mode, context, self.fetcher.source
+            )
             cached_result = self.cache_manager.get_cached_result(cache_key)
             if cached_result:
                 return cached_result
@@ -144,7 +147,9 @@ class SubscriptionManager:
 
         # Cache successful results
         if result.success and not force_reload:
-            cache_key = self.cache_manager.create_cache_key(mode, context, self.fetcher.source)
+            cache_key = self.cache_manager.create_cache_key(
+                mode, context, self.fetcher.source
+            )
             self.cache_manager.set_cached_result(cache_key, result)
 
         return result
@@ -155,7 +160,7 @@ class SubscriptionManager:
         user_routes: Optional[List[str]] = None,
         context: Optional[PipelineContext] = None,
         routing_plugin=None,
-        export_manager=None
+        export_manager=None,
     ) -> PipelineResult:
         """Export subscription configuration using export manager.
 
@@ -174,9 +179,7 @@ class SubscriptionManager:
         """
         # Get servers first
         servers_result = self.get_servers(
-            user_routes=user_routes,
-            exclusions=exclusions,
-            context=context
+            user_routes=user_routes, exclusions=exclusions, context=context
         )
 
         # If get_servers failed, return the failure
@@ -190,7 +193,7 @@ class SubscriptionManager:
             user_routes=user_routes,
             context=context,
             routing_plugin=routing_plugin,
-            export_manager=export_manager
+            export_manager=export_manager,
         )
 
     def _execute_pipeline(
@@ -198,7 +201,7 @@ class SubscriptionManager:
         user_routes: List[str],
         exclusions: List[str],
         mode: str,
-        context: PipelineContext
+        context: PipelineContext,
     ) -> PipelineResult:
         """Execute the complete subscription processing pipeline.
 
@@ -222,28 +225,41 @@ class SubscriptionManager:
             return self.pipeline_coordinator.create_pipeline_result([], context, False)
 
         # Stage 3: Validate parsed servers
-        validated_servers, validation_success = self.data_processor.validate_parsed_servers(servers, context)
-        if not validation_success and mode != 'strict':
+        (
+            validated_servers,
+            validation_success,
+        ) = self.data_processor.validate_parsed_servers(servers, context)
+        if not validation_success and mode != "strict":
             return self.pipeline_coordinator.create_pipeline_result([], context, False)
 
         # Stage 4: Apply policies
-        policy_servers = self.pipeline_coordinator.apply_policies(validated_servers, context)
+        policy_servers = self.pipeline_coordinator.apply_policies(
+            validated_servers, context
+        )
 
         # Stage 5: Process middleware
-        middleware_servers, middleware_success = self.pipeline_coordinator.process_middleware(policy_servers, context)
+        (
+            middleware_servers,
+            middleware_success,
+        ) = self.pipeline_coordinator.process_middleware(policy_servers, context)
 
         # Stage 6: Post-process and select
-        final_servers, selection_success = self.pipeline_coordinator.postprocess_and_select(
+        (
+            final_servers,
+            selection_success,
+        ) = self.pipeline_coordinator.postprocess_and_select(
             middleware_servers, user_routes, exclusions, mode
         )
 
         # Determine overall success
         overall_success = (
-            fetch_success and
-            parse_success and
-            (validation_success or mode == 'strict') and
-            middleware_success and
-            selection_success
+            fetch_success
+            and parse_success
+            and (validation_success or mode == "strict")
+            and middleware_success
+            and selection_success
         )
 
-        return self.pipeline_coordinator.create_pipeline_result(final_servers, context, overall_success)
+        return self.pipeline_coordinator.create_pipeline_result(
+            final_servers, context, overall_success
+        )

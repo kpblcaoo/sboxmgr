@@ -116,7 +116,7 @@ The main orchestrator that coordinates all components:
 ```python
 class SubscriptionManager:
     """Manages subscription data processing pipeline."""
-    
+
     def __init__(self, source, detect_parser=None, postprocessor_chain=None, middleware_chain=None)
     def get_servers(self, user_routes=None, exclusions=None, mode=None, context=None, force_reload=False) -> PipelineResult
     def export_config(self, exclusions=None, user_routes=None, context=None, routing_plugin=None, export_manager=None) -> PipelineResult
@@ -223,7 +223,7 @@ The module provides comprehensive error handling:
 ### Error Types
 
 - `FETCH`: Data fetching errors
-- `VALIDATION`: Data validation errors  
+- `VALIDATION`: Data validation errors
 - `PARSE`: Data parsing errors
 - `INTERNAL`: Internal processing errors
 
@@ -314,4 +314,4 @@ from sboxmgr.subscription.manager import (
 3. **Performance**: Improved caching and error handling
 4. **Extensibility**: Easy to add new pipeline stages or modify existing ones
 5. **Reusability**: Individual components can be used in other contexts
-6. **Debugging**: Better error tracking and context management 
+6. **Debugging**: Better error tracking and context management

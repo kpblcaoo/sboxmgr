@@ -1,8 +1,9 @@
 """Event types and data structures for the event system."""
 
-from enum import Enum, IntEnum
-from typing import Any, Dict, Optional, Union, Callable
 from datetime import datetime
+from enum import Enum, IntEnum
+from typing import Any, Callable, Dict, Optional, Union
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -72,7 +73,7 @@ class EventData(BaseModel):
     the event payload, source information, and timing data.
     """
 
-    model_config = ConfigDict(extra='allow')
+    model_config = ConfigDict(extra="allow")
 
     event_type: EventType
     payload: Dict[str, Any]

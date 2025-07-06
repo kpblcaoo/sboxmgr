@@ -2,6 +2,7 @@
 
 import hashlib
 
+
 def generate_server_id(server):
     """Generate a unique identifier for a server configuration.
 
@@ -10,7 +11,7 @@ def generate_server_id(server):
     server tracking across subscription updates.
 
     Args:
-        server: Server configuration dictionary containing 'tag', 'type', 
+        server: Server configuration dictionary containing 'tag', 'type',
                and 'server_port' keys.
 
     Returns:

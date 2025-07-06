@@ -15,4 +15,4 @@ _This ADR was written retrospectively to document a decision made earlier in the
 ## Consequences
 + Можно расширять без изменения ядра
 + Простота тестирования и отладки
-– Чуть выше порог входа 
+– Чуть выше порог входа

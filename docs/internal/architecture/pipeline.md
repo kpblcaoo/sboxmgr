@@ -15,16 +15,16 @@ flowchart TD
     E --> F[Selector]
     F --> G[Exporter]
     G --> H[Config Output]
-    
+
     subgraph Context
-      X[PipelineContext] 
+      X[PipelineContext]
     end
     X -.-> A
     X -.-> D
     X -.-> E
     X -.-> F
     X -.-> G
-    
+
     subgraph ErrorHandling
       Y[Error Reporter]
     end
@@ -35,10 +35,10 @@ flowchart TD
     Y -.-> E
     Y -.-> F
     Y -.-> G
-    
+
     style X fill:#f9f,stroke:#333,stroke-width:2px
     style Y fill:#ff9,stroke:#333,stroke-width:2px
-    
+
     classDef main fill:#bbf,stroke:#333,stroke-width:2px;
     class A,B,C,D,E,F,G,H main;
 ```
@@ -58,17 +58,17 @@ flowchart LR
     B --> C[RouteConfigMiddleware]
     C --> D[ExportManager]
     D --> E[Final Config]
-    
+
     subgraph "Middleware Context"
       F[PipelineContext]
       G[ClientProfile]
     end
-    
+
     F -.-> B
     F -.-> C
     G -.-> B
     G -.-> C
-    
+
     style F fill:#f9f,stroke:#333,stroke-width:2px
     style G fill:#bbf,stroke:#333,stroke-width:2px
 ```
@@ -157,4 +157,4 @@ The pipeline is designed for easy extension:
 - **Plugin Architecture**: Easy to add new fetchers, parsers, exporters
 - **Middleware System**: Extensible middleware chain
 - **Configuration**: Flexible configuration system
-- **Documentation**: Comprehensive documentation and examples 
+- **Documentation**: Comprehensive documentation and examples

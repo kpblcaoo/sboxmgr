@@ -273,4 +273,4 @@ When reporting issues, include:
 
 - [CLI Reference](cli-reference.md) - Command line interface
 - [Profiles](profiles.md) - Profile management
-- [Subscriptions](subscriptions.md) - Subscription management 
+- [Subscriptions](subscriptions.md) - Subscription management

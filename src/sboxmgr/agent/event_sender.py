@@ -6,10 +6,11 @@ to sboxagent via Unix socket using the framed JSON protocol.
 
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
+from sboxmgr.logging import get_logger
 
 from .ipc.socket_client import SocketClient
-from sboxmgr.logging import get_logger
 
 
 def _get_logger():
@@ -19,6 +20,7 @@ def _get_logger():
     except RuntimeError:
         # Fallback to basic logger if logging not initialized
         import logging
+
         return logging.getLogger(__name__)
 
 
@@ -85,9 +87,9 @@ class EventSender:
             self._client.connect()
             self._connected = True
 
-            _get_logger().info("Connected to sboxagent", extra={
-                "socket_path": self.socket_path
-            })
+            _get_logger().info(
+                "Connected to sboxagent", extra={"socket_path": self.socket_path}
+            )
 
             return True
 
@@ -112,12 +114,14 @@ class EventSender:
         """
         return self._connected and self._client is not None
 
-    def send_event(self,
-                   event_type: str,
-                   event_data: Dict[str, Any],
-                   source: str = "sboxmgr",
-                   priority: str = "normal",
-                   correlation_id: Optional[str] = None) -> bool:
+    def send_event(
+        self,
+        event_type: str,
+        event_data: Dict[str, Any],
+        source: str = "sboxmgr",
+        priority: str = "normal",
+        correlation_id: Optional[str] = None,
+    ) -> bool:
         """Send an event to sboxagent.
 
         Args:
@@ -152,7 +156,7 @@ class EventSender:
             event_data=event_data,
             source=source,
             priority=priority,
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
 
         try:
@@ -165,38 +169,43 @@ class EventSender:
             if response.get("type") == "response":
                 response_data = response.get("response", {})
                 if response_data.get("status") == "success":
-                    _get_logger().debug("Event sent successfully", extra={
-                        "event_type": event_type,
-                        "message_id": message["id"]
-                    })
+                    _get_logger().debug(
+                        "Event sent successfully",
+                        extra={"event_type": event_type, "message_id": message["id"]},
+                    )
                     return True
                 else:
                     error = response_data.get("error", {})
-                    _get_logger().error("Event sending failed", extra={
-                        "event_type": event_type,
-                        "error_code": error.get("code"),
-                        "error_message": error.get("message")
-                    })
+                    _get_logger().error(
+                        "Event sending failed",
+                        extra={
+                            "event_type": event_type,
+                            "error_code": error.get("code"),
+                            "error_message": error.get("message"),
+                        },
+                    )
                     return False
             else:
-                _get_logger().warning("Unexpected response type", extra={
-                    "expected": "response",
-                    "received": response.get("type")
-                })
+                _get_logger().warning(
+                    "Unexpected response type",
+                    extra={"expected": "response", "received": response.get("type")},
+                )
                 return False
 
         except Exception as e:
-            _get_logger().error("Failed to send event", extra={
-                "event_type": event_type,
-                "error": str(e)
-            })
+            _get_logger().error(
+                "Failed to send event",
+                extra={"event_type": event_type, "error": str(e)},
+            )
             self._connected = False
             raise EventSenderError(f"Failed to send event: {e}") from e
 
-    def send_heartbeat(self,
-                      agent_id: str = "sboxmgr",
-                      status: str = "healthy",
-                      version: Optional[str] = None) -> bool:
+    def send_heartbeat(
+        self,
+        agent_id: str = "sboxmgr",
+        status: str = "healthy",
+        version: Optional[str] = None,
+    ) -> bool:
         """Send a heartbeat to sboxagent.
 
         Args:
@@ -214,9 +223,7 @@ class EventSender:
 
         # Create heartbeat message
         message = self._create_heartbeat_message(
-            agent_id=agent_id,
-            status=status,
-            version=version
+            agent_id=agent_id, status=status, version=version
         )
 
         try:
@@ -227,29 +234,28 @@ class EventSender:
             response = self._client.recv_message()
 
             if response.get("type") == "heartbeat":
-                _get_logger().debug("Heartbeat exchange successful", extra={
-                    "agent_id": agent_id
-                })
+                _get_logger().debug(
+                    "Heartbeat exchange successful", extra={"agent_id": agent_id}
+                )
                 return True
             else:
-                _get_logger().warning("Unexpected heartbeat response", extra={
-                    "expected": "heartbeat",
-                    "received": response.get("type")
-                })
+                _get_logger().warning(
+                    "Unexpected heartbeat response",
+                    extra={"expected": "heartbeat", "received": response.get("type")},
+                )
                 return False
 
         except Exception as e:
-            _get_logger().error("Failed to send heartbeat", extra={
-                "agent_id": agent_id,
-                "error": str(e)
-            })
+            _get_logger().error(
+                "Failed to send heartbeat",
+                extra={"agent_id": agent_id, "error": str(e)},
+            )
             self._connected = False
             return False
 
-    def send_command(self,
-                    command: str,
-                    params: Dict[str, Any],
-                    correlation_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    def send_command(
+        self, command: str, params: Dict[str, Any], correlation_id: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
         """Send a command to sboxagent and wait for response.
 
         Args:
@@ -267,9 +273,7 @@ class EventSender:
 
         # Create command message
         message = self._create_command_message(
-            command=command,
-            params=params,
-            correlation_id=correlation_id
+            command=command, params=params, correlation_id=correlation_id
         )
 
         try:
@@ -285,24 +289,26 @@ class EventSender:
                     return response_data.get("data")
                 else:
                     error = response_data.get("error", {})
-                    _get_logger().error("Command failed", extra={
-                        "command": command,
-                        "error_code": error.get("code"),
-                        "error_message": error.get("message")
-                    })
+                    _get_logger().error(
+                        "Command failed",
+                        extra={
+                            "command": command,
+                            "error_code": error.get("code"),
+                            "error_message": error.get("message"),
+                        },
+                    )
                     return None
             else:
-                _get_logger().warning("Unexpected command response", extra={
-                    "expected": "response",
-                    "received": response.get("type")
-                })
+                _get_logger().warning(
+                    "Unexpected command response",
+                    extra={"expected": "response", "received": response.get("type")},
+                )
                 return None
 
         except Exception as e:
-            _get_logger().error("Failed to send command", extra={
-                "command": command,
-                "error": str(e)
-            })
+            _get_logger().error(
+                "Failed to send command", extra={"command": command, "error": str(e)}
+            )
             self._connected = False
             return None
 
@@ -325,23 +331,28 @@ class EventSender:
         """
         return self.send_command("status", {})
 
-    def _create_event_message(self,
-                             event_type: str,
-                             event_data: Dict[str, Any],
-                             source: str,
-                             priority: str,
-                             correlation_id: Optional[str] = None) -> Dict[str, Any]:
+    def _create_event_message(
+        self,
+        event_type: str,
+        event_data: Dict[str, Any],
+        source: str,
+        priority: str,
+        correlation_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Create an event message."""
         message = {
             "id": str(uuid.uuid4()),
             "type": "event",
-            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[
+                :-3
+            ]
+            + "Z",
             "event": {
                 "event_type": event_type,
                 "source": source,
                 "priority": priority,
-                "data": event_data
-            }
+                "data": event_data,
+            },
         }
 
         if correlation_id:
@@ -349,19 +360,18 @@ class EventSender:
 
         return message
 
-    def _create_command_message(self,
-                               command: str,
-                               params: Dict[str, Any],
-                               correlation_id: Optional[str] = None) -> Dict[str, Any]:
+    def _create_command_message(
+        self, command: str, params: Dict[str, Any], correlation_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Create a command message."""
         message = {
             "id": str(uuid.uuid4()),
             "type": "command",
-            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
-            "command": {
-                "command": command,
-                "params": params
-            }
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[
+                :-3
+            ]
+            + "Z",
+            "command": {"command": command, "params": params},
         }
 
         if correlation_id:
@@ -369,19 +379,18 @@ class EventSender:
 
         return message
 
-    def _create_heartbeat_message(self,
-                                 agent_id: str,
-                                 status: str,
-                                 version: Optional[str] = None) -> Dict[str, Any]:
+    def _create_heartbeat_message(
+        self, agent_id: str, status: str, version: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Create a heartbeat message."""
         message: Dict[str, Any] = {
             "id": str(uuid.uuid4()),
             "type": "heartbeat",
-            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z",
-            "heartbeat": {
-                "agent_id": agent_id,
-                "status": status
-            }
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[
+                :-3
+            ]
+            + "Z",
+            "heartbeat": {"agent_id": agent_id, "status": status},
         }
 
         if version:
@@ -407,10 +416,12 @@ def get_event_sender() -> EventSender:
     return _event_sender
 
 
-def send_event(event_type: str,
-               event_data: Dict[str, Any],
-               source: str = "sboxmgr",
-               priority: str = "normal") -> bool:
+def send_event(
+    event_type: str,
+    event_data: Dict[str, Any],
+    source: str = "sboxmgr",
+    priority: str = "normal",
+) -> bool:
     """Send an event with convenience parameters.
 
     Args:

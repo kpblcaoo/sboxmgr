@@ -6,7 +6,8 @@ dependency injection, testing, and architectural separation.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from sboxmgr.subscription.models import PipelineContext, PipelineResult
 
 
@@ -18,11 +19,14 @@ class SubscriptionManagerInterface(ABC):
     """
 
     @abstractmethod
-    def get_servers(self, user_routes: Optional[List[str]] = None,
-                   exclusions: Optional[List[str]] = None,
-                   mode: Optional[str] = None,
-                   context: Optional[PipelineContext] = None,
-                   force_reload: bool = False) -> PipelineResult:
+    def get_servers(
+        self,
+        user_routes: Optional[List[str]] = None,
+        exclusions: Optional[List[str]] = None,
+        mode: Optional[str] = None,
+        context: Optional[PipelineContext] = None,
+        force_reload: bool = False,
+    ) -> PipelineResult:
         """Retrieve and process servers from subscription.
 
         Args:
@@ -39,11 +43,14 @@ class SubscriptionManagerInterface(ABC):
         pass
 
     @abstractmethod
-    def export_config(self, exclusions: Optional[List[str]] = None,
-                     user_routes: Optional[List[str]] = None,
-                     context: Optional[PipelineContext] = None,
-                     routing_plugin: Optional[Any] = None,
-                     export_manager: Optional[Any] = None) -> PipelineResult:
+    def export_config(
+        self,
+        exclusions: Optional[List[str]] = None,
+        user_routes: Optional[List[str]] = None,
+        context: Optional[PipelineContext] = None,
+        routing_plugin: Optional[Any] = None,
+        export_manager: Optional[Any] = None,
+    ) -> PipelineResult:
         """Export subscription to configuration format.
 
         Args:
@@ -68,11 +75,14 @@ class ExportManagerInterface(ABC):
     """
 
     @abstractmethod
-    def export(self, servers: List[Any],
-              exclusions: Optional[List[str]] = None,
-              user_routes: Optional[List[Dict]] = None,
-              context: Optional[Dict[str, Any]] = None,
-              client_profile: Optional[Any] = None) -> Dict:
+    def export(
+        self,
+        servers: List[Any],
+        exclusions: Optional[List[str]] = None,
+        user_routes: Optional[List[Dict]] = None,
+        context: Optional[Dict[str, Any]] = None,
+        client_profile: Optional[Any] = None,
+    ) -> Dict:
         """Export servers to client configuration format.
 
         Args:
@@ -97,8 +107,9 @@ class ExclusionManagerInterface(ABC):
     """
 
     @abstractmethod
-    def add(self, server_id: str, name: Optional[str] = None,
-           reason: Optional[str] = None) -> bool:
+    def add(
+        self, server_id: str, name: Optional[str] = None, reason: Optional[str] = None
+    ) -> bool:
         """Add server to exclusions.
 
         Args:

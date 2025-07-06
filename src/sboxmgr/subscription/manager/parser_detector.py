@@ -1,10 +1,10 @@
 """Parser auto-detection functionality."""
 
 import base64
-import re
 import json
 import logging
-from typing import Optional, List, Any, Protocol
+import re
+from typing import Any, List, Optional, Protocol
 
 
 class ParserProtocol(Protocol):
@@ -26,7 +26,7 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
         Parser instance or None if detection fails.
     """
     # Декодируем данные
-    text = raw.decode('utf-8', errors='ignore')
+    text = raw.decode("utf-8", errors="ignore")
 
     # Если source_type явно указан, используем соответствующий парсер
     explicit_parser = _get_explicit_parser(source_type)
@@ -48,12 +48,15 @@ def _get_explicit_parser(source_type: str) -> Optional[ParserProtocol]:
     """
     if source_type in ("url_json", "file_json"):
         from ..parsers.singbox_parser import SingBoxParser
+
         return SingBoxParser()
     elif source_type in ("url_base64", "file_base64"):
         from ..parsers.base64_parser import Base64Parser
+
         return Base64Parser()
     elif source_type in ("uri_list", "file_uri_list"):
         from ..parsers.uri_list_parser import URIListParser
+
         return URIListParser()
 
     return None
@@ -90,6 +93,7 @@ def _auto_detect_parser(text: str) -> ParserProtocol:
 
     # Fallback
     from ..parsers.base64_parser import Base64Parser
+
     return Base64Parser()
 
 
@@ -104,6 +108,7 @@ def _try_json_parser(text: str) -> Optional[ParserProtocol]:
     """
     try:
         from ..parsers.singbox_parser import SingBoxParser
+
         parser = SingBoxParser()
         data = parser._strip_comments_and_validate(text)[0]
         json.loads(data)
@@ -124,12 +129,18 @@ def _try_clash_parser(text: str) -> Optional[ParserProtocol]:
     """
     # Check for Clash YAML indicators
     clash_indicators = [
-        "mixed-port:", "proxies:", "proxy-groups:", "proxy-providers:",
-        "rules:", "rule-providers:", "dns:"
+        "mixed-port:",
+        "proxies:",
+        "proxy-groups:",
+        "proxy-providers:",
+        "rules:",
+        "rule-providers:",
+        "dns:",
     ]
 
     if any(indicator in text for indicator in clash_indicators):
         from ..parsers.clash_parser import ClashParser
+
         return ClashParser()
 
     return None
@@ -145,18 +156,19 @@ def _try_base64_parser(text: str) -> Optional[ParserProtocol]:
         Base64Parser if base64 detected, None otherwise.
     """
     # Check if text looks like base64
-    b64_re = re.compile(r'^[A-Za-z0-9+/=\s]+$')
+    b64_re = re.compile(r"^[A-Za-z0-9+/=\s]+$")
     if not (b64_re.match(text) and len(text.strip()) > 100):
         return None
 
     try:
-        decoded = base64.b64decode(text.strip() + '=' * (-len(text.strip()) % 4))
-        decoded_text = decoded.decode('utf-8', errors='ignore')
+        decoded = base64.b64decode(text.strip() + "=" * (-len(text.strip()) % 4))
+        decoded_text = decoded.decode("utf-8", errors="ignore")
 
         # Check for proxy protocol indicators
         proxy_protocols = ("vless://", "vmess://", "trojan://", "ss://")
         if any(proto in decoded_text for proto in proxy_protocols):
             from ..parsers.base64_parser import Base64Parser
+
             return Base64Parser()
     except Exception as e:
         logging.debug(f"Base64 parser detection failed: {e}")
@@ -178,6 +190,7 @@ def _try_uri_list_parser(text: str) -> Optional[ParserProtocol]:
 
     if any(line.strip().startswith(proxy_protocols) for line in lines):
         from ..parsers.uri_list_parser import URIListParser
+
         return URIListParser()
 
     return None

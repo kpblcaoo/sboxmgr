@@ -149,7 +149,7 @@ except ValueError as e:
 This module replaces the original `singbox_exporter_v2.py` file (597 lines) with a modular architecture:
 
 - **Before**: Single 597-line file with all functionality
-- **After**: 5 specialized modules with clear responsibilities  
+- **After**: 5 specialized modules with clear responsibilities
 - **Benefits**: Better maintainability, easier testing, improved organization
 
 ## Performance Considerations
@@ -189,4 +189,4 @@ When adding new protocols or features:
 - **New Protocols**: Easy to add new protocol support
 - **Enhanced Validation**: Additional validation rules
 - **Performance Optimization**: Further optimization opportunities
-- **Configuration Templates**: Pre-built configuration templates 
+- **Configuration Templates**: Pre-built configuration templates

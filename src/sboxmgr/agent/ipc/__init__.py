@@ -2,4 +2,4 @@
 
 from .socket_client import SocketClient
 
-__all__ = ['SocketClient']
+__all__ = ["SocketClient"]

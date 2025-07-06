@@ -12,7 +12,7 @@ New modular implementation: enrichment/
 from .enrichment import EnrichmentMiddleware
 
 # Legacy compatibility - export the main class
-__all__ = ['EnrichmentMiddleware']
+__all__ = ["EnrichmentMiddleware"]
 
 # Note: This compatibility layer ensures that existing code continues to work
 # without any changes. The actual implementation is now in the enrichment/

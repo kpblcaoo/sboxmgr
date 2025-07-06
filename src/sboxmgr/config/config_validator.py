@@ -6,7 +6,8 @@ preventing runtime errors from invalid configurations.
 """
 
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
 from .validation import ConfigValidationError
 
 
@@ -100,7 +101,9 @@ def validate_outbound_config(outbound: Dict[str, Any], index: int) -> None:
     required_fields = ["type"]
     for field in required_fields:
         if field not in outbound:
-            raise ConfigValidationError(f"Outbound {index} must contain '{field}' field")
+            raise ConfigValidationError(
+                f"Outbound {index} must contain '{field}' field"
+            )
 
     # Validate outbound type
     outbound_type = outbound["type"]
@@ -132,7 +135,9 @@ def validate_protocol_specific_fields(outbound: Dict[str, Any], index: int) -> N
     if "server_port" in outbound:
         port = outbound["server_port"]
         if not isinstance(port, int) or port < 1 or port > 65535:
-            raise ConfigValidationError(f"Outbound {index} 'server_port' must be an integer between 1-65535")
+            raise ConfigValidationError(
+                f"Outbound {index} 'server_port' must be an integer between 1-65535"
+            )
 
     # Protocol-specific validation
     if outbound_type == "shadowsocks":
@@ -169,9 +174,13 @@ def validate_shadowsocks_fields(outbound: Dict[str, Any], index: int) -> None:
     required_fields = ["method", "password"]
     for field in required_fields:
         if field not in outbound:
-            raise ConfigValidationError(f"Shadowsocks outbound {index} must contain '{field}' field")
+            raise ConfigValidationError(
+                f"Shadowsocks outbound {index} must contain '{field}' field"
+            )
         if not isinstance(outbound[field], str):
-            raise ConfigValidationError(f"Shadowsocks outbound {index} '{field}' must be a string")
+            raise ConfigValidationError(
+                f"Shadowsocks outbound {index} '{field}' must be a string"
+            )
 
 
 def validate_vmess_fields(outbound: Dict[str, Any], index: int) -> None:
@@ -203,9 +212,13 @@ def validate_trojan_fields(outbound: Dict[str, Any], index: int) -> None:
 
     """
     if "password" not in outbound:
-        raise ConfigValidationError(f"Trojan outbound {index} must contain 'password' field")
+        raise ConfigValidationError(
+            f"Trojan outbound {index} must contain 'password' field"
+        )
     if not isinstance(outbound["password"], str):
-        raise ConfigValidationError(f"Trojan outbound {index} 'password' must be a string")
+        raise ConfigValidationError(
+            f"Trojan outbound {index} 'password' must be a string"
+        )
 
 
 def validate_wireguard_fields(outbound: Dict[str, Any], index: int) -> None:
@@ -222,7 +235,9 @@ def validate_wireguard_fields(outbound: Dict[str, Any], index: int) -> None:
     required_fields = ["private_key", "peer_public_key", "local_address"]
     for field in required_fields:
         if field not in outbound:
-            raise ConfigValidationError(f"WireGuard outbound {index} must contain '{field}' field")
+            raise ConfigValidationError(
+                f"WireGuard outbound {index} must contain '{field}' field"
+            )
 
 
 def validate_hysteria2_fields(outbound: Dict[str, Any], index: int) -> None:
@@ -237,9 +252,13 @@ def validate_hysteria2_fields(outbound: Dict[str, Any], index: int) -> None:
 
     """
     if "password" not in outbound:
-        raise ConfigValidationError(f"Hysteria2 outbound {index} must contain 'password' field")
+        raise ConfigValidationError(
+            f"Hysteria2 outbound {index} must contain 'password' field"
+        )
     if not isinstance(outbound["password"], str):
-        raise ConfigValidationError(f"Hysteria2 outbound {index} 'password' must be a string")
+        raise ConfigValidationError(
+            f"Hysteria2 outbound {index} 'password' must be a string"
+        )
 
 
 def validate_tuic_fields(outbound: Dict[str, Any], index: int) -> None:
@@ -256,9 +275,13 @@ def validate_tuic_fields(outbound: Dict[str, Any], index: int) -> None:
     required_fields = ["uuid", "password"]
     for field in required_fields:
         if field not in outbound:
-            raise ConfigValidationError(f"TUIC outbound {index} must contain '{field}' field")
+            raise ConfigValidationError(
+                f"TUIC outbound {index} must contain '{field}' field"
+            )
         if not isinstance(outbound[field], str):
-            raise ConfigValidationError(f"TUIC outbound {index} '{field}' must be a string")
+            raise ConfigValidationError(
+                f"TUIC outbound {index} '{field}' must be a string"
+            )
 
 
 def validate_inbound_config(inbound: Dict[str, Any], index: int) -> None:

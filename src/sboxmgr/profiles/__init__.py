@@ -4,25 +4,24 @@ This module provides profile-based configuration management,
 allowing users to define complete configurations in a single JSON file.
 """
 
-from .models import (
-    FullProfile,
-    Profile,
-    SubscriptionProfile,
-    FilterProfile,
-    RoutingProfile,
-    ExportProfile,
-    AgentProfile,
-    UIProfile,
-    LegacyProfile,
-    ExportFormat,
-    UIMode,
-    # Type aliases
-    SubscriptionConfig,
-    FilterConfig,
-    RoutingConfig,
-    ExportConfig,
+from .models import (  # Type aliases
     AgentConfig,
+    AgentProfile,
+    ExportConfig,
+    ExportFormat,
+    ExportProfile,
+    FilterConfig,
+    FilterProfile,
+    FullProfile,
+    LegacyProfile,
+    Profile,
+    RoutingConfig,
+    RoutingProfile,
+    SubscriptionConfig,
+    SubscriptionProfile,
     UIConfig,
+    UIMode,
+    UIProfile,
 )
 
 __all__ = [

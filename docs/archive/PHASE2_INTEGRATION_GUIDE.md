@@ -202,16 +202,16 @@ services:
     enabled: true
     socket_path: "/tmp/sboxagent.sock"
     timeout: "30s"
-  
+
   cli:
     enabled: true
     sboxmgr_path: "sboxmgr"
     timeout: "30s"
-  
+
   monitoring:
     enabled: true
     interval: "30s"
-  
+
   systemd:
     enabled: true
     service_name: "sboxagent"
@@ -282,4 +282,4 @@ INFO[2025-07-03T10:00:00Z] Received event client_id=client_123 event_type=subscr
 
 **Общий статус Phase 2: ✅ ЗАВЕРШЕНО (95%)**
 
-Phase 2 полностью функционален и готов к использованию. Единая экосистема работает как задумано! 
+Phase 2 полностью функционален и готов к использованию. Единая экосистема работает как задумано!

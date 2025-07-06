@@ -6,16 +6,22 @@ to enable proper testing and architectural separation while providing a
 unified interface for CLI and other consumers.
 """
 
-from typing import Dict, List, Optional, Any
 import logging
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
-from .interfaces import (
-    SubscriptionManagerInterface,
-    ExportManagerInterface,
-    ExclusionManagerInterface
+from sboxmgr.subscription.models import (
+    PipelineContext,
+    PipelineResult,
+    SubscriptionSource,
 )
-from sboxmgr.subscription.models import SubscriptionSource, PipelineContext, PipelineResult
+
+from .interfaces import (
+    ExclusionManagerInterface,
+    ExportManagerInterface,
+    SubscriptionManagerInterface,
+)
 
 
 class OrchestratorConfig(BaseModel):
@@ -33,7 +39,7 @@ class OrchestratorConfig(BaseModel):
 
     """
 
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra="forbid")
 
     default_mode: str = "tolerant"
     debug_level: int = 0
@@ -84,12 +90,14 @@ class Orchestrator:
 
     """
 
-    def __init__(self,
-                 subscription_manager: Optional[SubscriptionManagerInterface] = None,
-                 export_manager: Optional[ExportManagerInterface] = None,
-                 exclusion_manager: Optional[ExclusionManagerInterface] = None,
-                 config: Optional[OrchestratorConfig] = None,
-                 logger: Optional[logging.Logger] = None):
+    def __init__(
+        self,
+        subscription_manager: Optional[SubscriptionManagerInterface] = None,
+        export_manager: Optional[ExportManagerInterface] = None,
+        exclusion_manager: Optional[ExclusionManagerInterface] = None,
+        config: Optional[OrchestratorConfig] = None,
+        logger: Optional[logging.Logger] = None,
+    ):
         """Initialize Orchestrator with dependency injection.
 
         Args:
@@ -121,6 +129,7 @@ class Orchestrator:
         """
         if self._subscription_manager is None:
             from .factory import create_default_subscription_manager
+
             self._subscription_manager = create_default_subscription_manager()
         return self._subscription_manager
 
@@ -137,6 +146,7 @@ class Orchestrator:
         """
         if self._export_manager is None:
             from .factory import create_default_export_manager
+
             self._export_manager = create_default_export_manager()
         return self._export_manager
 
@@ -153,16 +163,20 @@ class Orchestrator:
         """
         if self._exclusion_manager is None:
             from .factory import create_default_exclusion_manager
+
             self._exclusion_manager = create_default_exclusion_manager()
         return self._exclusion_manager
 
-    def get_subscription_servers(self, url: str,
-                                source_type: str = "url_base64",
-                                user_routes: Optional[List[str]] = None,
-                                exclusions: Optional[List[str]] = None,
-                                mode: Optional[str] = None,
-                                force_reload: bool = False,
-                                **kwargs) -> PipelineResult:
+    def get_subscription_servers(
+        self,
+        url: str,
+        source_type: str = "url_base64",
+        user_routes: Optional[List[str]] = None,
+        exclusions: Optional[List[str]] = None,
+        mode: Optional[str] = None,
+        force_reload: bool = False,
+        **kwargs,
+    ) -> PipelineResult:
         """Retrieve and process servers from subscription source.
 
         Provides a unified interface for subscription processing that coordinates
@@ -194,12 +208,13 @@ class Orchestrator:
             # Create pipeline context
             context = PipelineContext(
                 mode=mode or self.config.default_mode,
-                debug_level=self.config.debug_level
+                debug_level=self.config.debug_level,
             )
             # Always create subscription manager for the specific source URL
             # SubscriptionManager is tied to a specific source, so we can't reuse
             # it for different URLs as it would fetch from the wrong source
             from sboxmgr.subscription.manager import SubscriptionManager
+
             sub_manager = SubscriptionManager(source)
 
             # Get servers through pipeline
@@ -208,16 +223,20 @@ class Orchestrator:
                 exclusions=exclusions,
                 mode=context.mode,
                 context=context,
-                force_reload=force_reload
+                force_reload=force_reload,
             )
 
             # Apply exclusion filtering if exclusion manager is available
             if result.success and result.config:
                 try:
-                    filtered_servers = self.exclusion_manager.filter_servers(result.config)
+                    filtered_servers = self.exclusion_manager.filter_servers(
+                        result.config
+                    )
                     # Update result with filtered servers
                     result.config = filtered_servers
-                    self.logger.info(f"Filtered to {len(filtered_servers)} servers after exclusions")
+                    self.logger.info(
+                        f"Filtered to {len(filtered_servers)} servers after exclusions"
+                    )
                 except Exception as e:
                     self.logger.warning(f"Exclusion filtering failed: {e}")
                     if not self.config.fail_safe:
@@ -232,10 +251,14 @@ class Orchestrator:
             if self.config.fail_safe:
                 # Return failed result instead of raising
                 context = PipelineContext(mode=mode or self.config.default_mode)
-                context.metadata['errors'] = [str(e)]
-                return PipelineResult(config=None, context=context, errors=[str(e)], success=False)
+                context.metadata["errors"] = [str(e)]
+                return PipelineResult(
+                    config=None, context=context, errors=[str(e)], success=False
+                )
             else:
-                raise OrchestratorError(error_msg, operation="get_subscription_servers", cause=e)
+                raise OrchestratorError(
+                    error_msg, operation="get_subscription_servers", cause=e
+                )
 
     def manage_exclusions(self, action: str, **kwargs) -> Dict[str, Any]:
         """Unified interface for exclusion management operations.
@@ -269,11 +292,13 @@ class Orchestrator:
                     raise ValueError("server_id is required for add action")
 
                 success = self.exclusion_manager.add(server_id, name, reason)
-                result.update({
-                    "success": success,
-                    "message": f"Server {server_id} {'added to' if success else 'already in'} exclusions",
-                    "data": {"server_id": server_id, "added": success}
-                })
+                result.update(
+                    {
+                        "success": success,
+                        "message": f"Server {server_id} {'added to' if success else 'already in'} exclusions",
+                        "data": {"server_id": server_id, "added": success},
+                    }
+                )
 
             elif action == "remove":
                 server_id = kwargs.get("server_id")
@@ -282,27 +307,33 @@ class Orchestrator:
                     raise ValueError("server_id is required for remove action")
 
                 success = self.exclusion_manager.remove(server_id)
-                result.update({
-                    "success": success,
-                    "message": f"Server {server_id} {'removed from' if success else 'not found in'} exclusions",
-                    "data": {"server_id": server_id, "removed": success}
-                })
+                result.update(
+                    {
+                        "success": success,
+                        "message": f"Server {server_id} {'removed from' if success else 'not found in'} exclusions",
+                        "data": {"server_id": server_id, "removed": success},
+                    }
+                )
 
             elif action == "list":
                 exclusions = self.exclusion_manager.list_all()
-                result.update({
-                    "success": True,
-                    "message": f"Found {len(exclusions)} exclusions",
-                    "data": {"exclusions": exclusions, "count": len(exclusions)}
-                })
+                result.update(
+                    {
+                        "success": True,
+                        "message": f"Found {len(exclusions)} exclusions",
+                        "data": {"exclusions": exclusions, "count": len(exclusions)},
+                    }
+                )
 
             elif action == "clear":
                 count = self.exclusion_manager.clear()
-                result.update({
-                    "success": True,
-                    "message": f"Cleared {count} exclusions",
-                    "data": {"cleared_count": count}
-                })
+                result.update(
+                    {
+                        "success": True,
+                        "message": f"Cleared {count} exclusions",
+                        "data": {"cleared_count": count},
+                    }
+                )
 
             else:
                 raise ValueError(f"Unknown exclusion action: {action}")
@@ -319,17 +350,22 @@ class Orchestrator:
                     "success": False,
                     "message": error_msg,
                     "data": None,
-                    "error": str(e)
+                    "error": str(e),
                 }
             else:
-                raise OrchestratorError(error_msg, operation="manage_exclusions", cause=e)
+                raise OrchestratorError(
+                    error_msg, operation="manage_exclusions", cause=e
+                )
 
-    def export_configuration(self, source_url: str,
-                           source_type: str = "url_base64",
-                           export_format: str = "singbox",
-                           exclusions: Optional[List[str]] = None,
-                           user_routes: Optional[List[str]] = None,
-                           **kwargs) -> Dict[str, Any]:
+    def export_configuration(
+        self,
+        source_url: str,
+        source_type: str = "url_base64",
+        export_format: str = "singbox",
+        exclusions: Optional[List[str]] = None,
+        user_routes: Optional[List[str]] = None,
+        **kwargs,
+    ) -> Dict[str, Any]:
         """Export subscription to client configuration format.
 
         Coordinates the complete process from subscription fetching through
@@ -351,7 +387,9 @@ class Orchestrator:
 
         """
         try:
-            self.logger.info(f"Exporting configuration from {source_url} to {export_format}")
+            self.logger.info(
+                f"Exporting configuration from {source_url} to {export_format}"
+            )
 
             # First get servers from subscription
             servers_result = self.get_subscription_servers(
@@ -359,13 +397,13 @@ class Orchestrator:
                 source_type=source_type,
                 user_routes=user_routes,
                 exclusions=exclusions,
-                **kwargs
+                **kwargs,
             )
 
             if not servers_result.success:
                 raise OrchestratorError(
                     f"Failed to retrieve servers: {servers_result.errors}",
-                    operation="get_servers"
+                    operation="get_servers",
                 )
 
             # Export configuration using export manager
@@ -384,22 +422,26 @@ class Orchestrator:
             config = self.export_manager.export(
                 servers=servers_result.config,
                 exclusions=exclusions,
-                user_routes=user_routes_dicts
+                user_routes=user_routes_dicts,
             )
 
             result = {
                 "success": True,
                 "format": export_format,
-                "server_count": len(servers_result.config) if servers_result.config else 0,
+                "server_count": (
+                    len(servers_result.config) if servers_result.config else 0
+                ),
                 "config": config,
                 "metadata": {
                     "source_url": source_url,
                     "exclusions_applied": len(exclusions) if exclusions else 0,
-                    "pipeline_errors": len(servers_result.errors)
-                }
+                    "pipeline_errors": len(servers_result.errors),
+                },
             }
 
-            self.logger.info(f"Configuration export completed: {result['server_count']} servers")
+            self.logger.info(
+                f"Configuration export completed: {result['server_count']} servers"
+            )
             return result
 
         except Exception as e:
@@ -410,13 +452,15 @@ class Orchestrator:
                     "success": False,
                     "format": export_format,
                     "error": error_msg,
-                    "config": None
+                    "config": None,
                 }
             else:
-                raise OrchestratorError(error_msg, operation="export_configuration", cause=e)
+                raise OrchestratorError(
+                    error_msg, operation="export_configuration", cause=e
+                )
 
     @classmethod
-    def create_default(cls, **config_overrides) -> 'Orchestrator':
+    def create_default(cls, **config_overrides) -> "Orchestrator":
         """Create Orchestrator with default dependencies.
 
         Provides a convenient way to create a fully configured Orchestrator
@@ -432,7 +476,7 @@ class Orchestrator:
         config = OrchestratorConfig(**config_overrides)
         return cls(config=config)
 
-    def with_custom_managers(self, **managers) -> 'Orchestrator':
+    def with_custom_managers(self, **managers) -> "Orchestrator":
         """Builder pattern for creating Orchestrator with custom managers.
 
         Enables flexible customization of dependencies while preserving
@@ -446,9 +490,13 @@ class Orchestrator:
 
         """
         return Orchestrator(
-            subscription_manager=managers.get('subscription_manager', self._subscription_manager),
-            export_manager=managers.get('export_manager', self._export_manager),
-            exclusion_manager=managers.get('exclusion_manager', self._exclusion_manager),
+            subscription_manager=managers.get(
+                "subscription_manager", self._subscription_manager
+            ),
+            export_manager=managers.get("export_manager", self._export_manager),
+            exclusion_manager=managers.get(
+                "exclusion_manager", self._exclusion_manager
+            ),
             config=self.config,
-            logger=self.logger
+            logger=self.logger,
         )

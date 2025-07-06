@@ -2,13 +2,14 @@
 
 from datetime import datetime, timezone
 from typing import List, Optional
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ExclusionEntry(BaseModel):
     """Single exclusion entry."""
 
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra="forbid")
 
     id: str
     name: Optional[str] = None
@@ -19,7 +20,7 @@ class ExclusionEntry(BaseModel):
 class ExclusionList(BaseModel):
     """Collection of exclusions with metadata and versioning."""
 
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra="forbid")
 
     exclusions: List[ExclusionEntry] = Field(default_factory=list)
     last_modified: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

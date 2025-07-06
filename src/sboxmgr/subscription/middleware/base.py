@@ -9,9 +9,10 @@ Implements Phase 3 architecture with profile integration and advanced features.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Dict, Any
-from ..models import ParsedServer, PipelineContext
+from typing import Any, Dict, List, Optional
+
 from ...profiles.models import FullProfile
+from ..models import ParsedServer, PipelineContext
 
 
 class BaseMiddleware(ABC):
@@ -35,14 +36,14 @@ class BaseMiddleware(ABC):
 
         """
         self.config = config or {}
-        self.enabled = self.config.get('enabled', True)
+        self.enabled = self.config.get("enabled", True)
 
     @abstractmethod
     def process(
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Process servers through middleware transformation.
 
@@ -64,7 +65,7 @@ class BaseMiddleware(ABC):
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> bool:
         """Check if this middleware can process the given servers.
 
@@ -90,7 +91,7 @@ class BaseMiddleware(ABC):
             "name": self.__class__.__name__,
             "type": self.middleware_type,
             "enabled": self.enabled,
-            "config": self.config
+            "config": self.config,
         }
 
 
@@ -101,7 +102,9 @@ class ProfileAwareMiddleware(BaseMiddleware):
     from profiles and applying profile-based transformations.
     """
 
-    def extract_middleware_config(self, profile: Optional[FullProfile]) -> Dict[str, Any]:
+    def extract_middleware_config(
+        self, profile: Optional[FullProfile]
+    ) -> Dict[str, Any]:
         """Extract middleware configuration from profile.
 
         Args:
@@ -111,10 +114,10 @@ class ProfileAwareMiddleware(BaseMiddleware):
             Dict with middleware configuration
 
         """
-        if not profile or 'middleware' not in profile.metadata:
+        if not profile or "middleware" not in profile.metadata:
             return {}
 
-        middleware_config = profile.metadata['middleware']
+        middleware_config = profile.metadata["middleware"]
         middleware_name = self.__class__.__name__.lower()
 
         return middleware_config.get(middleware_name, {})
@@ -123,7 +126,7 @@ class ProfileAwareMiddleware(BaseMiddleware):
         self,
         server: ParsedServer,
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> bool:
         """Check if server should be processed by this middleware.
 
@@ -151,7 +154,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> None:
         """Called before main processing. Override for setup logic.
 
@@ -167,7 +170,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> None:
         """Called after main processing. Override for cleanup logic.
 
@@ -183,7 +186,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Process servers with pre/post hooks.
 
@@ -206,7 +209,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Main processing logic. Override this method.
 
@@ -238,17 +241,17 @@ class ConditionalMiddleware(ChainableMiddleware):
 
         """
         super().__init__(config)
-        self.conditions = self.config.get('conditions', {})
-        self.min_servers = self.conditions.get('min_servers', 0)
-        self.max_servers = self.conditions.get('max_servers', float('inf'))
-        self.required_metadata = self.conditions.get('required_metadata', [])
-        self.execution_mode = self.conditions.get('execution_mode', 'always')
+        self.conditions = self.config.get("conditions", {})
+        self.min_servers = self.conditions.get("min_servers", 0)
+        self.max_servers = self.conditions.get("max_servers", float("inf"))
+        self.required_metadata = self.conditions.get("required_metadata", [])
+        self.execution_mode = self.conditions.get("execution_mode", "always")
 
     def can_process(
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> bool:
         """Enhanced conditional processing check.
 
@@ -275,11 +278,11 @@ class ConditionalMiddleware(ChainableMiddleware):
                 return False
 
         # Check execution mode
-        if self.execution_mode == 'never':
+        if self.execution_mode == "never":
             return False
-        elif self.execution_mode == 'profile_only' and not profile:
+        elif self.execution_mode == "profile_only" and not profile:
             return False
-        elif self.execution_mode == 'debug_only' and context.debug_level == 0:
+        elif self.execution_mode == "debug_only" and context.debug_level == 0:
             return False
 
         return True
@@ -300,15 +303,15 @@ class TransformMiddleware(ConditionalMiddleware):
 
         """
         super().__init__(config)
-        self.field_mappings = self.config.get('field_mappings', {})
-        self.value_transformers = self.config.get('value_transformers', {})
-        self.metadata_enrichers = self.config.get('metadata_enrichers', [])
+        self.field_mappings = self.config.get("field_mappings", {})
+        self.value_transformers = self.config.get("value_transformers", {})
+        self.metadata_enrichers = self.config.get("metadata_enrichers", [])
 
     def transform_server(
         self,
         server: ParsedServer,
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> ParsedServer:
         """Transform a single server.
 
@@ -352,11 +355,11 @@ class TransformMiddleware(ConditionalMiddleware):
 
         """
         # Basic transformers - can be extended
-        if transformer_name == 'uppercase':
+        if transformer_name == "uppercase":
             return str(value).upper() if value else value
-        elif transformer_name == 'lowercase':
+        elif transformer_name == "lowercase":
             return str(value).lower() if value else value
-        elif transformer_name == 'strip':
+        elif transformer_name == "strip":
             return str(value).strip() if value else value
         else:
             return value
@@ -366,7 +369,7 @@ class TransformMiddleware(ConditionalMiddleware):
         server: ParsedServer,
         enricher_config: Dict[str, Any],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> None:
         """Apply metadata enricher to server.
 
@@ -377,13 +380,14 @@ class TransformMiddleware(ConditionalMiddleware):
             profile: Full profile configuration
 
         """
-        enricher_type = enricher_config.get('type')
+        enricher_type = enricher_config.get("type")
 
-        if enricher_type == 'timestamp':
+        if enricher_type == "timestamp":
             import time
-            server.meta['processed_at'] = time.time()
-        elif enricher_type == 'trace_id':
-            server.meta['trace_id'] = context.trace_id
-        elif enricher_type == 'source':
-            server.meta['source'] = context.source
+
+            server.meta["processed_at"] = time.time()
+        elif enricher_type == "trace_id":
+            server.meta["trace_id"] = context.trace_id
+        elif enricher_type == "source":
+            server.meta["source"] = context.source
         # Add more enrichers as needed

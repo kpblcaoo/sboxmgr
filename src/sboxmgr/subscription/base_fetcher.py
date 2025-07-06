@@ -5,11 +5,15 @@ subscription data from various sources (HTTP URLs, local files, APIs, etc.).
 All concrete fetchers must implement the BaseFetcher interface and register
 themselves using the @register decorator for automatic discovery.
 """
+
 from abc import ABC, abstractmethod
-from .models import SubscriptionSource
-from urllib.parse import urlparse
-from sboxmgr.utils.env import get_fetch_size_limit
 from typing import Tuple
+from urllib.parse import urlparse
+
+from sboxmgr.utils.env import get_fetch_size_limit
+
+from .models import SubscriptionSource
+
 
 class BaseAuthHandler(ABC):
     """Interface for generating authentication headers/tokens for protected APIs.
@@ -34,6 +38,7 @@ class BaseAuthHandler(ABC):
         """
         pass
 
+
 class BaseHeaderPlugin(ABC):
     """Interface for adding or modifying HTTP headers.
 
@@ -57,6 +62,7 @@ class BaseHeaderPlugin(ABC):
 
         """
         pass
+
 
 class BaseFetcher(ABC):
     """Abstract base class for subscription fetcher plugins.

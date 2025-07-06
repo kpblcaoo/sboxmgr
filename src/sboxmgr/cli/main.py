@@ -4,40 +4,40 @@ This module defines the root Typer application and registers all CLI command
 groups (subscription, exclusions, lang, etc.). It serves as the primary entry
 point for the `sboxctl` console script defined in pyproject.toml.
 """
-import typer
-import os
-from dotenv import load_dotenv
-from sboxmgr.logging import initialize_logging
-from sboxmgr.config.models import LoggingConfig
-from sboxmgr.i18n.loader import LanguageLoader
-from pathlib import Path
+
 import locale
-from sboxmgr.i18n.t import t
+import os
+from pathlib import Path
+
+import typer
+from dotenv import load_dotenv
+
 from sboxmgr.cli import plugin_template
 from sboxmgr.cli.commands.config import config_app
+from sboxmgr.cli.commands.exclusions import exclusions
+from sboxmgr.cli.commands.export import export
+from sboxmgr.cli.commands.policy import app as policy_app
+from sboxmgr.cli.commands.profile import app as profile_app
 
 # Import commands for registration
 from sboxmgr.cli.commands.subscription import list_servers as subscription_list_servers
-from sboxmgr.cli.commands.exclusions import exclusions
-from sboxmgr.cli.commands.export import export
-from sboxmgr.cli.commands.profile import app as profile_app
-from sboxmgr.cli.commands.policy import app as policy_app
+from sboxmgr.config.models import LoggingConfig
+from sboxmgr.i18n.loader import LanguageLoader
+from sboxmgr.i18n.t import t
+from sboxmgr.logging import initialize_logging
 
 load_dotenv()
 
 # Initialize logging for CLI
-logging_config = LoggingConfig(
-    level="INFO",
-    format="text",
-    sinks=["stdout"]
-)
+logging_config = LoggingConfig(level="INFO", format="text", sinks=["stdout"])
 initialize_logging(logging_config)
 
-lang = LanguageLoader(os.getenv('SBOXMGR_LANG', 'en'))
+lang = LanguageLoader(os.getenv("SBOXMGR_LANG", "en"))
 
 app = typer.Typer(help=lang.get("cli.help"))
 
 SUPPORTED_PROTOCOLS = {"vless", "shadowsocks", "vmess", "trojan", "tuic", "hysteria2"}
+
 
 def is_ai_lang(code):
     """Check if language is AI-generated based on metadata.
@@ -54,6 +54,7 @@ def is_ai_lang(code):
     """
     import json
     from pathlib import Path
+
     i18n_dir = Path(__file__).parent.parent / "i18n"
     lang_file = i18n_dir / f"{code}.json"
     if lang_file.exists():
@@ -65,9 +66,12 @@ def is_ai_lang(code):
             return False
     return False
 
+
 @app.command("lang")
 def lang_cmd(
-    set_lang: str = typer.Option(None, "--set", "-s", help=lang.get("cli.lang.set.help")),
+    set_lang: str = typer.Option(
+        None, "--set", "-s", help=lang.get("cli.lang.set.help")
+    ),
 ):
     """Manage CLI internationalization language settings.
 
@@ -97,11 +101,15 @@ def lang_cmd(
         if config_path.exists():
             try:
                 import toml
+
                 cfg = toml.load(config_path)
                 if "default_lang" in cfg:
                     return cfg["default_lang"], f"config ({config_path})"
             except Exception as e:
-                typer.echo(f"[Warning] Failed to read {config_path}: {e}. Falling back to system LANG.", err=True)
+                typer.echo(
+                    f"[Warning] Failed to read {config_path}: {e}. Falling back to system LANG.",
+                    err=True,
+                )
         sys_lang = locale.getdefaultlocale()[0]
         if sys_lang:
             return sys_lang.split("_")[0], "system LANG"
@@ -115,6 +123,7 @@ def lang_cmd(
             raise typer.Exit(1)
         try:
             import toml
+
             with open(config_path, "w") as f:
                 toml.dump({"default_lang": set_lang}, f)
             typer.echo(f"Language set to '{set_lang}' and persisted in {config_path}.")
@@ -133,7 +142,11 @@ def lang_cmd(
             typer.echo(en_loader.get("cli.lang.help"))
             typer.echo(en_loader.get("cli.lang.bilingual_notice"))
             if local_loader:
-                typer.echo("--- Русский ---" if lang_code == "ru" else f"--- {lang_code.upper()} ---")
+                typer.echo(
+                    "--- Русский ---"
+                    if lang_code == "ru"
+                    else f"--- {lang_code.upper()} ---"
+                )
                 typer.echo(local_loader.get("cli.lang.help"))
                 typer.echo(local_loader.get("cli.lang.bilingual_notice"))
         else:
@@ -162,9 +175,12 @@ def lang_cmd(
         for lang_line in langs_out:
             typer.echo(lang_line)
         if any(is_ai_lang(code) for code in langs):
-            typer.echo("Note: [AI] = machine-translated, not reviewed. Contributions welcome!")
+            typer.echo(
+                "Note: [AI] = machine-translated, not reviewed. Contributions welcome!"
+            )
         typer.echo("To set language persistently: sboxctl lang --set ru")
         typer.echo("Or for one-time use: SBOXMGR_LANG=ru sboxctl ...")
+
 
 app.command("plugin-template")(plugin_template.plugin_template)
 

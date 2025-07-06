@@ -6,9 +6,11 @@ PipelineContext, and other data structures that represent subscription
 configuration and processing state.
 """
 
-from typing import Optional, Dict, List, Any, Literal
 import uuid
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from typing import Any, Dict, List, Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 
 class SubscriptionSource(BaseModel):
     """Configuration for a subscription data source.
@@ -25,13 +27,14 @@ class SubscriptionSource(BaseModel):
 
     """
 
-    model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra="forbid")
 
     url: str
     source_type: str  # url_base64, url_json, file_json, uri_list, ...
     headers: Optional[Dict[str, str]] = None
     label: Optional[str] = None
     user_agent: Optional[str] = None
+
 
 class ParsedServer(BaseModel):
     """Universal server model for subscription pipeline processing.
@@ -64,7 +67,9 @@ class ParsedServer(BaseModel):
 
     """
 
-    model_config = ConfigDict(extra='allow')  # Allow extra fields for protocol-specific params
+    model_config = ConfigDict(
+        extra="allow"
+    )  # Allow extra fields for protocol-specific params
 
     type: str
     address: str
@@ -88,6 +93,7 @@ class ParsedServer(BaseModel):
     congestion_control: Optional[str] = None
     tag: Optional[str] = None
 
+
 class PipelineContext(BaseModel):
     """Execution context for subscription processing pipeline.
 
@@ -107,7 +113,7 @@ class PipelineContext(BaseModel):
 
     """
 
-    model_config = ConfigDict(extra='allow')
+    model_config = ConfigDict(extra="allow")
 
     trace_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     source: Optional[str] = None
@@ -117,6 +123,7 @@ class PipelineContext(BaseModel):
     debug_level: int = 0
     metadata: Dict[str, Any] = Field(default_factory=dict)
     skip_policies: bool = False  # Whether to skip policy evaluation (for testing)
+
 
 class PipelineResult(BaseModel):
     """Result of subscription pipeline execution.
@@ -133,12 +140,13 @@ class PipelineResult(BaseModel):
 
     """
 
-    model_config = ConfigDict(extra='allow', arbitrary_types_allowed=True)
+    model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
 
     config: Any  # результат экспорта (например, JSON-конфиг)
     context: PipelineContext
     errors: list
     success: bool
+
 
 class InboundProfile(BaseModel):
     """Configuration profile for inbound proxy interfaces.
@@ -161,12 +169,20 @@ class InboundProfile(BaseModel):
 
     """
 
-    type: Literal['socks', 'http', 'tun', 'tproxy', 'ssh', 'dns', 'reality-inbound', 'shadowtls']
-    listen: str = Field(default="127.0.0.1", description="Адрес для bind, по умолчанию localhost.")
-    port: Optional[int] = Field(default=None, description="Порт, по умолчанию безопасный для типа.")
-    options: Optional[dict] = Field(default_factory=dict, description="Дополнительные параметры.")
+    type: Literal[
+        "socks", "http", "tun", "tproxy", "ssh", "dns", "reality-inbound", "shadowtls"
+    ]
+    listen: str = Field(
+        default="127.0.0.1", description="Адрес для bind, по умолчанию localhost."
+    )
+    port: Optional[int] = Field(
+        default=None, description="Порт, по умолчанию безопасный для типа."
+    )
+    options: Optional[dict] = Field(
+        default_factory=dict, description="Дополнительные параметры."
+    )
 
-    @field_validator('listen')
+    @field_validator("listen")
     def validate_listen(cls, v, info):
         """Validate bind address for security.
 
@@ -182,15 +198,17 @@ class InboundProfile(BaseModel):
 
         """
         # Allow 0.0.0.0 only for tproxy and tun that need to listen on all interfaces
-        inbound_type = info.data.get('type') if info.data else None
-        if inbound_type in ['tproxy', 'tun'] and v == "0.0.0.0":
+        inbound_type = info.data.get("type") if info.data else None
+        if inbound_type in ["tproxy", "tun"] and v == "0.0.0.0":
             return v
 
         if v not in ("127.0.0.1", "::1") and not v.startswith("192.168."):
-            raise ValueError("Bind address must be localhost or private network unless explicitly allowed.")
+            raise ValueError(
+                "Bind address must be localhost or private network unless explicitly allowed."
+            )
         return v
 
-    @field_validator('port')
+    @field_validator("port")
     def validate_port(cls, v):
         """Validate port number range.
 
@@ -210,11 +228,12 @@ class InboundProfile(BaseModel):
             raise ValueError("Port must be in 1024-65535 range.")
         return v
 
+
 class ClientProfile(BaseModel):
     """Client configuration profile for export operations.
 
     Defines the client-side configuration including inbound interfaces,
-    DNS settings, routing overrides, outbound exclusions, and additional 
+    DNS settings, routing overrides, outbound exclusions, and additional
     options for generating proxy client configurations.
 
     Attributes:
@@ -226,8 +245,18 @@ class ClientProfile(BaseModel):
 
     """
 
-    inbounds: List[InboundProfile] = Field(default_factory=list, description="List of inbound configurations.")
-    dns_mode: Optional[str] = Field(default="system", description="DNS resolution mode.")
-    routing: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Routing configuration overrides.")
-    exclude_outbounds: Optional[List[str]] = Field(default_factory=list, description="List of outbound types to exclude.")
-    extra: Optional[dict] = Field(default_factory=dict, description="Additional profile parameters.")
+    inbounds: List[InboundProfile] = Field(
+        default_factory=list, description="List of inbound configurations."
+    )
+    dns_mode: Optional[str] = Field(
+        default="system", description="DNS resolution mode."
+    )
+    routing: Optional[Dict[str, Any]] = Field(
+        default_factory=dict, description="Routing configuration overrides."
+    )
+    exclude_outbounds: Optional[List[str]] = Field(
+        default_factory=list, description="List of outbound types to exclude."
+    )
+    extra: Optional[dict] = Field(
+        default_factory=dict, description="Additional profile parameters."
+    )

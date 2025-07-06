@@ -255,4 +255,4 @@ sboxctl list-servers -u "https://example.com/proxy.json" -d 2
 
 - [Profiles](profiles.md) - Working with profiles
 - [Subscriptions](subscriptions.md) - Subscription management
-- [Troubleshooting](troubleshooting.md) - Problem solving 
+- [Troubleshooting](troubleshooting.md) - Problem solving

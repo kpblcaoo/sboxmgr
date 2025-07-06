@@ -3,8 +3,9 @@
 from typing import Any, Optional
 
 
-def extract_metadata_field(obj: Any, field_name: str,
-                          fallback_fields: Optional[list] = None) -> Optional[Any]:
+def extract_metadata_field(
+    obj: Any, field_name: str, fallback_fields: Optional[list] = None
+) -> Optional[Any]:
     """Extract field value from object with fallback options.
 
     Tries to extract a field from an object using multiple strategies:
@@ -32,20 +33,20 @@ def extract_metadata_field(obj: Any, field_name: str,
             return value
 
     # Try dictionary access (only if object has get method)
-    if hasattr(obj, 'get') and callable(getattr(obj, 'get')):
+    if hasattr(obj, "get") and callable(getattr(obj, "get")):
         value = obj.get(field_name)
         if value is not None:
             return value
 
         # Try metadata (only if object has get method)
-        metadata = obj.get('meta', {})
+        metadata = obj.get("meta", {})
         if isinstance(metadata, dict):
             value = metadata.get(field_name)
             if value is not None:
                 return value
 
     # Try metadata access for Pydantic models
-    if hasattr(obj, 'meta') and isinstance(obj.meta, dict):
+    if hasattr(obj, "meta") and isinstance(obj.meta, dict):
         value = obj.meta.get(field_name)
         if value is not None:
             return value
@@ -58,13 +59,13 @@ def extract_metadata_field(obj: Any, field_name: str,
                 if value is not None:
                     return value
 
-            if hasattr(obj, 'get') and callable(getattr(obj, 'get')):
+            if hasattr(obj, "get") and callable(getattr(obj, "get")):
                 value = obj.get(fallback_field)
                 if value is not None:
                     return value
 
             # Try fallback fields in metadata for Pydantic models
-            if hasattr(obj, 'meta') and isinstance(obj.meta, dict):
+            if hasattr(obj, "meta") and isinstance(obj.meta, dict):
                 value = obj.meta.get(fallback_field)
                 if value is not None:
                     return value

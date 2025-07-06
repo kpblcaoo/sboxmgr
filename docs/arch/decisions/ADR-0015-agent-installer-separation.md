@@ -2,8 +2,8 @@
 
 ## Статус
 
-**Дата:** 2025-07-03  
-**Статус:** ✅ **ПРИНЯТО**  
+**Дата:** 2025-07-03
+**Статус:** ✅ **ПРИНЯТО**
 **Контекст:** Уточнение архитектуры агента и процесса установки
 
 ## TL;DR
@@ -231,4 +231,4 @@ sboxmgr agent start/stop/restart
 
 - ADR-0012: Service Architecture & Dual-Path Support
 - ADR-0011: Event System
-- ADR-0010: Logging Core 
+- ADR-0010: Logging Core

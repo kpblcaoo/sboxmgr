@@ -175,4 +175,4 @@ class GeoValidator(BaseValidator):
 ## Расширение
 - Для новых типов (exporter, postprocessor и др.) — расширяйте CLI-генератор по аналогии.
 - Документируйте публичные методы и добавляйте примеры использования.
-- Примеры и шаблоны можно найти в этой папке и в `src/sboxmgr/subscription/<type>s/`. 
+- Примеры и шаблоны можно найти в этой папке и в `src/sboxmgr/subscription/<type>s/`.

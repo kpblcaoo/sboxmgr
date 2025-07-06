@@ -4,11 +4,12 @@ This module provides the foundation for the policy system including
 PolicyContext, PolicyResult, and BasePolicy classes.
 """
 
-from typing import Any, Dict, Optional, List
-from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
-from datetime import datetime, UTC
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 
 class PolicySeverity(Enum):
     """Policy severity levels."""
@@ -16,6 +17,7 @@ class PolicySeverity(Enum):
     WARNING = "warning"
     DENY = "deny"
     INFO = "info"
+
 
 @dataclass
 class PolicyResult:
@@ -50,7 +52,9 @@ class PolicyResult:
             PolicyResult with allowed=True
 
         """
-        return PolicyResult(allowed=True, reason=reason, metadata=metadata, severity=PolicySeverity.INFO)
+        return PolicyResult(
+            allowed=True, reason=reason, metadata=metadata, severity=PolicySeverity.INFO
+        )
 
     @staticmethod
     def deny(reason: str, **metadata) -> "PolicyResult":
@@ -64,7 +68,12 @@ class PolicyResult:
             PolicyResult with allowed=False
 
         """
-        return PolicyResult(allowed=False, reason=reason, metadata=metadata, severity=PolicySeverity.DENY)
+        return PolicyResult(
+            allowed=False,
+            reason=reason,
+            metadata=metadata,
+            severity=PolicySeverity.DENY,
+        )
 
     @staticmethod
     def warning(reason: str, **metadata) -> "PolicyResult":
@@ -78,7 +87,13 @@ class PolicyResult:
             PolicyResult with allowed=True but warning severity
 
         """
-        return PolicyResult(allowed=True, reason=reason, metadata=metadata, severity=PolicySeverity.WARNING)
+        return PolicyResult(
+            allowed=True,
+            reason=reason,
+            metadata=metadata,
+            severity=PolicySeverity.WARNING,
+        )
+
 
 @dataclass
 class PolicyEvaluationResult:
@@ -193,11 +208,21 @@ class PolicyEvaluationResult:
             "server_identifier": self.server_identifier,
             "is_allowed": self.is_allowed,
             "overall_reason": self.overall_reason,
-            "denials": [{"policy": r.policy_name, "reason": r.reason, "metadata": r.metadata} for r in self.denials],
-            "warnings": [{"policy": r.policy_name, "reason": r.reason, "metadata": r.metadata} for r in self.warnings],
-            "info_results": [{"policy": r.policy_name, "reason": r.reason, "metadata": r.metadata} for r in self.info_results],
-            "total_policies": len(self.results)
+            "denials": [
+                {"policy": r.policy_name, "reason": r.reason, "metadata": r.metadata}
+                for r in self.denials
+            ],
+            "warnings": [
+                {"policy": r.policy_name, "reason": r.reason, "metadata": r.metadata}
+                for r in self.warnings
+            ],
+            "info_results": [
+                {"policy": r.policy_name, "reason": r.reason, "metadata": r.metadata}
+                for r in self.info_results
+            ],
+            "total_policies": len(self.results),
         }
+
 
 @dataclass
 class PolicyContext:
@@ -232,29 +257,30 @@ class PolicyContext:
 
         # Handle dictionary objects
         if isinstance(self.server, dict):
-            if 'address' in self.server:
-                return str(self.server['address'])
-            if 'name' in self.server:
-                return str(self.server['name'])
-            if 'tag' in self.server:
-                return str(self.server['tag'])
+            if "address" in self.server:
+                return str(self.server["address"])
+            if "name" in self.server:
+                return str(self.server["name"])
+            if "tag" in self.server:
+                return str(self.server["tag"])
             return str(self.server)
 
         # Handle object attributes
-        address = getattr(self.server, 'address', None)
+        address = getattr(self.server, "address", None)
         if address is not None:
             return str(address)
 
-        name = getattr(self.server, 'name', None)
+        name = getattr(self.server, "name", None)
         if name is not None:
             return str(name)
 
-        tag = getattr(self.server, 'tag', None)
+        tag = getattr(self.server, "tag", None)
         if tag is not None:
             return str(tag)
 
         # Fallback to string representation
         return str(self.server)
+
 
 class BasePolicy(ABC):
     """Base class for all policies.

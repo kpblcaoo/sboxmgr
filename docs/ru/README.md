@@ -205,4 +205,4 @@ src/sboxmgr/
 ---
 
 **Другие языки / Other languages**
-- [English (README.md)](../../README.md) 
+- [English (README.md)](../../README.md)

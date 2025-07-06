@@ -1,10 +1,11 @@
 """File utilities for SBoxMgr."""
 
-import os
 import json
-import tempfile
-import shutil
 import logging
+import os
+import shutil
+import tempfile
+
 
 def handle_temp_file(content, target_path, validate_fn=None):
     """Write content to temporary file with validation and atomic move.
@@ -40,6 +41,7 @@ def handle_temp_file(content, target_path, validate_fn=None):
         logging.error(f"Failed to handle temporary file {temp_path}: {e}")
         raise
 
+
 def atomic_write_json(data, path):
     """Atomically write JSON data to file with rollback on failure.
 
@@ -73,6 +75,7 @@ def atomic_write_json(data, path):
             os.remove(temp_path)
         raise
 
+
 def atomic_remove(path):
     """Safely remove file with error handling and logging.
 
@@ -98,6 +101,7 @@ def atomic_remove(path):
         logging.error(f"Failed to remove {path}: {e}")
         raise
 
+
 def file_exists(path):
     """Check if file exists at the specified path.
 
@@ -109,6 +113,7 @@ def file_exists(path):
 
     """
     return os.path.exists(path)
+
 
 def read_json(path):
     """Read and parse JSON data from file.
@@ -126,6 +131,7 @@ def read_json(path):
     """
     with open(path, "r") as f:
         return json.load(f)
+
 
 def write_json(data, path):
     """Write Python object to file as formatted JSON.

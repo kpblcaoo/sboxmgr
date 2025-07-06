@@ -57,9 +57,9 @@ def detect_service_mode() -> bool:
         # Check parent process name
         parent_cmdline_path = f"/proc/{parent_pid}/cmdline"
         if os.path.exists(parent_cmdline_path):
-            with open(parent_cmdline_path, 'r') as f:
-                parent_cmd = f.read().strip('\x00')
-                if 'systemd' in parent_cmd or parent_cmd.endswith('init'):
+            with open(parent_cmdline_path, "r") as f:
+                parent_cmd = f.read().strip("\x00")
+                if "systemd" in parent_cmd or parent_cmd.endswith("init"):
                     return True
     except (OSError, IOError):
         # Can't determine parent process, continue with other checks
@@ -149,10 +149,9 @@ def detect_systemd_environment() -> bool:
     # Check if systemctl is available and working
     try:
         import subprocess
+
         result = subprocess.run(
-            ["systemctl", "--version"],
-            capture_output=True,
-            timeout=2
+            ["systemctl", "--version"], capture_output=True, timeout=2
         )
         return result.returncode == 0
     except (subprocess.SubprocessError, FileNotFoundError, subprocess.TimeoutExpired):
@@ -223,5 +222,5 @@ def get_environment_info() -> dict:
             "/.dockerenv": os.path.exists("/.dockerenv"),
             "/run/systemd/system": os.path.exists("/run/systemd/system"),
             "/proc/1/cgroup": os.path.exists("/proc/1/cgroup"),
-        }
+        },
     }

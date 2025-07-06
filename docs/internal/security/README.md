@@ -36,4 +36,4 @@ SBoxMgr implements a multi-layer security approach:
 
 ---
 
-**Last Updated:** 2025-01-05 
+**Last Updated:** 2025-01-05

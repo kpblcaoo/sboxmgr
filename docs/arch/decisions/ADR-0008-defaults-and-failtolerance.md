@@ -1,6 +1,6 @@
 # ADR-0008: Defaults and Fail-Tolerance in Subscription Pipeline
 
-**Status:** Proposed  
+**Status:** Proposed
 **Date:** 2025-06-XX
 
 ## Context
@@ -46,4 +46,4 @@
 - Для неподдерживаемых схем (ftp, data, chrome-extension и др.) выбрасывается ValueError("unsupported scheme: ...").
 - Все edge-тесты для нестандартных схем теперь зелёные, обход невозможен.
 - Решение масштабируется на все будущие fetcher-плагины.
-- См. также: tests/edge/test_fetcher_oversize.py, sec_checklist.md (SEC-FETCH-01). 
+- См. также: tests/edge/test_fetcher_oversize.py, sec_checklist.md (SEC-FETCH-01).

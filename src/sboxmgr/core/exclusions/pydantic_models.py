@@ -6,6 +6,7 @@ Replaces dataclass-based models with Pydantic BaseModel for better validation an
 
 from datetime import datetime, timezone
 from typing import List, Optional
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
@@ -17,14 +18,16 @@ class ExclusionEntryModel(BaseModel):
     """
 
     id: str = Field(..., description="Unique identifier for the excluded server")
-    name: Optional[str] = Field(None, description="Human-readable name for the exclusion")
+    name: Optional[str] = Field(
+        None, description="Human-readable name for the exclusion"
+    )
     reason: Optional[str] = Field(None, description="Reason for exclusion")
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        description="Timestamp when exclusion was created"
+        description="Timestamp when exclusion was created",
     )
 
-    @field_validator('id')
+    @field_validator("id")
     @classmethod
     def validate_id(cls, v: str) -> str:
         """Validate that ID is not empty."""
@@ -32,7 +35,7 @@ class ExclusionEntryModel(BaseModel):
             raise ValueError("Exclusion ID cannot be empty")
         return v.strip()
 
-    @field_validator('timestamp', mode='before')
+    @field_validator("timestamp", mode="before")
     @classmethod
     def validate_timestamp(cls, v) -> datetime:
         """Validate and normalize timestamp."""
@@ -63,11 +66,11 @@ class ExclusionEntryModel(BaseModel):
             "id": self.id,
             "name": self.name,
             "reason": self.reason,
-            "timestamp": self.timestamp.isoformat().replace("+00:00", "Z")
+            "timestamp": self.timestamp.isoformat().replace("+00:00", "Z"),
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'ExclusionEntryModel':
+    def from_dict(cls, data: dict) -> "ExclusionEntryModel":
         """Create from dictionary (JSON deserialization).
 
         Args:
@@ -91,20 +94,17 @@ class ExclusionListModel(BaseModel):
     """
 
     exclusions: List[ExclusionEntryModel] = Field(
-        default_factory=list,
-        description="List of exclusion entries"
+        default_factory=list, description="List of exclusion entries"
     )
     last_modified: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        description="Timestamp of last modification"
+        description="Timestamp of last modification",
     )
     version: int = Field(
-        default=1,
-        ge=1,
-        description="Schema version for migration support"
+        default=1, ge=1, description="Schema version for migration support"
     )
 
-    @field_validator('version')
+    @field_validator("version")
     @classmethod
     def validate_version(cls, v: int) -> int:
         """Validate version number."""
@@ -112,7 +112,7 @@ class ExclusionListModel(BaseModel):
             raise ValueError("Version must be >= 1")
         return v
 
-    @field_validator('last_modified', mode='before')
+    @field_validator("last_modified", mode="before")
     @classmethod
     def validate_last_modified(cls, v) -> datetime:
         """Validate and normalize last_modified timestamp."""
@@ -129,8 +129,8 @@ class ExclusionListModel(BaseModel):
         else:
             raise ValueError(f"Invalid last_modified type: {type(v)}")
 
-    @model_validator(mode='after')
-    def validate_exclusion_ids_unique(self) -> 'ExclusionListModel':
+    @model_validator(mode="after")
+    def validate_exclusion_ids_unique(self) -> "ExclusionListModel":
         """Validate that all exclusion IDs are unique."""
         ids = [ex.id for ex in self.exclusions]
         if len(ids) != len(set(ids)):
@@ -216,11 +216,11 @@ class ExclusionListModel(BaseModel):
         return {
             "version": self.version,
             "last_modified": self.last_modified.isoformat().replace("+00:00", "Z"),
-            "exclusions": [ex.to_dict() for ex in self.exclusions]
+            "exclusions": [ex.to_dict() for ex in self.exclusions],
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'ExclusionListModel':
+    def from_dict(cls, data: dict) -> "ExclusionListModel":
         """Create from dictionary (JSON deserialization) with version migration.
 
         Args:
@@ -242,7 +242,10 @@ class ExclusionListModel(BaseModel):
         elif version > 1:
             # Future version - log warning but try to load
             import logging
-            logging.warning(f"Exclusion file version {version} is newer than supported (1). Attempting to load...")
+
+            logging.warning(
+                f"Exclusion file version {version} is newer than supported (1). Attempting to load..."
+            )
 
         # Prepare data for Pydantic model
         model_data = {
@@ -251,7 +254,7 @@ class ExclusionListModel(BaseModel):
             "exclusions": [
                 ExclusionEntryModel.from_dict(ex_data)
                 for ex_data in data.get("exclusions", [])
-            ]
+            ],
         }
 
         return cls(**model_data)

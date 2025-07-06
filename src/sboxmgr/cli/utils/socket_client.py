@@ -5,12 +5,13 @@ TODO: Реализовать подключение к Unix socket, отправ
 """
 
 import socket
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 SOCKET_PATH = "/var/run/sboxagent.sock"  # TODO: sync with agent config
 PROTOCOL_VERSION = 1
 FRAME_HEADER_SIZE = 8
 MAX_MESSAGE_SIZE = 1024 * 1024
+
 
 class SocketClient:
     """Unix socket client for communicating with sboxagent."""
@@ -61,5 +62,6 @@ class SocketClient:
         """
         # TODO: framed JSON decode
         raise NotImplementedError
+
 
 # TODO: интеграция с CLI-командами и event sender

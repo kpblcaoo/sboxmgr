@@ -12,6 +12,7 @@ __all__ = [
     "ExclusionList",
 ]
 
+
 # Convenience function for backward compatibility
 def get_default_manager() -> ExclusionManager:
     """Get default ExclusionManager instance.

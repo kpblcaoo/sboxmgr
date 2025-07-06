@@ -5,10 +5,11 @@ from ParsedServer objects to appropriate sing-box model instances.
 """
 
 from typing import Optional
-from ...models import ParsedServer
 
 # Import new sing-box models
 from sboxmgr.models.singbox import TlsConfig, TransportConfig
+
+from ...models import ParsedServer
 
 
 def convert_tls_config(server: ParsedServer) -> Optional[TlsConfig]:
@@ -17,7 +18,9 @@ def convert_tls_config(server: ParsedServer) -> Optional[TlsConfig]:
 
     # Add server name (SNI)
     if server.meta.get("servername") or server.meta.get("sni"):
-        tls_data["server_name"] = server.meta.get("servername") or server.meta.get("sni")
+        tls_data["server_name"] = server.meta.get("servername") or server.meta.get(
+            "sni"
+        )
 
     # Add ALPN
     if server.meta.get("alpn"):
@@ -29,14 +32,13 @@ def convert_tls_config(server: ParsedServer) -> Optional[TlsConfig]:
 
     # Add insecure flag
     if server.meta.get("insecure") or server.meta.get("allow_insecure"):
-        tls_data["insecure"] = server.meta.get("insecure") or server.meta.get("allow_insecure")
+        tls_data["insecure"] = server.meta.get("insecure") or server.meta.get(
+            "allow_insecure"
+        )
 
     # Add other TLS options
     if server.meta.get("fingerprint"):
-        tls_data["utls"] = {
-            "enabled": True,
-            "fingerprint": server.meta["fingerprint"]
-        }
+        tls_data["utls"] = {"enabled": True, "fingerprint": server.meta["fingerprint"]}
 
     if server.meta.get("reality"):
         tls_data["reality"] = server.meta["reality"]
@@ -63,7 +65,9 @@ def convert_transport_config(server: ParsedServer) -> Optional[TransportConfig]:
                 transport_data["ws_opts"]["headers"] = server.meta["ws_headers"]
         elif network == "grpc":
             if server.meta.get("grpc_service_name"):
-                transport_data["grpc_opts"] = {"serviceName": server.meta["grpc_service_name"]}
+                transport_data["grpc_opts"] = {
+                    "serviceName": server.meta["grpc_service_name"]
+                }
         elif network == "http":
             if server.meta.get("http_path"):
                 transport_data["http_opts"] = {"path": server.meta["http_path"]}

@@ -8,7 +8,7 @@ This module provides modular sing-box configuration export functionality, refact
 singbox_exporter/
 ├── __init__.py              # Main exports and package interface
 ├── constants.py             # Constants and configuration values
-├── core.py                  # Core export functions  
+├── core.py                  # Core export functions
 ├── config_processors.py     # Configuration processing utilities
 ├── protocol_handlers.py     # Special protocol handlers
 ├── inbound_generator.py     # Inbound configuration generation
@@ -126,4 +126,4 @@ The module handles:
 - TLS configuration (including Reality)
 - Authentication and flow control
 - Tag management
-- Additional parameters validation 
+- Additional parameters validation

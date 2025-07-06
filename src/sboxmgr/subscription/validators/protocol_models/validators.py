@@ -4,12 +4,31 @@ This module provides utility functions for validating protocol configurations,
 generating schemas, and converting between different model types.
 """
 
-from typing import Dict, Any, Optional
-from .protocol_configs import ProtocolConfig, ShadowsocksConfig, VmessConfig, VlessConfig, TrojanConfig, WireGuardConfig
+from typing import Any, Dict, Optional
+
 from .outbound_models import (
-    OutboundModel, OutboundConfig, ShadowsocksOutbound, VmessOutbound, VlessOutbound,
-    TrojanOutbound, WireguardOutbound, HysteriaOutbound, TuicOutbound, HttpOutbound,
-    SocksOutbound, DirectOutbound, BlockOutbound, DnsOutbound
+    BlockOutbound,
+    DirectOutbound,
+    DnsOutbound,
+    HttpOutbound,
+    HysteriaOutbound,
+    OutboundConfig,
+    OutboundModel,
+    ShadowsocksOutbound,
+    SocksOutbound,
+    TrojanOutbound,
+    TuicOutbound,
+    VlessOutbound,
+    VmessOutbound,
+    WireguardOutbound,
+)
+from .protocol_configs import (
+    ProtocolConfig,
+    ShadowsocksConfig,
+    TrojanConfig,
+    VlessConfig,
+    VmessConfig,
+    WireGuardConfig,
 )
 
 
@@ -33,7 +52,7 @@ def validate_protocol_config(config: Dict[str, Any], protocol: str) -> ProtocolC
         "vless": VlessConfig,
         "trojan": TrojanConfig,
         "wireguard": WireGuardConfig,
-        "wg": WireGuardConfig
+        "wg": WireGuardConfig,
     }
 
     if protocol not in protocol_map:
@@ -59,7 +78,7 @@ def generate_protocol_schema(protocol: str) -> Dict[str, Any]:
         "vless": VlessConfig,
         "trojan": TrojanConfig,
         "wireguard": WireGuardConfig,
-        "wg": WireGuardConfig
+        "wg": WireGuardConfig,
     }
 
     if protocol not in protocol_map:
@@ -94,7 +113,7 @@ def validate_outbound_config(config: Dict[str, Any]) -> OutboundModel:
         "socks": SocksOutbound,
         "direct": DirectOutbound,
         "block": BlockOutbound,
-        "dns": DnsOutbound
+        "dns": DnsOutbound,
     }
 
     if outbound_type not in outbound_map:
@@ -113,7 +132,9 @@ def generate_outbound_schema() -> Dict[str, Any]:
     return OutboundConfig.model_json_schema()
 
 
-def convert_protocol_to_outbound(protocol_config: ProtocolConfig, tag: Optional[str] = None) -> OutboundModel:
+def convert_protocol_to_outbound(
+    protocol_config: ProtocolConfig, tag: Optional[str] = None
+) -> OutboundModel:
     """Convert protocol configuration to outbound configuration.
 
     Args:
@@ -136,12 +157,20 @@ def convert_protocol_to_outbound(protocol_config: ProtocolConfig, tag: Optional[
             password=protocol_config.password,
             plugin=protocol_config.plugin,
             plugin_opts=protocol_config.plugin_opts,
-            local_address=[protocol_config.local_address] if protocol_config.local_address else None
+            local_address=(
+                [protocol_config.local_address]
+                if protocol_config.local_address
+                else None
+            ),
         )
 
     elif isinstance(protocol_config, VmessConfig):
         # Extract first user from settings for outbound
-        user = protocol_config.settings.clients[0] if protocol_config.settings.clients else None
+        user = (
+            protocol_config.settings.clients[0]
+            if protocol_config.settings.clients
+            else None
+        )
         if not user:
             raise ValueError("VMess config requires at least one user")
 
@@ -152,12 +181,16 @@ def convert_protocol_to_outbound(protocol_config: ProtocolConfig, tag: Optional[
             server_port=protocol_config.server_port,
             uuid=user.id,
             security=user.security,
-            multiplex=protocol_config.multiplex
+            multiplex=protocol_config.multiplex,
         )
 
     elif isinstance(protocol_config, VlessConfig):
         # Extract first user from settings for outbound
-        user = protocol_config.settings.clients[0] if protocol_config.settings.clients else None
+        user = (
+            protocol_config.settings.clients[0]
+            if protocol_config.settings.clients
+            else None
+        )
         if not user:
             raise ValueError("VLESS config requires at least one user")
 
@@ -168,7 +201,7 @@ def convert_protocol_to_outbound(protocol_config: ProtocolConfig, tag: Optional[
             server_port=protocol_config.server_port,
             uuid=user.id,
             flow=user.flow,
-            multiplex=protocol_config.multiplex
+            multiplex=protocol_config.multiplex,
         )
 
     elif isinstance(protocol_config, TrojanConfig):
@@ -180,7 +213,7 @@ def convert_protocol_to_outbound(protocol_config: ProtocolConfig, tag: Optional[
             password=protocol_config.password,
             tls=protocol_config.tls,
             multiplex=protocol_config.multiplex,
-            fallback=protocol_config.fallback
+            fallback=protocol_config.fallback,
         )
 
     elif isinstance(protocol_config, WireGuardConfig):
@@ -195,14 +228,16 @@ def convert_protocol_to_outbound(protocol_config: ProtocolConfig, tag: Optional[
             private_key=protocol_config.interface.private_key,
             peer_public_key=peer.public_key,
             mtu=protocol_config.interface.mtu,
-            local_address=protocol_config.interface.address
+            local_address=protocol_config.interface.address,
         )
 
     else:
         raise ValueError(f"Unsupported protocol type: {type(protocol_config)}")
 
 
-def create_outbound_from_dict(config: Dict[str, Any], tag: Optional[str] = None) -> OutboundModel:
+def create_outbound_from_dict(
+    config: Dict[str, Any], tag: Optional[str] = None
+) -> OutboundModel:
     """Create outbound configuration from dictionary.
 
     Args:

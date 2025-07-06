@@ -12,7 +12,7 @@ New modular implementation: manager/
 from .manager import SubscriptionManager, detect_parser
 
 # Legacy compatibility - export main components
-__all__ = ['SubscriptionManager', 'detect_parser']
+__all__ = ["SubscriptionManager", "detect_parser"]
 
 # Note: This compatibility layer ensures that existing code continues to work
 # without any changes. The actual implementation is now in the manager/

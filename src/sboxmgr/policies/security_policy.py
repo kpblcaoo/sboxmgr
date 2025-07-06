@@ -4,7 +4,8 @@ This module provides policies for security validation including
 protocol security, encryption requirements, and authentication checks.
 """
 
-from typing import Any, Optional, List
+from typing import Any, List, Optional
+
 from .base import BasePolicy, PolicyContext, PolicyResult
 from .utils import extract_metadata_field, validate_mode
 
@@ -20,9 +21,12 @@ class ProtocolPolicy(BasePolicy):
     description = "Validates protocol security"
     group = "security"
 
-    def __init__(self, allowed_protocols: Optional[List[str]] = None,
-                 blocked_protocols: Optional[List[str]] = None,
-                 mode: str = "whitelist"):
+    def __init__(
+        self,
+        allowed_protocols: Optional[List[str]] = None,
+        blocked_protocols: Optional[List[str]] = None,
+        mode: str = "whitelist",
+    ):
         """Initialize protocol policy.
 
         Args:
@@ -38,14 +42,15 @@ class ProtocolPolicy(BasePolicy):
         validate_mode(mode, ["whitelist", "blacklist"])
 
         # Default secure protocols - include 'ss' as alias for shadowsocks
-        self.allowed_protocols = set(allowed_protocols or [
-            "vless", "trojan", "shadowsocks", "ss", "hysteria2", "tuic"
-        ])
+        self.allowed_protocols = set(
+            allowed_protocols
+            or ["vless", "trojan", "shadowsocks", "ss", "hysteria2", "tuic"]
+        )
 
         # Default unsafe protocols
-        self.blocked_protocols = set(blocked_protocols or [
-            "http", "socks4", "socks5"  # Unencrypted protocols
-        ])
+        self.blocked_protocols = set(
+            blocked_protocols or ["http", "socks4", "socks5"]  # Unencrypted protocols
+        )
 
         self.mode = mode
 
@@ -75,14 +80,14 @@ class ProtocolPolicy(BasePolicy):
                 return PolicyResult.deny(
                     f"Protocol {protocol} not in allowed list",
                     protocol=protocol,
-                    allowed_protocols=list(self.allowed_protocols)
+                    allowed_protocols=list(self.allowed_protocols),
                 )
         elif self.mode == "blacklist":
             if protocol in self.blocked_protocols:
                 return PolicyResult.deny(
                     f"Protocol {protocol} is blocked",
                     protocol=protocol,
-                    blocked_protocols=list(self.blocked_protocols)
+                    blocked_protocols=list(self.blocked_protocols),
                 )
 
         return PolicyResult.allow(f"Protocol {protocol} is allowed")
@@ -98,9 +103,7 @@ class ProtocolPolicy(BasePolicy):
 
         """
         protocol = extract_metadata_field(
-            server,
-            "protocol",
-            fallback_fields=["type", "method"]
+            server, "protocol", fallback_fields=["type", "method"]
         )
         return str(protocol).lower() if protocol else None
 
@@ -116,9 +119,12 @@ class EncryptionPolicy(BasePolicy):
     description = "Validates encryption strength"
     group = "security"
 
-    def __init__(self, strong_encryption: Optional[List[str]] = None,
-                 weak_encryption: Optional[List[str]] = None,
-                 require_encryption: bool = True):
+    def __init__(
+        self,
+        strong_encryption: Optional[List[str]] = None,
+        weak_encryption: Optional[List[str]] = None,
+        require_encryption: bool = True,
+    ):
         """Initialize encryption policy.
 
         Args:
@@ -130,15 +136,24 @@ class EncryptionPolicy(BasePolicy):
         super().__init__()
 
         # Default strong encryption methods - include Reality/TLS variants
-        self.strong_encryption = set(strong_encryption or [
-            "tls", "reality", "xtls", "aes-256-gcm", "chacha20-poly1305",
-            "chacha20-ietf-poly1305", "aes-256-gcm", "aes-128-gcm"
-        ])
+        self.strong_encryption = set(
+            strong_encryption
+            or [
+                "tls",
+                "reality",
+                "xtls",
+                "aes-256-gcm",
+                "chacha20-poly1305",
+                "chacha20-ietf-poly1305",
+                "aes-256-gcm",
+                "aes-128-gcm",
+            ]
+        )
 
         # Default weak encryption methods
-        self.weak_encryption = set(weak_encryption or [
-            "none", "plain", "aes-128", "rc4"
-        ])
+        self.weak_encryption = set(
+            weak_encryption or ["none", "plain", "aes-128", "rc4"]
+        )
 
         self.require_encryption = require_encryption
 
@@ -170,7 +185,7 @@ class EncryptionPolicy(BasePolicy):
             return PolicyResult.deny(
                 f"Weak encryption method: {encryption}",
                 encryption=encryption,
-                weak_methods=list(self.weak_encryption)
+                weak_methods=list(self.weak_encryption),
             )
 
         # Check if encryption is strong
@@ -192,24 +207,22 @@ class EncryptionPolicy(BasePolicy):
         """
         # Try direct fields first
         encryption = extract_metadata_field(
-            server,
-            "encryption",
-            fallback_fields=["security", "cipher", "method"]
+            server, "encryption", fallback_fields=["security", "cipher", "method"]
         )
 
         if encryption:
             return str(encryption).lower()
 
         # For VLESS/Reality servers, check for TLS/Reality indicators
-        if hasattr(server, 'meta') and isinstance(server.meta, dict):
+        if hasattr(server, "meta") and isinstance(server.meta, dict):
             meta = server.meta
 
             # Check for Reality/TLS indicators
-            if meta.get('tls') or meta.get('reality-opts'):
+            if meta.get("tls") or meta.get("reality-opts"):
                 return "reality"
 
             # Check for other TLS indicators
-            if meta.get('servername') or meta.get('alpn'):
+            if meta.get("servername") or meta.get("alpn"):
                 return "tls"
 
         return None
@@ -226,9 +239,12 @@ class AuthenticationPolicy(BasePolicy):
     description = "Validates authentication methods"
     group = "security"
 
-    def __init__(self, required_auth: bool = True,
-                 allowed_auth_methods: Optional[List[str]] = None,
-                 min_password_length: int = 8):
+    def __init__(
+        self,
+        required_auth: bool = True,
+        allowed_auth_methods: Optional[List[str]] = None,
+        min_password_length: int = 8,
+    ):
         """Initialize authentication policy.
 
         Args:
@@ -239,9 +255,9 @@ class AuthenticationPolicy(BasePolicy):
         """
         super().__init__()
         self.required_auth = required_auth
-        self.allowed_auth_methods = set(allowed_auth_methods or [
-            "password", "uuid", "psk", "certificate"
-        ])
+        self.allowed_auth_methods = set(
+            allowed_auth_methods or ["password", "uuid", "psk", "certificate"]
+        )
         self.min_password_length = min_password_length
 
     def evaluate(self, context: PolicyContext) -> PolicyResult:
@@ -274,7 +290,7 @@ class AuthenticationPolicy(BasePolicy):
                 return PolicyResult.deny(
                     f"Authentication method {auth_method} not allowed",
                     auth_method=auth_method,
-                    allowed_methods=list(self.allowed_auth_methods)
+                    allowed_methods=list(self.allowed_auth_methods),
                 )
 
         # Check credentials strength
@@ -283,7 +299,7 @@ class AuthenticationPolicy(BasePolicy):
                 return PolicyResult.deny(
                     f"Credentials too short: {len(auth_credentials)} < {self.min_password_length}",
                     credential_length=len(auth_credentials),
-                    min_length=self.min_password_length
+                    min_length=self.min_password_length,
                 )
 
         return PolicyResult.allow("Authentication requirements met")
@@ -299,9 +315,7 @@ class AuthenticationPolicy(BasePolicy):
 
         """
         method = extract_metadata_field(
-            server,
-            "auth_method",
-            fallback_fields=["authentication", "auth_type"]
+            server, "auth_method", fallback_fields=["authentication", "auth_type"]
         )
         return str(method).lower() if method else None
 
@@ -317,21 +331,19 @@ class AuthenticationPolicy(BasePolicy):
         """
         # Try direct fields first
         credentials = extract_metadata_field(
-            server,
-            "password",
-            fallback_fields=["uuid", "psk", "secret", "token"]
+            server, "password", fallback_fields=["uuid", "psk", "secret", "token"]
         )
 
         if credentials:
             return str(credentials)
 
         # For VLESS servers, check meta.uuid
-        if hasattr(server, 'meta') and isinstance(server.meta, dict):
+        if hasattr(server, "meta") and isinstance(server.meta, dict):
             meta = server.meta
-            if meta.get('uuid'):
-                return str(meta['uuid'])
+            if meta.get("uuid"):
+                return str(meta["uuid"])
             # For Shadowsocks servers, check meta.password
-            if meta.get('password'):
-                return str(meta['password'])
+            if meta.get("password"):
+                return str(meta["password"])
 
         return None

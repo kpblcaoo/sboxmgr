@@ -9,8 +9,8 @@ import logging.config
 from typing import Dict, Optional
 
 from ..config.models import LoggingConfig
-from .sinks import LogSink, create_handler, detect_available_sinks
 from .formatters import create_formatter
+from .sinks import LogSink, create_handler, detect_available_sinks
 from .trace import get_trace_id
 
 
@@ -32,7 +32,7 @@ class LoggingCore:
         self.config = config
         self._configured = False
         self._handlers: Dict[str, logging.Handler] = {}
-        self._root_logger = logging.getLogger('sboxmgr')
+        self._root_logger = logging.getLogger("sboxmgr")
 
     def configure(self) -> None:
         """Configure logging system based on configuration.
@@ -79,10 +79,10 @@ class LoggingCore:
         logger = logging.getLogger(name)
 
         # Add structured logging adapter if not already present
-        structured_adapter = getattr(logger, '_structured_adapter', None)
+        structured_adapter = getattr(logger, "_structured_adapter", None)
         if structured_adapter is None:
             structured_adapter = StructuredLoggerAdapter(logger)
-            setattr(logger, '_structured_adapter', structured_adapter)
+            setattr(logger, "_structured_adapter", structured_adapter)
 
         return structured_adapter
 
@@ -118,7 +118,10 @@ class LoggingCore:
                 # Log error but continue with other sinks
                 # Use stderr directly since logging may not be fully initialized
                 import sys
-                print(f"Warning: Failed to setup {sink_name} sink: {e}", file=sys.stderr)
+
+                print(
+                    f"Warning: Failed to setup {sink_name} sink: {e}", file=sys.stderr
+                )
 
     def _determine_sinks(self) -> Dict[str, Dict]:
         """Determine which sinks to set up based on configuration.
@@ -141,15 +144,17 @@ class LoggingCore:
             # Get level override for this sink
             sink_level = self.config.sink_levels.get(sink_name, self.config.level)
 
-            sinks[f'sink_{i}'] = {
-                'sink': sink_enum,
-                'level': sink_level,
-                'format': self.config.format
+            sinks[f"sink_{i}"] = {
+                "sink": sink_enum,
+                "level": sink_level,
+                "format": self.config.format,
             }
 
         return sinks
 
-    def _create_sink_handler(self, sink_name: str, sink_config: Dict) -> logging.Handler:
+    def _create_sink_handler(
+        self, sink_name: str, sink_config: Dict
+    ) -> logging.Handler:
         """Create handler for a specific sink.
 
         Args:
@@ -160,9 +165,9 @@ class LoggingCore:
             logging.Handler: Configured handler
 
         """
-        sink = sink_config['sink']
-        level = sink_config.get('level', self.config.level)
-        format_type = sink_config.get('format', self.config.format)
+        sink = sink_config["sink"]
+        level = sink_config.get("level", self.config.level)
+        format_type = sink_config.get("format", self.config.format)
 
         # Create handler
         handler = create_handler(sink, self.config, level)
@@ -185,22 +190,22 @@ class LoggingCore:
 
         """
         # Auto-select formatter based on sink if format is 'auto'
-        if format_type == 'auto':
+        if format_type == "auto":
             if sink in [LogSink.JOURNALD, LogSink.SYSLOG]:
-                format_type = 'json'
+                format_type = "json"
             else:
                 # Default to text format (human readable)
-                format_type = 'text'
+                format_type = "text"
 
-        return create_formatter(format_type, component='sboxmgr')
+        return create_formatter(format_type, component="sboxmgr")
 
     def _configure_third_party_loggers(self) -> None:
         """Configure third-party library loggers."""
         # Suppress noisy third-party loggers
         noisy_loggers = [
-            'urllib3.connectionpool',
-            'requests.packages.urllib3',
-            'httpx',
+            "urllib3.connectionpool",
+            "requests.packages.urllib3",
+            "httpx",
         ]
 
         for logger_name in noisy_loggers:
@@ -236,15 +241,17 @@ class StructuredLoggerAdapter(logging.LoggerAdapter):
 
         """
         # Ensure 'extra' dict exists
-        if 'extra' not in kwargs:
-            kwargs['extra'] = {}
+        if "extra" not in kwargs:
+            kwargs["extra"] = {}
 
         # Add trace ID to extra fields
-        kwargs['extra']['trace_id'] = get_trace_id()
+        kwargs["extra"]["trace_id"] = get_trace_id()
 
         return msg, kwargs
 
-    def log_operation(self, level: int, operation: str, message: str, **extra_fields) -> None:
+    def log_operation(
+        self, level: int, operation: str, message: str, **extra_fields
+    ) -> None:
         """Log with operation context.
 
         Args:
@@ -254,7 +261,7 @@ class StructuredLoggerAdapter(logging.LoggerAdapter):
             **extra_fields: Additional structured fields
 
         """
-        extra = {'operation': operation}
+        extra = {"operation": operation}
         extra.update(extra_fields)
         self.log(level, message, extra=extra)
 

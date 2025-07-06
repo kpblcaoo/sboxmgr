@@ -128,4 +128,4 @@ sing-box check -c config.json
 2. **Security** - Secure by default
 3. **Extensibility** - Easy to add new formats/protocols
 4. **Compatibility** - Backward compatibility with profiles
-5. **Validation** - Validation at every level 
+5. **Validation** - Validation at every level

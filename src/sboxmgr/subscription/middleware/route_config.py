@@ -7,11 +7,12 @@ final route actions and other routing parameters.
 Implements Phase 3 architecture with profile integration.
 """
 
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
+
+from ...profiles.models import FullProfile
+from ..models import ClientProfile, ParsedServer, PipelineContext
 from ..registry import register
 from .base import ProfileAwareMiddleware
-from ..models import ParsedServer, PipelineContext, ClientProfile
-from ...profiles.models import FullProfile
 
 
 @register("route_config")
@@ -44,15 +45,15 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
 
         """
         super().__init__(config)
-        self.final_action = self.config.get('final_action', 'auto')
-        self.preserve_metadata = self.config.get('preserve_metadata', True)
-        self.override_mode = self.config.get('override_mode', 'profile_overrides')
+        self.final_action = self.config.get("final_action", "auto")
+        self.preserve_metadata = self.config.get("preserve_metadata", True)
+        self.override_mode = self.config.get("override_mode", "profile_overrides")
 
     def process(
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Configure routing parameters based on profile.
 
@@ -72,22 +73,26 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
         route_config = self._extract_route_config(profile)
 
         # Set routing parameters in context
-        if 'routing' not in context.metadata:
-            context.metadata['routing'] = {}
+        if "routing" not in context.metadata:
+            context.metadata["routing"] = {}
 
-        context.metadata['routing'].update({
-            'final_action': route_config['final_action'],
-            'configured_by': 'route_config_middleware',
-            'override_mode': self.override_mode
-        })
+        context.metadata["routing"].update(
+            {
+                "final_action": route_config["final_action"],
+                "configured_by": "route_config_middleware",
+                "override_mode": self.override_mode,
+            }
+        )
 
         # Preserve detailed metadata if requested
         if self.preserve_metadata:
-            context.metadata['routing'].update({
-                'config_source': route_config['config_source'],
-                'original_final_action': route_config['original_final_action'],
-                'profile_has_routing': route_config['profile_has_routing']
-            })
+            context.metadata["routing"].update(
+                {
+                    "config_source": route_config["config_source"],
+                    "original_final_action": route_config["original_final_action"],
+                    "profile_has_routing": route_config["profile_has_routing"],
+                }
+            )
 
         return servers
 
@@ -102,10 +107,10 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
 
         """
         route_config = {
-            'final_action': self.final_action,
-            'config_source': 'middleware_config',
-            'original_final_action': self.final_action,
-            'profile_has_routing': False
+            "final_action": self.final_action,
+            "config_source": "middleware_config",
+            "original_final_action": self.final_action,
+            "profile_has_routing": False,
         }
 
         if not profile:
@@ -115,14 +120,15 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
         client_profile = None
 
         # Try to get from profile metadata
-        if hasattr(profile, 'metadata') and 'client_profile' in profile.metadata:
-            client_profile_data = profile.metadata['client_profile']
+        if hasattr(profile, "metadata") and "client_profile" in profile.metadata:
+            client_profile_data = profile.metadata["client_profile"]
             if isinstance(client_profile_data, dict):
                 try:
                     client_profile = ClientProfile(**client_profile_data)
                 except Exception as e:
                     # Log error but continue processing with default config
                     import logging
+
                     logger = logging.getLogger(__name__)
                     logger.warning(
                         f"Failed to create ClientProfile from metadata: {e}. "
@@ -132,27 +138,29 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
 
         # If we have a client profile with routing configuration
         if client_profile and client_profile.routing:
-            route_config['profile_has_routing'] = True
+            route_config["profile_has_routing"] = True
 
             # Handle override mode
-            if self.override_mode == 'profile_overrides':
+            if self.override_mode == "profile_overrides":
                 # Profile routing overrides middleware config
-                profile_final = client_profile.routing.get('final')
+                profile_final = client_profile.routing.get("final")
                 if profile_final:
-                    route_config['final_action'] = profile_final
-                    route_config['config_source'] = 'client_profile'
-            elif self.override_mode == 'config_overrides':
+                    route_config["final_action"] = profile_final
+                    route_config["config_source"] = "client_profile"
+            elif self.override_mode == "config_overrides":
                 # Middleware config overrides profile (keep current)
                 pass
             else:  # 'merge' mode - use profile if available, otherwise config
-                profile_final = client_profile.routing.get('final')
+                profile_final = client_profile.routing.get("final")
                 if profile_final:
-                    route_config['final_action'] = profile_final
-                    route_config['config_source'] = 'client_profile'
+                    route_config["final_action"] = profile_final
+                    route_config["config_source"] = "client_profile"
 
         return route_config
 
-    def can_process(self, servers: List[ParsedServer], context: Optional[PipelineContext] = None) -> bool:
+    def can_process(
+        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+    ) -> bool:
         """Check if route configuration can be applied.
 
         Args:
@@ -174,8 +182,8 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
 
         """
         return {
-            'type': 'route_config',
-            'final_action': self.final_action,
-            'override_mode': self.override_mode,
-            'preserve_metadata': self.preserve_metadata
+            "type": "route_config",
+            "final_action": self.final_action,
+            "override_mode": self.override_mode,
+            "preserve_metadata": self.preserve_metadata,
         }

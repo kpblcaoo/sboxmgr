@@ -6,23 +6,46 @@ into appropriate sing-box inbound configurations.
 
 import logging
 from typing import List, Union
-from ...models import ClientProfile
 
 # Import new sing-box models
 from sboxmgr.models.singbox import (
-    MixedInbound, SocksInbound, HttpInbound, ShadowsocksInbound,
-    VmessInbound, VlessInbound, TrojanInbound, Hysteria2Inbound,
-    WireGuardInbound, TuicInbound, ShadowTlsInbound, DirectInbound
+    DirectInbound,
+    HttpInbound,
+    Hysteria2Inbound,
+    MixedInbound,
+    ShadowsocksInbound,
+    ShadowTlsInbound,
+    SocksInbound,
+    TrojanInbound,
+    TuicInbound,
+    VlessInbound,
+    VmessInbound,
+    WireGuardInbound,
 )
+
+from ...models import ClientProfile
 
 logger = logging.getLogger(__name__)
 
 
-def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
-    MixedInbound, SocksInbound, HttpInbound, ShadowsocksInbound,
-    VmessInbound, VlessInbound, TrojanInbound, Hysteria2Inbound,
-    WireGuardInbound, TuicInbound, ShadowTlsInbound, DirectInbound
-]]:
+def convert_client_profile_to_inbounds(
+    profile: ClientProfile,
+) -> List[
+    Union[
+        MixedInbound,
+        SocksInbound,
+        HttpInbound,
+        ShadowsocksInbound,
+        VmessInbound,
+        VlessInbound,
+        TrojanInbound,
+        Hysteria2Inbound,
+        WireGuardInbound,
+        TuicInbound,
+        ShadowTlsInbound,
+        DirectInbound,
+    ]
+]:
     """Convert ClientProfile to list of sing-box inbound configurations.
 
     Args:
@@ -35,7 +58,7 @@ def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
 
     try:
         # Handle inbounds configuration
-        if hasattr(profile, 'inbounds') and profile.inbounds:
+        if hasattr(profile, "inbounds") and profile.inbounds:
             for inbound_config in profile.inbounds:
                 inbound = _convert_single_inbound(inbound_config)
                 if inbound:
@@ -44,31 +67,38 @@ def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
         # Default mixed inbound if no inbounds specified
         if not inbounds:
             default_inbound = MixedInbound(
-                type="mixed",
-                tag="mixed-in",
-                listen="127.0.0.1",
-                listen_port=7890
+                type="mixed", tag="mixed-in", listen="127.0.0.1", listen_port=7890
             )
             inbounds.append(default_inbound)
 
     except Exception as e:
         logger.error(f"Failed to convert client profile to inbounds: {e}")
         # Return default mixed inbound on error
-        return [MixedInbound(
-            type="mixed",
-            tag="mixed-in",
-            listen="127.0.0.1",
-            listen_port=7890
-        )]
+        return [
+            MixedInbound(
+                type="mixed", tag="mixed-in", listen="127.0.0.1", listen_port=7890
+            )
+        ]
 
     return inbounds
 
 
-def _convert_single_inbound(inbound_config: dict) -> Union[
-    MixedInbound, SocksInbound, HttpInbound, ShadowsocksInbound,
-    VmessInbound, VlessInbound, TrojanInbound, Hysteria2Inbound,
-    WireGuardInbound, TuicInbound, ShadowTlsInbound, DirectInbound,
-    None
+def _convert_single_inbound(
+    inbound_config: dict,
+) -> Union[
+    MixedInbound,
+    SocksInbound,
+    HttpInbound,
+    ShadowsocksInbound,
+    VmessInbound,
+    VlessInbound,
+    TrojanInbound,
+    Hysteria2Inbound,
+    WireGuardInbound,
+    TuicInbound,
+    ShadowTlsInbound,
+    DirectInbound,
+    None,
 ]:
     """Convert a single inbound configuration to appropriate model.
 
@@ -86,14 +116,16 @@ def _convert_single_inbound(inbound_config: dict) -> Union[
             "type": inbound_type,
             "tag": inbound_config.get("tag", f"{inbound_type}-in"),
             "listen": inbound_config.get("listen", "127.0.0.1"),
-            "listen_port": inbound_config.get("listen_port", 7890)
+            "listen_port": inbound_config.get("listen_port", 7890),
         }
 
         # Add optional fields if present
         if "sniff" in inbound_config:
             base_config["sniff"] = inbound_config["sniff"]
         if "sniff_override_destination" in inbound_config:
-            base_config["sniff_override_destination"] = inbound_config["sniff_override_destination"]
+            base_config["sniff_override_destination"] = inbound_config[
+                "sniff_override_destination"
+            ]
         if "domain_strategy" in inbound_config:
             base_config["domain_strategy"] = inbound_config["domain_strategy"]
 

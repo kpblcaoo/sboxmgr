@@ -18,7 +18,7 @@ from sboxmgr.policies.base import BasePolicy, PolicyResult
 class MyCustomPolicy(BasePolicy):
     name = "my_custom_policy"  # Unique identifier
     description = "Description of what this policy does"
-    
+
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         # Your evaluation logic here
         pass
@@ -64,29 +64,29 @@ from sboxmgr.policies.base import BasePolicy, PolicyResult, PolicyContext
 class MyCustomPolicy(BasePolicy):
     name = "my_custom_policy"
     description = "Custom policy for specific requirements"
-    
+
     def __init__(self, config: Optional[dict] = None):
         super().__init__(config)
         self.threshold = config.get("threshold", 100) if config else 100
-    
+
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         server = context.server
-        
+
         # Your custom logic here
         if not server:
             return PolicyResult.skip("No server to evaluate")
-        
+
         # Example: Check server latency
         latency = getattr(server, 'latency', None)
         if latency is None:
             return PolicyResult.warn("No latency information available")
-        
+
         if latency > self.threshold:
             return PolicyResult.deny(
                 f"Latency {latency}ms exceeds threshold {self.threshold}ms",
                 severity="medium"
             )
-        
+
         return PolicyResult.allow(f"Latency {latency}ms is acceptable")
 ```
 
@@ -126,28 +126,28 @@ Policies can accept configuration parameters:
 ```python
 class ConfigurablePolicy(BasePolicy):
     name = "configurable_policy"
-    
+
     def __init__(self, config: Optional[dict] = None):
         super().__init__(config)
         # Extract configuration
         self.allowed_tags = config.get("allowed_tags", []) if config else []
         self.blocked_tags = config.get("blocked_tags", []) if config else []
-    
+
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         server = context.server
         if not server:
             return PolicyResult.skip("No server to evaluate")
-        
+
         # Use configuration in evaluation
         tags = getattr(server, 'tags', [])
-        
+
         for tag in tags:
             if tag in self.blocked_tags:
                 return PolicyResult.deny(f"Tag '{tag}' is blocked")
-        
+
         if self.allowed_tags and not any(tag in self.allowed_tags for tag in tags):
             return PolicyResult.deny("No allowed tags found")
-        
+
         return PolicyResult.allow("Tags are acceptable")
 ```
 
@@ -158,16 +158,16 @@ Add metadata to your results for better debugging:
 ```python
 def evaluate(self, context: PolicyContext) -> PolicyResult:
     server = context.server
-    
+
     # Collect metadata
     metadata = {
         "server_id": getattr(server, 'id', 'unknown'),
         "evaluation_time": time.time(),
         "custom_field": "custom_value"
     }
-    
+
     # Your evaluation logic...
-    
+
     return PolicyResult.allow(
         "Server passed check",
         metadata=metadata
@@ -181,12 +181,12 @@ Policies can depend on other policies or external data:
 ```python
 class DependentPolicy(BasePolicy):
     name = "dependent_policy"
-    
+
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         # Check if required data is available
         if not hasattr(context.server, 'required_field'):
             return PolicyResult.skip("Required field not available")
-        
+
         # Your evaluation logic...
         pass
 ```
@@ -208,25 +208,25 @@ class TestMyCustomPolicy:
         policy = MyCustomPolicy({"threshold": 100})
         server = MockServer(latency=50)
         context = PolicyContext(server=server)
-        
+
         result = policy.evaluate(context)
         assert result.allowed
         assert "acceptable" in result.reason
-    
+
     def test_policy_denies_bad_server(self):
         policy = MyCustomPolicy({"threshold": 100})
         server = MockServer(latency=150)
         context = PolicyContext(server=server)
-        
+
         result = policy.evaluate(context)
         assert not result.allowed
         assert "exceeds threshold" in result.reason
-    
+
     def test_policy_warns_no_data(self):
         policy = MyCustomPolicy()
         server = MockServer()  # No latency attribute
         context = PolicyContext(server=server)
-        
+
         result = policy.evaluate(context)
         assert result.warning
         assert "No latency information" in result.reason
@@ -288,31 +288,31 @@ logger = logging.getLogger(__name__)
 class ServerTagPolicy(BasePolicy):
     """
     Policy that filters servers based on their tags.
-    
+
     Configuration:
         required_tags: List of tags that must be present
         blocked_tags: List of tags that cause denial
         preferred_tags: List of preferred tags (warnings if missing)
     """
-    
+
     name = "server_tag_policy"
     description = "Filters servers based on tag requirements"
-    
+
     def __init__(self, config: Optional[dict] = None):
         super().__init__(config)
         self.required_tags = config.get("required_tags", []) if config else []
         self.blocked_tags = config.get("blocked_tags", []) if config else []
         self.preferred_tags = config.get("preferred_tags", []) if config else []
-    
+
     def evaluate(self, context: PolicyContext) -> PolicyResult:
         server = context.server
         if not server:
             return PolicyResult.skip("No server to evaluate")
-        
+
         server_tags = getattr(server, 'tags', [])
         if not server_tags:
             return PolicyResult.warn("Server has no tags")
-        
+
         # Check for blocked tags
         for tag in server_tags:
             if tag in self.blocked_tags:
@@ -320,7 +320,7 @@ class ServerTagPolicy(BasePolicy):
                     f"Server has blocked tag: {tag}",
                     severity="high"
                 )
-        
+
         # Check for required tags
         if self.required_tags:
             missing_required = set(self.required_tags) - set(server_tags)
@@ -329,20 +329,20 @@ class ServerTagPolicy(BasePolicy):
                     f"Missing required tags: {missing_required}",
                     severity="medium"
                 )
-        
+
         # Check for preferred tags
         warnings = []
         if self.preferred_tags:
             missing_preferred = set(self.preferred_tags) - set(server_tags)
             if missing_preferred:
                 warnings.append(f"Missing preferred tags: {missing_preferred}")
-        
+
         if warnings:
             return PolicyResult.warn(
                 "; ".join(warnings),
                 severity="low"
             )
-        
+
         return PolicyResult.allow("Server tags meet all requirements")
 ```
 
@@ -385,4 +385,4 @@ sboxmgr policy audit --policy my_custom_policy
 - Review existing policies for patterns and best practices
 - Consider contributing your policy back to the community
 - Explore advanced features like policy chaining and dependencies
-- Implement comprehensive testing for your policies 
+- Implement comprehensive testing for your policies

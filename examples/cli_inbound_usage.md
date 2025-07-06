@@ -69,7 +69,7 @@ python -m sboxmgr.cli export \
 ### Inbound Types
 - `tun` - TUN interface for system-wide routing
 - `socks` - SOCKS5 proxy server
-- `http` - HTTP proxy server  
+- `http` - HTTP proxy server
 - `tproxy` - Transparent proxy (Linux only)
 
 ### TUN Parameters
@@ -163,4 +163,4 @@ Much simpler! 🎉
 - ✅ Works alongside existing `--client-profile` parameter
 - ✅ CLI parameters take priority over profile-based config
 - ✅ All existing functionality preserved
-- ✅ Generated configs are sing-box compatible 
+- ✅ Generated configs are sing-box compatible

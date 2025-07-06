@@ -15,9 +15,6 @@ The module is organized into the following components:
 - constants.py: Validation constants and defaults
 """
 
-from .cli import export, app
+from .cli import app, export
 
-__all__ = [
-    'export',
-    'app'
-]
+__all__ = ["export", "app"]

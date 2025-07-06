@@ -1,17 +1,18 @@
 """File-based ExclusionManager implementation with caching and DI support."""
 
+import fnmatch
 import json
 import logging
-from pathlib import Path
-from typing import List, Dict, Optional, Any, Tuple, Union
 import threading
-import fnmatch
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from sboxmgr.utils.env import get_exclusion_file
+from sboxmgr.utils.file import atomic_write_json, file_exists, read_json
+from sboxmgr.utils.id import generate_server_id
 
 from ..interfaces import ExclusionManagerInterface
 from .models import ExclusionEntry, ExclusionList
-from sboxmgr.utils.file import atomic_write_json, file_exists, read_json
-from sboxmgr.utils.env import get_exclusion_file
-from sboxmgr.utils.id import generate_server_id
 
 
 class ExclusionLoadError(Exception):
@@ -31,10 +32,15 @@ class ExclusionManager(ExclusionManagerInterface):
     - Dependency injection ready
     """
 
-    _default_instance: Optional['ExclusionManager'] = None
+    _default_instance: Optional["ExclusionManager"] = None
     _default_lock = threading.Lock()
 
-    def __init__(self, file_path: Optional[Path] = None, auto_load: bool = True, logger: Optional[logging.Logger] = None):
+    def __init__(
+        self,
+        file_path: Optional[Path] = None,
+        auto_load: bool = True,
+        logger: Optional[logging.Logger] = None,
+    ):
         """Initialize ExclusionManager.
 
         Args:
@@ -53,16 +59,16 @@ class ExclusionManager(ExclusionManagerInterface):
             self._load()
 
     @classmethod
-    def default(cls) -> 'ExclusionManager':
+    def default(cls) -> "ExclusionManager":
         """Get or create the default ExclusionManager, respecting env changes."""
         from sboxmgr.utils.env import get_exclusion_file
+
         file_path = get_exclusion_file()
         with cls._default_lock:
             # Если singleton не создан или путь изменился — пересоздать
-            if (
-                cls._default_instance is None or
-                str(cls._default_instance.file_path) != str(file_path)
-            ):
+            if cls._default_instance is None or str(
+                cls._default_instance.file_path
+            ) != str(file_path):
                 cls._default_instance = cls(file_path=file_path)
             return cls._default_instance
 
@@ -76,26 +82,38 @@ class ExclusionManager(ExclusionManagerInterface):
                 try:
                     data = read_json(str(self.file_path))
                     self._exclusions = ExclusionList.model_validate(data)
-                    self.logger.debug(f"Loaded {len(self._exclusions.exclusions)} exclusions from {self.file_path}")
+                    self.logger.debug(
+                        f"Loaded {len(self._exclusions.exclusions)} exclusions from {self.file_path}"
+                    )
                 except (json.JSONDecodeError, KeyError, ValueError) as e:
                     # Fail-safe: corrupted file -> empty list + restore file
-                    self.logger.warning(f"Exclusion file {self.file_path} is corrupted: {e}. Restoring to empty state.")
+                    self.logger.warning(
+                        f"Exclusion file {self.file_path} is corrupted: {e}. Restoring to empty state."
+                    )
                     self._exclusions = ExclusionList()
                     # Restore the file with empty exclusions
                     try:
                         self._save()
-                        self.logger.info(f"Restored corrupted exclusion file {self.file_path} to empty state")
+                        self.logger.info(
+                            f"Restored corrupted exclusion file {self.file_path} to empty state"
+                        )
                     except Exception as save_error:
-                        self.logger.error(f"Failed to restore exclusion file {self.file_path}: {save_error}")
+                        self.logger.error(
+                            f"Failed to restore exclusion file {self.file_path}: {save_error}"
+                        )
                     # Don't raise exception on init - fail-safe mode
                 except Exception as e:
                     # Unexpected error -> fail-safe
-                    self.logger.error(f"Unexpected error loading exclusions from {self.file_path}: {e}. Using empty list.")
+                    self.logger.error(
+                        f"Unexpected error loading exclusions from {self.file_path}: {e}. Using empty list."
+                    )
                     self._exclusions = ExclusionList()
                     # Don't raise exception on init - fail-safe mode
             else:
                 self._exclusions = ExclusionList()
-                self.logger.debug(f"No exclusion file found at {self.file_path}, starting with empty list")
+                self.logger.debug(
+                    f"No exclusion file found at {self.file_path}, starting with empty list"
+                )
 
             return self._exclusions
 
@@ -105,7 +123,7 @@ class ExclusionManager(ExclusionManagerInterface):
             return
 
         try:
-            data = self._exclusions.model_dump(mode='json')
+            data = self._exclusions.model_dump(mode="json")
             atomic_write_json(data, str(self.file_path))
         except Exception as e:
             logging.error(f"Failed to save exclusions to {self.file_path}: {e}")
@@ -115,11 +133,7 @@ class ExclusionManager(ExclusionManagerInterface):
         """Add server to exclusions with audit logging."""
         exclusions = self._load()  # _load() now handles errors internally
 
-        entry = ExclusionEntry(
-            id=server_id,
-            name=name,
-            reason=reason
-        )
+        entry = ExclusionEntry(id=server_id, name=name, reason=reason)
 
         with self._lock:
             if exclusions.add(entry):
@@ -127,7 +141,9 @@ class ExclusionManager(ExclusionManagerInterface):
                 # Audit logging
                 display_name = name or server_id
                 display_reason = f" (reason: {reason})" if reason else ""
-                self.logger.info(f"Excluded server: {display_name} [ID: {server_id}]{display_reason}")
+                self.logger.info(
+                    f"Excluded server: {display_name} [ID: {server_id}]{display_reason}"
+                )
                 return True
             else:
                 self.logger.debug(f"Server {server_id} already excluded")
@@ -158,7 +174,9 @@ class ExclusionManager(ExclusionManagerInterface):
             return False
 
         # Get name before removal for logging
-        old_entry = next((ex for ex in exclusions.exclusions if ex.id == server_id), None)
+        old_entry = next(
+            (ex for ex in exclusions.exclusions if ex.id == server_id), None
+        )
 
         with self._lock:
             if exclusions.remove(server_id):
@@ -168,7 +186,9 @@ class ExclusionManager(ExclusionManagerInterface):
                 self.logger.info(f"Removed exclusion: {display_name} [ID: {server_id}]")
                 return True
             else:
-                self.logger.warning(f"Attempted to remove non-existent exclusion: {server_id}")
+                self.logger.warning(
+                    f"Attempted to remove non-existent exclusion: {server_id}"
+                )
                 return False
 
     def contains(self, server_id: str) -> bool:
@@ -179,7 +199,7 @@ class ExclusionManager(ExclusionManagerInterface):
     def list_all(self) -> List[Dict]:
         """List all exclusions."""
         exclusions = self._load()
-        return [ex.model_dump(mode='json') for ex in exclusions.exclusions]
+        return [ex.model_dump(mode="json") for ex in exclusions.exclusions]
 
     def clear(self) -> int:
         """Clear all exclusions."""
@@ -211,9 +231,9 @@ class ExclusionManager(ExclusionManagerInterface):
         filtered = []
         for server in servers:
             # Handle both ParsedServer objects and dicts
-            if hasattr(server, '__dict__'):
+            if hasattr(server, "__dict__"):
                 # ParsedServer object - generate ID from its attributes
-                server_dict = server.__dict__ if hasattr(server, '__dict__') else {}
+                server_dict = server.__dict__ if hasattr(server, "__dict__") else {}
                 server_id = generate_server_id(server_dict)
             else:
                 # Dictionary - use directly
@@ -247,11 +267,15 @@ class ExclusionManager(ExclusionManagerInterface):
             "last_modified": exclusions.last_modified.isoformat(),
             "file_path": str(self.file_path),
             "file_exists": file_exists(str(self.file_path)),
-            "loaded_in_memory": self.is_loaded()
+            "loaded_in_memory": self.is_loaded(),
         }
 
     # NEW: Server listing and parsing functions
-    def set_servers_cache(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], supported_protocols: List[str]) -> None:
+    def set_servers_cache(
+        self,
+        json_data: Union[Dict[str, Any], List[Dict[str, Any]]],
+        supported_protocols: List[str],
+    ) -> None:
         """Cache server data for index-based operations."""
         # Handle both dict with "outbounds" key and direct list of servers
         if isinstance(json_data, dict):
@@ -262,18 +286,24 @@ class ExclusionManager(ExclusionManagerInterface):
             raise ValueError(f"Expected dict or list, got {type(json_data)}")
 
         self._servers_cache = {
-            'servers': servers,
-            'supported_servers': [
-                (idx, server) for idx, server in enumerate(servers)
+            "servers": servers,
+            "supported_servers": [
+                (idx, server)
+                for idx, server in enumerate(servers)
                 if server.get("type") in supported_protocols
             ],
-            'supported_protocols': supported_protocols
+            "supported_protocols": supported_protocols,
         }
-        self.logger.debug(f"Cached {len(self._servers_cache['supported_servers'])} supported servers")
+        self.logger.debug(
+            f"Cached {len(self._servers_cache['supported_servers'])} supported servers"
+        )
 
-    def list_servers(self, json_data: Optional[Dict[str, Any]] = None,
-                    supported_protocols: Optional[List[str]] = None,
-                    show_excluded: bool = True) -> List[Tuple[int, Dict[str, Any], bool]]:
+    def list_servers(
+        self,
+        json_data: Optional[Dict[str, Any]] = None,
+        supported_protocols: Optional[List[str]] = None,
+        show_excluded: bool = True,
+    ) -> List[Tuple[int, Dict[str, Any], bool]]:
         """List available servers with indices and exclusion status.
 
         Returns:
@@ -290,7 +320,9 @@ class ExclusionManager(ExclusionManagerInterface):
         result = []
 
         # Use sequential numbering for display, not original indices
-        for display_idx, (original_idx, server) in enumerate(self._servers_cache['supported_servers']):
+        for display_idx, (original_idx, server) in enumerate(
+            self._servers_cache["supported_servers"]
+        ):
             server_id = generate_server_id(server)
             is_excluded = self.contains(server_id)
 
@@ -299,11 +331,13 @@ class ExclusionManager(ExclusionManagerInterface):
 
         return result
 
-    def format_server_info(self, server: Dict[str, Any], index: int, is_excluded: bool = False) -> str:
+    def format_server_info(
+        self, server: Dict[str, Any], index: int, is_excluded: bool = False
+    ) -> str:
         """Format server information for display."""
-        tag = server.get('tag', 'N/A')
-        server_type = server.get('type', 'N/A')
-        port = server.get('server_port', 'N/A')
+        tag = server.get("tag", "N/A")
+        server_type = server.get("type", "N/A")
+        port = server.get("server_port", "N/A")
 
         status = "🚫 EXCLUDED" if is_excluded else "✅ Available"
         return f"[{index:2d}] {tag} ({server_type}:{port}) - {status}"
@@ -319,16 +353,27 @@ class ExclusionManager(ExclusionManagerInterface):
             read_json(str(self.file_path))
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             # File is corrupted, restore it
-            self.logger.warning(f"Exclusion file {self.file_path} is corrupted: {e}. Restoring to empty state.")
+            self.logger.warning(
+                f"Exclusion file {self.file_path} is corrupted: {e}. Restoring to empty state."
+            )
             self._exclusions = ExclusionList()
             try:
                 self._save()
-                self.logger.info(f"Restored corrupted exclusion file {self.file_path} to empty state")
+                self.logger.info(
+                    f"Restored corrupted exclusion file {self.file_path} to empty state"
+                )
             except Exception as save_error:
-                self.logger.error(f"Failed to restore exclusion file {self.file_path}: {save_error}")
+                self.logger.error(
+                    f"Failed to restore exclusion file {self.file_path}: {save_error}"
+                )
 
-    def add_by_index(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], indices: List[int],
-                    supported_protocols: List[str], reason: str = "Added by index") -> List[str]:
+    def add_by_index(
+        self,
+        json_data: Union[Dict[str, Any], List[Dict[str, Any]]],
+        indices: List[int],
+        supported_protocols: List[str],
+        reason: str = "Added by index",
+    ) -> List[str]:
         """Add exclusions by server indices.
 
         Args:
@@ -342,7 +387,7 @@ class ExclusionManager(ExclusionManagerInterface):
 
         """
         # Only re-cache if data is different or cache is empty
-        if not self._servers_cache or json_data != self._servers_cache.get('servers'):
+        if not self._servers_cache or json_data != self._servers_cache.get("servers"):
             self.set_servers_cache(json_data, supported_protocols)
 
         # Ensure file is valid before loading
@@ -350,7 +395,7 @@ class ExclusionManager(ExclusionManagerInterface):
         self._load()
 
         added_ids = []
-        supported_servers = self._servers_cache['supported_servers']
+        supported_servers = self._servers_cache["supported_servers"]
 
         with self._lock:
             for display_index in indices:
@@ -363,19 +408,30 @@ class ExclusionManager(ExclusionManagerInterface):
                         entry = ExclusionEntry(id=server_id, name=name, reason=reason)
                         self._exclusions.exclusions.append(entry)
                         added_ids.append(server_id)
-                        self.logger.info(f"Excluded server by index {display_index}: {name} [ID: {server_id}] (reason: {reason})")
+                        self.logger.info(
+                            f"Excluded server by index {display_index}: {name} [ID: {server_id}] (reason: {reason})"
+                        )
                     else:
-                        self.logger.info(f"Server already excluded: {name} [ID: {server_id}]")
+                        self.logger.info(
+                            f"Server already excluded: {name} [ID: {server_id}]"
+                        )
                 else:
-                    self.logger.warning(f"Invalid server index: {display_index} (max: {len(supported_servers)-1})")
+                    self.logger.warning(
+                        f"Invalid server index: {display_index} (max: {len(supported_servers) - 1})"
+                    )
 
             if added_ids:
                 self._save()
 
         return added_ids
 
-    def add_by_wildcard(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], patterns: List[str],
-                       supported_protocols: List[str], reason: str = "Added by wildcard") -> List[str]:
+    def add_by_wildcard(
+        self,
+        json_data: Union[Dict[str, Any], List[Dict[str, Any]]],
+        patterns: List[str],
+        supported_protocols: List[str],
+        reason: str = "Added by wildcard",
+    ) -> List[str]:
         """Add exclusions by wildcard patterns matching server tags.
 
         Returns:
@@ -383,7 +439,7 @@ class ExclusionManager(ExclusionManagerInterface):
 
         """
         # Only re-cache if data is different or cache is empty
-        if not self._servers_cache or json_data != self._servers_cache.get('servers'):
+        if not self._servers_cache or json_data != self._servers_cache.get("servers"):
             self.set_servers_cache(json_data, supported_protocols)
 
         # Ensure file is valid before loading
@@ -391,7 +447,7 @@ class ExclusionManager(ExclusionManagerInterface):
         self._load()
 
         added_ids = []
-        supported_servers = self._servers_cache['supported_servers']
+        supported_servers = self._servers_cache["supported_servers"]
 
         with self._lock:
             for pattern in patterns:
@@ -402,12 +458,18 @@ class ExclusionManager(ExclusionManagerInterface):
                         name = f"{server.get('tag', 'N/A')} ({server.get('type', 'N/A')}:{server.get('server_port', 'N/A')})"
 
                         if not self.contains(server_id):
-                            entry = ExclusionEntry(id=server_id, name=name, reason=reason)
+                            entry = ExclusionEntry(
+                                id=server_id, name=name, reason=reason
+                            )
                             self._exclusions.exclusions.append(entry)
                             added_ids.append(server_id)
-                            self.logger.info(f"Excluded server by pattern '{pattern}': {name} [ID: {server_id}] (reason: {reason})")
+                            self.logger.info(
+                                f"Excluded server by pattern '{pattern}': {name} [ID: {server_id}] (reason: {reason})"
+                            )
                         else:
-                            self.logger.info(f"Server already excluded: {name} [ID: {server_id}]")
+                            self.logger.info(
+                                f"Server already excluded: {name} [ID: {server_id}]"
+                            )
 
             if added_ids:
                 self._save()
@@ -415,8 +477,12 @@ class ExclusionManager(ExclusionManagerInterface):
         return added_ids
 
     # NEW: Enhanced remove methods with index support
-    def remove_by_index(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], indices: List[int],
-                       supported_protocols: List[str]) -> List[str]:
+    def remove_by_index(
+        self,
+        json_data: Union[Dict[str, Any], List[Dict[str, Any]]],
+        indices: List[int],
+        supported_protocols: List[str],
+    ) -> List[str]:
         """Remove exclusions by server indices.
 
         Args:
@@ -429,13 +495,13 @@ class ExclusionManager(ExclusionManagerInterface):
 
         """
         # Only re-cache if data is different or cache is empty
-        if not self._servers_cache or json_data != self._servers_cache.get('servers'):
+        if not self._servers_cache or json_data != self._servers_cache.get("servers"):
             self.set_servers_cache(json_data, supported_protocols)
 
         self._load()
 
         removed_ids = []
-        supported_servers = self._servers_cache['supported_servers']
+        supported_servers = self._servers_cache["supported_servers"]
 
         with self._lock:
             for display_index in indices:
@@ -445,11 +511,17 @@ class ExclusionManager(ExclusionManagerInterface):
 
                     if self.remove(server_id):
                         removed_ids.append(server_id)
-                        self.logger.info(f"Removed exclusion for server at index {display_index}: {server.get('tag', 'N/A')} [ID: {server_id}]")
+                        self.logger.info(
+                            f"Removed exclusion for server at index {display_index}: {server.get('tag', 'N/A')} [ID: {server_id}]"
+                        )
                     else:
-                        self.logger.warning(f"Server at index {display_index} was not excluded: {server.get('tag', 'N/A')} [ID: {server_id}]")
+                        self.logger.warning(
+                            f"Server at index {display_index} was not excluded: {server.get('tag', 'N/A')} [ID: {server_id}]"
+                        )
                 else:
-                    self.logger.warning(f"Invalid server index: {display_index} (max: {len(supported_servers)-1})")
+                    self.logger.warning(
+                        f"Invalid server index: {display_index} (max: {len(supported_servers) - 1})"
+                    )
 
         return removed_ids
 
@@ -473,7 +545,9 @@ class ExclusionManager(ExclusionManagerInterface):
                     entry = ExclusionEntry(id=server_id, name=name, reason=reason)
                     self._exclusions.exclusions.append(entry)
                     added_ids.append(server_id)
-                    self.logger.info(f"Excluded server: {name} [ID: {server_id}] (reason: {reason})")
+                    self.logger.info(
+                        f"Excluded server: {name} [ID: {server_id}] (reason: {reason})"
+                    )
 
             if added_ids:
                 self._save()

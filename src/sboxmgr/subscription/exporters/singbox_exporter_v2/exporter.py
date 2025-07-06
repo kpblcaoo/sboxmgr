@@ -6,16 +6,20 @@ interface using the modular Pydantic models for better validation and type safet
 
 import logging
 from typing import List, Optional
-from ...models import ParsedServer, ClientProfile
-from ...base_exporter import BaseExporter
-from ...registry import register
 
 # Import new sing-box models
 from sboxmgr.models.singbox import (
-    LogConfig, DirectOutbound, BlockOutbound,
-    RouteConfig, RouteRule, UrlTestOutbound
+    BlockOutbound,
+    DirectOutbound,
+    LogConfig,
+    RouteConfig,
+    RouteRule,
+    UrlTestOutbound,
 )
 
+from ...base_exporter import BaseExporter
+from ...models import ClientProfile, ParsedServer
+from ...registry import register
 from .converter import convert_parsed_server_to_outbound
 from .inbound_converter import convert_client_profile_to_inbounds
 
@@ -31,7 +35,11 @@ class SingboxExporterV2(BaseExporter):
     from sboxmgr.models.singbox for full validation.
     """
 
-    def export(self, servers: List[ParsedServer], client_profile: Optional[ClientProfile] = None) -> str:
+    def export(
+        self,
+        servers: List[ParsedServer],
+        client_profile: Optional[ClientProfile] = None,
+    ) -> str:
         """Export servers to sing-box JSON configuration string.
 
         Args:
@@ -65,15 +73,17 @@ class SingboxExporterV2(BaseExporter):
                     interval="3m",
                     tolerance=50,
                     idle_timeout="30m",  # 30 minutes as string
-                    interrupt_exist_connections=False
+                    interrupt_exist_connections=False,
                 )
                 outbounds.insert(0, urltest_outbound)
 
             # Add default outbounds
-            outbounds.extend([
-                DirectOutbound(type="direct", tag="direct"),
-                BlockOutbound(type="block", tag="block")
-            ])
+            outbounds.extend(
+                [
+                    DirectOutbound(type="direct", tag="direct"),
+                    BlockOutbound(type="block", tag="block"),
+                ]
+            )
 
             # Convert client profile to inbounds
             inbounds = []
@@ -84,26 +94,22 @@ class SingboxExporterV2(BaseExporter):
             routing_rules = []
 
             # Private IP ranges - direct (using correct field name)
-            routing_rules.append(RouteRule(
-                source_ip_cidr=[
-                    "10.0.0.0/8",
-                    "172.16.0.0/12",
-                    "192.168.0.0/16",
-                    "127.0.0.0/8"
-                ],
-                outbound="direct"
-            ))
+            routing_rules.append(
+                RouteRule(
+                    source_ip_cidr=[
+                        "10.0.0.0/8",
+                        "172.16.0.0/12",
+                        "192.168.0.0/16",
+                        "127.0.0.0/8",
+                    ],
+                    outbound="direct",
+                )
+            )
 
             # Default rule for all other traffic to auto
             if proxy_tags:
-                routing_rules.append(RouteRule(
-                    network="tcp",
-                    outbound="auto"
-                ))
-                routing_rules.append(RouteRule(
-                    network="udp",
-                    outbound="auto"
-                ))
+                routing_rules.append(RouteRule(network="tcp", outbound="auto"))
+                routing_rules.append(RouteRule(network="udp", outbound="auto"))
 
             # Determine final action
             final_action = "auto" if proxy_tags else "direct"
@@ -114,9 +120,11 @@ class SingboxExporterV2(BaseExporter):
                 "inbounds": [inbound.smart_dump() for inbound in inbounds],
                 "outbounds": [outbound.smart_dump() for outbound in outbounds],
                 "route": RouteConfig(
-                    rules=[rule.model_dump(exclude_none=True) for rule in routing_rules],
-                    final=final_action
-                ).model_dump(exclude_none=True)
+                    rules=[
+                        rule.model_dump(exclude_none=True) for rule in routing_rules
+                    ],
+                    final=final_action,
+                ).model_dump(exclude_none=True),
             }
 
             # Remove empty sections
@@ -124,6 +132,7 @@ class SingboxExporterV2(BaseExporter):
 
             # Export as JSON
             import json
+
             return json.dumps(config_data, indent=2)
 
         except Exception as e:

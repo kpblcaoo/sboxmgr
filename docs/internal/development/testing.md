@@ -119,9 +119,9 @@ def setup_test_env():
     os.environ['SBOXMGR_LOG_FILE'] = './test_sboxmgr.log'
     os.environ['SBOXMGR_EXCLUSION_FILE'] = './test_exclusions.json'
     os.environ['SBOXMGR_DEBUG'] = '0'
-    
+
     yield
-    
+
     # Cleanup test files
     for file in ['test_config.json', 'test_sboxmgr.log', 'test_exclusions.json']:
         if os.path.exists(file):
@@ -160,10 +160,10 @@ def test_parser_handles_valid_input():
     # Arrange
     input_data = "valid subscription data"
     parser = ClashParser()
-    
+
     # Act
     result = parser.parse(input_data)
-    
+
     # Assert
     assert len(result) > 0
     assert all(isinstance(server, ParsedServer) for server in result)
@@ -180,7 +180,7 @@ def test_fetcher_handles_network_errors():
         # Arrange
         mock_get.side_effect = requests.RequestException("Network error")
         fetcher = URLFetcher()
-        
+
         # Act & Assert
         with pytest.raises(FetchError):
             fetcher.fetch("https://example.com/subscription")
@@ -196,11 +196,11 @@ from sboxmgr.cli.main import app
 def test_list_servers_command():
     """Test list-servers command."""
     runner = CliRunner()
-    
+
     # Test with valid URL
     result = runner.invoke(app, ["list-servers", "-u", "https://example.com/sub"])
     assert result.exit_code == 0
-    
+
     # Test with invalid URL
     result = runner.invoke(app, ["list-servers", "-u", "invalid-url"])
     assert result.exit_code != 0
@@ -229,7 +229,7 @@ open htmlcov/index.html
 ```ini
 # .coveragerc
 [run]
-omit = 
+omit =
     */tests/*
     */venv/*
     */__pycache__/*
@@ -246,13 +246,13 @@ def test_parser_performance_large_dataset():
     """Test parser performance with large dataset."""
     # Generate large test dataset
     large_data = generate_large_subscription_data(1000)
-    
+
     # Measure parsing time
     start_time = time.time()
     parser = ClashParser()
     result = parser.parse(large_data)
     end_time = time.time()
-    
+
     # Assert performance requirements
     assert end_time - start_time < 5.0  # Should complete within 5 seconds
     assert len(result) == 1000
@@ -269,13 +269,13 @@ def test_memory_usage():
     """Test memory usage during processing."""
     process = psutil.Process(os.getpid())
     initial_memory = process.memory_info().rss
-    
+
     # Perform memory-intensive operation
     process_large_dataset()
-    
+
     final_memory = process.memory_info().rss
     memory_increase = final_memory - initial_memory
-    
+
     # Assert memory usage is reasonable
     assert memory_increase < 100 * 1024 * 1024  # Less than 100MB increase
 ```

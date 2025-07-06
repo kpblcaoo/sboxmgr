@@ -6,14 +6,17 @@ lifecycle management. It includes atomic file operations for safe configuration
 updates.
 """
 
-import json
-import os
 import datetime
-from sboxmgr.utils.id import generate_server_id
-from sboxmgr.utils.file import handle_temp_file as atomic_handle_temp_file
+import json
 import logging
+import os
 
-SELECTED_CONFIG_FILE = os.getenv("SINGBOX_SELECTED_CONFIG_FILE", "./selected_config.json")
+from sboxmgr.utils.file import handle_temp_file as atomic_handle_temp_file
+from sboxmgr.utils.id import generate_server_id
+
+SELECTED_CONFIG_FILE = os.getenv(
+    "SINGBOX_SELECTED_CONFIG_FILE", "./selected_config.json"
+)
 
 
 def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
@@ -33,7 +36,7 @@ def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
 def load_selected_config():
     """Load selected configuration from file."""
     if os.path.exists(SELECTED_CONFIG_FILE):
-        with open(SELECTED_CONFIG_FILE, 'r') as f:
+        with open(SELECTED_CONFIG_FILE, "r") as f:
             return json.load(f)
     return {"last_modified": "", "selected": []}
 
@@ -48,8 +51,12 @@ def save_selected_config(selected):
         selected: Dictionary containing selected server configuration data.
 
     """
-    selected["last_modified"] = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
-    atomic_handle_temp_file(selected, SELECTED_CONFIG_FILE, lambda x: True)  # Add proper validation
+    selected["last_modified"] = (
+        datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+    )
+    atomic_handle_temp_file(
+        selected, SELECTED_CONFIG_FILE, lambda x: True
+    )  # Add proper validation
 
 
 def apply_exclusions(configs, excluded_ids, debug_level):
@@ -59,7 +66,9 @@ def apply_exclusions(configs, excluded_ids, debug_level):
         server_id = generate_server_id(config)
         if server_id in excluded_ids:
             if debug_level >= 1:
-                logging.info(f"Skipping server {config.get('name', 'N/A')} (ID: {server_id}) due to exclusion.")
+                logging.info(
+                    f"Skipping server {config.get('name', 'N/A')} (ID: {server_id}) due to exclusion."
+                )
             continue
         valid_configs.append(config)
     return valid_configs

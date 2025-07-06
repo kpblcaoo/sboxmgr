@@ -1,9 +1,9 @@
 """Error handling functionality for subscription manager."""
 
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
-from ..errors import PipelineError, ErrorType
+from ..errors import ErrorType, PipelineError
 
 
 class ErrorHandler:
@@ -22,7 +22,7 @@ class ErrorHandler:
         error_type: ErrorType,
         stage: str,
         message: str,
-        context_data: Optional[Dict[str, Any]] = None
+        context_data: Optional[Dict[str, Any]] = None,
     ) -> PipelineError:
         """Create standardized pipeline error.
 
@@ -43,10 +43,12 @@ class ErrorHandler:
             stage=stage,
             message=message,
             context=context_data or {},
-            timestamp=datetime.now(timezone.utc)
+            timestamp=datetime.now(timezone.utc),
         )
 
-    def create_fetch_error(self, message: str, context_data: Optional[Dict[str, Any]] = None) -> PipelineError:
+    def create_fetch_error(
+        self, message: str, context_data: Optional[Dict[str, Any]] = None
+    ) -> PipelineError:
         """Create fetch stage error.
 
         Args:
@@ -57,13 +59,12 @@ class ErrorHandler:
             Fetch error object.
         """
         return self.create_pipeline_error(
-            ErrorType.FETCH,
-            "fetch",
-            message,
-            context_data
+            ErrorType.FETCH, "fetch", message, context_data
         )
 
-    def create_validation_error(self, stage: str, message: str, context_data: Optional[Dict[str, Any]] = None) -> PipelineError:
+    def create_validation_error(
+        self, stage: str, message: str, context_data: Optional[Dict[str, Any]] = None
+    ) -> PipelineError:
         """Create validation stage error.
 
         Args:
@@ -75,13 +76,12 @@ class ErrorHandler:
             Validation error object.
         """
         return self.create_pipeline_error(
-            ErrorType.VALIDATION,
-            stage,
-            message,
-            context_data
+            ErrorType.VALIDATION, stage, message, context_data
         )
 
-    def create_parse_error(self, message: str, context_data: Optional[Dict[str, Any]] = None) -> PipelineError:
+    def create_parse_error(
+        self, message: str, context_data: Optional[Dict[str, Any]] = None
+    ) -> PipelineError:
         """Create parse stage error.
 
         Args:
@@ -92,13 +92,12 @@ class ErrorHandler:
             Parse error object.
         """
         return self.create_pipeline_error(
-            ErrorType.PARSE,
-            "parse",
-            message,
-            context_data
+            ErrorType.PARSE, "parse", message, context_data
         )
 
-    def create_internal_error(self, stage: str, message: str, context_data: Optional[Dict[str, Any]] = None) -> PipelineError:
+    def create_internal_error(
+        self, stage: str, message: str, context_data: Optional[Dict[str, Any]] = None
+    ) -> PipelineError:
         """Create internal stage error.
 
         Args:
@@ -110,10 +109,7 @@ class ErrorHandler:
             Internal error object.
         """
         return self.create_pipeline_error(
-            ErrorType.INTERNAL,
-            stage,
-            message,
-            context_data
+            ErrorType.INTERNAL, stage, message, context_data
         )
 
     def add_error_to_context(self, context, error: PipelineError) -> None:
@@ -123,12 +119,12 @@ class ErrorHandler:
             context: Pipeline context to add error to.
             error: Error to add.
         """
-        if not hasattr(context, 'metadata'):
+        if not hasattr(context, "metadata"):
             context.metadata = {}
-        if 'errors' not in context.metadata:
-            context.metadata['errors'] = []
+        if "errors" not in context.metadata:
+            context.metadata["errors"] = []
 
-        context.metadata['errors'].append(error)
+        context.metadata["errors"].append(error)
 
     def has_errors(self, context) -> bool:
         """Check if context has any errors.
@@ -140,9 +136,9 @@ class ErrorHandler:
             True if context has errors, False otherwise.
         """
         return (
-            hasattr(context, 'metadata')
+            hasattr(context, "metadata")
             and context.metadata
-            and context.metadata.get('errors')
+            and context.metadata.get("errors")
         )
 
     def get_error_count(self, context) -> int:
@@ -156,4 +152,4 @@ class ErrorHandler:
         """
         if not self.has_errors(context):
             return 0
-        return len(context.metadata['errors'])
+        return len(context.metadata["errors"])

@@ -4,12 +4,14 @@ This module provides the LanguageLoader class for loading and managing
 localized strings from JSON files. It supports automatic language detection
 from environment variables and system locale, with fallback to English.
 """
+
 import json
-import os
-from pathlib import Path
 import locale
+import os
 import re
+from pathlib import Path
 from typing import Dict
+
 
 class LanguageLoader:
     """Language loader for internationalization support.
@@ -30,7 +32,7 @@ class LanguageLoader:
         """Initialize the language loader.
 
         Args:
-            lang: Language code to load (e.g., 'en', 'ru'). If None, 
+            lang: Language code to load (e.g., 'en', 'ru'). If None,
                   auto-detects from environment and system locale.
             base_dir: Directory containing translation files. If None,
                      uses the directory containing this module.
@@ -60,7 +62,7 @@ class LanguageLoader:
         # Load current language
         if file.exists():
             try:
-                with open(file, 'r', encoding='utf-8') as f:
+                with open(file, "r", encoding="utf-8") as f:
                     raw_translations = json.load(f)
                     self.translations = self.sanitize(raw_translations)
             except (json.JSONDecodeError, OSError):
@@ -71,7 +73,7 @@ class LanguageLoader:
         # Load English fallback
         if en_file.exists():
             try:
-                with open(en_file, 'r', encoding='utf-8') as f:
+                with open(en_file, "r", encoding="utf-8") as f:
                     raw_en = json.load(f)
                     self.en_translations = self.sanitize(raw_en)
             except (json.JSONDecodeError, OSError):
@@ -92,18 +94,19 @@ class LanguageLoader:
             Sanitized dictionary with cleaned translation values.
 
         """
+
         # Remove ANSI escape sequences completely
         def clean_value(v):
             if isinstance(v, str):
                 # Remove all ANSI escape sequences: \x1b[ followed by any characters until a letter
                 # This covers: \x1b[31m, \x1b[1;33m, \x1b(B, \x1b)P, etc.
-                cleaned = re.sub(r'\x1b\[[0-9;]*[a-zA-Z]', '', v)
+                cleaned = re.sub(r"\x1b\[[0-9;]*[a-zA-Z]", "", v)
                 # Also remove other ANSI sequences like \x1b(, \x1b), \x1bP, etc.
-                cleaned = re.sub(r'\x1b[()P]', '', cleaned)
+                cleaned = re.sub(r"\x1b[()P]", "", cleaned)
                 # Remove incomplete ANSI sequences (like \x1b[31 without ending letter)
-                cleaned = re.sub(r'\x1b\[[0-9;]*$', '', cleaned)
+                cleaned = re.sub(r"\x1b\[[0-9;]*$", "", cleaned)
                 # Remove any remaining \x1b characters
-                cleaned = re.sub(r'\x1b', '', cleaned)
+                cleaned = re.sub(r"\x1b", "", cleaned)
                 # Limit length to 500 characters
                 return cleaned[:500]
             return str(v)[:500]
@@ -139,7 +142,7 @@ class LanguageLoader:
 
         Returns:
             Tuple of (translated_string, source_language) where source_language
-            is the language code that provided the translation ('local', 'en', 
+            is the language code that provided the translation ('local', 'en',
             or 'fallback').
 
         """
@@ -213,6 +216,7 @@ class LanguageLoader:
         if config_path.exists():
             try:
                 import toml
+
                 cfg = toml.load(config_path)
                 if "default_lang" in cfg:
                     return cfg["default_lang"], "config"
@@ -224,7 +228,7 @@ class LanguageLoader:
             lang = os.environ.get(env_var)
             if lang:
                 # Извлекаем код языка из локали (например, "ru_RU.UTF-8" -> "ru")
-                lang_code = lang.split('.')[0].split('_')[0]
+                lang_code = lang.split(".")[0].split("_")[0]
                 if lang_code:
                     return lang_code, "env"
 
@@ -232,7 +236,7 @@ class LanguageLoader:
         try:
             sys_lang = locale.getdefaultlocale()[0]
             if sys_lang:
-                lang_code = sys_lang.split('_')[0]
+                lang_code = sys_lang.split("_")[0]
                 return lang_code, "locale"
         except (TypeError, AttributeError):
             pass

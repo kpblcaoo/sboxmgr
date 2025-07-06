@@ -1,7 +1,7 @@
 """Basic enrichment functionality for server data."""
 
-import time
 import hashlib
+import time
 
 from ...models import ParsedServer, PipelineContext
 
@@ -28,20 +28,20 @@ class BasicEnricher:
             Server with basic enrichment applied
         """
         # Add processing metadata
-        server.meta['enriched_at'] = time.time()
-        server.meta['trace_id'] = context.trace_id
+        server.meta["enriched_at"] = time.time()
+        server.meta["trace_id"] = context.trace_id
 
         # Add server identifier hash
         server_id = f"{server.type}://{server.address}:{server.port}"
-        server.meta['server_id'] = hashlib.sha256(server_id.encode()).hexdigest()[:8]
+        server.meta["server_id"] = hashlib.sha256(server_id.encode()).hexdigest()[:8]
 
         # Add source information
         if context.source:
-            server.meta['source'] = context.source
+            server.meta["source"] = context.source
 
         # Normalize server tag
-        if not server.tag and 'name' in server.meta:
-            server.tag = server.meta['name']
+        if not server.tag and "name" in server.meta:
+            server.tag = server.meta["name"]
         elif not server.tag:
             server.tag = f"{server.type}-{server.address}"
 

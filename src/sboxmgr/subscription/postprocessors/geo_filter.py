@@ -8,11 +8,12 @@ based on user location and preferences.
 Implements Phase 3 architecture with profile integration.
 """
 
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
+
+from ...profiles.models import FullProfile
+from ..models import ParsedServer, PipelineContext
 from ..registry import register
 from .base import ProfileAwarePostProcessor
-from ..models import ParsedServer, PipelineContext
-from ...profiles.models import FullProfile
 
 
 @register("geo_filter")
@@ -48,17 +49,17 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
 
         """
         super().__init__(config)
-        self.allowed_countries = self.config.get('allowed_countries', [])
-        self.blocked_countries = self.config.get('blocked_countries', [])
-        self.preferred_regions = self.config.get('preferred_regions', [])
-        self.max_distance_km = self.config.get('max_distance_km')
-        self.fallback_mode = self.config.get('fallback_mode', 'allow_all')
+        self.allowed_countries = self.config.get("allowed_countries", [])
+        self.blocked_countries = self.config.get("blocked_countries", [])
+        self.preferred_regions = self.config.get("preferred_regions", [])
+        self.max_distance_km = self.config.get("max_distance_km")
+        self.fallback_mode = self.config.get("fallback_mode", "allow_all")
 
     def process(
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Filter servers based on geographic criteria.
 
@@ -84,7 +85,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
                 filtered_servers.append(server)
 
         # Apply fallback logic if no servers match
-        if not filtered_servers and self.fallback_mode == 'allow_all':
+        if not filtered_servers and self.fallback_mode == "allow_all":
             return servers
 
         return filtered_servers
@@ -100,24 +101,24 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
 
         """
         geo_config = {
-            'allowed_countries': self.allowed_countries,
-            'blocked_countries': self.blocked_countries,
-            'preferred_regions': self.preferred_regions,
-            'max_distance_km': self.max_distance_km
+            "allowed_countries": self.allowed_countries,
+            "blocked_countries": self.blocked_countries,
+            "preferred_regions": self.preferred_regions,
+            "max_distance_km": self.max_distance_km,
         }
 
         if not profile:
             return geo_config
 
         # Check if profile has geographic metadata
-        if 'geo' in profile.metadata:
-            profile_geo = profile.metadata['geo']
-            if 'allowed_countries' in profile_geo:
-                geo_config['allowed_countries'] = profile_geo['allowed_countries']
-            if 'blocked_countries' in profile_geo:
-                geo_config['blocked_countries'] = profile_geo['blocked_countries']
-            if 'preferred_regions' in profile_geo:
-                geo_config['preferred_regions'] = profile_geo['preferred_regions']
+        if "geo" in profile.metadata:
+            profile_geo = profile.metadata["geo"]
+            if "allowed_countries" in profile_geo:
+                geo_config["allowed_countries"] = profile_geo["allowed_countries"]
+            if "blocked_countries" in profile_geo:
+                geo_config["blocked_countries"] = profile_geo["blocked_countries"]
+            if "preferred_regions" in profile_geo:
+                geo_config["preferred_regions"] = profile_geo["preferred_regions"]
 
         return geo_config
 
@@ -125,7 +126,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
         self,
         server: ParsedServer,
         geo_config: Dict[str, Any],
-        context: Optional[PipelineContext] = None
+        context: Optional[PipelineContext] = None,
     ) -> bool:
         """Check if server should be included based on geographic criteria.
 
@@ -143,15 +144,15 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
 
         if not country_code:
             # If no country information, apply fallback logic
-            return self.fallback_mode == 'allow_all'
+            return self.fallback_mode == "allow_all"
 
         # Check blocked countries first
-        if country_code in geo_config['blocked_countries']:
+        if country_code in geo_config["blocked_countries"]:
             return False
 
         # Check allowed countries
-        if geo_config['allowed_countries']:
-            return country_code in geo_config['allowed_countries']
+        if geo_config["allowed_countries"]:
+            return country_code in geo_config["allowed_countries"]
 
         # If no specific allowed countries, allow all except blocked
         return True
@@ -167,30 +168,32 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
 
         """
         # Check various metadata fields for country information
-        if 'country' in server.meta:
-            return server.meta['country'].upper()
+        if "country" in server.meta:
+            return server.meta["country"].upper()
 
-        if 'geo' in server.meta:
-            geo_info = server.meta['geo']
-            if isinstance(geo_info, dict) and 'country' in geo_info:
-                return geo_info['country'].upper()
+        if "geo" in server.meta:
+            geo_info = server.meta["geo"]
+            if isinstance(geo_info, dict) and "country" in geo_info:
+                return geo_info["country"].upper()
 
         # Try to extract from tag (e.g., "US-Server-1" -> "US")
         if server.tag:
-            parts = server.tag.split('-')
+            parts = server.tag.split("-")
             if len(parts) > 0 and len(parts[0]) == 2:
                 return parts[0].upper()
 
         # Try to extract from address (basic heuristic)
-        if '.' in server.address and not server.address.replace('.', '').isdigit():
+        if "." in server.address and not server.address.replace(".", "").isdigit():
             # Domain name - try to extract TLD as country hint
-            tld = server.address.split('.')[-1].upper()
+            tld = server.address.split(".")[-1].upper()
             if len(tld) == 2:
                 return tld
 
         return None
 
-    def can_process(self, servers: List[ParsedServer], context: Optional[PipelineContext] = None) -> bool:
+    def can_process(
+        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+    ) -> bool:
         """Check if geo filtering can be applied.
 
         Args:
@@ -220,11 +223,13 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
 
         """
         metadata = super().get_metadata()
-        metadata.update({
-            'allowed_countries': self.allowed_countries,
-            'blocked_countries': self.blocked_countries,
-            'preferred_regions': self.preferred_regions,
-            'max_distance_km': self.max_distance_km,
-            'fallback_mode': self.fallback_mode
-        })
+        metadata.update(
+            {
+                "allowed_countries": self.allowed_countries,
+                "blocked_countries": self.blocked_countries,
+                "preferred_regions": self.preferred_regions,
+                "max_distance_km": self.max_distance_km,
+                "fallback_mode": self.fallback_mode,
+            }
+        )
         return metadata

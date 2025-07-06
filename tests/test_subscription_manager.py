@@ -1,21 +1,31 @@
 import os
+
 import pytest
-from sboxmgr.subscription.models import SubscriptionSource, PipelineContext, PipelineResult
-from sboxmgr.subscription.manager import SubscriptionManager
-from sboxmgr.subscription.errors import PipelineError, ErrorType
+
 from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+from sboxmgr.subscription.errors import ErrorType, PipelineError
 from sboxmgr.subscription.fetchers.url_fetcher import URLFetcher
+from sboxmgr.subscription.manager import SubscriptionManager
+from sboxmgr.subscription.models import (
+    PipelineContext,
+    PipelineResult,
+    SubscriptionSource,
+)
+
 
 def test_base64_subscription(tmp_path):
-    example_path = os.path.join(os.path.dirname(__file__), '../src/sboxmgr/examples/example_base64.txt')
+    example_path = os.path.join(
+        os.path.dirname(__file__), "../src/sboxmgr/examples/example_base64.txt"
+    )
     # Проверяем что файл существует
     assert os.path.exists(example_path)
     # Эмулируем fetcher, подставляя raw напрямую (или через временный fetcher)
-    source = SubscriptionSource(url='file://' + example_path, source_type='url_base64')
+    source = SubscriptionSource(url="file://" + example_path, source_type="url_base64")
     mgr = SubscriptionManager(source)
     result = mgr.get_servers()
     assert isinstance(result, PipelineResult)
     assert result.success or result.errors  # либо успех, либо ошибки
+
 
 # Пример edge-case подписок (минимальные заглушки)
 MIXED_URI_LIST = """
@@ -27,10 +37,17 @@ ss://aes-256-gcm:pass@example.com:8388#ssuri  # pragma: allowlist secret
 
 INVALID_JSON = "{"  # Некорректный JSON
 
-@pytest.mark.parametrize("source,should_fail", [
-    (SubscriptionSource(url="file://mixed_uri_list.txt", source_type="uri_list"), False),  # uri_list парсер толерантен
-    (SubscriptionSource(url="file://invalid.json", source_type="url_json"), True),
-])
+
+@pytest.mark.parametrize(
+    "source,should_fail",
+    [
+        (
+            SubscriptionSource(url="file://mixed_uri_list.txt", source_type="uri_list"),
+            False,
+        ),  # uri_list парсер толерантен
+        (SubscriptionSource(url="file://invalid.json", source_type="url_json"), True),
+    ],
+)
 def test_subscription_manager_edge_cases(tmp_path, source, should_fail):
     # Подготовка файлов
     if source.url.endswith("mixed_uri_list.txt"):
@@ -41,7 +58,7 @@ def test_subscription_manager_edge_cases(tmp_path, source, should_fail):
         f = tmp_path / "invalid.json"
         f.write_text(INVALID_JSON)
         source.url = f"file://{f}"
-    
+
     # Для invalid.json источника ожидаем ошибку уже в конструкторе или при get_servers
     if should_fail:
         try:
@@ -62,7 +79,12 @@ def test_subscription_manager_edge_cases(tmp_path, source, should_fail):
         result = mgr.get_servers()
         assert result.success
         assert any(s.type == "ss" for s in result.config)
-        assert any("emoji" in (s.meta or {}).get("tag", "") or "🚀" in (s.meta or {}).get("tag", "") for s in result.config)
+        assert any(
+            "emoji" in (s.meta or {}).get("tag", "")
+            or "🚀" in (s.meta or {}).get("tag", "")
+            for s in result.config
+        )
+
 
 class MockRouter(BaseRoutingPlugin):
     def __init__(self):
@@ -83,19 +105,36 @@ class MockRouter(BaseRoutingPlugin):
             "servers": servers,
             "exclusions": exclusions,
             "user_routes": user_routes,
-            "context": context
+            "context": context,
         }
         return [{"test": True}]
 
+
 def test_export_config_with_test_router(tmp_path):
-    from sboxmgr.subscription.models import SubscriptionSource, PipelineResult
     from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import PipelineResult, SubscriptionSource
+
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     # Мокаем get_servers для простоты
     mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=[type('S', (), {"type": "ss", "address": "1.2.3.4", "port": 1234, "security": None, "meta": {"tag": "test"}})()],
-        context=PipelineContext(), errors=[], success=True)
+        config=[
+            type(
+                "S",
+                (),
+                {
+                    "type": "ss",
+                    "address": "1.2.3.4",
+                    "port": 1234,
+                    "security": None,
+                    "meta": {"tag": "test"},
+                },
+            )()
+        ],
+        context=PipelineContext(),
+        errors=[],
+        success=True,
+    )
     router = MockRouter()
     exclusions = ["5.6.7.8"]
     user_routes = [{"domain": ["example.com"], "outbound": "ss"}]
@@ -109,10 +148,12 @@ def test_export_config_with_test_router(tmp_path):
     assert router.last_call["user_routes"] == user_routes
     assert router.last_call["servers"][0].address == "1.2.3.4"
 
+
 def test_export_config_integration_edge_cases(tmp_path):
-    from sboxmgr.subscription.models import SubscriptionSource, PipelineResult
-    from sboxmgr.subscription.manager import SubscriptionManager
     from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+    from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import PipelineResult, SubscriptionSource
+
     # Мокаем get_servers для сложного сценария
     class S:
         def __init__(self, type, address, port, security=None, meta=None):
@@ -121,6 +162,7 @@ def test_export_config_integration_edge_cases(tmp_path):
             self.port = port
             self.security = security
             self.meta = meta or {}
+
     servers = [
         S("ss", "1.2.3.4", 1234, meta={"tag": "A"}),
         S("vmess", "5.6.7.8", 443, meta={"tag": "B"}),
@@ -129,7 +171,9 @@ def test_export_config_integration_edge_cases(tmp_path):
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True)
+        config=servers, context=PipelineContext(), errors=[], success=True
+    )
+
     class MockRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (edge-case).
@@ -146,10 +190,13 @@ def test_export_config_integration_edge_cases(tmp_path):
             assert user_routes[0]["domain"] == ["example.com"]
             assert context.mode == "geo"
             return [{"outbound": s.type, "tag": s.meta.get("tag", "")} for s in servers]
+
     exclusions = ["5.6.7.8"]
     user_routes = [{"domain": ["example.com"], "outbound": "ss"}]
     context = PipelineContext(mode="geo")
-    result = mgr.export_config(exclusions, user_routes, context, routing_plugin=MockRouter())
+    result = mgr.export_config(
+        exclusions, user_routes, context, routing_plugin=MockRouter()
+    )
     assert result.success
     config = result.config
     # Фильтруем только outbounds с полем server (исключаем direct)
@@ -158,10 +205,12 @@ def test_export_config_integration_edge_cases(tmp_path):
     route_tags = [r["tag"] for r in config["route"]["rules"]]
     assert set(route_tags) == {"A", "C"}
 
+
 def test_export_config_unicode_emoji(tmp_path):
-    from sboxmgr.subscription.models import SubscriptionSource
-    from sboxmgr.subscription.manager import SubscriptionManager
     from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+    from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import SubscriptionSource
+
     class S:
         def __init__(self, type, address, port, security=None, meta=None):
             self.type = type
@@ -169,6 +218,7 @@ def test_export_config_unicode_emoji(tmp_path):
             self.port = port
             self.security = security
             self.meta = meta or {}
+
     servers = [
         S("ss", "1.2.3.4", 1234, meta={"tag": "🚀Rocket"}),
         S("vmess", "emoji.com", 443, meta={"tag": "🌐Web"}),
@@ -176,7 +226,9 @@ def test_export_config_unicode_emoji(tmp_path):
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True)
+        config=servers, context=PipelineContext(), errors=[], success=True
+    )
+
     class MockRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (unicode/emoji).
@@ -190,14 +242,19 @@ def test_export_config_unicode_emoji(tmp_path):
                 list: Маршруты.
             """
             return [{"outbound": s.type, "tag": s.meta.get("tag", "")} for s in servers]
-    config = mgr.export_config([], [], PipelineContext(mode="default"), routing_plugin=MockRouter())
+
+    config = mgr.export_config(
+        [], [], PipelineContext(mode="default"), routing_plugin=MockRouter()
+    )
     tags = [r["tag"] for r in config.config["route"]["rules"]]
     assert "🚀Rocket" in tags and "🌐Web" in tags
 
+
 def test_export_config_large_server_list(tmp_path):
-    from sboxmgr.subscription.models import SubscriptionSource
-    from sboxmgr.subscription.manager import SubscriptionManager
     from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+    from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import SubscriptionSource
+
     class S:
         def __init__(self, type, address, port, security=None, meta=None):
             self.type = type
@@ -205,11 +262,22 @@ def test_export_config_large_server_list(tmp_path):
             self.port = port
             self.security = security
             self.meta = meta or {}
-    servers = [S("ss", f"10.0.0.{i}", 1000+i, meta={"method": "aes-256-gcm", "cipher": "aes-256-gcm"}) for i in range(1000)]
+
+    servers = [
+        S(
+            "ss",
+            f"10.0.0.{i}",
+            1000 + i,
+            meta={"method": "aes-256-gcm", "cipher": "aes-256-gcm"},
+        )
+        for i in range(1000)
+    ]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True)
+        config=servers, context=PipelineContext(), errors=[], success=True
+    )
+
     class TestRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (большой список).
@@ -223,19 +291,26 @@ def test_export_config_large_server_list(tmp_path):
                 list: Маршруты.
             """
             return [{"outbound": s.type, "tag": s.address} for s in servers]
-    config = mgr.export_config([], [], PipelineContext(mode="default"), routing_plugin=TestRouter())
+
+    config = mgr.export_config(
+        [], [], PipelineContext(mode="default"), routing_plugin=TestRouter()
+    )
     # 1000 серверов + 3 служебных outbound (direct, block, dns) = 1003
     assert len(config.config["outbounds"]) == 1003
     assert len(config.config["route"]["rules"]) == 1000
 
+
 def test_export_config_invalid_inputs(tmp_path):
-    from sboxmgr.subscription.models import SubscriptionSource
-    from sboxmgr.subscription.manager import SubscriptionManager
     from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+    from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import SubscriptionSource
+
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=[], context=PipelineContext(), errors=[], success=True)
+        config=[], context=PipelineContext(), errors=[], success=True
+    )
+
     class TestRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (пустые inputs).
@@ -249,6 +324,7 @@ def test_export_config_invalid_inputs(tmp_path):
                 list: Маршруты.
             """
             return []
+
     config = mgr.export_config(None, None, None, routing_plugin=TestRouter())
     outbounds = config.config["outbounds"]
     assert len(outbounds) == 3
@@ -257,10 +333,12 @@ def test_export_config_invalid_inputs(tmp_path):
     assert {"type": "dns", "tag": "dns-out"} in outbounds
     assert config.config["route"]["rules"] == []
 
+
 def test_export_config_same_tag_different_types(tmp_path):
-    from sboxmgr.subscription.models import SubscriptionSource
-    from sboxmgr.subscription.manager import SubscriptionManager
     from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+    from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import SubscriptionSource
+
     class S:
         def __init__(self, type, address, port, security=None, meta=None):
             self.type = type
@@ -268,6 +346,7 @@ def test_export_config_same_tag_different_types(tmp_path):
             self.port = port
             self.security = security
             self.meta = meta or {}
+
     servers = [
         S("ss", "1.2.3.4", 1234, meta={"tag": "DUP"}),
         S("vmess", "5.6.7.8", 443, meta={"tag": "DUP"}),
@@ -275,7 +354,9 @@ def test_export_config_same_tag_different_types(tmp_path):
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True)
+        config=servers, context=PipelineContext(), errors=[], success=True
+    )
+
     class TagRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (одинаковые теги).
@@ -288,15 +369,22 @@ def test_export_config_same_tag_different_types(tmp_path):
             Returns:
                 list: Маршруты.
             """
-            return [{"outbound": s.type, "tag": s.meta.get("tag", "") } for s in servers]
-    config = mgr.export_config([], [], PipelineContext(mode="default"), routing_plugin=TagRouter())
-    types = [r["outbound"] for r in config.config["route"]["rules"] if r["tag"] == "DUP"]
+            return [{"outbound": s.type, "tag": s.meta.get("tag", "")} for s in servers]
+
+    config = mgr.export_config(
+        [], [], PipelineContext(mode="default"), routing_plugin=TagRouter()
+    )
+    types = [
+        r["outbound"] for r in config.config["route"]["rules"] if r["tag"] == "DUP"
+    ]
     assert set(types) == {"ss", "vmess"}
 
+
 def test_export_config_user_routes_vs_exclusions(tmp_path):
-    from sboxmgr.subscription.models import SubscriptionSource
-    from sboxmgr.subscription.manager import SubscriptionManager
     from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+    from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import SubscriptionSource
+
     class S:
         def __init__(self, type, address, port, security=None, meta=None):
             self.type = type
@@ -304,11 +392,14 @@ def test_export_config_user_routes_vs_exclusions(tmp_path):
             self.port = port
             self.security = security
             self.meta = meta or {}
+
     servers = [S("ss", "1.2.3.4", 1234, meta={"tag": "A"})]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True)
+        config=servers, context=PipelineContext(), errors=[], success=True
+    )
+
     class ConflictRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (exclusions vs user_routes).
@@ -323,10 +414,16 @@ def test_export_config_user_routes_vs_exclusions(tmp_path):
             """
             if not servers:
                 return []
-            return [{"outbound": s.type, "tag": s.meta.get("tag", "") } for s in servers]
+            return [{"outbound": s.type, "tag": s.meta.get("tag", "")} for s in servers]
+
     exclusions = ["1.2.3.4"]
     user_routes = [{"domain": ["example.com"], "outbound": "ss"}]
-    config = mgr.export_config(exclusions, user_routes, PipelineContext(mode="default"), routing_plugin=ConflictRouter())
+    config = mgr.export_config(
+        exclusions,
+        user_routes,
+        PipelineContext(mode="default"),
+        routing_plugin=ConflictRouter(),
+    )
     # Сервер исключен, остаются только служебные outbounds
     outbounds = config.config["outbounds"]
     assert len(outbounds) == 3
@@ -334,10 +431,12 @@ def test_export_config_user_routes_vs_exclusions(tmp_path):
     assert {"type": "block", "tag": "block"} in outbounds
     assert {"type": "dns", "tag": "dns-out"} in outbounds
 
+
 def test_export_config_user_routes_wildcard_not_implemented(tmp_path):
-    from sboxmgr.subscription.models import SubscriptionSource
-    from sboxmgr.subscription.manager import SubscriptionManager
     from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+    from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import SubscriptionSource
+
     class S:
         def __init__(self, type, address, port, security=None, meta=None):
             self.type = type
@@ -345,11 +444,14 @@ def test_export_config_user_routes_wildcard_not_implemented(tmp_path):
             self.port = port
             self.security = security
             self.meta = meta or {}
+
     servers = [S("ss", "1.2.3.4", 1234)]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True)
+        config=servers, context=PipelineContext(), errors=[], success=True
+    )
+
     class WildcardRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (wildcard).
@@ -364,12 +466,20 @@ def test_export_config_user_routes_wildcard_not_implemented(tmp_path):
             """
             for route in user_routes:
                 if route.get("domain") == ["*"]:
-                    raise NotImplementedError("Wildcard domain override not supported yet")
+                    raise NotImplementedError(
+                        "Wildcard domain override not supported yet"
+                    )
             return []
+
     user_routes = [{"domain": ["*"], "outbound": "ss"}]
     try:
         # Передаем серверы, чтобы WildcardRouter был вызван
-        mgr.export_config([], user_routes, PipelineContext(mode="default"), routing_plugin=WildcardRouter())
+        mgr.export_config(
+            [],
+            user_routes,
+            PipelineContext(mode="default"),
+            routing_plugin=WildcardRouter(),
+        )
     except NotImplementedError as e:
         assert "Wildcard domain override not supported yet" in str(e)
     else:
@@ -377,10 +487,12 @@ def test_export_config_user_routes_wildcard_not_implemented(tmp_path):
         # Это корректное поведение - проверяем, что config создан успешно
         pass
 
+
 def test_export_config_unsupported_mode(tmp_path):
-    from sboxmgr.subscription.models import SubscriptionSource
-    from sboxmgr.subscription.manager import SubscriptionManager
     from sboxmgr.export.routing.base_router import BaseRoutingPlugin
+    from sboxmgr.subscription.manager import SubscriptionManager
+    from sboxmgr.subscription.models import SubscriptionSource
+
     class S:
         def __init__(self, type, address, port, security=None, meta=None):
             self.type = type
@@ -388,11 +500,14 @@ def test_export_config_unsupported_mode(tmp_path):
             self.port = port
             self.security = security
             self.meta = meta or {}
+
     servers = [S("ss", "1.2.3.4", 1234)]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True)
+        config=servers, context=PipelineContext(), errors=[], success=True
+    )
+
     class ModeRouter(BaseRoutingPlugin):
         def generate_routes(self, servers, exclusions, user_routes, context=None):
             """Генерирует маршруты для теста (unsupported mode).
@@ -408,8 +523,11 @@ def test_export_config_unsupported_mode(tmp_path):
             if context and getattr(context, "mode", None) not in ("default", "geo"):
                 raise ValueError(f"Unsupported mode: {getattr(context, 'mode', None)}")
             return []
+
     try:
-        mgr.export_config([], [], PipelineContext(mode="unknown_mode"), routing_plugin=ModeRouter())
+        mgr.export_config(
+            [], [], PipelineContext(mode="unknown_mode"), routing_plugin=ModeRouter()
+        )
     except ValueError as e:
         assert "Unsupported mode" in str(e)
     else:
@@ -417,48 +535,74 @@ def test_export_config_unsupported_mode(tmp_path):
         # Это корректное поведение
         pass
 
+
 def test_pipeline_context_and_error_reporter_tolerant():
     # Некорректный source_type вызовет ошибку в конструкторе SubscriptionManager
-    source = SubscriptionSource(url='file://dummy', source_type='unknown_type')
+    source = SubscriptionSource(url="file://dummy", source_type="unknown_type")
     try:
         mgr = SubscriptionManager(source)
         # Если дошли сюда, значит ошибка не выбросилась в конструкторе
-        context = PipelineContext(mode='tolerant')
+        context = PipelineContext(mode="tolerant")
         result = mgr.get_servers(context=context)
         assert not result.success
-        assert any(isinstance(e, PipelineError) and e.type == ErrorType.PARSE for e in result.errors)
+        assert any(
+            isinstance(e, PipelineError) and e.type == ErrorType.PARSE
+            for e in result.errors
+        )
     except ValueError as e:
         # Ожидаемое поведение - ошибка в конструкторе
         assert "Unknown source_type" in str(e)
+
 
 def test_pipeline_context_and_error_reporter_strict():
     # Некорректный source_type вызовет ошибку в конструкторе SubscriptionManager
-    source = SubscriptionSource(url='file://dummy', source_type='unknown_type')
+    source = SubscriptionSource(url="file://dummy", source_type="unknown_type")
     try:
         mgr = SubscriptionManager(source)
         # Если дошли сюда, значит ошибка не выбросилась в конструкторе
-        context = PipelineContext(mode='strict')
+        context = PipelineContext(mode="strict")
         result = mgr.get_servers(context=context)
         assert not result.success
-        assert any(isinstance(e, PipelineError) and e.type == ErrorType.PARSE for e in result.errors)
+        assert any(
+            isinstance(e, PipelineError) and e.type == ErrorType.PARSE
+            for e in result.errors
+        )
     except ValueError as e:
         # Ожидаемое поведение - ошибка в конструкторе
         assert "Unknown source_type" in str(e)
 
+
 def test_subscription_manager_caching(monkeypatch):
-    from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
     from sboxmgr.subscription.manager import SubscriptionManager
-    calls = {'count': 0}  # Инициализация счетчика
+    from sboxmgr.subscription.models import PipelineContext, SubscriptionSource
+
+    calls = {"count": 0}  # Инициализация счетчика
+
     class DummyFetcher:
         def __init__(self, source):
             self.source = source
+
         def fetch(self, force_reload=False):
-            calls['count'] += 1  # Прямое инкрементирование
-            return b'data'
-    servers = [type('S', (), {"type": "ss", "address": "1.2.3.4", "port": 443, "meta": {"method": "aes-256-gcm"}})()]
+            calls["count"] += 1  # Прямое инкрементирование
+            return b"data"
+
+    servers = [
+        type(
+            "S",
+            (),
+            {
+                "type": "ss",
+                "address": "1.2.3.4",
+                "port": 443,
+                "meta": {"method": "aes-256-gcm"},
+            },
+        )()
+    ]
+
     class DummyParser:
         def parse(self, raw):
             return servers
+
     src = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(src)
     mgr.fetcher = DummyFetcher(src)
@@ -469,55 +613,65 @@ def test_subscription_manager_caching(monkeypatch):
     # Первый вызов — fetch вызывается
     result1 = mgr.get_servers(context=context)
     assert result1.success
-    assert calls['count'] == 1
+    assert calls["count"] == 1
     # Второй вызов с теми же параметрами — кеш
     result2 = mgr.get_servers(context=context)
     assert result2.success
-    assert calls['count'] == 1
+    assert calls["count"] == 1
     # Сброс кеша
     result3 = mgr.get_servers(context=context, force_reload=True)
     assert result3.success
-    assert calls['count'] == 2
+    assert calls["count"] == 2
     # Разные параметры — разный кеш
     context2 = PipelineContext()
     context2.tag_filters = ["A"]
     result4 = mgr.get_servers(context=context2)
     assert result4.success
-    assert calls['count'] == 3
+    assert calls["count"] == 3
+
 
 def test_fetcher_caching(monkeypatch):
     from sboxmgr.subscription.models import SubscriptionSource
+
     calls = {}
+
     class DummyRequests:
-        def get(self, url, headers=None, stream=None, timeout=None):  # добавляем timeout параметр
+        def get(
+            self, url, headers=None, stream=None, timeout=None
+        ):  # добавляем timeout параметр
             class Resp:
-                def raise_for_status(self): pass
+                def raise_for_status(self):
+                    pass
+
                 @property
                 def raw(self):
                     class Raw:
                         def read(self, n):
-                            calls['count'] = calls.get('count', 0) + 1
-                            return b'data'
+                            calls["count"] = calls.get("count", 0) + 1
+                            return b"data"
+
                     return Raw()
+
             return Resp()
+
     monkeypatch.setattr("requests.get", DummyRequests().get)
     src = SubscriptionSource(url="http://test", source_type="url_base64")
     fetcher = URLFetcher(src)
     # Первый вызов — реальный fetch
     data1 = fetcher.fetch()
-    assert data1 == b'data'
-    assert calls['count'] == 1
+    assert data1 == b"data"
+    assert calls["count"] == 1
     # Второй вызов — кеш
     data2 = fetcher.fetch()
-    assert data2 == b'data'
-    assert calls['count'] == 1
+    assert data2 == b"data"
+    assert calls["count"] == 1
     # Сброс кеша
     data3 = fetcher.fetch(force_reload=True)
-    assert data3 == b'data'
-    assert calls['count'] == 2
+    assert data3 == b"data"
+    assert calls["count"] == 2
     # Разные параметры — разный кеш
     fetcher2 = URLFetcher(src)
     fetcher2.source.user_agent = "UA2"
     data4 = fetcher2.fetch()
-    assert data4 == b'data'
-    assert calls['count'] == 3 
+    assert data4 == b"data"
+    assert calls["count"] == 3

@@ -276,4 +276,4 @@ This security audit checklist provides a comprehensive framework for assessing a
 2. Establish regular security assessment schedules
 3. Implement automated security monitoring
 4. Develop security incident response procedures
-5. Create security awareness training programs 
+5. Create security awareness training programs

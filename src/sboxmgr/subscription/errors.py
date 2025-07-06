@@ -6,10 +6,12 @@ export errors. These exceptions provide structured error information for
 better error handling and debugging throughout the subscription pipeline.
 """
 
-from enum import Enum
 from datetime import datetime, timezone
-from typing import Dict, Any
-from pydantic import BaseModel, Field, ConfigDict
+from enum import Enum
+from typing import Any, Dict
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class ErrorType(Enum):
     """Enumeration of pipeline error types.
@@ -23,6 +25,7 @@ class ErrorType(Enum):
     PARSE = "parse"
     PLUGIN = "plugin"
     INTERNAL = "internal"
+
 
 class PipelineError(BaseModel):
     """Represents an error that occurred during pipeline execution.
@@ -39,7 +42,7 @@ class PipelineError(BaseModel):
 
     """
 
-    model_config = ConfigDict(extra='allow')
+    model_config = ConfigDict(extra="allow")
 
     type: ErrorType
     stage: str

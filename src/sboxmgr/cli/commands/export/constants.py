@@ -1,87 +1,54 @@
 """Constants for export command validation and configuration."""
 
 # Allowed postprocessor types
-ALLOWED_POSTPROCESSORS = [
-    'geo_filter',
-    'tag_filter',
-    'latency_sort'
-]
+ALLOWED_POSTPROCESSORS = ["geo_filter", "tag_filter", "latency_sort"]
 
 # Allowed middleware types
-ALLOWED_MIDDLEWARE = [
-    'logging',
-    'enrichment'
-]
+ALLOWED_MIDDLEWARE = ["logging", "enrichment"]
 
 # Valid final route values
-VALID_FINAL_ROUTES = [
-    'auto',
-    'direct',
-    'block',
-    'proxy',
-    'dns'
-]
+VALID_FINAL_ROUTES = ["auto", "direct", "block", "proxy", "dns"]
 
 # Valid outbound types for exclusion
 VALID_OUTBOUND_TYPES = [
     # Basic outbound types
-    'direct',
-    'block',
-    'dns',
-    'proxy',
-    'urltest',
-    'selector',
+    "direct",
+    "block",
+    "dns",
+    "proxy",
+    "urltest",
+    "selector",
     # Supported protocol types
-    'vmess',
-    'vless',
-    'trojan',
-    'shadowsocks',
-    'ss',
-    'hysteria2',
-    'wireguard',
-    'tuic',
-    'shadowtls',
-    'anytls',
-    'tor',
-    'ssh',
-    'http',
-    'socks'
+    "vmess",
+    "vless",
+    "trojan",
+    "shadowsocks",
+    "ss",
+    "hysteria2",
+    "wireguard",
+    "tuic",
+    "shadowtls",
+    "anytls",
+    "tor",
+    "ssh",
+    "http",
+    "socks",
 ]
 
 # Valid inbound types
-VALID_INBOUND_TYPES = [
-    'tun',
-    'socks',
-    'http',
-    'tproxy'
-]
+VALID_INBOUND_TYPES = ["tun", "socks", "http", "tproxy"]
 
 # Valid TUN stack types
-VALID_TUN_STACKS = [
-    'system',
-    'gvisor',
-    'mixed'
-]
+VALID_TUN_STACKS = ["system", "gvisor", "mixed"]
 
 # Valid DNS modes
-VALID_DNS_MODES = [
-    'system',
-    'tunnel',
-    'off'
-]
+VALID_DNS_MODES = ["system", "tunnel", "off"]
 
 # Output format types
-VALID_OUTPUT_FORMATS = [
-    'json',
-    'toml',
-    'auto'
-]
+VALID_OUTPUT_FORMATS = ["json", "toml", "auto"]
 
 # Export format types
-VALID_EXPORT_FORMATS = [
-    'singbox',
-    'clash'
-]
+VALID_EXPORT_FORMATS = ["singbox", "clash"]
 
 # Default values
 DEFAULT_TUN_ADDRESS = "198.18.0.1/16"

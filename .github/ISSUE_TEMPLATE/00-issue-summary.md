@@ -9,7 +9,7 @@ This repository contains a series of professional GitHub issues for the sboxmgr 
 2. **🔒 Security Framework Implementation** (#02) - Comprehensive security with 30+ measures
 3. **🎯 ExclusionManager v2 Enhancement** (#03) - Enhanced exclusion management with DI
 
-### Developer Experience Issues  
+### Developer Experience Issues
 4. **🛠️ Developer Experience & Automation Tools** (#04) - Plugin development and automation
 5. **🎨 CLI/UX Improvements & i18n** (#05) - Modern CLI with internationalization
 6. **🚀 Performance Optimization & Caching** (#06) - System-wide performance improvements
@@ -108,6 +108,6 @@ This repository contains a series of professional GitHub issues for the sboxmgr 
 
 ---
 
-**License**: Apache License 2.0  
-**Maintainer**: kpblc  
+**License**: Apache License 2.0
+**Maintainer**: kpblc
 **Project**: sboxmgr (sing-box manager)

@@ -11,9 +11,9 @@ import typer
 import yaml
 from pydantic import ValidationError
 
-from ...config.models import AppConfig
-from ...config.loader import load_config
 from ...config.detection import get_environment_info
+from ...config.loader import load_config
+from ...config.models import AppConfig
 
 # Create Typer app for config commands
 config_app = typer.Typer(name="config", help="Configuration management commands")
@@ -24,23 +24,17 @@ def dump_config(
     format: str = typer.Option(
         "yaml",
         "--format",
-        help="Output format for configuration dump (yaml, json, env)"
+        help="Output format for configuration dump (yaml, json, env)",
     ),
     include_defaults: bool = typer.Option(
-        False,
-        "--include-defaults",
-        help="Include default values in output"
+        False, "--include-defaults", help="Include default values in output"
     ),
     include_env_info: bool = typer.Option(
-        False,
-        "--include-env-info",
-        help="Include environment detection information"
+        False, "--include-env-info", help="Include environment detection information"
     ),
     config_file: Optional[str] = typer.Option(
-        None,
-        "--config-file",
-        help="Configuration file to load"
-    )
+        None, "--config-file", help="Configuration file to load"
+    ),
 ):
     """Dump resolved configuration in specified format.
 
@@ -76,26 +70,18 @@ def dump_config(
             "config_file": config.config_file,
             "service_mode": config.service.service_mode,
             "container_mode": config.container_mode,
-            "format_version": "1.0"
+            "format_version": "1.0",
         }
 
         # Output in requested format
         if format == "yaml":
             yaml_output = yaml.dump(
-                config_data,
-                default_flow_style=False,
-                sort_keys=True,
-                indent=2
+                config_data, default_flow_style=False, sort_keys=True, indent=2
             )
             typer.echo(yaml_output)
 
         elif format == "json":
-            json_output = json.dumps(
-                config_data,
-                indent=2,
-                sort_keys=True,
-                default=str
-            )
+            json_output = json.dumps(config_data, indent=2, sort_keys=True, default=str)
             typer.echo(json_output)
 
         elif format == "env":
@@ -125,7 +111,7 @@ def dump_config(
 
 @config_app.command(name="validate")
 def validate_config(
-    config_file: str = typer.Argument(..., help="Configuration file to validate")
+    config_file: str = typer.Argument(..., help="Configuration file to validate"),
 ):
     """Validate configuration file syntax and values.
 
@@ -161,10 +147,8 @@ def validate_config(
 @config_app.command(name="schema")
 def generate_schema(
     output: Optional[str] = typer.Option(
-        None,
-        "--output",
-        help="Output file for JSON schema (default: stdout)"
-    )
+        None, "--output", help="Output file for JSON schema (default: stdout)"
+    ),
 ):
     """Generate JSON schema for configuration validation.
 
@@ -180,7 +164,7 @@ def generate_schema(
         schema_json = json.dumps(schema, indent=2, sort_keys=True)
 
         if output:
-            with open(output, 'w') as f:
+            with open(output, "w") as f:
                 f.write(schema_json)
             typer.echo(f"✅ JSON schema written to {output}")
         else:
@@ -212,11 +196,15 @@ def environment_info():
         typer.echo(f"Service Mode: {service_mode}")
 
         # Container detection
-        container = "✅ Detected" if env_info["container_environment"] else "❌ Not detected"
+        container = (
+            "✅ Detected" if env_info["container_environment"] else "❌ Not detected"
+        )
         typer.echo(f"Container Environment: {container}")
 
         # Systemd detection
-        systemd = "✅ Available" if env_info["systemd_environment"] else "❌ Not available"
+        systemd = (
+            "✅ Available" if env_info["systemd_environment"] else "❌ Not available"
+        )
         typer.echo(f"Systemd Environment: {systemd}")
 
         # Development detection

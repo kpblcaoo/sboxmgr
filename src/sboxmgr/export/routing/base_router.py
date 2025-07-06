@@ -4,8 +4,10 @@ This module defines the abstract base class for routing plugins that generate
 routing rules for different VPN clients. Routing plugins transform server
 lists and user preferences into client-specific routing configurations.
 """
+
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 
 class BaseRoutingPlugin(ABC):
     """Abstract base class for routing rule generators.
@@ -22,7 +24,7 @@ class BaseRoutingPlugin(ABC):
         servers: List[Any],  # ParsedServer
         exclusions: List[str],
         user_routes: List[Dict],
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
     ) -> List[Dict]:
         """Generate routing rules for the given servers and configuration.
 

@@ -4,9 +4,11 @@ This module provides outbound configuration models for sing-box export format
 including all supported protocols and their specific configurations.
 """
 
+from typing import Any, Dict, List, Literal, Optional, Union
+
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any, Literal, Union
-from .common import TlsConfig, MultiplexConfig
+
+from .common import MultiplexConfig, TlsConfig
 
 
 # Base Outbound Model
@@ -18,7 +20,9 @@ class OutboundBase(BaseModel):
     server: Optional[str] = Field(None, description="Server address")
     server_port: Optional[int] = Field(None, ge=1, le=65535, description="Server port")
     tls: Optional[TlsConfig] = Field(None, description="TLS configuration")
-    multiplex: Optional[MultiplexConfig] = Field(None, description="Multiplexing configuration")
+    multiplex: Optional[MultiplexConfig] = Field(
+        None, description="Multiplexing configuration"
+    )
     local_address: Optional[List[str]] = Field(None, description="Local address list")
 
     class Config:
@@ -41,8 +45,12 @@ class VmessOutbound(OutboundBase):
 
     type: Literal["vmess"] = "vmess"
     uuid: str = Field(..., description="User UUID")
-    security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = Field("auto", description="Encryption method")
-    packet_encoding: Optional[Literal["packet", "xudp"]] = Field(None, description="Packet encoding method")
+    security: Optional[
+        Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]
+    ] = Field("auto", description="Encryption method")
+    packet_encoding: Optional[Literal["packet", "xudp"]] = Field(
+        None, description="Packet encoding method"
+    )
 
 
 class VlessOutbound(OutboundBase):
@@ -50,8 +58,12 @@ class VlessOutbound(OutboundBase):
 
     type: Literal["vless"] = "vless"
     uuid: str = Field(..., description="User UUID")
-    flow: Optional[Literal["xtls-rprx-vision", "xtls-rprx-direct"]] = Field(None, description="Flow type for XTLS")
-    packet_encoding: Optional[Literal["packet", "xudp"]] = Field(None, description="Packet encoding method")
+    flow: Optional[Literal["xtls-rprx-vision", "xtls-rprx-direct"]] = Field(
+        None, description="Flow type for XTLS"
+    )
+    packet_encoding: Optional[Literal["packet", "xudp"]] = Field(
+        None, description="Packet encoding method"
+    )
 
 
 class TrojanOutbound(OutboundBase):
@@ -59,7 +71,9 @@ class TrojanOutbound(OutboundBase):
 
     type: Literal["trojan"] = "trojan"
     password: str = Field(..., description="Authentication password")
-    fallback: Optional[Dict[str, Any]] = Field(None, description="Fallback configuration")
+    fallback: Optional[Dict[str, Any]] = Field(
+        None, description="Fallback configuration"
+    )
 
 
 class WireguardOutbound(OutboundBase):
@@ -90,8 +104,12 @@ class TuicOutbound(OutboundBase):
     type: Literal["tuic"] = "tuic"
     uuid: str = Field(..., description="User UUID")
     password: str = Field(..., description="Authentication password")
-    congestion_control: Optional[Literal["bbr", "cubic", "new_reno"]] = Field(None, description="Congestion control algorithm")
-    zero_rtt_handshake: Optional[bool] = Field(None, description="Enable zero-RTT handshake")
+    congestion_control: Optional[Literal["bbr", "cubic", "new_reno"]] = Field(
+        None, description="Congestion control algorithm"
+    )
+    zero_rtt_handshake: Optional[bool] = Field(
+        None, description="Enable zero-RTT handshake"
+    )
 
 
 class HttpOutbound(OutboundBase):
@@ -107,7 +125,9 @@ class SocksOutbound(OutboundBase):
     """SOCKS outbound configuration for sing-box."""
 
     type: Literal["socks"] = "socks"
-    version: Optional[Literal["4", "4a", "5"]] = Field(None, description="SOCKS version")
+    version: Optional[Literal["4", "4a", "5"]] = Field(
+        None, description="SOCKS version"
+    )
     username: Optional[str] = Field(None, description="SOCKS username")
     password: Optional[str] = Field(None, description="SOCKS password")
 
@@ -117,7 +137,9 @@ class DirectOutbound(OutboundBase):
 
     type: Literal["direct"] = "direct"
     override_address: Optional[str] = Field(None, description="Override address")
-    override_port: Optional[int] = Field(None, ge=0, le=65535, description="Override port")
+    override_port: Optional[int] = Field(
+        None, ge=0, le=65535, description="Override port"
+    )
 
 
 class BlockOutbound(OutboundBase):
@@ -145,7 +167,7 @@ OutboundModel = Union[
     SocksOutbound,
     DirectOutbound,
     BlockOutbound,
-    DnsOutbound
+    DnsOutbound,
 ]
 
 

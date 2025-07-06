@@ -1,10 +1,11 @@
 """Legacy functions for sing-box exporter (deprecated)."""
 
 import warnings
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
-from sboxmgr.subscription.models import ParsedServer, ClientProfile
-from .core import process_single_server, create_urltest_outbound
+from sboxmgr.subscription.models import ClientProfile, ParsedServer
+
+from .core import create_urltest_outbound, process_single_server
 from .inbound_generator import generate_inbounds
 
 
@@ -15,22 +16,13 @@ def add_special_outbounds(outbounds: List[Dict[str, Any]]) -> None:
         outbounds: List of outbounds to modify.
     """
     # Add direct outbound
-    outbounds.append({
-        "type": "direct",
-        "tag": "direct"
-    })
+    outbounds.append({"type": "direct", "tag": "direct"})
 
     # Add block outbound
-    outbounds.append({
-        "type": "block",
-        "tag": "block"
-    })
+    outbounds.append({"type": "block", "tag": "block"})
 
     # Add DNS outbound
-    outbounds.append({
-        "type": "dns",
-        "tag": "dns"
-    })
+    outbounds.append({"type": "dns", "tag": "dns"})
 
 
 def create_enhanced_routing_rules() -> List[Dict[str, Any]]:
@@ -40,34 +32,20 @@ def create_enhanced_routing_rules() -> List[Dict[str, Any]]:
         List of routing rules.
     """
     return [
+        {"protocol": "dns", "outbound": "dns"},
         {
-            "protocol": "dns",
-            "outbound": "dns"
+            "ip_cidr": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8"],
+            "outbound": "direct",
         },
-        {
-            "ip_cidr": [
-                "10.0.0.0/8",
-                "172.16.0.0/12",
-                "192.168.0.0/16",
-                "127.0.0.0/8"
-            ],
-            "outbound": "direct"
-        },
-        {
-            "rule_set": ["geoip-ru"],
-            "outbound": "direct"
-        },
-        {
-            "rule_set": ["geosite-ads"],
-            "outbound": "block"
-        }
+        {"rule_set": ["geoip-ru"], "outbound": "direct"},
+        {"rule_set": ["geosite-ads"], "outbound": "block"},
     ]
 
 
 def singbox_export_legacy(
     servers: List[ParsedServer],
     routes: Optional[List[Dict[str, Any]]] = None,
-    client_profile: Optional[ClientProfile] = None
+    client_profile: Optional[ClientProfile] = None,
 ) -> Dict[str, Any]:
     """Export parsed servers to sing-box configuration format (legacy approach).
 
@@ -86,7 +64,7 @@ def singbox_export_legacy(
     warnings.warn(
         "singbox_export_legacy() is deprecated. Use singbox_export() for modern sing-box 1.11.0 compatibility.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
 
     outbounds = []
@@ -124,16 +102,12 @@ def singbox_export_legacy(
                     "type": "remote",
                     "format": "binary",
                     "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-ru.srs",
-                    "download_detour": "direct"
+                    "download_detour": "direct",
                 }
             ],
-            "final": "auto" if proxy_tags else "direct"
+            "final": "auto" if proxy_tags else "direct",
         },
-        "experimental": {
-            "cache_file": {
-                "enabled": True
-            }
-        }
+        "experimental": {"cache_file": {"enabled": True}},
     }
 
     # Add inbounds if client profile provided

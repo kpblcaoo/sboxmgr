@@ -4,7 +4,9 @@ This module provides convenient functions for accessing translations without
 directly instantiating LanguageLoader. It includes caching mechanisms to
 avoid repeated language file loading.
 """
+
 from .loader import LanguageLoader
+
 
 def current_lang() -> LanguageLoader:
     """Get cached instance of the current language loader.
@@ -14,6 +16,7 @@ def current_lang() -> LanguageLoader:
 
     """
     return LanguageLoader()
+
 
 def t(key: str) -> str:
     """Get translated string for the given key.

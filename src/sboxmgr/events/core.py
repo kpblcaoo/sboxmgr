@@ -2,18 +2,20 @@
 
 import asyncio
 import threading
-from typing import Any, List, Optional
-from datetime import datetime
-from pydantic import BaseModel, Field, ConfigDict
 from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Any, List, Optional
 
-from .types import EventType, EventPriority, EventData, EventPayload
+from pydantic import BaseModel, ConfigDict, Field
+
+from .types import EventData, EventPayload, EventPriority, EventType
 
 
 def _get_logger():
     """Get logger lazily to avoid initialization issues."""
     try:
         from ..logging import get_logger
+
         return get_logger(__name__)
     except Exception:
         # Fallback to print for tests
@@ -24,6 +26,7 @@ def _get_trace_id():
     """Get trace ID lazily to avoid initialization issues."""
     try:
         from ..logging.trace import get_trace_id
+
         return get_trace_id()
     except Exception:
         return None
@@ -80,7 +83,7 @@ class Event(BaseModel):
     for event processing, including cancellation and result tracking.
     """
 
-    model_config = ConfigDict(extra='allow', arbitrary_types_allowed=True)
+    model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
 
     data: EventData
     cancelled: bool = False
@@ -187,9 +190,14 @@ class EventManager:
             except ValueError:
                 return False
 
-    def emit(self, event_type: EventType, payload: EventPayload,
-             source: str = "unknown", priority: EventPriority = EventPriority.NORMAL,
-             trace_id: Optional[str] = None) -> Event:
+    def emit(
+        self,
+        event_type: EventType,
+        payload: EventPayload,
+        source: str = "unknown",
+        priority: EventPriority = EventPriority.NORMAL,
+        trace_id: Optional[str] = None,
+    ) -> Event:
         """Emit an event synchronously.
 
         Args:
@@ -212,7 +220,7 @@ class EventManager:
             source=source,
             timestamp=datetime.now(),
             priority=priority,
-            trace_id=trace_id or _get_trace_id()
+            trace_id=trace_id or _get_trace_id(),
         )
 
         event = Event(data=event_data)
@@ -226,9 +234,14 @@ class EventManager:
 
         return event
 
-    async def emit_async(self, event_type: EventType, payload: EventPayload,
-                        source: str = "unknown", priority: EventPriority = EventPriority.NORMAL,
-                        trace_id: Optional[str] = None) -> Event:
+    async def emit_async(
+        self,
+        event_type: EventType,
+        payload: EventPayload,
+        source: str = "unknown",
+        priority: EventPriority = EventPriority.NORMAL,
+        trace_id: Optional[str] = None,
+    ) -> Event:
         """Emit an event asynchronously.
 
         Args:
@@ -251,7 +264,7 @@ class EventManager:
             source=source,
             timestamp=datetime.now(),
             priority=priority,
-            trace_id=trace_id or _get_trace_id()
+            trace_id=trace_id or _get_trace_id(),
         )
 
         event = Event(data=event_data)
@@ -265,7 +278,9 @@ class EventManager:
 
         return event
 
-    def get_handlers(self, event_type: Optional[EventType] = None) -> List[EventHandler]:
+    def get_handlers(
+        self, event_type: Optional[EventType] = None
+    ) -> List[EventHandler]:
         """Get registered handlers, optionally filtered by event type.
 
         Args:
@@ -284,7 +299,7 @@ class EventManager:
                 event_type=event_type,
                 payload={},
                 source="filter",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
             return [h for h in self._handlers if h.can_handle(dummy_data)]
@@ -387,13 +402,15 @@ class EventManager:
         with self._lock:
             return [h for h in self._handlers if h.can_handle(event_data)]
 
-    def _create_cancelled_event(self, event_type: EventType, payload: EventPayload, source: str) -> Event:
+    def _create_cancelled_event(
+        self, event_type: EventType, payload: EventPayload, source: str
+    ) -> Event:
         """Create a cancelled event when manager is disabled."""
         event_data = EventData(
             event_type=event_type,
             payload=payload,
             source=source,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
         event = Event(data=event_data)
         event.cancel()
@@ -429,8 +446,12 @@ def get_event_manager() -> EventManager:
     return _event_manager
 
 
-def emit_event(event_type: EventType, payload: EventPayload,
-               source: str = "unknown", priority: EventPriority = EventPriority.NORMAL) -> Event:
+def emit_event(
+    event_type: EventType,
+    payload: EventPayload,
+    source: str = "unknown",
+    priority: EventPriority = EventPriority.NORMAL,
+) -> Event:
     """Emit events using global manager.
 
     Args:

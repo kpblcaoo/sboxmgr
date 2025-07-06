@@ -181,4 +181,4 @@ When adding new protocols or features:
 - **New Protocols**: Easy to add new protocol support
 - **Enhanced Validation**: Additional validation rules
 - **Performance Optimization**: Further optimization opportunities
-- **Schema Evolution**: Support for schema versioning 
+- **Schema Evolution**: Support for schema versioning

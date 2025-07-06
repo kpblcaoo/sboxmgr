@@ -4,12 +4,15 @@ This module contains the list-servers command that fetches subscription data
 and displays available server configurations. This is the only remaining
 command in this module after the CLI reorganization.
 """
-import typer
+
 from typing import List
-from sboxmgr.subscription.manager import SubscriptionManager
-from sboxmgr.subscription.models import SubscriptionSource, PipelineContext
-from sboxmgr.server.exclusions import load_exclusions
+
+import typer
+
 from sboxmgr.i18n.t import t
+from sboxmgr.server.exclusions import load_exclusions
+from sboxmgr.subscription.manager import SubscriptionManager
+from sboxmgr.subscription.models import PipelineContext, SubscriptionSource
 
 
 def _is_service_outbound(outbound: dict) -> bool:
@@ -74,14 +77,32 @@ def _format_policy_details(context: PipelineContext, server_tag: str) -> str:
 
 def list_servers(
     url: str = typer.Option(
-        ..., "-u", "--url", help=t("cli.url.help"),
-        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"]
+        ...,
+        "-u",
+        "--url",
+        help=t("cli.url.help"),
+        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
     ),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
-    user_agent: str = typer.Option(None, "--user-agent", help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)"),
-    no_user_agent: bool = typer.Option(False, "--no-user-agent", help="Do not send User-Agent header at all"),
-    format: str = typer.Option(None, "--format", help="Force specific format: auto, base64, json, uri_list, clash"),
-    policy_details: bool = typer.Option(False, "-P", "--policy-details", help="Show policy evaluation details for each server"),
+    user_agent: str = typer.Option(
+        None,
+        "--user-agent",
+        help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)",
+    ),
+    no_user_agent: bool = typer.Option(
+        False, "--no-user-agent", help="Do not send User-Agent header at all"
+    ),
+    format: str = typer.Option(
+        None,
+        "--format",
+        help="Force specific format: auto, base64, json, uri_list, clash",
+    ),
+    policy_details: bool = typer.Option(
+        False,
+        "-P",
+        "--policy-details",
+        help="Show policy evaluation details for each server",
+    ),
 ):
     """List all available servers from subscription.
 
@@ -126,7 +147,9 @@ def list_servers(
         exclusions = load_exclusions(dry_run=True)
         context = PipelineContext(mode="default", debug_level=debug)
         user_routes: List[str] = []
-        config = mgr.export_config(exclusions=exclusions, user_routes=user_routes, context=context)
+        config = mgr.export_config(
+            exclusions=exclusions, user_routes=user_routes, context=context
+        )
 
         # Проверяем политики ДО проверки config.config
         if policy_details:
@@ -137,8 +160,12 @@ def list_servers(
             # Если есть нарушения политик, показываем их независимо от результата конфигурации
             if violations or warnings or info_results:
                 typer.echo("\n📊 Policy Evaluation Summary:")
-                typer.echo(f"   Servers denied: {len(set(v['server'] for v in violations))}")
-                typer.echo(f"   Servers with warnings: {len(set(w['server'] for w in warnings))}")
+                typer.echo(
+                    f"   Servers denied: {len(set(v['server'] for v in violations))}"
+                )
+                typer.echo(
+                    f"   Servers with warnings: {len(set(w['server'] for w in warnings))}"
+                )
                 typer.echo(f"   Total policy violations: {len(violations)}")
                 typer.echo(f"   Total policy warnings: {len(warnings)}")
 
@@ -147,18 +174,26 @@ def list_servers(
                 if validation_fixes:
                     typer.echo("\n🔧 Validation Fixes Applied:")
                     for fix in validation_fixes:
-                        severity_icon = "ℹ️" if fix['severity'] == 'info' else "⚠️"
-                        typer.echo(f"   {severity_icon} Server {fix['server_identifier']}: {fix['description']}")
+                        severity_icon = "ℹ️" if fix["severity"] == "info" else "⚠️"
+                        typer.echo(
+                            f"   {severity_icon} Server {fix['server_identifier']}: {fix['description']}"
+                        )
 
                 # Выводим причины блокировки по каждому серверу
-                typer.echo("\n❌ Сервера заблокированы политиками. Причины по каждому серверу:")
+                typer.echo(
+                    "\n❌ Сервера заблокированы политиками. Причины по каждому серверу:"
+                )
                 # Собираем уникальные server_id
-                all_servers = set([v['server'] for v in violations] + [w['server'] for w in warnings] + [i['server'] for i in info_results])
+                all_servers = set(
+                    [v["server"] for v in violations]
+                    + [w["server"] for w in warnings]
+                    + [i["server"] for i in info_results]
+                )
                 for server_id in all_servers:
                     typer.echo(f"\nServer: {server_id}")
-                    vlist = [v for v in violations if v['server'] == server_id]
-                    wlist = [w for w in warnings if w['server'] == server_id]
-                    ilist = [i for i in info_results if i['server'] == server_id]
+                    vlist = [v for v in violations if v["server"] == server_id]
+                    wlist = [w for w in warnings if w["server"] == server_id]
+                    ilist = [i for i in info_results if i["server"] == server_id]
                     if vlist:
                         for v in vlist:
                             typer.echo(f"  ❌ DENIED by {v['policy']}: {v['reason']}")
@@ -189,8 +224,12 @@ def list_servers(
 
             typer.echo("\n📊 Policy Evaluation Summary:")
             typer.echo(f"   Total servers processed: {len(servers)}")
-            typer.echo(f"   Servers denied: {len(set(v['server'] for v in violations))}")
-            typer.echo(f"   Servers with warnings: {len(set(w['server'] for w in warnings))}")
+            typer.echo(
+                f"   Servers denied: {len(set(v['server'] for v in violations))}"
+            )
+            typer.echo(
+                f"   Servers with warnings: {len(set(w['server'] for w in warnings))}"
+            )
             typer.echo(f"   Total policy violations: {len(violations)}")
             typer.echo(f"   Total policy warnings: {len(warnings)}")
 
@@ -199,13 +238,17 @@ def list_servers(
             if validation_fixes:
                 typer.echo("\n🔧 Validation Fixes Applied:")
                 for fix in validation_fixes:
-                    severity_icon = "ℹ️" if fix['severity'] == 'info' else "⚠️"
-                    typer.echo(f"   {severity_icon} Server {fix['server_identifier']}: {fix['description']}")
+                    severity_icon = "ℹ️" if fix["severity"] == "info" else "⚠️"
+                    typer.echo(
+                        f"   {severity_icon} Server {fix['server_identifier']}: {fix['description']}"
+                    )
             typer.echo()
 
         for i, s in enumerate(servers):
-            server_tag = s.get('tag', s.get('server', ''))
-            server_info = f"[{i}] {server_tag} ({s.get('type', '')}:{s.get('server_port', '')})"
+            server_tag = s.get("tag", s.get("server", ""))
+            server_info = (
+                f"[{i}] {server_tag} ({s.get('type', '')}:{s.get('server_port', '')})"
+            )
 
             if policy_details:
                 policy_info = _format_policy_details(context, server_tag)

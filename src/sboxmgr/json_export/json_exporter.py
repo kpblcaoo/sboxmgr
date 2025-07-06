@@ -4,15 +4,15 @@ Provides standardized JSON output format for all subbox client configurations
 with metadata, validation, and schema compliance.
 """
 
-import json
 import hashlib
+import json
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from ..logging import get_logger
-from ..config.validation import ConfigValidationError
 from ..config.config_validator import validate_temp_config_json
+from ..config.validation import ConfigValidationError
+from ..logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -31,12 +31,14 @@ class JSONExporter:
         self.logger = logger
         self.validate = validate
 
-    def export_config(self,
-                     client_type: str,
-                     config_data: Dict[str, Any],
-                     subscription_url: Optional[str] = None,
-                     metadata: Optional[Dict[str, Any]] = None,
-                     validate: Optional[bool] = None) -> Dict[str, Any]:
+    def export_config(
+        self,
+        client_type: str,
+        config_data: Dict[str, Any],
+        subscription_url: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        validate: Optional[bool] = None,
+    ) -> Dict[str, Any]:
         """Export configuration in standardized JSON format.
 
         Args:
@@ -57,7 +59,7 @@ class JSONExporter:
                 "version": self._get_client_version(client_type),
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "config": config_data,
-                "metadata": self._generate_metadata(subscription_url, metadata)
+                "metadata": self._generate_metadata(subscription_url, metadata),
             }
 
             # Calculate checksum
@@ -69,7 +71,9 @@ class JSONExporter:
                 try:
                     self._validate_export(exported)
                     self._validate_client_config(client_type, config_data)
-                    self.logger.info(f"Configuration validation passed for {client_type}")
+                    self.logger.info(
+                        f"Configuration validation passed for {client_type}"
+                    )
                 except ConfigValidationError as e:
                     self.logger.error(f"Configuration validation failed: {e}")
                     raise
@@ -81,14 +85,16 @@ class JSONExporter:
             self.logger.error(f"Failed to export {client_type} configuration: {e}")
             raise
 
-    def export_to_file(self,
-                      client_type: str,
-                      config_data: Dict[str, Any],
-                      output_path: Path,
-                      subscription_url: Optional[str] = None,
-                      metadata: Optional[Dict[str, Any]] = None,
-                      pretty: bool = True,
-                      validate: Optional[bool] = None) -> Path:
+    def export_to_file(
+        self,
+        client_type: str,
+        config_data: Dict[str, Any],
+        output_path: Path,
+        subscription_url: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        pretty: bool = True,
+        validate: Optional[bool] = None,
+    ) -> Path:
         """Export configuration to file.
 
         Args:
@@ -109,10 +115,12 @@ class JSONExporter:
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Export configuration
-            exported = self.export_config(client_type, config_data, subscription_url, metadata, validate)
+            exported = self.export_config(
+                client_type, config_data, subscription_url, metadata, validate
+            )
 
             # Write to file
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 if pretty:
                     json.dump(exported, f, indent=2, ensure_ascii=False)
                 else:
@@ -122,14 +130,18 @@ class JSONExporter:
             return output_path
 
         except Exception as e:
-            self.logger.error(f"Failed to export {client_type} configuration to file: {e}")
+            self.logger.error(
+                f"Failed to export {client_type} configuration to file: {e}"
+            )
             raise
 
-    def export_multiple(self,
-                       configs: List[Dict[str, Any]],
-                       output_dir: Path,
-                       pretty: bool = True,
-                       validate: Optional[bool] = None) -> List[Path]:
+    def export_multiple(
+        self,
+        configs: List[Dict[str, Any]],
+        output_dir: Path,
+        pretty: bool = True,
+        validate: Optional[bool] = None,
+    ) -> List[Path]:
         """Export multiple configurations.
 
         Args:
@@ -158,26 +170,35 @@ class JSONExporter:
 
                 # Export
                 file_path = self.export_to_file(
-                    client_type, config_data, output_path,
-                    subscription_url, metadata, pretty, validate
+                    client_type,
+                    config_data,
+                    output_path,
+                    subscription_url,
+                    metadata,
+                    pretty,
+                    validate,
                 )
                 created_files.append(file_path)
 
             except Exception as e:
-                self.logger.error(f"Failed to export config {config.get('client_type', 'unknown')}: {e}")
+                self.logger.error(
+                    f"Failed to export config {config.get('client_type', 'unknown')}: {e}"
+                )
                 continue
 
         return created_files
 
-    def _generate_metadata(self,
-                          subscription_url: Optional[str] = None,
-                          additional_metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _generate_metadata(
+        self,
+        subscription_url: Optional[str] = None,
+        additional_metadata: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Generate metadata for exported configuration."""
         metadata = {
             "source": subscription_url or "manual",
             "generator": f"sboxmgr-{self.version}",
             "format": "json",
-            "schema_version": "1.0"
+            "schema_version": "1.0",
         }
 
         if additional_metadata:
@@ -199,6 +220,7 @@ class JSONExporter:
         """Get sboxmgr version from package metadata."""
         try:
             from sboxmgr import __version__
+
             return __version__
         except Exception:
             return "unknown"
@@ -210,7 +232,7 @@ class JSONExporter:
             "sing-box": "1.8.0",
             "clash": "1.18.0",
             "xray": "1.8.0",
-            "mihomo": "1.8.0"
+            "mihomo": "1.8.0",
         }
         return client_versions.get(client_type, "unknown")
 
@@ -227,7 +249,9 @@ class JSONExporter:
         required_fields = ["client", "version", "created_at", "config", "metadata"]
         for field in required_fields:
             if field not in exported:
-                raise ConfigValidationError(f"Exported configuration missing required field: {field}")
+                raise ConfigValidationError(
+                    f"Exported configuration missing required field: {field}"
+                )
 
         if not isinstance(exported["client"], str):
             raise ConfigValidationError("'client' field must be a string")
@@ -238,7 +262,9 @@ class JSONExporter:
         if not isinstance(exported["metadata"], dict):
             raise ConfigValidationError("'metadata' field must be a dictionary")
 
-    def _validate_client_config(self, client_type: str, config_data: Dict[str, Any]) -> None:
+    def _validate_client_config(
+        self, client_type: str, config_data: Dict[str, Any]
+    ) -> None:
         """Validate client-specific configuration.
 
         Args:
@@ -255,11 +281,15 @@ class JSONExporter:
                 config_json = json.dumps(config_data)
                 validate_temp_config_json(config_json)
             except Exception as e:
-                raise ConfigValidationError(f"Sing-box configuration validation failed: {e}")
+                raise ConfigValidationError(
+                    f"Sing-box configuration validation failed: {e}"
+                )
         elif client_type in ["clash", "xray", "mihomo"]:
             # Basic validation for other clients
             if not isinstance(config_data, dict):
-                raise ConfigValidationError(f"{client_type} configuration must be a dictionary")
+                raise ConfigValidationError(
+                    f"{client_type} configuration must be a dictionary"
+                )
         else:
             raise ConfigValidationError(f"Unsupported client type: {client_type}")
 

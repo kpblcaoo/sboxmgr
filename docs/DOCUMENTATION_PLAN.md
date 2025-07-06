@@ -187,4 +187,4 @@ This document outlines the plan for updating SBoxMgr documentation to reflect th
 ---
 
 **Last Updated:** 2025-01-05
-**Status:** Phase 1 Complete, Phase 2 In Progress 
+**Status:** Phase 1 Complete, Phase 2 In Progress

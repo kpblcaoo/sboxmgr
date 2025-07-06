@@ -1,7 +1,7 @@
 """Cache management functionality for subscription manager."""
 
 import threading
-from typing import Dict, Tuple, Any
+from typing import Any, Dict, Tuple
 
 from ..models import PipelineContext
 
@@ -18,7 +18,9 @@ class CacheManager:
         self._cache_lock = threading.Lock()
         self._get_servers_cache: Dict[Tuple, Any] = {}
 
-    def create_cache_key(self, mode: str, context: PipelineContext, fetcher_source) -> tuple:
+    def create_cache_key(
+        self, mode: str, context: PipelineContext, fetcher_source
+    ) -> tuple:
         """Create cache key for get_servers results.
 
         Generates a unique cache key based on subscription source parameters
@@ -34,9 +36,9 @@ class CacheManager:
         """
         return (
             str(fetcher_source.url),
-            getattr(fetcher_source, 'user_agent', None),
-            str(getattr(fetcher_source, 'headers', None)),
-            str(getattr(context, 'tag_filters', None)),
+            getattr(fetcher_source, "user_agent", None),
+            str(getattr(fetcher_source, "headers", None)),
+            str(getattr(context, "tag_filters", None)),
             str(mode),
         )
 

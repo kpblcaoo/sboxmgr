@@ -5,18 +5,22 @@ external sboxagent processes through JSON API calls.
 """
 
 import json
-import subprocess
 import shutil
-from typing import Optional, Dict, Any
+import subprocess
 from pathlib import Path
+from typing import Any, Dict, Optional
 
+from ..events import EventPriority, EventType, emit_event
+from .event_sender import ping_agent, send_event
 from .protocol import (
-    ValidationRequest, InstallRequest, CheckRequest,
-    ValidationResponse, InstallResponse, CheckResponse,
-    ClientType
+    CheckRequest,
+    CheckResponse,
+    ClientType,
+    InstallRequest,
+    InstallResponse,
+    ValidationRequest,
+    ValidationResponse,
 )
-from .event_sender import send_event, ping_agent
-from ..events import emit_event, EventType, EventPriority
 
 
 def _get_logger():
@@ -27,6 +31,7 @@ def _get_logger():
 
     """
     from ..logging import get_logger
+
     return get_logger(__name__)
 
 
@@ -38,6 +43,7 @@ def _get_trace_id():
 
     """
     from ..logging.trace import get_trace_id
+
     return get_trace_id()
 
 
@@ -129,8 +135,12 @@ class AgentBridge:
             self._available = False
             return False
 
-    def validate(self, config_path: Path, client_type: Optional[ClientType] = None,
-                strict: bool = True) -> ValidationResponse:
+    def validate(
+        self,
+        config_path: Path,
+        client_type: Optional[ClientType] = None,
+        strict: bool = True,
+    ) -> ValidationResponse:
         """Validate configuration file using sboxagent.
 
         Args:
@@ -161,24 +171,28 @@ class AgentBridge:
             {
                 "config_path": str(config_path),
                 "client_type": client_type.value if client_type else None,
-                "strict": strict
+                "strict": strict,
             },
             source="agent.bridge",
-            priority=EventPriority.NORMAL
+            priority=EventPriority.NORMAL,
         )
 
         # Send event to agent via socket
-        send_event("validation_started", {
-            "config_path": str(config_path),
-            "client_type": client_type.value if client_type else None,
-            "strict": strict
-        }, source="sboxmgr.bridge")
+        send_event(
+            "validation_started",
+            {
+                "config_path": str(config_path),
+                "client_type": client_type.value if client_type else None,
+                "strict": strict,
+            },
+            source="sboxmgr.bridge",
+        )
 
         request = ValidationRequest(
             config_path=str(config_path),
             client_type=client_type,
             strict=strict,
-            trace_id=_get_trace_id()
+            trace_id=_get_trace_id(),
         )
 
         try:
@@ -191,20 +205,32 @@ class AgentBridge:
                 {
                     "success": response.success,
                     "errors": response.errors,
-                    "client_detected": response.client_detected.value if response.client_detected else None,
-                    "client_version": response.client_version
+                    "client_detected": (
+                        response.client_detected.value
+                        if response.client_detected
+                        else None
+                    ),
+                    "client_version": response.client_version,
                 },
                 source="agent.bridge",
-                priority=EventPriority.NORMAL
+                priority=EventPriority.NORMAL,
             )
 
             # Send completion event to agent via socket
-            send_event("validation_completed", {
-                "success": response.success,
-                "errors": response.errors,
-                "client_detected": response.client_detected.value if response.client_detected else None,
-                "client_version": response.client_version
-            }, source="sboxmgr.bridge")
+            send_event(
+                "validation_completed",
+                {
+                    "success": response.success,
+                    "errors": response.errors,
+                    "client_detected": (
+                        response.client_detected.value
+                        if response.client_detected
+                        else None
+                    ),
+                    "client_version": response.client_version,
+                },
+                source="sboxmgr.bridge",
+            )
 
             return response
 
@@ -215,17 +241,23 @@ class AgentBridge:
                 {
                     "error_type": type(e).__name__,
                     "error_message": str(e),
-                    "component": "agent.validation"
+                    "component": "agent.validation",
                 },
                 source="agent.bridge",
-                priority=EventPriority.HIGH
+                priority=EventPriority.HIGH,
             )
 
-            _get_logger().error(f"Agent validation failed: {e}", extra={"trace_id": _get_trace_id()})
+            _get_logger().error(
+                f"Agent validation failed: {e}", extra={"trace_id": _get_trace_id()}
+            )
             raise AgentError(f"Validation failed: {e}") from e
 
-    def install(self, client_type: ClientType, version: Optional[str] = None,
-               force: bool = False) -> InstallResponse:
+    def install(
+        self,
+        client_type: ClientType,
+        version: Optional[str] = None,
+        force: bool = False,
+    ) -> InstallResponse:
         """Install VPN client using sboxagent.
 
         Args:
@@ -247,20 +279,16 @@ class AgentBridge:
         # Emit installation start event
         emit_event(
             EventType.AGENT_INSTALLATION_STARTED,
-            {
-                "client_type": client_type.value,
-                "version": version,
-                "force": force
-            },
+            {"client_type": client_type.value, "version": version, "force": force},
             source="agent.bridge",
-            priority=EventPriority.NORMAL
+            priority=EventPriority.NORMAL,
         )
 
         request = InstallRequest(
             client_type=client_type,
             version=version,
             force=force,
-            trace_id=_get_trace_id()
+            trace_id=_get_trace_id(),
         )
 
         try:
@@ -272,12 +300,14 @@ class AgentBridge:
                 EventType.AGENT_INSTALLATION_COMPLETED,
                 {
                     "success": response.success,
-                    "client_type": response.client_type.value if response.client_type else None,
+                    "client_type": (
+                        response.client_type.value if response.client_type else None
+                    ),
                     "version": response.version,
-                    "binary_path": response.binary_path
+                    "binary_path": response.binary_path,
                 },
                 source="agent.bridge",
-                priority=EventPriority.NORMAL
+                priority=EventPriority.NORMAL,
             )
 
             return response
@@ -289,13 +319,15 @@ class AgentBridge:
                 {
                     "error_type": type(e).__name__,
                     "error_message": str(e),
-                    "component": "agent.installation"
+                    "component": "agent.installation",
                 },
                 source="agent.bridge",
-                priority=EventPriority.HIGH
+                priority=EventPriority.HIGH,
             )
 
-            _get_logger().error(f"Agent installation failed: {e}", extra={"trace_id": _get_trace_id()})
+            _get_logger().error(
+                f"Agent installation failed: {e}", extra={"trace_id": _get_trace_id()}
+            )
             raise AgentError(f"Installation failed: {e}") from e
 
     def check(self, client_type: Optional[ClientType] = None) -> CheckResponse:
@@ -315,10 +347,7 @@ class AgentBridge:
         if not self.is_available():
             raise AgentNotAvailableError("sboxagent is not available")
 
-        request = CheckRequest(
-            client_type=client_type,
-            trace_id=_get_trace_id()
-        )
+        request = CheckRequest(client_type=client_type, trace_id=_get_trace_id())
 
         try:
             response_data = self._call_agent(request.model_dump())
@@ -330,10 +359,10 @@ class AgentBridge:
                 {
                     "success": response.success,
                     "clients": response.clients,
-                    "checked_client": client_type.value if client_type else None
+                    "checked_client": client_type.value if client_type else None,
                 },
                 source="agent.bridge",
-                priority=EventPriority.NORMAL
+                priority=EventPriority.NORMAL,
             )
 
             return response
@@ -345,13 +374,15 @@ class AgentBridge:
                 {
                     "error_type": type(e).__name__,
                     "error_message": str(e),
-                    "component": "agent.check"
+                    "component": "agent.check",
                 },
                 source="agent.bridge",
-                priority=EventPriority.HIGH
+                priority=EventPriority.HIGH,
             )
 
-            _get_logger().error(f"Agent check failed: {e}", extra={"trace_id": _get_trace_id()})
+            _get_logger().error(
+                f"Agent check failed: {e}", extra={"trace_id": _get_trace_id()}
+            )
             raise AgentError(f"Check failed: {e}") from e
 
     def _call_agent(self, request: Dict[str, Any]) -> Dict[str, Any]:
@@ -381,7 +412,7 @@ class AgentBridge:
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,
-                check=False  # Don't raise on non-zero exit
+                check=False,  # Don't raise on non-zero exit
             )
 
             # Log stderr for debugging (technical logs)
@@ -390,7 +421,9 @@ class AgentBridge:
 
             # Parse JSON response from stdout
             if not result.stdout.strip():
-                raise AgentError(f"Empty response from agent (exit code: {result.returncode})")
+                raise AgentError(
+                    f"Empty response from agent (exit code: {result.returncode})"
+                )
 
             try:
                 response = json.loads(result.stdout)
@@ -399,7 +432,9 @@ class AgentBridge:
 
             # Check for agent-level errors
             if result.returncode != 0 and not response.get("success"):
-                error_msg = response.get("message", f"Agent failed with exit code {result.returncode}")
+                error_msg = response.get(
+                    "message", f"Agent failed with exit code {result.returncode}"
+                )
                 raise AgentError(error_msg)
 
             return response

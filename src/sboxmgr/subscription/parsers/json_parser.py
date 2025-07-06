@@ -5,13 +5,17 @@ native JSON subscriptions and ShadowsocksR (SSR) JSON format. It handles
 various JSON subscription formats and converts them into standardized
 ParsedServer objects for consistent processing.
 """
+
 import json
 import re
 from typing import List, Tuple
-from ..models import ParsedServer
-from ..base_parser import BaseParser
+
 from sboxmgr.utils.env import get_debug_level
+
+from ..base_parser import BaseParser
+from ..models import ParsedServer
 from ..registry import register
+
 
 @register("json")
 class JSONParser(BaseParser):
@@ -45,6 +49,7 @@ class JSONParser(BaseParser):
             raise  # выбрасываем ошибку дальше
         # TODO: распарсить data в список ParsedServer (заглушка)
         return []
+
 
 @register("tolerant_json")
 class TolerantJSONParser(BaseParser):
@@ -101,20 +106,21 @@ class TolerantJSONParser(BaseParser):
                 removed.append(line)
                 continue
             # Удаляем inline // и # комментарии
-            if '//' in line:
-                idx = line.index('//')
+            if "//" in line:
+                idx = line.index("//")
                 removed.append(line[idx:])
                 line = line[:idx]
-            if '#' in line and not line.lstrip().startswith('#'):
-                idx = line.index('#')
+            if "#" in line and not line.lstrip().startswith("#"):
+                idx = line.index("#")
                 removed.append(line[idx:])
                 line = line[:idx]
             clean_lines.append(line)
-        clean_json = '\n'.join(clean_lines)
+        clean_json = "\n".join(clean_lines)
         # Удаляем поля _comment и trailing commas
-        clean_json = re.sub(r'"_comment"\s*:\s*".*?",?', '', clean_json)
-        clean_json = re.sub(r',\s*([}\]])', r'\1', clean_json)
+        clean_json = re.sub(r'"_comment"\s*:\s*".*?",?', "", clean_json)
+        clean_json = re.sub(r",\s*([}\]])", r"\1", clean_json)
         return clean_json, removed
+
 
 @register("ssr_json")
 class SSRJSONParser(BaseParser):

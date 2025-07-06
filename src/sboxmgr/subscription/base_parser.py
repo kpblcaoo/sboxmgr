@@ -5,9 +5,12 @@ subscription data into structured ParsedServer objects. Parsers handle
 different subscription formats (base64, JSON, YAML, URI lists, etc.) and
 must register themselves for automatic format detection and processing.
 """
+
 from abc import ABC, abstractmethod
-from .models import ParsedServer
 from typing import List
+
+from .models import ParsedServer
+
 
 class BaseParser(ABC):
     """Abstract base class for subscription parser plugins.

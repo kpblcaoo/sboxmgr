@@ -1,10 +1,10 @@
 """Event filters for advanced event handling."""
 
-from abc import ABC, abstractmethod
-from typing import Optional, Set, Pattern, Any
 import re
+from abc import ABC, abstractmethod
+from typing import Any, Optional, Pattern, Set
 
-from .types import EventType, EventData
+from .types import EventData, EventType
 
 
 class EventFilter(ABC):

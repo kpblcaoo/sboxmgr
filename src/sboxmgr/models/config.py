@@ -12,29 +12,33 @@ import warnings
 warnings.warn(
     "src.sboxmgr.models.config is deprecated. Use src.sboxmgr.models.singbox instead.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 """Configuration models for sing-box."""
 
+from typing import Any, Dict, List, Literal, Optional, Union
+
 from pydantic import BaseModel, Field, field_validator
-from typing import List, Literal, Optional, Union, Dict, Any
-from .singbox.enums import LogLevel, DomainStrategy
-from .singbox.dns import DnsConfig
-from .singbox.ntp import NtpConfig
+
 from .singbox.auth import AuthenticationConfig
+from .singbox.dns import DnsConfig
+from .singbox.enums import DomainStrategy, LogLevel
+from .singbox.experimental import ExperimentalConfig
 from .singbox.inbounds import Inbound
+from .singbox.ntp import NtpConfig
+from .singbox.observatory import ObservatoryConfig
 from .singbox.outbounds import Outbound
 from .singbox.routing import RouteConfig
-from .singbox.experimental import ExperimentalConfig
-from .singbox.observatory import ObservatoryConfig
 
 
 class LogConfig(BaseModel):
     """Logging configuration for sing-box."""
 
     level: Optional[LogLevel] = Field(default=None, description="Log level.")
-    timestamp: Optional[bool] = Field(default=None, description="Include timestamp in log messages.")
+    timestamp: Optional[bool] = Field(
+        default=None, description="Include timestamp in log messages."
+    )
     output: Optional[str] = Field(default=None, description="Log output path.")
     format: Optional[str] = Field(default=None, description="Log format.")
 
@@ -150,13 +154,27 @@ class SingBoxConfig(BaseModel):
 
     log: Optional[LogConfig] = Field(default=None, description="Logging configuration.")
     dns: Optional[DnsConfig] = Field(default=None, description="DNS configuration.")
-    ntp: Optional[NtpConfig] = Field(default=None, description="NTP configuration for time synchronization.")
-    authentication: Optional[AuthenticationConfig] = Field(default=None, description="Global authentication settings.")
-    inbounds: Optional[List[Inbound]] = Field(default=None, description="List of inbound configurations.")
-    outbounds: Optional[List[Outbound]] = Field(default=None, description="List of outbound configurations.")
-    route: Optional[RouteConfig] = Field(default=None, description="Routing configuration.")
-    experimental: Optional[ExperimentalConfig] = Field(default=None, description="Experimental features configuration.")
-    observatory: Optional[ObservatoryConfig] = Field(default=None, description="Server probing configuration.")
+    ntp: Optional[NtpConfig] = Field(
+        default=None, description="NTP configuration for time synchronization."
+    )
+    authentication: Optional[AuthenticationConfig] = Field(
+        default=None, description="Global authentication settings."
+    )
+    inbounds: Optional[List[Inbound]] = Field(
+        default=None, description="List of inbound configurations."
+    )
+    outbounds: Optional[List[Outbound]] = Field(
+        default=None, description="List of outbound configurations."
+    )
+    route: Optional[RouteConfig] = Field(
+        default=None, description="Routing configuration."
+    )
+    experimental: Optional[ExperimentalConfig] = Field(
+        default=None, description="Experimental features configuration."
+    )
+    observatory: Optional[ObservatoryConfig] = Field(
+        default=None, description="Server probing configuration."
+    )
 
     model_config = {"extra": "forbid"}
 
@@ -164,7 +182,9 @@ class SingBoxConfig(BaseModel):
     def check_unique_servers(cls, v):
         """Ensure unique server/port combinations in outbounds."""
         if v:
-            servers = [(o.server, o.server_port) for o in v if o.server and o.server_port]
+            servers = [
+                (o.server, o.server_port) for o in v if o.server and o.server_port
+            ]
             if len(servers) != len(set(servers)):
                 raise ValueError("Duplicate server/port found")
         return v

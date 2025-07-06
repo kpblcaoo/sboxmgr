@@ -1,10 +1,11 @@
 """Module installer utilities for SBoxMgr."""
 
+import logging
 import subprocess
 import sys
-import logging
 
 # Function to install dependencies from requirements.txt
+
 
 def install_dependencies():
     """Install Python dependencies from requirements.txt file.
@@ -22,10 +23,14 @@ def install_dependencies():
 
     """
     try:
-        subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], check=True)
+        subprocess.run(
+            [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
+            check=True,
+        )
         logging.info("Dependencies installed successfully.")
     except Exception as e:
         logging.error(f"Error installing dependencies: {e}")
+
 
 if __name__ == "__main__":
     install_dependencies()

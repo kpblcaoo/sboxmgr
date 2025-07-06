@@ -1,6 +1,8 @@
 import json
+
 import pytest
 from typer.testing import CliRunner
+
 from sboxmgr.cli.main import app
 from tests.utils.http_mocking import setup_legacy_cli_mock
 
@@ -16,7 +18,7 @@ MOCK_JSON = {
             "server_port": 443,
             "uuid": "uuid-1",
             "security": "auto",
-            "transport": {"type": "ws"}
+            "transport": {"type": "ws"},
         },
         {
             "type": "vmess",
@@ -25,10 +27,11 @@ MOCK_JSON = {
             "server_port": 443,
             "uuid": "uuid-2",
             "security": "auto",
-            "transport": {"type": "ws"}
-        }
+            "transport": {"type": "ws"},
+        },
     ]
 }
+
 
 @pytest.mark.usefixtures("cleanup_files")
 def test_add_exclusion_and_idempotency(tmp_path, monkeypatch):
@@ -51,6 +54,7 @@ def test_add_exclusion_and_idempotency(tmp_path, monkeypatch):
     assert len(data2["exclusions"]) == 1
     assert "already excluded" in (result2.stdout or "")
 
+
 @pytest.mark.usefixtures("cleanup_files")
 def test_clear_exclusions(tmp_path, monkeypatch):
     setup_legacy_cli_mock(monkeypatch, json_data=MOCK_JSON)
@@ -62,11 +66,12 @@ def test_clear_exclusions(tmp_path, monkeypatch):
     exclusions_path = tmp_path / "exclusions.json"
     assert exclusions_path.exists()
     # Подтверждаем очистку exclusions через input='y\n'
-    result = runner.invoke(app, ["exclusions", "--clear"], input='y\n')
+    result = runner.invoke(app, ["exclusions", "--clear"], input="y\n")
     assert result.exit_code == 0
     with open(exclusions_path) as f:
         data = json.load(f)
     assert data["exclusions"] == []
+
 
 @pytest.mark.usefixtures("cleanup_files")
 def test_broken_exclusions_json_is_recovered(tmp_path, monkeypatch):
@@ -88,6 +93,7 @@ def test_broken_exclusions_json_is_recovered(tmp_path, monkeypatch):
     # Проверяем, что exclusion был добавлен (может быть 0 или 1 в зависимости от того, был ли сервер уже исключен)
     assert len(data["exclusions"]) >= 0
 
+
 @pytest.mark.usefixtures("cleanup_files")
 def test_add_exclusion_invalid_index(tmp_path, monkeypatch):
     setup_legacy_cli_mock(monkeypatch, json_data=MOCK_JSON)
@@ -98,6 +104,7 @@ def test_add_exclusion_invalid_index(tmp_path, monkeypatch):
     assert result.exit_code != 0
     assert "Invalid server index" in (result.stdout or "")
 
+
 @pytest.mark.usefixtures("cleanup_files")
 def test_view_exclusions(tmp_path, monkeypatch):
     setup_legacy_cli_mock(monkeypatch, json_data=MOCK_JSON)
@@ -107,4 +114,4 @@ def test_view_exclusions(tmp_path, monkeypatch):
     result = runner.invoke(app, ["exclusions", "-u", url, "--view"])
     assert result.exit_code == 0
     assert "Current Exclusions" in (result.stdout or "")
-    assert "vmess-reality2" in (result.stdout or "") 
+    assert "vmess-reality2" in (result.stdout or "")

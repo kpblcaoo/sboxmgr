@@ -34,7 +34,7 @@ class LoggingConfig(BaseSettings):
     level: str = Field(default="INFO", description="Logging level")
     format: Literal["text", "json"] = Field(default="text")
     sinks: list[str] = Field(default=["auto"], description="Output sinks")
-    
+
     class Config:
         env_prefix = "SBOXMGR_LOGGING_"
         env_nested_delimiter = "__"
@@ -43,7 +43,7 @@ class AppConfig(BaseSettings):
     service_mode: bool = Field(default=False, description="Service daemon mode")
     config_file: Optional[str] = Field(default=None, description="Config file path")
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
-    
+
     class Config:
         env_nested_delimiter = "__"
         env_file = ".env"
@@ -63,15 +63,15 @@ def detect_service_mode() -> bool:
     # Explicit override
     if "--service" in sys.argv or "--daemon" in sys.argv:
         return True
-    
+
     # Systemd detection
     if os.getenv("INVOCATION_ID"):
         return True
-        
+
     # Container detection
     if os.path.exists("/.dockerenv") or os.getenv("KUBERNETES_SERVICE_HOST"):
         return True
-        
+
     return False
 ```
 
@@ -94,7 +94,7 @@ class AppConfig(BaseSettings):
         if v and not Path(v).exists():
             raise ValueError(f"Config file not found: {v}")
         return v
-    
+
     @validator('logging')
     def validate_logging_config(cls, v):
         if v.level not in ["DEBUG", "INFO", "WARNING", "ERROR"]:
@@ -129,7 +129,7 @@ class Orchestrator:
     def __init__(self, config: Optional[AppConfig] = None):
         self.config = config or AppConfig()
         self._setup_logging()
-        
+
     def _setup_logging(self):
         # Configure logging based on config
         setup_logging(self.config.logging)
@@ -212,4 +212,4 @@ def main(config, log_level, service):
 ## References
 - **Related ADRs**: ADR-0010 (Logging Core), ADR-0011 (Event System)
 - **Implementation**: Stage 3 Configuration & Logging Foundation
-- **Dependencies**: Pydantic, Click, PyYAML 
+- **Dependencies**: Pydantic, Click, PyYAML

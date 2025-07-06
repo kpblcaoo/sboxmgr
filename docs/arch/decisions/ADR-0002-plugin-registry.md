@@ -15,4 +15,4 @@ _This ADR was written retrospectively to document a decision made earlier in the
 ## Consequences
 + Лёгкость расширения и поддержки
 + Возможность сторонних плагинов (pip install)
-– Требует дисциплины в именовании и регистрации 
+– Требует дисциплины в именовании и регистрации

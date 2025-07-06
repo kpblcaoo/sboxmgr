@@ -159,4 +159,4 @@ sboxmgr export --url "your-subscription-url" --inbound-types tun,socks --dns-mod
 2. **Exclude Legacy Protocols** - Filter out vmess, shadowsocks for better performance
 3. **Customize Final Action** - Use `direct` for local traffic, `block` for security
 4. **Test Configurations** - Always validate with `sing-box check`
-5. **Document Profiles** - Use `extra.description` to document your configurations 
+5. **Document Profiles** - Use `extra.description` to document your configurations

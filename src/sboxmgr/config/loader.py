@@ -5,7 +5,7 @@ and CLI arguments with proper precedence handling.
 """
 
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import toml
 import yaml
@@ -38,7 +38,7 @@ def load_config(config_file_path: Optional[str] = None) -> AppConfig:
     try:
         # Include config_file in initialization to trigger validation
         if config_file_path:
-            config_data['config_file'] = config_file_path
+            config_data["config_file"] = config_file_path
         config = AppConfig(**config_data)
         return config
     except ValidationError:
@@ -72,13 +72,14 @@ def load_config_file(file_path: str) -> Dict[str, Any]:
     suffix = path.suffix.lower()
 
     try:
-        with open(path, 'r', encoding='utf-8') as f:
-            if suffix in ['.toml']:
+        with open(path, "r", encoding="utf-8") as f:
+            if suffix in [".toml"]:
                 return toml.load(f)
-            elif suffix in ['.yaml', '.yml']:
+            elif suffix in [".yaml", ".yml"]:
                 return yaml.safe_load(f)
-            elif suffix in ['.json']:
+            elif suffix in [".json"]:
                 import json
+
                 return json.load(f)
             else:
                 # Try to auto-detect format
@@ -99,6 +100,7 @@ def load_config_file(file_path: str) -> Dict[str, Any]:
                 # Try JSON
                 try:
                     import json
+
                     return json.loads(content)
                 except json.JSONDecodeError:
                     pass
@@ -121,11 +123,7 @@ def find_config_file() -> Optional[str]:
         Optional path to found configuration file
 
     """
-    search_paths = [
-        Path.cwd(),
-        Path.home() / ".sboxmgr",
-        Path("/etc/sboxmgr")
-    ]
+    search_paths = [Path.cwd(), Path.home() / ".sboxmgr", Path("/etc/sboxmgr")]
 
     config_names = [
         "config.toml",
@@ -134,7 +132,7 @@ def find_config_file() -> Optional[str]:
         "config.json",
         "sboxmgr.toml",
         "sboxmgr.yaml",
-        "sboxmgr.yml"
+        "sboxmgr.yml",
     ]
 
     for search_path in search_paths:
@@ -171,13 +169,14 @@ def save_config(config: AppConfig, file_path: str) -> None:
     config_data = config.model_dump(exclude_unset=True, exclude_none=True)
 
     try:
-        with open(path, 'w', encoding='utf-8') as f:
-            if suffix in ['.toml']:
+        with open(path, "w", encoding="utf-8") as f:
+            if suffix in [".toml"]:
                 toml.dump(config_data, f)
-            elif suffix in ['.yaml', '.yml']:
+            elif suffix in [".yaml", ".yml"]:
                 yaml.dump(config_data, f, default_flow_style=False, indent=2)
-            elif suffix in ['.json']:
+            elif suffix in [".json"]:
                 import json
+
                 json.dump(config_data, f, indent=2)
             else:
                 raise ValueError(f"Unsupported configuration file format: {suffix}")
@@ -199,28 +198,26 @@ def create_default_config_file(output_path: str) -> None:
     default_config = {
         "debug": False,
         "verbose": False,
-
         "logging": {
             "level": "INFO",
             "format": "text",
             "sinks": ["auto"],
             "enable_trace_id": True,
         },
-
         "service": {
             "service_mode": False,
             "health_check_enabled": True,
             "health_check_port": 8080,
             "metrics_enabled": True,
             "metrics_port": 9090,
-        }
+        },
     }
 
     try:
         output_file = Path(output_path)
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             toml.dump(default_config, f)
 
     except Exception as e:
@@ -233,7 +230,7 @@ def merge_cli_args_to_config(
     debug: Optional[bool] = None,
     verbose: Optional[bool] = None,
     service_mode: Optional[bool] = None,
-    config_file: Optional[str] = None
+    config_file: Optional[str] = None,
 ) -> AppConfig:
     """Merge CLI arguments into configuration.
 

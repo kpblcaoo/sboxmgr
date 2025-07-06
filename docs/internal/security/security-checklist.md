@@ -90,4 +90,4 @@ _Last updated: 2025-06-24. See ADR-0001, ADR-0004, ADR-0005, ADR-0007. See also 
 ### 🟢 Medium Priority (Security Impact: Low)
 - SEC-CODE-07: Error handling improvement
 - SEC-LEGACY-02: Legacy audit
-- SEC-I18N-01: i18n validation 
+- SEC-I18N-01: i18n validation

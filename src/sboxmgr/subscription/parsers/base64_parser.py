@@ -4,14 +4,18 @@ This module provides the Base64Parser class for parsing base64-encoded
 subscription data. It handles base64 decoding and delegates to appropriate
 parsers based on the decoded content format (URI lists, JSON, YAML, etc.).
 """
+
 import base64
 import re
 from typing import List
-from ..models import ParsedServer
-from ..base_parser import BaseParser
-from .uri_list_parser import URIListParser
+
 from sboxmgr.utils.env import get_debug_level
+
+from ..base_parser import BaseParser
+from ..models import ParsedServer
 from ..registry import register
+from .uri_list_parser import URIListParser
+
 
 @register("base64")
 class Base64Parser(BaseParser):
@@ -50,12 +54,12 @@ class Base64Parser(BaseParser):
         lines = decoded.decode("utf-8").splitlines()
         servers = []
         debug_level = get_debug_level()
-        ss_pattern = re.compile(r'^[^:]+:[^@]+@[^:]+:\d+$')
+        ss_pattern = re.compile(r"^[^:]+:[^@]+@[^:]+:\d+$")
         for line in lines:
             line = line.strip()
-            if not line or line.startswith('#'):
+            if not line or line.startswith("#"):
                 continue
-            if line.startswith(('ss://', 'vless://', 'vmess://')):
+            if line.startswith(("ss://", "vless://", "vmess://")):
                 servers.extend(URIListParser().parse(line.encode("utf-8")))
             elif ss_pattern.match(line):
                 if debug_level > 1:

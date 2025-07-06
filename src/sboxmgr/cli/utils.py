@@ -6,10 +6,11 @@ that help maintain consistency in the command-line interface.
 """
 
 import json
-import os
-from pathlib import Path
 import locale
 import logging
+import os
+from pathlib import Path
+
 
 def is_ai_lang(code):
     """Check if language file contains AI-generated translations.
@@ -36,6 +37,7 @@ def is_ai_lang(code):
             return False
     return False
 
+
 def detect_lang_source():
     """Detect current language setting and its configuration source.
 
@@ -52,7 +54,7 @@ def detect_lang_source():
         Priority order:
         1. SBOXMGR_LANG environment variable
         2. default_lang in ~/.sboxmgr/config.toml
-        3. System locale (LANG environment variable)  
+        3. System locale (LANG environment variable)
         4. Default fallback ('en')
 
     """
@@ -62,6 +64,7 @@ def detect_lang_source():
     if config_path.exists():
         try:
             import toml
+
             cfg = toml.load(config_path)
             if "default_lang" in cfg:
                 return cfg["default_lang"], f"config ({config_path})"

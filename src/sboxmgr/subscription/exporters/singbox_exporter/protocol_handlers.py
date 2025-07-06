@@ -1,7 +1,7 @@
 """Protocol handlers for sing-box exporter."""
 
 import logging
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 from sboxmgr.subscription.models import ParsedServer
 
@@ -18,12 +18,17 @@ def export_wireguard(server: ParsedServer) -> Optional[Dict[str, Any]]:
         Outbound configuration dict or None if incomplete.
     """
     required_fields = [
-        server.address, server.port, server.private_key,
-        server.peer_public_key, server.local_address
+        server.address,
+        server.port,
+        server.private_key,
+        server.peer_public_key,
+        server.local_address,
     ]
 
     if not all(required_fields):
-        logger.warning(f"Incomplete wireguard fields, skipping: {server.address}:{server.port}")
+        logger.warning(
+            f"Incomplete wireguard fields, skipping: {server.address}:{server.port}"
+        )
         return None
 
     outbound = {
@@ -40,7 +45,7 @@ def export_wireguard(server: ParsedServer) -> Optional[Dict[str, Any]]:
         outbound["pre_shared_key"] = server.pre_shared_key
 
     # Meta fields
-    meta = getattr(server, 'meta', {}) or {}
+    meta = getattr(server, "meta", {}) or {}
     if meta.get("mtu") is not None:
         outbound["mtu"] = meta["mtu"]
     if meta.get("keepalive") is not None:
@@ -64,7 +69,9 @@ def export_hysteria2(server: ParsedServer) -> Optional[Dict[str, Any]]:
     required_fields = [server.address, server.port, server.password]
 
     if not all(required_fields):
-        logger.warning(f"Incomplete hysteria2 fields, skipping: {server.address}:{server.port}")
+        logger.warning(
+            f"Incomplete hysteria2 fields, skipping: {server.address}:{server.port}"
+        )
         return None
 
     outbound = {
@@ -92,7 +99,9 @@ def export_tuic(server: ParsedServer) -> Optional[Dict[str, Any]]:
     required_fields = [server.address, server.port, server.uuid, server.password]
 
     if not all(required_fields):
-        logger.warning(f"Incomplete tuic fields, skipping: {server.address}:{server.port}")
+        logger.warning(
+            f"Incomplete tuic fields, skipping: {server.address}:{server.port}"
+        )
         return None
 
     outbound = {
@@ -112,7 +121,7 @@ def export_tuic(server: ParsedServer) -> Optional[Dict[str, Any]]:
         outbound["tls"] = server.tls
 
     # Meta fields
-    meta = getattr(server, 'meta', {}) or {}
+    meta = getattr(server, "meta", {}) or {}
     if meta.get("udp_relay_mode") is not None:
         outbound["udp_relay_mode"] = meta["udp_relay_mode"]
 
@@ -134,7 +143,9 @@ def export_shadowtls(server: ParsedServer) -> Optional[Dict[str, Any]]:
     required_fields = [server.address, server.port, server.password, server.version]
 
     if not all(required_fields):
-        logger.warning(f"Incomplete shadowtls fields, skipping: {server.address}:{server.port}")
+        logger.warning(
+            f"Incomplete shadowtls fields, skipping: {server.address}:{server.port}"
+        )
         return None
 
     outbound = {
@@ -169,7 +180,9 @@ def export_anytls(server: ParsedServer) -> Optional[Dict[str, Any]]:
     required_fields = [server.address, server.port, server.uuid]
 
     if not all(required_fields):
-        logger.warning(f"Incomplete anytls fields, skipping: {server.address}:{server.port}")
+        logger.warning(
+            f"Incomplete anytls fields, skipping: {server.address}:{server.port}"
+        )
         return None
 
     outbound = {
@@ -201,7 +214,9 @@ def export_tor(server: ParsedServer) -> Optional[Dict[str, Any]]:
     required_fields = [server.address, server.port]
 
     if not all(required_fields):
-        logger.warning(f"Incomplete tor fields, skipping: {server.address}:{server.port}")
+        logger.warning(
+            f"Incomplete tor fields, skipping: {server.address}:{server.port}"
+        )
         return None
 
     outbound = {
@@ -228,7 +243,9 @@ def export_ssh(server: ParsedServer) -> Optional[Dict[str, Any]]:
     required_fields = [server.address, server.port, server.username]
 
     if not all(required_fields):
-        logger.warning(f"Incomplete ssh fields, skipping: {server.address}:{server.port}")
+        logger.warning(
+            f"Incomplete ssh fields, skipping: {server.address}:{server.port}"
+        )
         return None
 
     outbound = {
@@ -262,7 +279,7 @@ def _get_server_tag(server: ParsedServer, protocol_type: str) -> str:
     Returns:
         Server tag string.
     """
-    meta = getattr(server, 'meta', {}) or {}
+    meta = getattr(server, "meta", {}) or {}
 
     if meta.get("name"):
         return meta["name"]

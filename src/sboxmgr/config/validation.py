@@ -6,7 +6,7 @@ Implements CONFIG-03 validation from ADR-0009.
 
 import os
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 class ConfigValidationError(Exception):
@@ -47,30 +47,36 @@ def validate_config_file(file_path: str) -> None:
 
     # Determine file format and validate syntax
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             content = f.read().strip()
 
         # Try to parse as JSON first (most common for sing-box configs)
         try:
             import json
+
             json.loads(content)
             return  # JSON is valid
         except json.JSONDecodeError:
             # Not JSON, try TOML
             try:
                 import toml
+
                 toml.loads(content)
                 return  # TOML is valid
             except toml.TomlDecodeError as e:
                 raise ConfigValidationError(f"Invalid TOML syntax in {file_path}: {e}")
             except ImportError:
-                raise ConfigValidationError(f"TOML parser not available for {file_path}")
+                raise ConfigValidationError(
+                    f"TOML parser not available for {file_path}"
+                )
 
     except Exception as e:
         if "JSONDecodeError" in str(type(e)):
             raise ConfigValidationError(f"Invalid JSON syntax in {file_path}: {e}")
         else:
-            raise ConfigValidationError(f"Error reading configuration file {file_path}: {e}")
+            raise ConfigValidationError(
+                f"Error reading configuration file {file_path}: {e}"
+            )
 
 
 def validate_log_level(level: str) -> str:
@@ -195,14 +201,20 @@ def validate_environment_variables(config_dict: Dict[str, Any]) -> Dict[str, Any
 
     # Check for common conflicts
     if os.getenv("SBOXMGR_SERVICE_MODE") and os.getenv("SBOXMGR_DEBUG"):
-        service_mode = os.getenv("SBOXMGR_SERVICE_MODE", "").lower() in ("true", "1", "yes")
+        service_mode = os.getenv("SBOXMGR_SERVICE_MODE", "").lower() in (
+            "true",
+            "1",
+            "yes",
+        )
         debug_mode = os.getenv("SBOXMGR_DEBUG", "").lower() in ("true", "1", "yes")
 
         if service_mode and debug_mode:
             env_conflicts.append("Service mode and debug mode are both enabled")
 
     if env_conflicts:
-        raise ConfigValidationError(f"Environment variable conflicts: {'; '.join(env_conflicts)}")
+        raise ConfigValidationError(
+            f"Environment variable conflicts: {'; '.join(env_conflicts)}"
+        )
 
     return config_dict
 
@@ -230,7 +242,9 @@ def validate_service_configuration(config_dict: Dict[str, Any]) -> Dict[str, Any
         # In service mode, certain combinations don't make sense
         logging_config = config_dict.get("logging", {})
 
-        if logging_config.get("format") == "text" and logging_config.get("sinks") == ["journald"]:
+        if logging_config.get("format") == "text" and logging_config.get("sinks") == [
+            "journald"
+        ]:
             # Suggest JSON format for journald
             pass  # This is just a recommendation, not an error
 
@@ -251,7 +265,7 @@ def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
         "valid": True,
         "warnings": [],
         "recommendations": [],
-        "errors": []
+        "errors": [],
     }
 
     # Add explicit type annotations for lists
@@ -290,9 +304,7 @@ def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
         # File logging recommendations
         if "file" in logging_config.get("sinks", []):
             if not logging_config.get("file_path"):
-                warnings.append(
-                    "File sink specified but no file path configured"
-                )
+                warnings.append("File sink specified but no file path configured")
 
     except ConfigValidationError as e:
         summary["valid"] = False

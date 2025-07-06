@@ -6,9 +6,9 @@ filtering, and custom geographic rules for optimizing server selection
 based on user location and preferences.
 """
 
-from ..registry import register
-from ..postprocessor_base import BasePostProcessor
 from ..models import PipelineContext
+from ..postprocessor_base import BasePostProcessor
+from ..registry import register
 
 
 @register("geo_filter")
@@ -33,4 +33,3 @@ class GeoFilterPostProcessor(BasePostProcessor):
 
         """
         raise NotImplementedError()
-

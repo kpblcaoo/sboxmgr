@@ -4,9 +4,10 @@ This module provides the PolicyEngine class which manages and evaluates
 a collection of policies against given contexts.
 """
 
-from .base import BasePolicy, PolicyContext, PolicyResult, PolicyEvaluationResult
-from typing import List
 import logging
+from typing import List
+
+from .base import BasePolicy, PolicyContext, PolicyEvaluationResult, PolicyResult
 
 
 class PolicyEngine:
@@ -120,29 +121,39 @@ class PolicyEngine:
                 result.policy_name = getattr(policy, "name", policy.__class__.__name__)
                 evaluation_result.add_result(result)
 
-                self.logger.debug(f"Policy {result.policy_name}: {result.severity.value} - {result.reason}")
+                self.logger.debug(
+                    f"Policy {result.policy_name}: {result.severity.value} - {result.reason}"
+                )
 
             except Exception as e:
                 # Fail-secure: treat policy errors as denials
                 error_result = PolicyResult.deny(
                     f"Policy evaluation error: {e}",
                     error_type="policy_exception",
-                    policy_name=getattr(policy, "name", policy.__class__.__name__)
+                    policy_name=getattr(policy, "name", policy.__class__.__name__),
                 )
                 evaluation_result.add_result(error_result)
                 self.logger.error(f"Policy {policy.name} evaluation failed: {e}")
 
         # Log summary
         if evaluation_result.has_denials:
-            self.logger.info(f"Server {evaluation_result.server_identifier} denied by {len(evaluation_result.denials)} policy(ies)")
+            self.logger.info(
+                f"Server {evaluation_result.server_identifier} denied by {len(evaluation_result.denials)} policy(ies)"
+            )
         elif evaluation_result.has_warnings:
-            self.logger.info(f"Server {evaluation_result.server_identifier} allowed with {len(evaluation_result.warnings)} warning(s)")
+            self.logger.info(
+                f"Server {evaluation_result.server_identifier} allowed with {len(evaluation_result.warnings)} warning(s)"
+            )
         else:
-            self.logger.debug(f"Server {evaluation_result.server_identifier} allowed by all policies")
+            self.logger.debug(
+                f"Server {evaluation_result.server_identifier} allowed by all policies"
+            )
 
         return evaluation_result
 
-    def get_policies(self, group: str = None, enabled_only: bool = True) -> List[BasePolicy]:
+    def get_policies(
+        self, group: str = None, enabled_only: bool = True
+    ) -> List[BasePolicy]:
         """Get policies with optional filtering.
 
         Args:

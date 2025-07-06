@@ -6,19 +6,20 @@ coordinates fetchers, parsers, validators, postprocessors, and exporters
 to provide a unified subscription processing interface.
 """
 
-from .models import SubscriptionSource, PipelineContext, PipelineResult
-from .registry import get_plugin, load_entry_points
-from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации
-
-from typing import Optional, Any, Dict, Tuple, List, Protocol
-from sboxmgr.export.export_manager import ExportManager
-from .base_selector import DefaultSelector
-from .postprocessor_base import DedupPostProcessor, PostProcessorChain
-from .errors import PipelineError, ErrorType
-from datetime import datetime, timezone
-from .middleware_base import MiddlewareChain
-
 import threading
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Protocol, Tuple
+
+from sboxmgr.export.export_manager import ExportManager
+
+from .base_selector import DefaultSelector
+from .errors import ErrorType, PipelineError
+from .fetchers import *  # noqa: F401, импортируем fetcher-плагины для регистрации
+from .middleware_base import MiddlewareChain
+from .models import PipelineContext, PipelineResult, SubscriptionSource
+from .postprocessor_base import DedupPostProcessor, PostProcessorChain
+from .registry import get_plugin, load_entry_points
+
 
 class ParserProtocol(Protocol):
     """Protocol for parser objects that can parse subscription data."""
@@ -26,6 +27,7 @@ class ParserProtocol(Protocol):
     def parse(self, raw: bytes) -> List[Any]:
         """Parse raw subscription data into server configurations."""
         ...
+
 
 def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
     """Auto-detect appropriate parser based on data content.
@@ -39,57 +41,81 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
 
     """
     # Декодируем данные
-    text = raw.decode('utf-8', errors='ignore')
+    text = raw.decode("utf-8", errors="ignore")
 
     # Если source_type явно указан, используем соответствующий парсер
     if source_type == "url_json" or source_type == "file_json":
         from .parsers.singbox_parser import SingBoxParser
+
         return SingBoxParser()
     elif source_type == "url_base64" or source_type == "file_base64":
         from .parsers.base64_parser import Base64Parser
+
         return Base64Parser()
     elif source_type == "uri_list" or source_type == "file_uri_list":
         from .parsers.uri_list_parser import URIListParser
+
         return URIListParser()
 
     # Автоопределение по содержимому (fallback)
     # 1. Пробуем JSON (SingBox)
     try:
         from .parsers.singbox_parser import SingBoxParser
+
         parser = SingBoxParser()
         data = parser._strip_comments_and_validate(text)[0]
         import json
+
         json.loads(data)
         return parser
     except Exception as e:
         import logging
+
         logging.debug(f"JSON parser detection failed: {e}")
     # 2. Пробуем Clash YAML
-    if text.startswith(("mixed-port:", "proxies:", "proxy-groups:", "proxy-providers:")) or 'proxies:' in text:
+    if (
+        text.startswith(
+            ("mixed-port:", "proxies:", "proxy-groups:", "proxy-providers:")
+        )
+        or "proxies:" in text
+    ):
         from .parsers.clash_parser import ClashParser
+
         return ClashParser()
     # 3. Пробуем base64 (если строка похожа на base64)
     import base64
     import re
-    b64_re = re.compile(r'^[A-Za-z0-9+/=\s]+$')
+
+    b64_re = re.compile(r"^[A-Za-z0-9+/=\s]+$")
     if b64_re.match(text) and len(text.strip()) > 100:
         try:
-            decoded = base64.b64decode(text.strip() + '=' * (-len(text.strip()) % 4))
-            decoded_text = decoded.decode('utf-8', errors='ignore')
-            if any(proto in decoded_text for proto in ("vless://", "vmess://", "trojan://", "ss://")):
+            decoded = base64.b64decode(text.strip() + "=" * (-len(text.strip()) % 4))
+            decoded_text = decoded.decode("utf-8", errors="ignore")
+            if any(
+                proto in decoded_text
+                for proto in ("vless://", "vmess://", "trojan://", "ss://")
+            ):
                 from .parsers.base64_parser import Base64Parser
+
                 return Base64Parser()
         except Exception as e:
             import logging
+
             logging.debug(f"Base64 parser detection failed: {e}")
     # 4. Пробуем plain URI list
     lines = text.splitlines()
-    if any(line.strip().startswith(("vless://", "vmess://", "trojan://", "ss://")) for line in lines):
+    if any(
+        line.strip().startswith(("vless://", "vmess://", "trojan://", "ss://"))
+        for line in lines
+    ):
         from .parsers.uri_list_parser import URIListParser
+
         return URIListParser()
     # fallback
     from .parsers.base64_parser import Base64Parser
+
     return Base64Parser()
+
 
 class SubscriptionManager:
     """Manages subscription data processing pipeline.
@@ -103,7 +129,7 @@ class SubscriptionManager:
     The pipeline stages are:
     1. Fetch raw data from source
     2. Validate raw data
-    3. Parse into server configurations  
+    3. Parse into server configurations
     4. Apply middleware transformations
     5. Post-process and deduplicate
     6. Select servers based on criteria
@@ -120,7 +146,13 @@ class SubscriptionManager:
     _cache_lock = threading.Lock()
     _get_servers_cache: Dict[Tuple, Any] = {}
 
-    def __init__(self, source: SubscriptionSource, detect_parser=None, postprocessor_chain=None, middleware_chain=None):
+    def __init__(
+        self,
+        source: SubscriptionSource,
+        detect_parser=None,
+        postprocessor_chain=None,
+        middleware_chain=None,
+    ):
         """Initialize subscription manager with configuration.
 
         Args:
@@ -151,6 +183,7 @@ class SubscriptionManager:
         self.selector = DefaultSelector()
         if detect_parser is None:
             from .manager import detect_parser as default_detect_parser
+
             self.detect_parser = default_detect_parser
         else:
             self.detect_parser = detect_parser
@@ -171,13 +204,15 @@ class SubscriptionManager:
         """
         return (
             str(self.fetcher.source.url),
-            getattr(self.fetcher.source, 'user_agent', None),
-            str(getattr(self.fetcher.source, 'headers', None)),
-            str(getattr(context, 'tag_filters', None)),
+            getattr(self.fetcher.source, "user_agent", None),
+            str(getattr(self.fetcher.source, "headers", None)),
+            str(getattr(context, "tag_filters", None)),
             str(mode),
         )
 
-    def _create_pipeline_error(self, error_type: ErrorType, stage: str, message: str, context_data: dict = None) -> PipelineError:
+    def _create_pipeline_error(
+        self, error_type: ErrorType, stage: str, message: str, context_data: dict = None
+    ) -> PipelineError:
         """Create standardized pipeline error.
 
         Centralizes pipeline error creation with consistent structure
@@ -198,7 +233,7 @@ class SubscriptionManager:
             stage=stage,
             message=message,
             context=context_data or {},
-            timestamp=datetime.now(timezone.utc)
+            timestamp=datetime.now(timezone.utc),
         )
 
     def _fetch_and_validate_raw(self, context: PipelineContext) -> tuple[bytes, bool]:
@@ -217,9 +252,9 @@ class SubscriptionManager:
         """
         try:
             # Логируем User-Agent на уровне 1
-            debug_level = getattr(context, 'debug_level', 0)
+            debug_level = getattr(context, "debug_level", 0)
             if debug_level >= 1:
-                ua = getattr(self.fetcher.source, 'user_agent', None)
+                ua = getattr(self.fetcher.source, "user_agent", None)
                 if ua == "":
                     print("[fetcher] Using User-Agent: [none]")
                 elif ua:
@@ -231,10 +266,13 @@ class SubscriptionManager:
 
             # Отладочные print в зависимости от debug_level
             if debug_level >= 2:
-                print(f"[debug] Fetched {len(raw)} bytes. First 200 bytes: {raw[:200]!r}")
+                print(
+                    f"[debug] Fetched {len(raw)} bytes. First 200 bytes: {raw[:200]!r}"
+                )
 
             # Raw validation
             from .validators.base import RAW_VALIDATOR_REGISTRY
+
             validator_cls = RAW_VALIDATOR_REGISTRY.get("noop")
             validator = validator_cls()
             result = validator.validate(raw, context)
@@ -244,23 +282,23 @@ class SubscriptionManager:
                     ErrorType.VALIDATION,
                     "raw_validate",
                     "; ".join(result.errors),
-                    {"source_type": self.fetcher.source.source_type}
+                    {"source_type": self.fetcher.source.source_type},
                 )
-                context.metadata['errors'].append(err)
+                context.metadata["errors"].append(err)
                 return raw, False
 
             return raw, True
 
         except Exception as e:
             err = self._create_pipeline_error(
-                ErrorType.INTERNAL,
-                "fetch_and_validate",
-                str(e)
+                ErrorType.INTERNAL, "fetch_and_validate", str(e)
             )
-            context.metadata['errors'].append(err)
+            context.metadata["errors"].append(err)
             return b"", False
 
-    def _parse_servers(self, raw_data: bytes, context: PipelineContext) -> tuple[list, bool]:
+    def _parse_servers(
+        self, raw_data: bytes, context: PipelineContext
+    ) -> tuple[list, bool]:
         """Parse raw data into server configurations.
 
         Handles parser detection and server parsing with comprehensive
@@ -276,21 +314,23 @@ class SubscriptionManager:
 
         """
         try:
-            debug_level = getattr(context, 'debug_level', 0)
+            debug_level = getattr(context, "debug_level", 0)
 
             # Parser detection
             parser = self.detect_parser(raw_data, self.fetcher.source.source_type)
             if debug_level >= 2:
-                print(f"[debug] Selected parser: {getattr(parser, '__class__', type(parser)).__name__}")
+                print(
+                    f"[debug] Selected parser: {getattr(parser, '__class__', type(parser)).__name__}"
+                )
 
             if not parser:
                 err = self._create_pipeline_error(
                     ErrorType.PARSE,
                     "detect_parser",
                     "Could not detect parser for subscription data",
-                    {"source_type": self.fetcher.source.source_type}
+                    {"source_type": self.fetcher.source.source_type},
                 )
-                context.metadata['errors'].append(err)
+                context.metadata["errors"].append(err)
                 return [], False
 
             # Parse servers
@@ -305,12 +345,14 @@ class SubscriptionManager:
                 ErrorType.PARSE,
                 "parse_servers",
                 str(e),
-                {"source_type": self.fetcher.source.source_type}
+                {"source_type": self.fetcher.source.source_type},
             )
-            context.metadata['errors'].append(err)
+            context.metadata["errors"].append(err)
             return [], False
 
-    def _validate_parsed_servers(self, servers: list, context: PipelineContext) -> tuple[list, bool]:
+    def _validate_parsed_servers(
+        self, servers: list, context: PipelineContext
+    ) -> tuple[list, bool]:
         """Validate parsed server configurations.
 
         Applies parsed validation rules to ensure server configurations
@@ -326,10 +368,11 @@ class SubscriptionManager:
 
         """
         try:
-            debug_level = getattr(context, 'debug_level', 0)
+            debug_level = getattr(context, "debug_level", 0)
 
             # Parsed validation
             from .validators.base import PARSED_VALIDATOR_REGISTRY
+
             parsed_validator_cls = PARSED_VALIDATOR_REGISTRY.get("required_fields")
             if not parsed_validator_cls:
                 return servers, True  # No validator available
@@ -338,11 +381,13 @@ class SubscriptionManager:
             parsed_result = parsed_validator.validate(servers, context)
 
             if debug_level >= 2:
-                print(f"[DEBUG] ParsedValidator valid_servers: {getattr(parsed_result, 'valid_servers', None)} errors: {parsed_result.errors}")
+                print(
+                    f"[DEBUG] ParsedValidator valid_servers: {getattr(parsed_result, 'valid_servers', None)} errors: {parsed_result.errors}"
+                )
 
             # В strict режиме возвращаем все сервера (включая невалидные) с ошибками
             # В tolerant режиме возвращаем только валидные сервера
-            if context.mode == 'strict':
+            if context.mode == "strict":
                 validated_servers = servers  # Возвращаем все сервера
                 # В strict режиме при наличии серверов всегда success=True
                 if servers:
@@ -350,7 +395,7 @@ class SubscriptionManager:
                 else:
                     success = False
             else:
-                validated_servers = getattr(parsed_result, 'valid_servers', servers)
+                validated_servers = getattr(parsed_result, "valid_servers", servers)
                 success = bool(validated_servers)
 
             if debug_level >= 2:
@@ -361,9 +406,9 @@ class SubscriptionManager:
                     ErrorType.VALIDATION,
                     "parsed_validate",
                     "; ".join(parsed_result.errors),
-                    {"source_type": self.fetcher.source.source_type}
+                    {"source_type": self.fetcher.source.source_type},
                 )
-                context.metadata['errors'].append(err)
+                context.metadata["errors"].append(err)
                 return [], False
 
             if parsed_result.errors:
@@ -371,9 +416,9 @@ class SubscriptionManager:
                     ErrorType.VALIDATION,
                     "parsed_validate",
                     "; ".join(parsed_result.errors),
-                    {"source_type": self.fetcher.source.source_type}
+                    {"source_type": self.fetcher.source.source_type},
                 )
-                context.metadata['errors'].append(err)
+                context.metadata["errors"].append(err)
 
             return validated_servers, success
 
@@ -382,9 +427,9 @@ class SubscriptionManager:
                 ErrorType.VALIDATION,
                 "validate_parsed_servers",
                 str(e),
-                {"source_type": self.fetcher.source.source_type}
+                {"source_type": self.fetcher.source.source_type},
             )
-            context.metadata['errors'].append(err)
+            context.metadata["errors"].append(err)
             return servers, False
 
     def _apply_policies(self, servers: list, context: PipelineContext) -> list:
@@ -398,7 +443,9 @@ class SubscriptionManager:
             List of servers that passed all DENY policies.
 
         """
-        from sboxmgr.policies import policy_registry, PolicyContext as PolCtx
+        from sboxmgr.policies import PolicyContext as PolCtx
+        from sboxmgr.policies import policy_registry
+
         result = []
         # Prepare metadata containers
         context.metadata.setdefault("policy_violations", [])
@@ -406,7 +453,12 @@ class SubscriptionManager:
         context.metadata.setdefault("policy_info", [])
 
         for s in servers:
-            pol_ctx = PolCtx(server=s, profile=getattr(context, 'profile', None), user=getattr(context, 'user', None), env=getattr(context, 'env', {}))
+            pol_ctx = PolCtx(
+                server=s,
+                profile=getattr(context, "profile", None),
+                user=getattr(context, "user", None),
+                env=getattr(context, "env", {}),
+            )
 
             try:
                 # Use evaluate_all() to get comprehensive results
@@ -419,31 +471,37 @@ class SubscriptionManager:
                 if evaluation_result.has_denials:
                     # Server is denied - add all denials to violations
                     for denial in evaluation_result.denials:
-                        context.metadata["policy_violations"].append({
-                            "server": server_id,
-                            "policy": denial.policy_name,
-                            "reason": denial.reason,
-                            "metadata": denial.metadata
-                        })
+                        context.metadata["policy_violations"].append(
+                            {
+                                "server": server_id,
+                                "policy": denial.policy_name,
+                                "reason": denial.reason,
+                                "metadata": denial.metadata,
+                            }
+                        )
                     continue  # Exclude server
 
                 # Server is allowed - add warnings and info
                 if evaluation_result.has_warnings:
                     for warning in evaluation_result.warnings:
-                        context.metadata["policy_warnings"].append({
-                            "server": server_id,
-                            "policy": warning.policy_name,
-                            "reason": warning.reason,
-                            "metadata": warning.metadata
-                        })
+                        context.metadata["policy_warnings"].append(
+                            {
+                                "server": server_id,
+                                "policy": warning.policy_name,
+                                "reason": warning.reason,
+                                "metadata": warning.metadata,
+                            }
+                        )
 
                 for info_result in evaluation_result.info_results:
-                    context.metadata["policy_info"].append({
-                        "server": server_id,
-                        "policy": info_result.policy_name,
-                        "reason": info_result.reason,
-                        "metadata": info_result.metadata
-                    })
+                    context.metadata["policy_info"].append(
+                        {
+                            "server": server_id,
+                            "policy": info_result.policy_name,
+                            "reason": info_result.reason,
+                            "metadata": info_result.metadata,
+                        }
+                    )
 
                 # Add server to result if allowed
                 if evaluation_result.is_allowed:
@@ -452,17 +510,21 @@ class SubscriptionManager:
             except Exception as e:
                 # Fail-secure: treat as DENY
                 server_id = pol_ctx.get_server_identifier()
-                context.metadata["policy_violations"].append({
-                    "server": server_id,
-                    "policy": "system",
-                    "reason": f"Policy evaluation error: {e}",
-                    "metadata": {"error_type": "system_exception"}
-                })
+                context.metadata["policy_violations"].append(
+                    {
+                        "server": server_id,
+                        "policy": "system",
+                        "reason": f"Policy evaluation error: {e}",
+                        "metadata": {"error_type": "system_exception"},
+                    }
+                )
                 continue  # Exclude server
 
         return result
 
-    def _process_middleware(self, servers: list, context: PipelineContext) -> tuple[list, bool]:
+    def _process_middleware(
+        self, servers: list, context: PipelineContext
+    ) -> tuple[list, bool]:
         """Process servers through middleware chain.
 
         Applies middleware transformations to server configurations
@@ -478,25 +540,27 @@ class SubscriptionManager:
 
         """
         try:
-            debug_level = getattr(context, 'debug_level', 0)
+            debug_level = getattr(context, "debug_level", 0)
 
             processed_servers = self.middleware_chain.process(servers, context=context)
 
             if debug_level >= 2:
-                print(f"[debug] servers after middleware: {processed_servers[:2]}{' ...' if len(processed_servers) > 3 else ''}")
+                print(
+                    f"[debug] servers after middleware: {processed_servers[:2]}{' ...' if len(processed_servers) > 3 else ''}"
+                )
 
             return processed_servers, True
 
         except Exception as e:
             err = self._create_pipeline_error(
-                ErrorType.INTERNAL,
-                "process_middleware",
-                str(e)
+                ErrorType.INTERNAL, "process_middleware", str(e)
             )
-            context.metadata['errors'].append(err)
+            context.metadata["errors"].append(err)
             return servers, False
 
-    def _postprocess_and_select(self, servers: list, user_routes: list, exclusions: list, mode: str) -> tuple[list, bool]:
+    def _postprocess_and_select(
+        self, servers: list, user_routes: list, exclusions: list, mode: str
+    ) -> tuple[list, bool]:
         """Apply post-processing and server selection.
 
         Handles the final stages of server processing including
@@ -522,7 +586,7 @@ class SubscriptionManager:
                 processed_servers,
                 user_routes=user_routes,
                 exclusions=exclusions,
-                mode=mode
+                mode=mode,
             )
 
             return selected_servers, True
@@ -531,7 +595,14 @@ class SubscriptionManager:
             # Post-processing errors are not critical - return original servers
             return servers, True
 
-    def get_servers(self, user_routes=None, exclusions=None, mode=None, context: PipelineContext = None, force_reload: bool = False) -> PipelineResult:
+    def get_servers(
+        self,
+        user_routes=None,
+        exclusions=None,
+        mode=None,
+        context: PipelineContext = None,
+        force_reload: bool = False,
+    ) -> PipelineResult:
         """Retrieve and process servers from subscription with comprehensive pipeline.
 
         Executes the complete subscription processing pipeline including fetching,
@@ -564,8 +635,8 @@ class SubscriptionManager:
         context = context or PipelineContext()
         if mode is not None:
             context.mode = mode
-        if 'errors' not in context.metadata:
-            context.metadata['errors'] = []
+        if "errors" not in context.metadata:
+            context.metadata["errors"] = []
 
         # Handle caching
         key = self._create_cache_key(mode, context)
@@ -584,23 +655,48 @@ class SubscriptionManager:
             # Stage 1: Fetch and validate raw data
             raw_data, success = self._fetch_and_validate_raw(context)
             if not success:
-                if context.mode == 'strict':
-                    return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
+                if context.mode == "strict":
+                    return PipelineResult(
+                        config=None,
+                        context=context,
+                        errors=context.metadata["errors"],
+                        success=False,
+                    )
                 else:
-                    return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
+                    return PipelineResult(
+                        config=[],
+                        context=context,
+                        errors=context.metadata["errors"],
+                        success=False,
+                    )
 
             # Stage 2: Parse servers
             servers, success = self._parse_servers(raw_data, context)
             if not success:
-                if context.mode == 'strict':
-                    return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
+                if context.mode == "strict":
+                    return PipelineResult(
+                        config=None,
+                        context=context,
+                        errors=context.metadata["errors"],
+                        success=False,
+                    )
                 else:
-                    return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
+                    return PipelineResult(
+                        config=[],
+                        context=context,
+                        errors=context.metadata["errors"],
+                        success=False,
+                    )
 
             # Stage 3: Validate parsed servers
             servers, success = self._validate_parsed_servers(servers, context)
             if not success:
-                return PipelineResult(config=[], context=context, errors=context.metadata['errors'], success=False)
+                return PipelineResult(
+                    config=[],
+                    context=context,
+                    errors=context.metadata["errors"],
+                    success=False,
+                )
 
             # Stage 3.5: Apply policies (security, geo, profile, etc.)
             servers = self._apply_policies(servers, context)
@@ -609,15 +705,27 @@ class SubscriptionManager:
             servers, success = self._process_middleware(servers, context)
             if not success:
                 # Middleware errors are not critical in tolerant mode
-                if context.mode == 'strict':
-                    return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
+                if context.mode == "strict":
+                    return PipelineResult(
+                        config=None,
+                        context=context,
+                        errors=context.metadata["errors"],
+                        success=False,
+                    )
 
             # Stage 5: Post-process and select
-            servers, success = self._postprocess_and_select(servers, user_routes, exclusions, mode)
+            servers, success = self._postprocess_and_select(
+                servers, user_routes, exclusions, mode
+            )
 
             # Create successful result - even if all servers were blocked by policies
             # This is not a pipeline failure, but a policy decision
-            result = PipelineResult(config=servers, context=context, errors=context.metadata['errors'], success=True)
+            result = PipelineResult(
+                config=servers,
+                context=context,
+                errors=context.metadata["errors"],
+                success=True,
+            )
 
             # Cache successful result
             with self._cache_lock:
@@ -627,15 +735,23 @@ class SubscriptionManager:
 
         except Exception as e:
             # Handle unexpected errors
-            err = self._create_pipeline_error(
-                ErrorType.INTERNAL,
-                "get_servers",
-                str(e)
+            err = self._create_pipeline_error(ErrorType.INTERNAL, "get_servers", str(e))
+            context.metadata["errors"].append(err)
+            return PipelineResult(
+                config=None,
+                context=context,
+                errors=context.metadata["errors"],
+                success=False,
             )
-            context.metadata['errors'].append(err)
-            return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
 
-    def export_config(self, exclusions=None, user_routes=None, context: PipelineContext = None, routing_plugin=None, export_manager: Optional[ExportManager] = None) -> PipelineResult:
+    def export_config(
+        self,
+        exclusions=None,
+        user_routes=None,
+        context: PipelineContext = None,
+        routing_plugin=None,
+        export_manager: Optional[ExportManager] = None,
+    ) -> PipelineResult:
         """Export subscription to final configuration format.
 
         Processes the subscription through the complete pipeline and exports
@@ -667,24 +783,44 @@ class SubscriptionManager:
         exclusions = exclusions or []
         user_routes = user_routes or []
         context = context or PipelineContext()
-        if 'errors' not in context.metadata:
-            context.metadata['errors'] = []
-        servers_result = self.get_servers(user_routes=user_routes, exclusions=exclusions, mode=context.mode, context=context)
+        if "errors" not in context.metadata:
+            context.metadata["errors"] = []
+        servers_result = self.get_servers(
+            user_routes=user_routes,
+            exclusions=exclusions,
+            mode=context.mode,
+            context=context,
+        )
         if not servers_result.success:
-            return PipelineResult(config=None, context=servers_result.context, errors=servers_result.errors, success=False)
+            return PipelineResult(
+                config=None,
+                context=servers_result.context,
+                errors=servers_result.errors,
+                success=False,
+            )
 
         # Используем переданный ExportManager или создаём дефолтный
         mgr = export_manager or ExportManager(routing_plugin=routing_plugin)
         try:
             config = mgr.export(servers_result.config, exclusions, user_routes, context)
-            return PipelineResult(config=config, context=context, errors=context.metadata['errors'], success=True)
+            return PipelineResult(
+                config=config,
+                context=context,
+                errors=context.metadata["errors"],
+                success=True,
+            )
         except Exception as e:
             err = PipelineError(
                 type=ErrorType.INTERNAL,
                 stage="export_config",
                 message=str(e),
                 context={},
-                timestamp=datetime.now(timezone.utc)
+                timestamp=datetime.now(timezone.utc),
             )
-            context.metadata['errors'].append(err)
-            return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)
+            context.metadata["errors"].append(err)
+            return PipelineResult(
+                config=None,
+                context=context,
+                errors=context.metadata["errors"],
+                success=False,
+            )

@@ -52,12 +52,14 @@ def create_backup_if_needed(output_file: str, backup: bool) -> Optional[str]:
     return None
 
 
-def write_config_to_file(config_data: dict, output_file: str, output_format: str) -> None:
+def write_config_to_file(
+    config_data: dict, output_file: str, output_format: str
+) -> None:
     """Write configuration to output file in specified format.
 
     Args:
         config_data: Configuration data to write
-        output_file: Output file path  
+        output_file: Output file path
         output_format: Output format (json or toml)
 
     Raises:
@@ -71,6 +73,7 @@ def write_config_to_file(config_data: dict, output_file: str, output_format: str
 
         if output_format == "toml":
             import toml
+
             config_content = toml.dumps(config_data)
         else:
             config_content = json.dumps(config_data, indent=2, ensure_ascii=False)

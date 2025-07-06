@@ -215,4 +215,4 @@ To report security issues:
 
 ---
 
-For detailed security information, see the [internal security documentation](internal/security/README.md). 
+For detailed security information, see the [internal security documentation](internal/security/README.md).

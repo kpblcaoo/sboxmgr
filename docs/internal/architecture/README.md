@@ -34,4 +34,4 @@ SBoxMgr follows a modular architecture with:
 
 ---
 
-**Last Updated:** 2025-01-05 
+**Last Updated:** 2025-01-05

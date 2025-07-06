@@ -1,13 +1,14 @@
 """Core exporter functions for sing-box configuration."""
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
-from sboxmgr.subscription.models import ParsedServer, ClientProfile, PipelineContext
-from .constants import SUPPORTED_PROTOCOLS, DEFAULT_URLTEST_CONFIG
-from .protocol_handlers import get_protocol_dispatcher
+from sboxmgr.subscription.models import ClientProfile, ParsedServer, PipelineContext
+
 from .config_processors import normalize_protocol_type, process_standard_server
+from .constants import DEFAULT_URLTEST_CONFIG, SUPPORTED_PROTOCOLS
 from .inbound_generator import generate_inbounds
+from .protocol_handlers import get_protocol_dispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,9 @@ def process_single_server(server: ParsedServer) -> Optional[Dict[str, Any]]:
 
     # Check protocol support
     if not is_supported_protocol(protocol_type):
-        logger.warning(f"Unsupported outbound type: {server.type}, skipping {server.address}:{server.port}")
+        logger.warning(
+            f"Unsupported outbound type: {server.type}, skipping {server.address}:{server.port}"
+        )
         return None
 
     # Handle special protocols
@@ -79,27 +82,18 @@ def create_modern_routing_rules(proxy_tags: List[str]) -> List[Dict[str, Any]]:
     rules = []
 
     # Private IP ranges - direct
-    rules.append({
-        "ip_cidr": [
-            "10.0.0.0/8",
-            "172.16.0.0/12",
-            "192.168.0.0/16",
-            "127.0.0.0/8"
-        ],
-        "outbound": "direct"
-    })
+    rules.append(
+        {
+            "ip_cidr": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8"],
+            "outbound": "direct",
+        }
+    )
 
     # Russian sites - direct
-    rules.append({
-        "rule_set": ["geoip-ru"],
-        "outbound": "direct"
-    })
+    rules.append({"rule_set": ["geoip-ru"], "outbound": "direct"})
 
     # Block ads and malware
-    rules.append({
-        "rule_set": ["geosite-ads"],
-        "outbound": "block"
-    })
+    rules.append({"rule_set": ["geosite-ads"], "outbound": "block"})
 
     return rules
 
@@ -107,7 +101,7 @@ def create_modern_routing_rules(proxy_tags: List[str]) -> List[Dict[str, Any]]:
 def singbox_export(
     servers: List[ParsedServer],
     routes: Optional[List[Dict[str, Any]]] = None,
-    client_profile: Optional[ClientProfile] = None
+    client_profile: Optional[ClientProfile] = None,
 ) -> Dict[str, Any]:
     """Export parsed servers to sing-box configuration format (modern approach).
 
@@ -150,10 +144,7 @@ def singbox_export(
     # Build final configuration
     config = {
         "outbounds": outbounds,
-        "route": {
-            "rules": routing_rules,
-            "final": final_action
-        }
+        "route": {"rules": routing_rules, "final": final_action},
     }
 
     # Add inbounds if client profile provided
@@ -167,7 +158,7 @@ def singbox_export_with_middleware(
     servers: List[ParsedServer],
     routes: Optional[List[Dict[str, Any]]] = None,
     client_profile: Optional[ClientProfile] = None,
-    context: Optional[PipelineContext] = None
+    context: Optional[PipelineContext] = None,
 ) -> Dict[str, Any]:
     """Export parsed servers to sing-box configuration format using middleware.
 
@@ -209,8 +200,8 @@ def singbox_export_with_middleware(
     final_action = "auto"  # default
 
     # Priority: context > client_profile > default
-    if context and 'routing' in context.metadata:
-        context_final = context.metadata['routing'].get('final_action')
+    if context and "routing" in context.metadata:
+        context_final = context.metadata["routing"].get("final_action")
         if context_final:
             final_action = context_final
     elif client_profile and client_profile.routing:
@@ -219,10 +210,7 @@ def singbox_export_with_middleware(
     # Build final configuration
     config = {
         "outbounds": outbounds,
-        "route": {
-            "rules": routing_rules,
-            "final": final_action
-        }
+        "route": {"rules": routing_rules, "final": final_action},
     }
 
     # Add inbounds if client profile provided

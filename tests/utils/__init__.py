@@ -1,1 +1,1 @@
-"""Test utilities for SBOXMGR.""" 
+"""Test utilities for SBOXMGR."""

@@ -5,9 +5,12 @@ server selection algorithms. Selectors choose which servers from a parsed
 subscription should be included in the final configuration based on various
 criteria like performance, geography, user preferences, etc.
 """
+
 from abc import ABC, abstractmethod
-from .models import ParsedServer
 from typing import List, Optional
+
+from .models import ParsedServer
+
 
 class BaseSelector(ABC):
     """Abstract base class for server selection strategies.
@@ -17,7 +20,13 @@ class BaseSelector(ABC):
     """
 
     @abstractmethod
-    def select(self, servers: List[ParsedServer], user_routes: Optional[List[str]] = None, exclusions: Optional[List[str]] = None, mode: Optional[str] = None) -> List[ParsedServer]:
+    def select(
+        self,
+        servers: List[ParsedServer],
+        user_routes: Optional[List[str]] = None,
+        exclusions: Optional[List[str]] = None,
+        mode: Optional[str] = None,
+    ) -> List[ParsedServer]:
         """Select servers based on the specified criteria.
 
         Args:
@@ -35,6 +44,7 @@ class BaseSelector(ABC):
         """
         pass
 
+
 class DefaultSelector(BaseSelector):
     """Default server selector that applies basic filtering rules.
 
@@ -42,7 +52,13 @@ class DefaultSelector(BaseSelector):
     It implements a simple tag-based filtering mechanism.
     """
 
-    def select(self, servers: List[ParsedServer], user_routes: Optional[List[str]] = None, exclusions: Optional[List[str]] = None, mode: Optional[str] = None) -> List[ParsedServer]:
+    def select(
+        self,
+        servers: List[ParsedServer],
+        user_routes: Optional[List[str]] = None,
+        exclusions: Optional[List[str]] = None,
+        mode: Optional[str] = None,
+    ) -> List[ParsedServer]:
         """Select servers using default filtering logic.
 
         Applies exclusion filtering first, then user route filtering if specified.
@@ -61,9 +77,16 @@ class DefaultSelector(BaseSelector):
         user_routes = user_routes or []
         exclusions = exclusions or []
         # Фильтрация по exclusions (по тегу)
-        filtered = [s for s in servers if getattr(s, 'meta', {}).get('tag') not in exclusions]
+        filtered = [
+            s for s in servers if getattr(s, "meta", {}).get("tag") not in exclusions
+        ]
         # Если user_routes указаны, фильтруем только по ним (по тегу)
         if user_routes:
-            filtered = [s for s in filtered if getattr(s, 'meta', {}).get('tag') in user_routes or '*' in user_routes]
+            filtered = [
+                s
+                for s in filtered
+                if getattr(s, "meta", {}).get("tag") in user_routes
+                or "*" in user_routes
+            ]
         # mode пока не используется, но можно расширить
         return filtered

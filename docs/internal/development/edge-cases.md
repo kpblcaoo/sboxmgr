@@ -85,4 +85,4 @@
 - [ ] Middleware: hooks/commands — expand edge tests for sandbox isolation, variable passing, bypass
 
 ## New behavior
-- Unsupported scheme (ftp, data, chrome-extension): safe fail, log, partial success (see SEC-FETCH-01) 
+- Unsupported scheme (ftp, data, chrome-extension): safe fail, log, partial success (see SEC-FETCH-01)

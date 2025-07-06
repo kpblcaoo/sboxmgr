@@ -14,7 +14,7 @@ According to ADR-0015, sboxmgr should focus on subscription processing and confi
 - **Replacement**: Move to sboxagent
 
 ### 2. Service Management Code
-- **Files**: 
+- **Files**:
   - `src/sboxmgr/service/manage.py`
   - `src/sboxmgr/server/management.py`
 - **Functionality**: sing-box service start/stop/restart
@@ -105,4 +105,4 @@ According to ADR-0015, sboxmgr should focus on subscription processing and confi
 - ✅ **All tests pass** after cleanup
 - ✅ **No breaking changes** to core functionality
 
-The agent cleanup is now **COMPLETE**. sboxmgr is ready for the next phase of architectural improvements. 
+The agent cleanup is now **COMPLETE**. sboxmgr is ready for the next phase of architectural improvements.

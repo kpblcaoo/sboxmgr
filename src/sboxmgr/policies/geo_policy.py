@@ -4,7 +4,8 @@ This module provides policies for geographic restrictions including
 country-based and ASN-based filtering.
 """
 
-from typing import Any, Optional, List
+from typing import Any, List, Optional
+
 from .base import BasePolicy, PolicyContext, PolicyResult
 from .utils import extract_metadata_field, validate_mode
 
@@ -20,9 +21,12 @@ class CountryPolicy(BasePolicy):
     description = "Restricts servers by country code"
     group = "geo"
 
-    def __init__(self, allowed_countries: Optional[List[str]] = None,
-                 blocked_countries: Optional[List[str]] = None,
-                 mode: str = "whitelist"):
+    def __init__(
+        self,
+        allowed_countries: Optional[List[str]] = None,
+        blocked_countries: Optional[List[str]] = None,
+        mode: str = "whitelist",
+    ):
         """Initialize country policy.
 
         Args:
@@ -66,14 +70,14 @@ class CountryPolicy(BasePolicy):
                 return PolicyResult.deny(
                     f"Country {country} not in allowed list",
                     country=country,
-                    allowed_countries=list(self.allowed_countries)
+                    allowed_countries=list(self.allowed_countries),
                 )
         elif self.mode == "blacklist":
             if country in self.blocked_countries:
                 return PolicyResult.deny(
                     f"Country {country} is blocked",
                     country=country,
-                    blocked_countries=list(self.blocked_countries)
+                    blocked_countries=list(self.blocked_countries),
                 )
 
         return PolicyResult.allow(f"Country {country} is allowed")
@@ -89,9 +93,7 @@ class CountryPolicy(BasePolicy):
 
         """
         country = extract_metadata_field(
-            server,
-            "country",
-            fallback_fields=["cc", "geo", "location"]
+            server, "country", fallback_fields=["cc", "geo", "location"]
         )
         return str(country).upper() if country else None
 
@@ -107,9 +109,12 @@ class ASNPolicy(BasePolicy):
     description = "Restricts servers by ASN"
     group = "geo"
 
-    def __init__(self, allowed_asns: Optional[List[int]] = None,
-                 blocked_asns: Optional[List[int]] = None,
-                 mode: str = "blacklist"):
+    def __init__(
+        self,
+        allowed_asns: Optional[List[int]] = None,
+        blocked_asns: Optional[List[int]] = None,
+        mode: str = "blacklist",
+    ):
         """Initialize ASN policy.
 
         Args:
@@ -153,14 +158,14 @@ class ASNPolicy(BasePolicy):
                 return PolicyResult.deny(
                     f"ASN {asn} not in allowed list",
                     asn=asn,
-                    allowed_asns=list(self.allowed_asns)
+                    allowed_asns=list(self.allowed_asns),
                 )
         elif self.mode == "blacklist":
             if asn in self.blocked_asns:
                 return PolicyResult.deny(
                     f"ASN {asn} is blocked",
                     asn=asn,
-                    blocked_asns=list(self.blocked_asns)
+                    blocked_asns=list(self.blocked_asns),
                 )
 
         return PolicyResult.allow(f"ASN {asn} is allowed")
@@ -176,9 +181,7 @@ class ASNPolicy(BasePolicy):
 
         """
         asn = extract_metadata_field(
-            server,
-            "asn",
-            fallback_fields=["autonomous_system"]
+            server, "asn", fallback_fields=["autonomous_system"]
         )
         if asn:
             try:

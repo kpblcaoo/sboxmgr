@@ -4,16 +4,18 @@ This module provides the main SingBoxConfig class that combines all
 sing-box configuration components into a single validated model.
 """
 
-from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
-from .enums import LogLevel
+
+from pydantic import BaseModel, Field, field_validator
+
 from .dns import DnsConfig
-from .ntp import NtpConfig
+from .enums import LogLevel
+from .experimental import ExperimentalConfig
 from .inbounds import Inbound
+from .ntp import NtpConfig
+from .observatory import ObservatoryConfig
 from .outbounds import Outbound
 from .routing import RouteConfig
-from .experimental import ExperimentalConfig
-from .observatory import ObservatoryConfig
 
 
 class LogConfig(BaseModel):
@@ -21,7 +23,9 @@ class LogConfig(BaseModel):
 
     disabled: Optional[bool] = Field(default=None, description="Disable logging.")
     level: Optional[LogLevel] = Field(default=None, description="Log level.")
-    timestamp: Optional[bool] = Field(default=None, description="Include timestamp in log messages.")
+    timestamp: Optional[bool] = Field(
+        default=None, description="Include timestamp in log messages."
+    )
     output: Optional[str] = Field(default=None, description="Log output path.")
 
     model_config = {"extra": "forbid"}
@@ -34,23 +38,35 @@ class SingBoxConfig(BaseModel):
     protocols and features. It is validated against sing-box 1.11.13.
 
     Features:
-    - 17 inbound protocols (mixed, socks, http, shadowsocks, vmess, vless, 
-      trojan, hysteria2, wireguard, tuic, shadowtls, direct, anytls, naive, 
+    - 17 inbound protocols (mixed, socks, http, shadowsocks, vmess, vless,
+      trojan, hysteria2, wireguard, tuic, shadowtls, direct, anytls, naive,
       redirect, tproxy, tun)
-    - 18 outbound protocols (shadowsocks, vmess, vless, trojan, hysteria2, 
-      wireguard, http, socks, tuic, shadowtls, dns, direct, block, selector, 
+    - 18 outbound protocols (shadowsocks, vmess, vless, trojan, hysteria2,
+      wireguard, http, socks, tuic, shadowtls, dns, direct, block, selector,
       urltest, hysteria, anytls, ssh, tor)
     - Complete DNS, routing, and experimental features support
     """
 
     log: Optional[LogConfig] = Field(default=None, description="Logging configuration.")
     dns: Optional[DnsConfig] = Field(default=None, description="DNS configuration.")
-    ntp: Optional[NtpConfig] = Field(default=None, description="NTP configuration for time synchronization.")
-    inbounds: Optional[List[Inbound]] = Field(default=None, description="List of inbound configurations.")
-    outbounds: Optional[List[Outbound]] = Field(default=None, description="List of outbound configurations.")
-    route: Optional[RouteConfig] = Field(default=None, description="Routing configuration.")
-    experimental: Optional[ExperimentalConfig] = Field(default=None, description="Experimental features configuration.")
-    observatory: Optional[ObservatoryConfig] = Field(default=None, description="Server probing configuration.")
+    ntp: Optional[NtpConfig] = Field(
+        default=None, description="NTP configuration for time synchronization."
+    )
+    inbounds: Optional[List[Inbound]] = Field(
+        default=None, description="List of inbound configurations."
+    )
+    outbounds: Optional[List[Outbound]] = Field(
+        default=None, description="List of outbound configurations."
+    )
+    route: Optional[RouteConfig] = Field(
+        default=None, description="Routing configuration."
+    )
+    experimental: Optional[ExperimentalConfig] = Field(
+        default=None, description="Experimental features configuration."
+    )
+    observatory: Optional[ObservatoryConfig] = Field(
+        default=None, description="Server probing configuration."
+    )
 
     model_config = {"extra": "forbid"}
 
@@ -64,7 +80,9 @@ class SingBoxConfig(BaseModel):
                 raise ValueError("Duplicate outbound tags found")
 
             # Check unique server/port combinations
-            servers = [(o.server, o.server_port) for o in v if o.server and o.server_port]
+            servers = [
+                (o.server, o.server_port) for o in v if o.server and o.server_port
+            ]
             if len(servers) != len(set(servers)):
                 raise ValueError("Duplicate server/port found")
         return v

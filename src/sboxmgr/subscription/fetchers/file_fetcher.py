@@ -5,12 +5,15 @@ from local files. It supports various file formats and provides caching
 mechanisms for improved performance when processing multiple subscriptions
 from the same file sources.
 """
-from pathlib import Path
+
 import threading
+from pathlib import Path
 from typing import Dict, Tuple
-from ..models import SubscriptionSource
+
 from ..base_fetcher import BaseFetcher
+from ..models import SubscriptionSource
 from ..registry import register
+
 
 @register("file")
 class FileFetcher(BaseFetcher):
@@ -73,7 +76,9 @@ class FileFetcher(BaseFetcher):
         size_limit = self._get_size_limit()
 
         if file_size > size_limit:
-            raise ValueError(f"File size ({file_size} bytes) exceeds limit ({size_limit} bytes)")
+            raise ValueError(
+                f"File size ({file_size} bytes) exceeds limit ({size_limit} bytes)"
+            )
 
         with open(path, "rb") as f:
             data = f.read()
@@ -87,5 +92,3 @@ class FileFetcher(BaseFetcher):
         """Валидирует схему URL для FileFetcher."""
         if not url.startswith("file://"):
             raise ValueError(f"FileFetcher supports only file:// URLs, got: {url}")
-
-

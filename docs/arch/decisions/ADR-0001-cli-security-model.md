@@ -16,4 +16,4 @@ _This ADR was written retrospectively to document a decision made earlier in the
 ## Consequences
 + Прозрачность и зрелость архитектуры
 + Лёгкость аудита и развития
-– Требует дисциплины при добавлении новых фич 
+– Требует дисциплины при добавлении новых фич

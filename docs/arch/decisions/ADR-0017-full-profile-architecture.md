@@ -2,8 +2,8 @@
 
 ## Статус
 
-**Дата:** 2025-06-29  
-**Статус:** ✅ **ПРИНЯТО**  
+**Дата:** 2025-06-29
+**Статус:** ✅ **ПРИНЯТО**
 **Контекст:** Единая конфигурационная сущность для всего пайплайна
 
 ## TL;DR
@@ -18,7 +18,7 @@
 
 Текущая архитектура имеет разрозненные конфигурационные файлы:
 - `config.json` - настройки CLI
-- `exclusions.json` - исключения серверов  
+- `exclusions.json` - исключения серверов
 - `subscriptions.yaml` - источники подписок
 - Различные CLI флаги для маршрутизации и экспорта
 
@@ -191,4 +191,4 @@ sboxmgr apply --profile profiles/home.json --override-subscription https://new-s
 - ADR-0005: Extensible Routing Layer
 - ADR-0009: Configuration System Architecture
 - ADR-0015: Agent-Installer Separation & Installation Strategy
-- ADR-0016: Pydantic as Single Source of Truth for Validation and Schema Generation 
+- ADR-0016: Pydantic as Single Source of Truth for Validation and Schema Generation

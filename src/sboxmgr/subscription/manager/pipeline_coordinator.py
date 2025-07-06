@@ -1,6 +1,6 @@
 """Pipeline coordination functionality for subscription manager."""
 
-from typing import List, Tuple, Any, Optional
+from typing import Any, List, Optional, Tuple
 
 from ..models import PipelineContext, PipelineResult
 from .error_handler import ErrorHandler
@@ -18,7 +18,7 @@ class PipelineCoordinator:
         middleware_chain=None,
         postprocessor=None,
         selector=None,
-        error_handler: ErrorHandler = None
+        error_handler: ErrorHandler = None,
     ):
         """Initialize pipeline coordinator.
 
@@ -48,6 +48,7 @@ class PipelineCoordinator:
         """
         try:
             from ..policies.base import get_registered_policies
+
             policies = get_registered_policies()
 
             for policy_name, policy_class in policies.items():
@@ -59,7 +60,7 @@ class PipelineCoordinator:
                     err = self.error_handler.create_internal_error(
                         f"policy_{policy_name}",
                         str(e),
-                        {"policy": policy_name, "server_count": len(servers)}
+                        {"policy": policy_name, "server_count": len(servers)},
                     )
                     self.error_handler.add_error_to_context(context, err)
 
@@ -68,14 +69,14 @@ class PipelineCoordinator:
         except Exception as e:
             # If policy system fails, return servers unchanged
             err = self.error_handler.create_internal_error(
-                "apply_policies",
-                str(e),
-                {"server_count": len(servers)}
+                "apply_policies", str(e), {"server_count": len(servers)}
             )
             self.error_handler.add_error_to_context(context, err)
             return servers
 
-    def process_middleware(self, servers: List[Any], context: PipelineContext) -> Tuple[List[Any], bool]:
+    def process_middleware(
+        self, servers: List[Any], context: PipelineContext
+    ) -> Tuple[List[Any], bool]:
         """Process servers through middleware chain.
 
         Applies registered middleware transformations to enrich,
@@ -98,9 +99,7 @@ class PipelineCoordinator:
 
         except Exception as e:
             err = self.error_handler.create_internal_error(
-                "middleware_processing",
-                str(e),
-                {"input_server_count": len(servers)}
+                "middleware_processing", str(e), {"input_server_count": len(servers)}
             )
             self.error_handler.add_error_to_context(context, err)
             return servers, False
@@ -110,7 +109,7 @@ class PipelineCoordinator:
         servers: List[Any],
         user_routes: Optional[List[str]],
         exclusions: Optional[List[str]],
-        mode: str
+        mode: str,
     ) -> Tuple[List[Any], bool]:
         """Post-process and select servers based on criteria.
 
@@ -136,10 +135,7 @@ class PipelineCoordinator:
             # Apply server selection
             if self.selector:
                 selected_servers = self.selector.select(
-                    processed_servers,
-                    user_routes,
-                    exclusions,
-                    mode
+                    processed_servers, user_routes, exclusions, mode
                 )
             else:
                 selected_servers = processed_servers
@@ -150,10 +146,7 @@ class PipelineCoordinator:
             return servers, False
 
     def create_pipeline_result(
-        self,
-        servers: List[Any],
-        context: PipelineContext,
-        success: bool
+        self, servers: List[Any], context: PipelineContext, success: bool
     ) -> PipelineResult:
         """Create pipeline result object.
 
@@ -165,13 +158,12 @@ class PipelineCoordinator:
         Returns:
             PipelineResult object with servers and context.
         """
-        errors = context.metadata.get('errors', []) if hasattr(context, 'metadata') else []
+        errors = (
+            context.metadata.get("errors", []) if hasattr(context, "metadata") else []
+        )
 
         return PipelineResult(
-            config=servers,
-            context=context,
-            errors=errors,
-            success=success
+            config=servers, context=context, errors=errors, success=success
         )
 
     def export_configuration(
@@ -181,7 +173,7 @@ class PipelineCoordinator:
         user_routes: Optional[List[str]] = None,
         context: Optional[PipelineContext] = None,
         routing_plugin=None,
-        export_manager=None
+        export_manager=None,
     ) -> PipelineResult:
         """Export final configuration using export manager.
 
@@ -209,24 +201,18 @@ class PipelineCoordinator:
             return PipelineResult(
                 config=config,
                 context=context,
-                errors=context.metadata.get('errors', []) if context else [],
-                success=True
+                errors=context.metadata.get("errors", []) if context else [],
+                success=True,
             )
 
         except Exception as e:
             if context:
-                err = self.error_handler.create_internal_error(
-                    "export_config",
-                    str(e)
-                )
+                err = self.error_handler.create_internal_error("export_config", str(e))
                 self.error_handler.add_error_to_context(context, err)
-                errors = context.metadata.get('errors', [])
+                errors = context.metadata.get("errors", [])
             else:
                 errors = []
 
             return PipelineResult(
-                config=None,
-                context=context,
-                errors=errors,
-                success=False
+                config=None, context=context, errors=errors, success=False
             )

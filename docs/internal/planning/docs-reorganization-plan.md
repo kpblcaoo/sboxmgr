@@ -179,4 +179,4 @@ mv docs/struct.json docs/internal/structure/project-layout.json
 ---
 
 **Status:** Planning Phase
-**Next Steps:** Implement directory structure and begin file migration 
+**Next Steps:** Implement directory structure and begin file migration

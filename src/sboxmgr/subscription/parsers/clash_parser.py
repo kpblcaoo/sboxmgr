@@ -4,10 +4,13 @@ This module provides the ClashParser class for parsing Clash-format YAML
 subscription data. It converts Clash proxy configurations into standardized
 ParsedServer objects for consistent processing across different client formats.
 """
+
 import yaml
-from ..models import ParsedServer
+
 from ..base_parser import BaseParser
+from ..models import ParsedServer
 from ..registry import register
+
 
 @register("clash")
 class ClashParser(BaseParser):
@@ -52,12 +55,14 @@ class ClashParser(BaseParser):
             print("[ClashParser] No proxies section found or section is empty.")
             return []
         for p in proxies:
-            servers.append(ParsedServer(
-                type=p.get("type", "unknown"),
-                address=p.get("server", ""),
-                port=int(p.get("port", 0)),
-                security=p.get("cipher", None),
-                meta=p
-            ))
+            servers.append(
+                ParsedServer(
+                    type=p.get("type", "unknown"),
+                    address=p.get("server", ""),
+                    port=int(p.get("port", 0)),
+                    security=p.get("cipher", None),
+                    meta=p,
+                )
+            )
         # Убираем безусловный print - логирование будет в manager.py
         return servers

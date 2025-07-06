@@ -1,21 +1,23 @@
 """Chain builders for postprocessors and middleware."""
 
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
 import typer
 
 from sboxmgr.i18n.t import t
-from .validators import validate_postprocessors, validate_middleware
+
+from .validators import validate_middleware, validate_postprocessors
 
 # Import Phase 3 components
 try:
+    from sboxmgr.subscription.middleware import EnrichmentMiddleware, LoggingMiddleware
     from sboxmgr.subscription.postprocessors import (
-        PostProcessorChain,
         GeoFilterPostProcessor,
+        LatencySortPostProcessor,
+        PostProcessorChain,
         TagFilterPostProcessor,
-        LatencySortPostProcessor
     )
-    from sboxmgr.subscription.middleware import LoggingMiddleware, EnrichmentMiddleware
+
     PHASE3_AVAILABLE = True
 except ImportError:
     PHASE3_AVAILABLE = False
@@ -27,7 +29,9 @@ except ImportError:
     EnrichmentMiddleware = None
 
 
-def create_postprocessor_chain_from_list(processors: List[str]) -> Optional['PostProcessorChain']:
+def create_postprocessor_chain_from_list(
+    processors: List[str],
+) -> Optional["PostProcessorChain"]:
     """Create PostProcessorChain from list of processor names.
 
     Args:
@@ -48,9 +52,9 @@ def create_postprocessor_chain_from_list(processors: List[str]) -> Optional['Pos
 
     processor_instances = []
     processor_map = {
-        'geo_filter': GeoFilterPostProcessor,
-        'tag_filter': TagFilterPostProcessor,
-        'latency_sort': LatencySortPostProcessor
+        "geo_filter": GeoFilterPostProcessor,
+        "tag_filter": TagFilterPostProcessor,
+        "latency_sort": LatencySortPostProcessor,
     }
 
     for proc_name in processors:
@@ -59,10 +63,10 @@ def create_postprocessor_chain_from_list(processors: List[str]) -> Optional['Pos
         typer.echo(f"✅ {t('cli.success.postprocessor_added').format(name=proc_name)}")
 
     if processor_instances:
-        return PostProcessorChain(processor_instances, {
-            'execution_mode': 'sequential',
-            'error_strategy': 'continue'
-        })
+        return PostProcessorChain(
+            processor_instances,
+            {"execution_mode": "sequential", "error_strategy": "continue"},
+        )
 
     return None
 
@@ -87,10 +91,7 @@ def create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
     validate_middleware(middleware)
 
     middleware_instances = []
-    middleware_map = {
-        'logging': LoggingMiddleware,
-        'enrichment': EnrichmentMiddleware
-    }
+    middleware_map = {"logging": LoggingMiddleware, "enrichment": EnrichmentMiddleware}
 
     for mw_name in middleware:
         # Use default configuration for CLI-specified middleware

@@ -10,7 +10,7 @@ enrichment/
 ├── core.py          # Main EnrichmentMiddleware coordinator
 ├── basic.py         # Basic metadata enrichment
 ├── geo.py           # Geographic information enrichment
-├── performance.py   # Performance metrics enrichment  
+├── performance.py   # Performance metrics enrichment
 ├── security.py      # Security analysis enrichment
 ├── custom.py        # Custom profile-based enrichment
 └── README.md        # This documentation
@@ -218,4 +218,4 @@ from sboxmgr.subscription.middleware.enrichment import (
 2. **Testability**: Each enricher can be tested independently
 3. **Performance**: Optional enrichers reduce processing overhead
 4. **Extensibility**: Easy to add new enrichment types
-5. **Reusability**: Individual enrichers can be used in other contexts 
+5. **Reusability**: Individual enrichers can be used in other contexts

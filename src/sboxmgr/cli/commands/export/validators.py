@@ -6,25 +6,23 @@ from typing import List, Optional
 import typer
 
 from sboxmgr.i18n.t import t
+
 from .constants import (
-    ALLOWED_POSTPROCESSORS,
     ALLOWED_MIDDLEWARE,
+    ALLOWED_POSTPROCESSORS,
     VALID_FINAL_ROUTES,
-    VALID_OUTBOUND_TYPES
+    VALID_OUTBOUND_TYPES,
 )
 
 
 def validate_flag_combinations(
-    dry_run: bool,
-    agent_check: bool,
-    validate_only: bool,
-    url: Optional[str]
+    dry_run: bool, agent_check: bool, validate_only: bool, url: Optional[str]
 ) -> None:
     """Validate flag combinations for mutual exclusivity.
 
     Args:
         dry_run: Dry run mode flag
-        agent_check: Agent check mode flag  
+        agent_check: Agent check mode flag
         validate_only: Validate only mode flag
         url: Subscription URL
 
@@ -32,15 +30,22 @@ def validate_flag_combinations(
         typer.Exit: If invalid flag combination detected
     """
     if dry_run and agent_check:
-        typer.echo("❌ Error: --dry-run and --agent-check are mutually exclusive", err=True)
+        typer.echo(
+            "❌ Error: --dry-run and --agent-check are mutually exclusive", err=True
+        )
         raise typer.Exit(1)
 
     if validate_only and url:
-        typer.echo("❌ Error: --validate-only cannot be used with subscription URL", err=True)
+        typer.echo(
+            "❌ Error: --validate-only cannot be used with subscription URL", err=True
+        )
         raise typer.Exit(1)
 
     if validate_only and (dry_run or agent_check):
-        typer.echo("❌ Error: --validate-only cannot be used with --dry-run or --agent-check", err=True)
+        typer.echo(
+            "❌ Error: --validate-only cannot be used with --dry-run or --agent-check",
+            err=True,
+        )
         raise typer.Exit(1)
 
 
@@ -54,8 +59,14 @@ def validate_postprocessors(processors: List[str]) -> None:
         typer.Exit: If invalid postprocessor names found
     """
     if invalid := [x for x in processors if x not in ALLOWED_POSTPROCESSORS]:
-        typer.echo(f"❌ {t('cli.error.unknown_postprocessors').format(invalid=', '.join(invalid))}", err=True)
-        typer.echo(f"💡 {t('cli.error.available_postprocessors').format(available=', '.join(ALLOWED_POSTPROCESSORS))}", err=True)
+        typer.echo(
+            f"❌ {t('cli.error.unknown_postprocessors').format(invalid=', '.join(invalid))}",
+            err=True,
+        )
+        typer.echo(
+            f"💡 {t('cli.error.available_postprocessors').format(available=', '.join(ALLOWED_POSTPROCESSORS))}",
+            err=True,
+        )
         raise typer.Exit(1)
 
 
@@ -69,8 +80,14 @@ def validate_middleware(middleware: List[str]) -> None:
         typer.Exit: If invalid middleware names found
     """
     if invalid := [x for x in middleware if x not in ALLOWED_MIDDLEWARE]:
-        typer.echo(f"❌ {t('cli.error.unknown_middleware').format(invalid=', '.join(invalid))}", err=True)
-        typer.echo(f"💡 {t('cli.error.available_middleware').format(available=', '.join(ALLOWED_MIDDLEWARE))}", err=True)
+        typer.echo(
+            f"❌ {t('cli.error.unknown_middleware').format(invalid=', '.join(invalid))}",
+            err=True,
+        )
+        typer.echo(
+            f"💡 {t('cli.error.available_middleware').format(available=', '.join(ALLOWED_MIDDLEWARE))}",
+            err=True,
+        )
         raise typer.Exit(1)
 
 
@@ -88,11 +105,14 @@ def validate_final_route(final_route: str) -> None:
         return
 
     # Check if it's a valid outbound tag (alphanumeric + hyphen/underscore)
-    if re.match(r'^[a-zA-Z0-9_-]+$', final_route):
+    if re.match(r"^[a-zA-Z0-9_-]+$", final_route):
         return
 
     typer.echo(f"❌ Invalid final route: {final_route}", err=True)
-    typer.echo(f"💡 Valid values: {', '.join(VALID_FINAL_ROUTES)} or a valid outbound tag", err=True)
+    typer.echo(
+        f"💡 Valid values: {', '.join(VALID_FINAL_ROUTES)} or a valid outbound tag",
+        err=True,
+    )
     raise typer.Exit(1)
 
 
@@ -105,7 +125,7 @@ def validate_exclude_outbounds(exclude_outbounds: str) -> None:
     Raises:
         typer.Exit: If exclude outbounds contains invalid values
     """
-    exclude_list = [o.strip() for o in exclude_outbounds.split(',') if o.strip()]
+    exclude_list = [o.strip() for o in exclude_outbounds.split(",") if o.strip()]
 
     invalid_types = []
     for outbound_type in exclude_list:
@@ -122,7 +142,7 @@ def validate_and_parse_cli_parameters(
     postprocessors: Optional[str],
     middleware: Optional[str],
     final_route: Optional[str],
-    exclude_outbounds: Optional[str]
+    exclude_outbounds: Optional[str],
 ) -> tuple[Optional[list[str]], Optional[list[str]]]:
     """Validate and parse CLI parameters.
 
@@ -142,12 +162,14 @@ def validate_and_parse_cli_parameters(
     middleware_list = None
 
     if postprocessors:
-        postprocessors_list = [p.strip() for p in postprocessors.split(',') if p.strip()]
+        postprocessors_list = [
+            p.strip() for p in postprocessors.split(",") if p.strip()
+        ]
         if postprocessors_list:
             validate_postprocessors(postprocessors_list)
 
     if middleware:
-        middleware_list = [m.strip() for m in middleware.split(',') if m.strip()]
+        middleware_list = [m.strip() for m in middleware.split(",") if m.strip()]
         if middleware_list:
             validate_middleware(middleware_list)
 

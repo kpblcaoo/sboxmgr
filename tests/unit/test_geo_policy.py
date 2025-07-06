@@ -1,7 +1,7 @@
 """Unit tests for geographic policies."""
 
-from src.sboxmgr.policies.geo_policy import CountryPolicy, ASNPolicy
 from src.sboxmgr.policies.base import PolicyContext
+from src.sboxmgr.policies.geo_policy import ASNPolicy, CountryPolicy
 
 
 class TestCountryPolicy:
@@ -74,11 +74,12 @@ class TestCountryPolicy:
 
     def test_country_extraction_from_attributes(self):
         """Test country extraction from object attributes."""
+
         class TestServer:
             def __init__(self):
                 self.country = "US"
                 self.name = "test"
-        
+
         policy = CountryPolicy(allowed_countries=["US"])
         server = TestServer()
         context = PolicyContext(server=server)
@@ -156,11 +157,12 @@ class TestASNPolicy:
 
     def test_asn_extraction_from_attributes(self):
         """Test ASN extraction from object attributes."""
+
         class TestServer:
             def __init__(self):
                 self.asn = 12345
                 self.name = "test"
-        
+
         policy = ASNPolicy(allowed_asns=[12345])
         server = TestServer()
         context = PolicyContext(server=server)
@@ -175,4 +177,4 @@ class TestASNPolicy:
         context = PolicyContext(server=server)
         result = policy.evaluate(context)
         assert result.allowed
-        assert "No ASN information available" in result.reason 
+        assert "No ASN information available" in result.reason

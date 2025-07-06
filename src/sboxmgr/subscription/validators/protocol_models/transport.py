@@ -4,8 +4,9 @@ This module provides transport-specific configuration models for various protoco
 including WebSocket, HTTP/2, gRPC, and QUIC transports.
 """
 
+from typing import Dict, List, Literal, Optional
+
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Literal
 
 
 class RealityConfig(BaseModel):
@@ -13,7 +14,9 @@ class RealityConfig(BaseModel):
 
     public_key: str = Field(..., description="Reality public key")
     short_id: Optional[str] = Field(None, description="Reality short ID")
-    max_time_difference: Optional[int] = Field(None, ge=0, description="Maximum time difference in seconds")
+    max_time_difference: Optional[int] = Field(
+        None, ge=0, description="Maximum time difference in seconds"
+    )
     fingerprint: Optional[str] = Field(None, description="Browser fingerprint")
 
     class Config:
@@ -24,7 +27,20 @@ class UtlsConfig(BaseModel):
     """uTLS configuration for TLS client emulation."""
 
     enabled: bool = Field(True, description="Enable uTLS")
-    fingerprint: Optional[Literal["chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random", "randomized"]] = Field(None, description="Browser fingerprint to emulate")
+    fingerprint: Optional[
+        Literal[
+            "chrome",
+            "firefox",
+            "safari",
+            "ios",
+            "android",
+            "edge",
+            "360",
+            "qq",
+            "random",
+            "randomized",
+        ]
+    ] = Field(None, description="Browser fingerprint to emulate")
 
     class Config:
         extra = "forbid"
@@ -35,8 +51,12 @@ class WsConfig(BaseModel):
 
     path: str = Field(..., description="WebSocket path")
     headers: Optional[Dict[str, str]] = Field(None, description="WebSocket headers")
-    max_early_data: Optional[int] = Field(None, ge=0, description="Maximum early data size")
-    use_browser_forwarding: Optional[bool] = Field(None, description="Use browser forwarding")
+    max_early_data: Optional[int] = Field(
+        None, ge=0, description="Maximum early data size"
+    )
+    use_browser_forwarding: Optional[bool] = Field(
+        None, description="Use browser forwarding"
+    )
 
     class Config:
         extra = "forbid"
@@ -57,10 +77,18 @@ class GrpcConfig(BaseModel):
 
     service_name: str = Field(..., description="gRPC service name")
     multi_mode: Optional[bool] = Field(None, description="Enable multi mode")
-    idle_timeout: Optional[int] = Field(None, ge=0, description="Idle timeout in seconds")
-    health_check_timeout: Optional[int] = Field(None, ge=0, description="Health check timeout in seconds")
-    permit_without_stream: Optional[bool] = Field(None, description="Permit without stream")
-    initial_windows_size: Optional[int] = Field(None, ge=0, description="Initial window size")
+    idle_timeout: Optional[int] = Field(
+        None, ge=0, description="Idle timeout in seconds"
+    )
+    health_check_timeout: Optional[int] = Field(
+        None, ge=0, description="Health check timeout in seconds"
+    )
+    permit_without_stream: Optional[bool] = Field(
+        None, description="Permit without stream"
+    )
+    initial_windows_size: Optional[int] = Field(
+        None, ge=0, description="Initial window size"
+    )
 
     class Config:
         extra = "forbid"

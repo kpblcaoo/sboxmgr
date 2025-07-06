@@ -6,10 +6,11 @@ dependency injection while maintaining backward compatibility.
 """
 
 from typing import Optional
+
 from .interfaces import (
-    SubscriptionManagerInterface,
+    ExclusionManagerInterface,
     ExportManagerInterface,
-    ExclusionManagerInterface
+    SubscriptionManagerInterface,
 )
 
 
@@ -42,6 +43,7 @@ def create_default_export_manager() -> ExportManagerInterface:
 
     """
     from sboxmgr.export.export_manager import ExportManager
+
     return ExportManager()
 
 
@@ -53,6 +55,7 @@ def create_default_exclusion_manager() -> ExclusionManagerInterface:
 
     """
     from sboxmgr.core.exclusions.manager import ExclusionManager
+
     return ExclusionManager.default()
 
 
@@ -76,10 +79,13 @@ class ManagerFactory:
 
         """
         from sboxmgr.subscription.manager import SubscriptionManager
+
         return SubscriptionManager(source, **kwargs)
 
     @staticmethod
-    def create_export_manager(export_format: str = "singbox", **kwargs) -> ExportManagerInterface:
+    def create_export_manager(
+        export_format: str = "singbox", **kwargs
+    ) -> ExportManagerInterface:
         """Create export manager with specific format.
 
         Args:
@@ -91,10 +97,13 @@ class ManagerFactory:
 
         """
         from sboxmgr.export.export_manager import ExportManager
+
         return ExportManager(export_format=export_format, **kwargs)
 
     @staticmethod
-    def create_exclusion_manager(file_path: Optional[str] = None, **kwargs) -> ExclusionManagerInterface:
+    def create_exclusion_manager(
+        file_path: Optional[str] = None, **kwargs
+    ) -> ExclusionManagerInterface:
         """Create exclusion manager with specific file path.
 
         Args:
@@ -106,8 +115,10 @@ class ManagerFactory:
 
         """
         from sboxmgr.core.exclusions.manager import ExclusionManager
+
         if file_path:
             from pathlib import Path
+
             return ExclusionManager(file_path=Path(file_path), **kwargs)
         else:
             return ExclusionManager.default()

@@ -1,16 +1,22 @@
 """Decorators for event handler registration."""
 
 import functools
-from typing import Callable, Set, Optional, Any
-from .types import EventType, EventData
+from typing import Any, Callable, Optional, Set
+
 from .core import EventHandler, get_event_manager
+from .types import EventData, EventType
 
 
 class DecoratedEventHandler(EventHandler):
     """Event handler wrapper for decorated functions."""
 
-    def __init__(self, func: Callable, event_types: Set[EventType],
-                 source_filter: Optional[str] = None, priority: int = 50):
+    def __init__(
+        self,
+        func: Callable,
+        event_types: Set[EventType],
+        source_filter: Optional[str] = None,
+        priority: int = 50,
+    ):
         """Initialize decorated event handler.
 
         Args:
@@ -40,21 +46,26 @@ class DecoratedEventHandler(EventHandler):
         return self.func(event_data)
 
 
-def event_handler(*event_types: EventType, source: Optional[str] = None,
-                  priority: int = 50, auto_register: bool = True):
+def event_handler(
+    *event_types: EventType,
+    source: Optional[str] = None,
+    priority: int = 50,
+    auto_register: bool = True,
+):
     """Mark a function as an event handler."""
+
     def decorator(func: Callable) -> Callable:
         handler = DecoratedEventHandler(
             func=func,
             event_types=set(event_types),
             source_filter=source,
-            priority=priority
+            priority=priority,
         )
 
         if auto_register:
             get_event_manager().register_handler(handler)
 
-        setattr(func, '_event_handler', handler)
+        setattr(func, "_event_handler", handler)
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -65,21 +76,26 @@ def event_handler(*event_types: EventType, source: Optional[str] = None,
     return decorator
 
 
-def async_event_handler(*event_types: EventType, source: Optional[str] = None,
-                       priority: int = 50, auto_register: bool = True):
+def async_event_handler(
+    *event_types: EventType,
+    source: Optional[str] = None,
+    priority: int = 50,
+    auto_register: bool = True,
+):
     """Mark an async function as an event handler."""
+
     def decorator(func: Callable) -> Callable:
         handler = DecoratedEventHandler(
             func=func,
             event_types=set(event_types),
             source_filter=source,
-            priority=priority
+            priority=priority,
         )
 
         if auto_register:
             get_event_manager().register_handler(handler)
 
-        setattr(func, '_event_handler', handler)
+        setattr(func, "_event_handler", handler)
 
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
@@ -88,4 +104,3 @@ def async_event_handler(*event_types: EventType, source: Optional[str] = None,
         return wrapper
 
     return decorator
-

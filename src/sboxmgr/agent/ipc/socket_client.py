@@ -12,7 +12,7 @@ Usage example:
 """
 
 import socket
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 try:
     from sbox_common.protocols.socket.framed_json import FramedJSONProtocol
@@ -21,6 +21,7 @@ except ImportError:
         "sbox_common package not found. Please install it with: "
         "pip install -e ../sbox-common"
     )
+
 
 class SocketClient:
     """Client for framed JSON protocol over Unix socket."""
@@ -76,7 +77,9 @@ class SocketClient:
         # Read frame header
         header = self._recv_exact(self.protocol.FRAME_HEADER_SIZE)
         if len(header) != self.protocol.FRAME_HEADER_SIZE:
-            raise ConnectionError(f"Connection closed: incomplete header received ({len(header)}/{self.protocol.FRAME_HEADER_SIZE} bytes)")
+            raise ConnectionError(
+                f"Connection closed: incomplete header received ({len(header)}/{self.protocol.FRAME_HEADER_SIZE} bytes)"
+            )
 
         length, version = self._unpack_header(header)
         if version != self.protocol.PROTOCOL_VERSION:
@@ -85,7 +88,9 @@ class SocketClient:
         # Read message body
         body = self._recv_exact(length)
         if len(body) != length:
-            raise ConnectionError(f"Connection closed: incomplete message body received ({len(body)}/{length} bytes)")
+            raise ConnectionError(
+                f"Connection closed: incomplete message body received ({len(body)}/{length} bytes)"
+            )
 
         message, _ = self.protocol.decode_message(header + body)
         return message
@@ -100,7 +105,7 @@ class SocketClient:
             Received bytes (may be less than n if connection closed).
 
         """
-        buf = b''
+        buf = b""
         while len(buf) < n:
             chunk = self.sock.recv(n - len(buf))
             if not chunk:  # Connection closed
@@ -125,4 +130,5 @@ class SocketClient:
 
         """
         import struct
-        return struct.unpack('>II', header)
+
+        return struct.unpack(">II", header)

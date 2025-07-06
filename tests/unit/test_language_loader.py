@@ -1,4 +1,3 @@
-
 from sboxmgr.i18n.loader import LanguageLoader
 
 
@@ -16,7 +15,7 @@ def test_get_with_source():
 def test_sanitize_ansi_sequences():
     """Test comprehensive ANSI escape sequence sanitization."""
     loader = LanguageLoader(lang="en")
-    
+
     # Test various ANSI sequences
     test_cases = [
         # Basic color codes
@@ -31,12 +30,12 @@ def test_sanitize_ansi_sequences():
         ("Normal \x1b[31mcolored\x1b[0m text", "Normal colored text"),
         # Malformed sequences (should be cleaned)
         ("\x1b[31", ""),  # Incomplete sequence
-        ("\x1b[", ""),    # Very incomplete
+        ("\x1b[", ""),  # Very incomplete
         # No ANSI sequences
         ("Plain text", "Plain text"),
         ("", ""),
     ]
-    
+
     for input_text, expected in test_cases:
         sanitized = loader.sanitize({"test": input_text})["test"]
         assert sanitized == expected, f"Failed for input: {repr(input_text)}"
@@ -45,13 +44,13 @@ def test_sanitize_ansi_sequences():
 def test_sanitize_length_limit():
     """Test that sanitization respects length limits."""
     loader = LanguageLoader(lang="en")
-    
+
     # Test key length limit
     long_key = "a" * 150
     result = loader.sanitize({long_key: "value"})
     assert long_key not in result
-    
+
     # Test value length limit
     long_value = "x" * 600
     result = loader.sanitize({"test": long_value})
-    assert len(result["test"]) == 500 
+    assert len(result["test"]) == 500

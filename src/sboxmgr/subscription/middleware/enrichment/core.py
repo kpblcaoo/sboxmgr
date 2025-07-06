@@ -1,17 +1,16 @@
 """Core enrichment middleware implementation."""
 
 import time
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
-from ..base import TransformMiddleware
-from ...models import ParsedServer, PipelineContext
 from ....profiles.models import FullProfile
-
+from ...models import ParsedServer, PipelineContext
+from ..base import TransformMiddleware
 from .basic import BasicEnricher
+from .custom import CustomEnricher
 from .geo import GeoEnricher
 from .performance import PerformanceEnricher
 from .security import SecurityEnricher
-from .custom import CustomEnricher
 
 
 class EnrichmentMiddleware(TransformMiddleware):
@@ -51,14 +50,22 @@ class EnrichmentMiddleware(TransformMiddleware):
         super().__init__(config)
 
         # Configuration
-        self.enable_geo_enrichment = self.config.get('enable_geo_enrichment', True)
-        self.enable_performance_enrichment = self.config.get('enable_performance_enrichment', True)
-        self.enable_security_enrichment = self.config.get('enable_security_enrichment', True)
-        self.enable_custom_enrichment = self.config.get('enable_custom_enrichment', True)
-        self.geo_database_path = self.config.get('geo_database_path')
-        self.performance_cache_duration = self.config.get('performance_cache_duration', 300)
-        self.custom_enrichers = self.config.get('custom_enrichers', [])
-        self.max_enrichment_time = self.config.get('max_enrichment_time', 1.0)
+        self.enable_geo_enrichment = self.config.get("enable_geo_enrichment", True)
+        self.enable_performance_enrichment = self.config.get(
+            "enable_performance_enrichment", True
+        )
+        self.enable_security_enrichment = self.config.get(
+            "enable_security_enrichment", True
+        )
+        self.enable_custom_enrichment = self.config.get(
+            "enable_custom_enrichment", True
+        )
+        self.geo_database_path = self.config.get("geo_database_path")
+        self.performance_cache_duration = self.config.get(
+            "performance_cache_duration", 300
+        )
+        self.custom_enrichers = self.config.get("custom_enrichers", [])
+        self.max_enrichment_time = self.config.get("max_enrichment_time", 1.0)
 
         # Initialize enrichers
         self.basic_enricher = BasicEnricher()
@@ -71,7 +78,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Enrich servers with additional metadata.
 
@@ -95,23 +102,27 @@ class EnrichmentMiddleware(TransformMiddleware):
 
             try:
                 # Apply enrichment
-                enriched_server = self._enrich_server(server, context, profile, enrichment_config)
+                enriched_server = self._enrich_server(
+                    server, context, profile, enrichment_config
+                )
                 enriched_servers.append(enriched_server)
 
                 # Check time limit
                 if time.time() - start_time > self.max_enrichment_time:
                     # If enrichment is taking too long, add remaining servers without enrichment
-                    enriched_servers.extend(servers[len(enriched_servers):])
+                    enriched_servers.extend(servers[len(enriched_servers) :])
                     break
 
             except Exception as e:
                 # On error, add server with error metadata
-                server.meta['enrichment_error'] = str(e)
+                server.meta["enrichment_error"] = str(e)
                 enriched_servers.append(server)
 
         return enriched_servers
 
-    def _extract_enrichment_config(self, profile: Optional[FullProfile]) -> Dict[str, Any]:
+    def _extract_enrichment_config(
+        self, profile: Optional[FullProfile]
+    ) -> Dict[str, Any]:
         """Extract enrichment configuration from profile.
 
         Args:
@@ -121,19 +132,23 @@ class EnrichmentMiddleware(TransformMiddleware):
             Dictionary with enrichment configuration
         """
         enrichment_config = {
-            'enable_geo_enrichment': self.enable_geo_enrichment,
-            'enable_performance_enrichment': self.enable_performance_enrichment,
-            'enable_security_enrichment': self.enable_security_enrichment,
-            'enable_custom_enrichment': self.enable_custom_enrichment,
-            'custom_enrichers': self.custom_enrichers.copy()
+            "enable_geo_enrichment": self.enable_geo_enrichment,
+            "enable_performance_enrichment": self.enable_performance_enrichment,
+            "enable_security_enrichment": self.enable_security_enrichment,
+            "enable_custom_enrichment": self.enable_custom_enrichment,
+            "custom_enrichers": self.custom_enrichers.copy(),
         }
 
         if not profile:
             return enrichment_config
 
         # Check for enrichment-specific metadata in profile
-        if hasattr(profile, 'metadata') and profile.metadata and 'enrichment' in profile.metadata:
-            enrichment_meta = profile.metadata['enrichment']
+        if (
+            hasattr(profile, "metadata")
+            and profile.metadata
+            and "enrichment" in profile.metadata
+        ):
+            enrichment_meta = profile.metadata["enrichment"]
             for key in enrichment_config:
                 if key in enrichment_meta:
                     enrichment_config[key] = enrichment_meta[key]
@@ -145,7 +160,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-        enrichment_config: Optional[Dict[str, Any]] = None
+        enrichment_config: Optional[Dict[str, Any]] = None,
     ) -> ParsedServer:
         """Enrich a single server with metadata.
 
@@ -165,24 +180,21 @@ class EnrichmentMiddleware(TransformMiddleware):
         server = self.basic_enricher.enrich(server, context)
 
         # Apply geographic enrichment
-        if enrichment_config['enable_geo_enrichment']:
+        if enrichment_config["enable_geo_enrichment"]:
             server = self.geo_enricher.enrich(server, context)
 
         # Apply performance enrichment
-        if enrichment_config['enable_performance_enrichment']:
+        if enrichment_config["enable_performance_enrichment"]:
             server = self.performance_enricher.enrich(server, context)
 
         # Apply security enrichment
-        if enrichment_config['enable_security_enrichment']:
+        if enrichment_config["enable_security_enrichment"]:
             server = self.security_enricher.enrich(server, context)
 
         # Apply custom enrichment
-        if enrichment_config['enable_custom_enrichment']:
+        if enrichment_config["enable_custom_enrichment"]:
             server = self.custom_enricher.enrich(
-                server,
-                context,
-                profile,
-                enrichment_config['custom_enrichers']
+                server, context, profile, enrichment_config["custom_enrichers"]
             )
 
         return server

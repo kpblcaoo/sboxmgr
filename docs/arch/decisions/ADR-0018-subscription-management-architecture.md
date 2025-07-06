@@ -2,8 +2,8 @@
 
 ## Статус
 
-**Дата:** 2025-06-29  
-**Статус:** ✅ **ПРИНЯТО**  
+**Дата:** 2025-06-29
+**Статус:** ✅ **ПРИНЯТО**
 **Контекст:** Расширенное управление подписками с профилями, изоляцией и автоматическим переключением
 
 ## TL;DR
@@ -37,7 +37,7 @@ subscriptions:
     priority: 1
     tags: ["china", "streaming"]
     description: "Китайские серверы для стриминга"
-    
+
   - id: "work_ss"
     url: "https://sub.example.com/work"
     type: "shadowsocks"
@@ -45,7 +45,7 @@ subscriptions:
     priority: 2
     tags: ["work", "stable"]
     description: "Рабочие серверы"
-    
+
   - id: "backup_clash"
     url: "https://sub.example.com/backup"
     type: "clash"
@@ -67,7 +67,7 @@ subscriptions:
       "priority": 1
     },
     {
-      "id": "work_ss", 
+      "id": "work_ss",
       "enabled": false,
       "priority": 2
     }
@@ -120,13 +120,13 @@ policies:
       - source: "china_vless"
         max_latency: 300
         switch_to: "backup_clash"
-    
+
   - name: "geo_switch"
     condition:
       - when: "user_location == 'CN'"
         enable: ["china_vless"]
         disable: ["work_ss"]
-    
+
   - name: "availability_check"
     condition:
       - source: "work_ss"
@@ -141,7 +141,7 @@ class SubscriptionMonitor:
     def check_health(self, source_id: str) -> HealthStatus
     def measure_latency(self, source_id: str) -> float
     def get_user_location(self) -> str
-    
+
 class PolicyEngine:
     def evaluate_policies(self, context: RuntimeContext) -> List[Action]
     def apply_actions(self, actions: List[Action]) -> None
@@ -174,7 +174,7 @@ sboxmgr export --priority 1,2
 - **Расширение**: добавлены поля enabled, priority, tags, description
 - **Обратная совместимость**: старые подписки работают без изменений
 
-### ✅ ADR-0017: Full Profile Architecture  
+### ✅ ADR-0017: Full Profile Architecture
 - **Интеграция**: подписки управляются через профили
 - **Единый источник**: profile.json содержит настройки подписок
 - **CLI**: `sboxmgr apply --profile` применяет настройки подписок
@@ -247,4 +247,4 @@ sboxmgr export --priority 1,2
 - ADR-0017: Full Profile Architecture
 - ADR-0016: Pydantic as Single Source of Truth for Validation and Schema Generation
 - ADR-0015: Agent-Installer Separation & Installation Strategy
-- ADR-0012: Service Architecture & Dual-Path Support 
+- ADR-0012: Service Architecture & Dual-Path Support

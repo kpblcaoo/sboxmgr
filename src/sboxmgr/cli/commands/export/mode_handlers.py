@@ -8,17 +8,25 @@ from typing import Optional
 
 import typer
 
-from sboxmgr.i18n.t import t
 from sboxmgr.agent import AgentBridge, AgentNotAvailableError, ClientType
 from sboxmgr.config.validation import validate_config_file
+from sboxmgr.i18n.t import t
 from sboxmgr.subscription.models import ClientProfile
 
-from .file_handlers import write_config_to_file, determine_output_format, create_backup_if_needed
-from .config_generators import generate_config_from_subscription, generate_profile_from_cli
+from .config_generators import (
+    generate_config_from_subscription,
+    generate_profile_from_cli,
+)
+from .file_handlers import (
+    create_backup_if_needed,
+    determine_output_format,
+    write_config_to_file,
+)
 
 # Import Phase 3 components
 try:
     from sboxmgr.profiles.models import FullProfile
+
     PHASE3_AVAILABLE = True
 except ImportError:
     PHASE3_AVAILABLE = False
@@ -41,7 +49,9 @@ def run_agent_check(config_file: str, agent_check: bool) -> bool:
     try:
         bridge = AgentBridge()
         if not bridge.is_available():
-            typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
+            typer.echo(
+                "ℹ️  sboxagent not available - skipping external validation", err=True
+            )
             return True
 
         # Validate config with agent
@@ -61,7 +71,9 @@ def run_agent_check(config_file: str, agent_check: bool) -> bool:
             return False
 
     except AgentNotAvailableError:
-        typer.echo("ℹ️  sboxagent not available - skipping external validation", err=True)
+        typer.echo(
+            "ℹ️  sboxagent not available - skipping external validation", err=True
+        )
         return True
     except Exception as e:
         typer.echo(f"⚠️  Agent check failed: {e}", err=True)
@@ -69,9 +81,7 @@ def run_agent_check(config_file: str, agent_check: bool) -> bool:
 
 
 def handle_profile_generation(
-    generate_profile: str,
-    postprocessors: Optional[str],
-    middleware: Optional[str]
+    generate_profile: str, postprocessors: Optional[str], middleware: Optional[str]
 ) -> None:
     """Handle profile generation mode.
 
@@ -83,8 +93,14 @@ def handle_profile_generation(
     Raises:
         typer.Exit: Always exits with code 0
     """
-    postprocessors_list = [p.strip() for p in postprocessors.split(',') if p.strip()] if postprocessors else None
-    middleware_list = [m.strip() for m in middleware.split(',') if m.strip()] if middleware else None
+    postprocessors_list = (
+        [p.strip() for p in postprocessors.split(",") if p.strip()]
+        if postprocessors
+        else None
+    )
+    middleware_list = (
+        [m.strip() for m in middleware.split(",") if m.strip()] if middleware else None
+    )
     generate_profile_from_cli(postprocessors_list, middleware_list, generate_profile)
     raise typer.Exit(0)
 
@@ -125,11 +141,11 @@ def process_export_mode(
     user_agent: Optional[str],
     no_user_agent: bool,
     debug: int,
-    loaded_profile: Optional['FullProfile'],
-    loaded_client_profile: Optional['ClientProfile'],
+    loaded_profile: Optional["FullProfile"],
+    loaded_client_profile: Optional["ClientProfile"],
     postprocessors_list: Optional[list[str]],
     middleware_list: Optional[list[str]],
-    backup: bool
+    backup: bool,
 ) -> None:
     """Process export mode (default, dry-run, or agent-check).
 
@@ -168,7 +184,7 @@ def process_export_mode(
         export_format=export_format,
         debug=debug,
         profile=loaded_profile,
-        client_profile=loaded_client_profile
+        client_profile=loaded_client_profile,
     )
 
     # Handle different modes
@@ -223,10 +239,10 @@ def handle_legacy_modes(
     no_user_agent: bool,
     export_format: str,
     debug: int,
-    loaded_profile: Optional['FullProfile'],
-    loaded_client_profile: Optional['ClientProfile'],
+    loaded_profile: Optional["FullProfile"],
+    loaded_client_profile: Optional["ClientProfile"],
     output: str,
-    format: str
+    format: str,
 ) -> None:
     """Handle legacy dry-run and agent-check modes from original implementation.
 
@@ -248,7 +264,13 @@ def handle_legacy_modes(
     """
     # Generate configuration from subscription
     config_data = generate_config_from_subscription(
-        url, user_agent, no_user_agent, export_format, debug, loaded_profile, loaded_client_profile
+        url,
+        user_agent,
+        no_user_agent,
+        export_format,
+        debug,
+        loaded_profile,
+        loaded_client_profile,
     )
 
     # Determine output format
@@ -257,10 +279,13 @@ def handle_legacy_modes(
     # Handle dry-run mode
     if dry_run:
         typer.echo("🔍 " + t("cli.dry_run_mode"))
-        with tempfile.NamedTemporaryFile("w+", suffix=f".{output_format}", delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(
+            "w+", suffix=f".{output_format}", delete=False
+        ) as tmp:
             temp_path = tmp.name
             if output_format == "toml":
                 import toml
+
                 tmp.write(toml.dumps(config_data))
             else:
                 tmp.write(json.dumps(config_data, indent=2, ensure_ascii=False))

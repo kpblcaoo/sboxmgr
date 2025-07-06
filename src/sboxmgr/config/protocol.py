@@ -5,7 +5,9 @@ protocol configurations (VMess, VLESS, Trojan, Shadowsocks, etc.). It provides
 normalization, validation, and conversion functions for protocol parameters
 and connection details.
 """
+
 from logging import error
+
 
 def validate_protocol(config, supported_protocols):
     """Validate protocol and extract parameters."""

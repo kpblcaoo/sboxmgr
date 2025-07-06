@@ -85,4 +85,4 @@ validate(instance=config, schema=schema)
 ---
 
 **Last Updated**: 2025-01-05
-**Generated**: 15 schemas from Pydantic models 
+**Generated**: 15 schemas from Pydantic models

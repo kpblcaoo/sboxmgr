@@ -10,11 +10,17 @@ from typing import Optional
 
 import typer
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
+from rich.table import Table
 
-from sboxmgr.profiles.models import FullProfile, LegacyProfile, SubscriptionProfile, FilterProfile, ExportProfile
 from sboxmgr.logging.core import get_logger
+from sboxmgr.profiles.models import (
+    ExportProfile,
+    FilterProfile,
+    FullProfile,
+    LegacyProfile,
+    SubscriptionProfile,
+)
 
 # Don't initialize logger at module level - it will be done in functions
 console = Console()
@@ -24,9 +30,15 @@ app = typer.Typer(name="profile", help="Profile management commands")
 @app.command()
 def apply(
     profile_path: str = typer.Argument(..., help="Path to profile JSON file"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Show what would be applied without making changes"),
-    override_subscription: Optional[str] = typer.Option(None, "--override-subscription", help="Override subscription URL"),
-    output: Optional[str] = typer.Option(None, "--output", "-o", help="Override output file path"),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Show what would be applied without making changes"
+    ),
+    override_subscription: Optional[str] = typer.Option(
+        None, "--override-subscription", help="Override subscription URL"
+    ),
+    output: Optional[str] = typer.Option(
+        None, "--output", "-o", help="Override output file path"
+    ),
 ) -> None:
     """Apply a profile configuration (ADR-0017)."""
     logger = get_logger(__name__)  # Initialize logger inside function
@@ -165,7 +177,7 @@ def _load_profile(profile_path: str) -> FullProfile:
         raise FileNotFoundError(f"Profile file not found: {profile_path}")
 
     try:
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
         # Try to parse as FullProfile first
@@ -188,33 +200,27 @@ def _convert_legacy_profile(legacy: LegacyProfile) -> FullProfile:
     subscriptions = []
     for i, url in enumerate(legacy.subscriptions):
         subscriptions.append(
-            SubscriptionProfile(
-                id=f"legacy_{i}",
-                enabled=True,
-                priority=i + 1
-            )
+            SubscriptionProfile(id=f"legacy_{i}", enabled=True, priority=i + 1)
         )
 
     # Create filter profile from exclusions
-    filters = FilterProfile(
-        exclusions=legacy.exclusions
-    )
+    filters = FilterProfile(exclusions=legacy.exclusions)
 
     # Create export profile
-    export = ExportProfile(
-        format=legacy.export_format
-    )
+    export = ExportProfile(format=legacy.export_format)
 
     return FullProfile(
         id="converted_legacy",
         description="Converted from legacy format",
         subscriptions=subscriptions,
         filters=filters,
-        export=export
+        export=export,
     )
 
 
-def _apply_profile(profile: FullProfile, override_subscription: Optional[str], output: Optional[str]) -> None:
+def _apply_profile(
+    profile: FullProfile, override_subscription: Optional[str], output: Optional[str]
+) -> None:
     """Apply a profile configuration."""
     # TODO: Implement full profile application
     # For now, just show what would be applied
@@ -236,15 +242,17 @@ def _apply_profile(profile: FullProfile, override_subscription: Optional[str], o
 
 def _show_profile_preview(profile: FullProfile) -> None:
     """Show a preview of what the profile would do."""
-    console.print(Panel(
-        f"[bold]Profile Preview: {profile.id}[/bold]\n"
-        f"Description: {profile.description or 'No description'}\n"
-        f"Subscriptions: {len(profile.subscriptions)}\n"
-        f"Export format: {profile.export.format}\n"
-        f"Output file: {profile.export.output_file}",
-        title="Profile Preview",
-        border_style="blue"
-    ))
+    console.print(
+        Panel(
+            f"[bold]Profile Preview: {profile.id}[/bold]\n"
+            f"Description: {profile.description or 'No description'}\n"
+            f"Subscriptions: {len(profile.subscriptions)}\n"
+            f"Export format: {profile.export.format}\n"
+            f"Output file: {profile.export.output_file}",
+            title="Profile Preview",
+            border_style="blue",
+        )
+    )
 
 
 def _show_profile_summary(profile: FullProfile) -> None:
@@ -265,27 +273,31 @@ def _show_profile_summary(profile: FullProfile) -> None:
 
 def _show_profile_explanation(profile: FullProfile) -> None:
     """Explain what the profile does."""
-    console.print(Panel(
-        f"[bold]What this profile does:[/bold]\n\n"
-        f"• [cyan]Subscriptions:[/cyan] {len(profile.subscriptions)} subscription(s) will be processed\n"
-        f"• [cyan]Filtering:[/cyan] {len(profile.filters.exclude_tags)} tags excluded, "
-        f"{len(profile.filters.only_tags)} tags required\n"
-        f"• [cyan]Routing:[/cyan] Default route: {profile.routing.default_route}\n"
-        f"• [cyan]Export:[/cyan] Will generate {profile.export.format.value} config\n"
-        f"• [cyan]Output:[/cyan] Will save to {profile.export.output_file}",
-        title=f"Profile Explanation: {profile.id}",
-        border_style="green"
-    ))
+    console.print(
+        Panel(
+            f"[bold]What this profile does:[/bold]\n\n"
+            f"• [cyan]Subscriptions:[/cyan] {len(profile.subscriptions)} subscription(s) will be processed\n"
+            f"• [cyan]Filtering:[/cyan] {len(profile.filters.exclude_tags)} tags excluded, "
+            f"{len(profile.filters.only_tags)} tags required\n"
+            f"• [cyan]Routing:[/cyan] Default route: {profile.routing.default_route}\n"
+            f"• [cyan]Export:[/cyan] Will generate {profile.export.format.value} config\n"
+            f"• [cyan]Output:[/cyan] Will save to {profile.export.output_file}",
+            title=f"Profile Explanation: {profile.id}",
+            border_style="green",
+        )
+    )
 
 
 def _show_profile_diff(profile1: FullProfile, profile2: FullProfile) -> None:
     """Show differences between two profiles."""
-    console.print(Panel(
-        f"[bold]Profile Comparison[/bold]\n\n"
-        f"[cyan]{profile1.id}[/cyan] vs [cyan]{profile2.id}[/cyan]\n\n"
-        f"• Subscriptions: {len(profile1.subscriptions)} vs {len(profile2.subscriptions)}\n"
-        f"• Export format: {profile1.export.format.value} vs {profile2.export.format.value}\n"
-        f"• Output file: {profile1.export.output_file} vs {profile2.export.output_file}",
-        title="Profile Diff",
-        border_style="yellow"
-    ))
+    console.print(
+        Panel(
+            f"[bold]Profile Comparison[/bold]\n\n"
+            f"[cyan]{profile1.id}[/cyan] vs [cyan]{profile2.id}[/cyan]\n\n"
+            f"• Subscriptions: {len(profile1.subscriptions)} vs {len(profile2.subscriptions)}\n"
+            f"• Export format: {profile1.export.format.value} vs {profile2.export.format.value}\n"
+            f"• Output file: {profile1.export.output_file} vs {profile2.export.output_file}",
+            title="Profile Diff",
+            border_style="yellow",
+        )
+    )

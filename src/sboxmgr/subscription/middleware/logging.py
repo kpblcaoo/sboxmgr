@@ -9,11 +9,12 @@ Implements Phase 3 architecture with profile integration.
 """
 
 import time
-from typing import List, Optional, Dict, Any
-from .base import ChainableMiddleware
-from ..models import ParsedServer, PipelineContext
-from ...profiles.models import FullProfile
+from typing import Any, Dict, List, Optional
+
 from ...logging.core import get_logger
+from ...profiles.models import FullProfile
+from ..models import ParsedServer, PipelineContext
+from .base import ChainableMiddleware
 
 
 class LoggingMiddleware(ChainableMiddleware):
@@ -53,13 +54,13 @@ class LoggingMiddleware(ChainableMiddleware):
 
         """
         super().__init__(config)
-        self.log_level = self.config.get('log_level', 'info')
-        self.log_server_details = self.config.get('log_server_details', False)
-        self.log_performance = self.config.get('log_performance', True)
-        self.log_errors_only = self.config.get('log_errors_only', False)
-        self.max_servers_logged = self.config.get('max_servers_logged', 5)
-        self.include_metadata = self.config.get('include_metadata', False)
-        self.log_format = self.config.get('log_format', 'simple')
+        self.log_level = self.config.get("log_level", "info")
+        self.log_server_details = self.config.get("log_server_details", False)
+        self.log_performance = self.config.get("log_performance", True)
+        self.log_errors_only = self.config.get("log_errors_only", False)
+        self.max_servers_logged = self.config.get("max_servers_logged", 5)
+        self.include_metadata = self.config.get("include_metadata", False)
+        self.log_format = self.config.get("log_format", "simple")
 
         self.logger = get_logger(__name__)
         self._start_time = 0.0
@@ -68,7 +69,7 @@ class LoggingMiddleware(ChainableMiddleware):
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> None:
         """Log processing start information.
 
@@ -84,14 +85,17 @@ class LoggingMiddleware(ChainableMiddleware):
         log_config = self._extract_log_config(profile)
 
         if not self.log_errors_only:
-            if self.log_format == 'json':
-                self.logger.info("Pipeline processing started", extra={
-                    'event': 'pipeline_start',
-                    'trace_id': context.trace_id,
-                    'server_count': len(servers),
-                    'source': context.source,
-                    'profile_id': profile.id if profile else None
-                })
+            if self.log_format == "json":
+                self.logger.info(
+                    "Pipeline processing started",
+                    extra={
+                        "event": "pipeline_start",
+                        "trace_id": context.trace_id,
+                        "server_count": len(servers),
+                        "source": context.source,
+                        "profile_id": profile.id if profile else None,
+                    },
+                )
             else:
                 self.logger.info(
                     f"Processing {len(servers)} servers "
@@ -99,14 +103,16 @@ class LoggingMiddleware(ChainableMiddleware):
                 )
 
             # Log server details if enabled
-            if self.log_server_details and log_config.get('log_server_details', self.log_server_details):
+            if self.log_server_details and log_config.get(
+                "log_server_details", self.log_server_details
+            ):
                 self._log_server_details(servers, context, "input")
 
     def post_process(
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> None:
         """Log processing completion information.
 
@@ -122,34 +128,43 @@ class LoggingMiddleware(ChainableMiddleware):
         log_config = self._extract_log_config(profile)
 
         if not self.log_errors_only:
-            if self.log_format == 'json':
-                self.logger.info("Pipeline processing completed", extra={
-                    'event': 'pipeline_complete',
-                    'trace_id': context.trace_id,
-                    'input_count': context.metadata.get('input_server_count', 0),
-                    'output_count': len(servers),
-                    'duration_seconds': round(duration, 3),
-                    'servers_per_second': round(len(servers) / duration, 2) if duration > 0 else 0
-                })
+            if self.log_format == "json":
+                self.logger.info(
+                    "Pipeline processing completed",
+                    extra={
+                        "event": "pipeline_complete",
+                        "trace_id": context.trace_id,
+                        "input_count": context.metadata.get("input_server_count", 0),
+                        "output_count": len(servers),
+                        "duration_seconds": round(duration, 3),
+                        "servers_per_second": (
+                            round(len(servers) / duration, 2) if duration > 0 else 0
+                        ),
+                    },
+                )
             else:
                 self.logger.info(
                     f"Processing completed: {len(servers)} servers processed "
-                    f"in {duration:.3f}s ({len(servers)/duration:.2f} servers/sec)"
+                    f"in {duration:.3f}s ({len(servers) / duration:.2f} servers/sec)"
                 )
 
             # Log performance metrics if enabled
-            if self.log_performance and log_config.get('log_performance', self.log_performance):
+            if self.log_performance and log_config.get(
+                "log_performance", self.log_performance
+            ):
                 self._log_performance_metrics(servers, context, duration)
 
             # Log server details if enabled
-            if self.log_server_details and log_config.get('log_server_details', self.log_server_details):
+            if self.log_server_details and log_config.get(
+                "log_server_details", self.log_server_details
+            ):
                 self._log_server_details(servers, context, "output")
 
     def _do_process(
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Main processing logic - pass through with logging.
 
@@ -163,7 +178,7 @@ class LoggingMiddleware(ChainableMiddleware):
 
         """
         # Store input count for post-processing metrics
-        context.metadata['input_server_count'] = len(servers)
+        context.metadata["input_server_count"] = len(servers)
 
         # Log any errors in server data
         self._log_server_errors(servers, context)
@@ -182,36 +197,33 @@ class LoggingMiddleware(ChainableMiddleware):
 
         """
         log_config = {
-            'log_level': self.log_level,
-            'log_server_details': self.log_server_details,
-            'log_performance': self.log_performance,
-            'log_errors_only': self.log_errors_only,
-            'max_servers_logged': self.max_servers_logged,
-            'include_metadata': self.include_metadata,
-            'log_format': self.log_format
+            "log_level": self.log_level,
+            "log_server_details": self.log_server_details,
+            "log_performance": self.log_performance,
+            "log_errors_only": self.log_errors_only,
+            "max_servers_logged": self.max_servers_logged,
+            "include_metadata": self.include_metadata,
+            "log_format": self.log_format,
         }
 
         if not profile:
             return log_config
 
         # Check for logging-specific metadata in profile
-        if 'logging' in profile.metadata:
-            logging_meta = profile.metadata['logging']
+        if "logging" in profile.metadata:
+            logging_meta = profile.metadata["logging"]
             for key in log_config:
                 if key in logging_meta:
                     log_config[key] = logging_meta[key]
 
         # Check agent configuration for logging settings
         if profile.agent:
-            log_config['log_level'] = profile.agent.log_level
+            log_config["log_level"] = profile.agent.log_level
 
         return log_config
 
     def _log_server_details(
-        self,
-        servers: List[ParsedServer],
-        context: PipelineContext,
-        stage: str
+        self, servers: List[ParsedServer], context: PipelineContext, stage: str
     ) -> None:
         """Log details about servers.
 
@@ -221,39 +233,40 @@ class LoggingMiddleware(ChainableMiddleware):
             stage: Processing stage ('input' or 'output')
 
         """
-        servers_to_log = servers[:self.max_servers_logged]
+        servers_to_log = servers[: self.max_servers_logged]
 
         for i, server in enumerate(servers_to_log):
-            if self.log_format == 'json':
+            if self.log_format == "json":
                 server_data = {
-                    'event': f'server_{stage}',
-                    'trace_id': context.trace_id,
-                    'server_index': i,
-                    'type': server.type,
-                    'address': server.address,
-                    'port': server.port,
-                    'tag': server.tag
+                    "event": f"server_{stage}",
+                    "trace_id": context.trace_id,
+                    "server_index": i,
+                    "type": server.type,
+                    "address": server.address,
+                    "port": server.port,
+                    "tag": server.tag,
                 }
 
                 if self.include_metadata:
-                    server_data['metadata'] = server.meta
+                    server_data["metadata"] = server.meta
 
                 self.logger.debug(f"Server {stage} details", extra=server_data)
             else:
-                metadata_str = f" (meta: {server.meta})" if self.include_metadata else ""
+                metadata_str = (
+                    f" (meta: {server.meta})" if self.include_metadata else ""
+                )
                 self.logger.debug(
-                    f"Server {i+1}: {server.type}://{server.address}:{server.port} "
+                    f"Server {i + 1}: {server.type}://{server.address}:{server.port} "
                     f"[{server.tag or 'no-tag'}]{metadata_str}"
                 )
 
         if len(servers) > self.max_servers_logged:
-            self.logger.debug(f"... and {len(servers) - self.max_servers_logged} more servers")
+            self.logger.debug(
+                f"... and {len(servers) - self.max_servers_logged} more servers"
+            )
 
     def _log_performance_metrics(
-        self,
-        servers: List[ParsedServer],
-        context: PipelineContext,
-        duration: float
+        self, servers: List[ParsedServer], context: PipelineContext, duration: float
     ) -> None:
         """Log performance metrics.
 
@@ -264,24 +277,25 @@ class LoggingMiddleware(ChainableMiddleware):
 
         """
         metrics = {
-            'total_servers': len(servers),
-            'duration_seconds': round(duration, 3),
-            'servers_per_second': round(len(servers) / duration, 2) if duration > 0 else 0,
-            'memory_usage_mb': self._get_memory_usage(),
-            'trace_id': context.trace_id
+            "total_servers": len(servers),
+            "duration_seconds": round(duration, 3),
+            "servers_per_second": (
+                round(len(servers) / duration, 2) if duration > 0 else 0
+            ),
+            "memory_usage_mb": self._get_memory_usage(),
+            "trace_id": context.trace_id,
         }
 
         # Count servers by type
         server_types = {}
         for server in servers:
             server_types[server.type] = server_types.get(server.type, 0) + 1
-        metrics['server_types'] = server_types
+        metrics["server_types"] = server_types
 
-        if self.log_format == 'json':
-            self.logger.info("Performance metrics", extra={
-                'event': 'performance_metrics',
-                **metrics
-            })
+        if self.log_format == "json":
+            self.logger.info(
+                "Performance metrics", extra={"event": "performance_metrics", **metrics}
+            )
         else:
             self.logger.info(
                 f"Performance: {metrics['total_servers']} servers, "
@@ -290,7 +304,9 @@ class LoggingMiddleware(ChainableMiddleware):
                 f"{metrics['memory_usage_mb']}MB memory"
             )
 
-    def _log_server_errors(self, servers: List[ParsedServer], context: PipelineContext) -> None:
+    def _log_server_errors(
+        self, servers: List[ParsedServer], context: PipelineContext
+    ) -> None:
         """Log any errors found in server data.
 
         Args:
@@ -312,27 +328,32 @@ class LoggingMiddleware(ChainableMiddleware):
                 errors.append("missing type")
 
             # Check for error metadata
-            if 'error' in server.meta:
+            if "error" in server.meta:
                 errors.append(f"metadata error: {server.meta['error']}")
 
             if errors:
                 error_count += 1
-                if self.log_format == 'json':
-                    self.logger.warning("Server validation errors", extra={
-                        'event': 'server_errors',
-                        'trace_id': context.trace_id,
-                        'server_index': i,
-                        'server_address': server.address,
-                        'server_port': server.port,
-                        'errors': errors
-                    })
+                if self.log_format == "json":
+                    self.logger.warning(
+                        "Server validation errors",
+                        extra={
+                            "event": "server_errors",
+                            "trace_id": context.trace_id,
+                            "server_index": i,
+                            "server_address": server.address,
+                            "server_port": server.port,
+                            "errors": errors,
+                        },
+                    )
                 else:
                     self.logger.warning(
-                        f"Server {i+1} ({server.address}:{server.port}) has errors: {', '.join(errors)}"
+                        f"Server {i + 1} ({server.address}:{server.port}) has errors: {', '.join(errors)}"
                     )
 
         if error_count > 0:
-            self.logger.warning(f"Found {error_count} servers with errors out of {len(servers)} total")
+            self.logger.warning(
+                f"Found {error_count} servers with errors out of {len(servers)} total"
+            )
 
     def _get_memory_usage(self) -> float:
         """Get current memory usage in MB.
@@ -342,8 +363,10 @@ class LoggingMiddleware(ChainableMiddleware):
 
         """
         try:
-            import psutil
             import os
+
+            import psutil
+
             process = psutil.Process(os.getpid())
             return round(process.memory_info().rss / 1024 / 1024, 2)
         except ImportError:
@@ -353,7 +376,7 @@ class LoggingMiddleware(ChainableMiddleware):
         self,
         servers: List[ParsedServer],
         context: PipelineContext,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> bool:
         """Check if logging middleware should process.
 
@@ -370,9 +393,9 @@ class LoggingMiddleware(ChainableMiddleware):
             return False
 
         # Check if logging is disabled in profile
-        if profile and 'logging' in profile.metadata:
-            logging_config = profile.metadata['logging']
-            if not logging_config.get('enabled', True):
+        if profile and "logging" in profile.metadata:
+            logging_config = profile.metadata["logging"]
+            if not logging_config.get("enabled", True):
                 return False
 
         return True
@@ -385,11 +408,13 @@ class LoggingMiddleware(ChainableMiddleware):
 
         """
         metadata = super().get_metadata()
-        metadata.update({
-            'log_level': self.log_level,
-            'log_server_details': self.log_server_details,
-            'log_performance': self.log_performance,
-            'log_format': self.log_format,
-            'max_servers_logged': self.max_servers_logged
-        })
+        metadata.update(
+            {
+                "log_level": self.log_level,
+                "log_server_details": self.log_server_details,
+                "log_performance": self.log_performance,
+                "log_format": self.log_format,
+                "max_servers_logged": self.max_servers_logged,
+            }
+        )
         return metadata

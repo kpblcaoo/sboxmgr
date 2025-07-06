@@ -7,11 +7,12 @@ types from the final configuration.
 Implements Phase 3 architecture with profile integration.
 """
 
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
+
+from ...profiles.models import FullProfile
+from ..models import ClientProfile, ParsedServer, PipelineContext
 from ..registry import register
 from .base import ProfileAwareMiddleware
-from ..models import ParsedServer, PipelineContext, ClientProfile
-from ...profiles.models import FullProfile
 
 
 @register("outbound_filter")
@@ -44,15 +45,15 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
 
         """
         super().__init__(config)
-        self.exclude_types = set(self.config.get('exclude_types', []))
-        self.strict_mode = self.config.get('strict_mode', False)
-        self.preserve_metadata = self.config.get('preserve_metadata', True)
+        self.exclude_types = set(self.config.get("exclude_types", []))
+        self.strict_mode = self.config.get("strict_mode", False)
+        self.preserve_metadata = self.config.get("preserve_metadata", True)
 
     def process(
         self,
         servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
-        profile: Optional[FullProfile] = None
+        profile: Optional[FullProfile] = None,
     ) -> List[ParsedServer]:
         """Filter servers based on outbound type exclusions.
 
@@ -71,7 +72,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         # Extract exclude configuration from profile
         exclude_config = self._extract_exclude_config(profile)
 
-        if not exclude_config['exclude_types']:
+        if not exclude_config["exclude_types"]:
             return servers
 
         # Apply outbound type filtering
@@ -80,7 +81,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         excluded_servers = []
 
         for server in servers:
-            if server.type in exclude_config['exclude_types']:
+            if server.type in exclude_config["exclude_types"]:
                 excluded_servers.append(server)
             else:
                 filtered_servers.append(server)
@@ -94,19 +95,21 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
 
         # Preserve metadata in context
         if self.preserve_metadata and context:
-            if 'outbound_filter' not in context.metadata:
-                context.metadata['outbound_filter'] = {}
+            if "outbound_filter" not in context.metadata:
+                context.metadata["outbound_filter"] = {}
 
-            context.metadata['outbound_filter'].update({
-                'excluded_types': list(exclude_config['exclude_types']),
-                'excluded_count': len(excluded_servers),
-                'original_count': original_count,
-                'filtered_count': len(filtered_servers),
-                'excluded_servers': [
-                    {'type': s.type, 'tag': s.tag, 'address': s.address}
-                    for s in excluded_servers
-                ]
-            })
+            context.metadata["outbound_filter"].update(
+                {
+                    "excluded_types": list(exclude_config["exclude_types"]),
+                    "excluded_count": len(excluded_servers),
+                    "original_count": original_count,
+                    "filtered_count": len(filtered_servers),
+                    "excluded_servers": [
+                        {"type": s.type, "tag": s.tag, "address": s.address}
+                        for s in excluded_servers
+                    ],
+                }
+            )
 
         return filtered_servers
 
@@ -120,9 +123,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
             Dictionary with exclude configuration
 
         """
-        exclude_config = {
-            'exclude_types': self.exclude_types.copy()
-        }
+        exclude_config = {"exclude_types": self.exclude_types.copy()}
 
         if not profile:
             return exclude_config
@@ -131,14 +132,15 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         client_profile = None
 
         # Try to get from profile metadata
-        if hasattr(profile, 'metadata') and 'client_profile' in profile.metadata:
-            client_profile_data = profile.metadata['client_profile']
+        if hasattr(profile, "metadata") and "client_profile" in profile.metadata:
+            client_profile_data = profile.metadata["client_profile"]
             if isinstance(client_profile_data, dict):
                 try:
                     client_profile = ClientProfile(**client_profile_data)
                 except Exception as e:
                     # Log error but continue processing with default config
                     import logging
+
                     logger = logging.getLogger(__name__)
                     logger.warning(
                         f"Failed to create ClientProfile from metadata: {e}. "
@@ -148,11 +150,16 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
 
         # If we have a client profile, merge exclude configuration
         if client_profile and client_profile.exclude_outbounds:
-            exclude_config['exclude_types'].update(client_profile.exclude_outbounds)
+            exclude_config["exclude_types"].update(client_profile.exclude_outbounds)
 
         return exclude_config
 
-    def can_process(self, servers: List[ParsedServer], context: Optional[PipelineContext] = None, profile: Optional[FullProfile] = None) -> bool:
+    def can_process(
+        self,
+        servers: List[ParsedServer],
+        context: Optional[PipelineContext] = None,
+        profile: Optional[FullProfile] = None,
+    ) -> bool:
         """Check if outbound filtering can be applied.
 
         Args:
@@ -169,12 +176,12 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
 
         # Use merged exclude_types from config and profile
         exclude_config = self._extract_exclude_config(profile)
-        if not exclude_config['exclude_types']:
+        if not exclude_config["exclude_types"]:
             return False
 
         # Check if any servers have the excluded types
         server_types = {server.type for server in servers}
-        return bool(server_types & exclude_config['exclude_types'])
+        return bool(server_types & exclude_config["exclude_types"])
 
     def get_metadata(self) -> Dict[str, Any]:
         """Get middleware metadata.
@@ -184,8 +191,8 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
 
         """
         return {
-            'type': 'outbound_filter',
-            'exclude_types': list(self.exclude_types),
-            'strict_mode': self.strict_mode,
-            'preserve_metadata': self.preserve_metadata
+            "type": "outbound_filter",
+            "exclude_types": list(self.exclude_types),
+            "strict_mode": self.strict_mode,
+            "preserve_metadata": self.preserve_metadata,
         }

@@ -269,4 +269,4 @@ export SBOXMGR_DEFAULT_PROFILE="home"
 
 - [CLI Reference](cli-reference.md) - Command line interface
 - [Subscriptions](subscriptions.md) - Subscription management
-- [Configuration](../getting-started/configuration.md) - System configuration 
+- [Configuration](../getting-started/configuration.md) - System configuration

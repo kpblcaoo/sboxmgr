@@ -29,7 +29,7 @@ _Часть ADR написана ретроспективно для фикса�
 ## Summary
 - **Security**: ADR-0001 establishes CLI security foundation
 - **Extensibility**: ADR-0002, ADR-0004 define plugin architecture
-- **Data Models**: ADR-0003 standardizes subscription data structures  
+- **Data Models**: ADR-0003 standardizes subscription data structures
 - **Routing**: ADR-0005 handles config generation and routing
 - **i18n**: ADR-0006 provides multilingual support with security focus
 - **Validation**: ADR-0007 introduces comprehensive validation pipeline with context tracking and fail-tolerance
@@ -42,4 +42,4 @@ _Часть ADR написана ретроспективно для фикса�
 - **Validation**: ADR-0016 standardizes Pydantic as single source of truth for validation and schema generation
 - **Profiles**: ADR-0017 establishes unified configuration entity for all pipeline components
 - **Subscriptions**: ADR-0018 provides extended subscription management with isolation and auto-switching
-- **UX**: ADR-0019 covers production-ready UX and runtime management for profiles and subscriptions 
+- **UX**: ADR-0019 covers production-ready UX and runtime management for profiles and subscriptions

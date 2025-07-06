@@ -27,4 +27,4 @@ InboundProfile(type="socks", listen="127.0.0.1", port=80)   # ValueError
 - Интеграция с sec_checklist.md и edge_cases.md
 - Автоматизация security-аудита CLI
 
-_См. также: sec_checklist.md, edge_cases.md, README.md_ 
+_См. также: sec_checklist.md, edge_cases.md, README.md_

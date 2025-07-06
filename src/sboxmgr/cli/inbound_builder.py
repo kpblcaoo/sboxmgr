@@ -6,7 +6,9 @@ JSON profile creation while maintaining architectural integrity.
 """
 
 from typing import List, Optional, Union
+
 import typer
+
 from sboxmgr.subscription.models import ClientProfile, InboundProfile
 
 
@@ -38,8 +40,8 @@ class InboundBuilder:
         auto_route: bool = True,
         strict_route: bool = True,
         sniff: bool = True,
-        **kwargs
-    ) -> 'InboundBuilder':
+        **kwargs,
+    ) -> "InboundBuilder":
         """Add TUN inbound configuration.
 
         Args:
@@ -72,7 +74,9 @@ class InboundBuilder:
         if stack is None:
             stack = "mixed"
         elif stack not in ["system", "gvisor", "mixed"]:
-            raise ValueError(f"Invalid stack: {stack}. Must be one of: system, gvisor, mixed")
+            raise ValueError(
+                f"Invalid stack: {stack}. Must be one of: system, gvisor, mixed"
+            )
 
         options = {
             "tag": "tun-in",
@@ -83,7 +87,7 @@ class InboundBuilder:
             "strict_route": strict_route,
             "sniff": sniff,
             "sniff_override_destination": False,
-            **kwargs
+            **kwargs,
         }
 
         inbound = InboundProfile(type="tun", options=options)
@@ -95,8 +99,8 @@ class InboundBuilder:
         port: Optional[int] = None,
         listen: Optional[str] = None,
         auth: Optional[str] = None,
-        **kwargs
-    ) -> 'InboundBuilder':
+        **kwargs,
+    ) -> "InboundBuilder":
         """Add SOCKS inbound configuration.
 
         Args:
@@ -120,12 +124,11 @@ class InboundBuilder:
         if listen is None:
             listen = "127.0.0.1"
         elif listen == "0.0.0.0":
-            typer.echo("⚠️  Warning: SOCKS binding to 0.0.0.0 (all interfaces)", err=True)
+            typer.echo(
+                "⚠️  Warning: SOCKS binding to 0.0.0.0 (all interfaces)", err=True
+            )
 
-        options = {
-            "tag": "socks-in",
-            **kwargs
-        }
+        options = {"tag": "socks-in", **kwargs}
 
         # Add authentication if provided
         if auth:
@@ -134,7 +137,9 @@ class InboundBuilder:
             username, password = auth.split(":", 1)
             options["users"] = [{"username": username, "password": password}]
 
-        inbound = InboundProfile(type="socks", listen=listen, port=port, options=options)
+        inbound = InboundProfile(
+            type="socks", listen=listen, port=port, options=options
+        )
         self._inbounds.append(inbound)
         return self
 
@@ -143,8 +148,8 @@ class InboundBuilder:
         port: Optional[int] = None,
         listen: Optional[str] = None,
         auth: Optional[str] = None,
-        **kwargs
-    ) -> 'InboundBuilder':
+        **kwargs,
+    ) -> "InboundBuilder":
         """Add HTTP proxy inbound configuration.
 
         Args:
@@ -168,12 +173,11 @@ class InboundBuilder:
         if listen is None:
             listen = "127.0.0.1"
         elif listen == "0.0.0.0":
-            typer.echo("⚠️  Warning: HTTP proxy binding to 0.0.0.0 (all interfaces)", err=True)
+            typer.echo(
+                "⚠️  Warning: HTTP proxy binding to 0.0.0.0 (all interfaces)", err=True
+            )
 
-        options = {
-            "tag": "http-in",
-            **kwargs
-        }
+        options = {"tag": "http-in", **kwargs}
 
         # Add authentication if provided
         if auth:
@@ -191,8 +195,8 @@ class InboundBuilder:
         port: Optional[int] = None,
         listen: Optional[str] = None,
         network: Optional[str] = None,
-        **kwargs
-    ) -> 'InboundBuilder':
+        **kwargs,
+    ) -> "InboundBuilder":
         """Add transparent proxy inbound configuration.
 
         Args:
@@ -219,20 +223,19 @@ class InboundBuilder:
         if network is None:
             network = "tcp"
         elif network not in ["tcp", "udp", "tcp,udp"]:
-            raise ValueError(f"Invalid network: {network}. Must be one of: tcp, udp, tcp,udp")
+            raise ValueError(
+                f"Invalid network: {network}. Must be one of: tcp, udp, tcp,udp"
+            )
 
-        options = {
-            "tag": "tproxy-in",
-            "network": network,
-            "sniff": True,
-            **kwargs
-        }
+        options = {"tag": "tproxy-in", "network": network, "sniff": True, **kwargs}
 
-        inbound = InboundProfile(type="tproxy", listen=listen, port=port, options=options)
+        inbound = InboundProfile(
+            type="tproxy", listen=listen, port=port, options=options
+        )
         self._inbounds.append(inbound)
         return self
 
-    def set_dns_mode(self, mode: str) -> 'InboundBuilder':
+    def set_dns_mode(self, mode: str) -> "InboundBuilder":
         """Set DNS resolution mode.
 
         Args:
@@ -246,7 +249,9 @@ class InboundBuilder:
 
         """
         if mode not in ["system", "tunnel", "off"]:
-            raise ValueError(f"Invalid DNS mode: {mode}. Must be one of: system, tunnel, off")
+            raise ValueError(
+                f"Invalid DNS mode: {mode}. Must be one of: system, tunnel, off"
+            )
         self._dns_mode = mode
         return self
 
@@ -263,10 +268,7 @@ class InboundBuilder:
         if not self._inbounds:
             raise ValueError("At least one inbound must be configured")
 
-        return ClientProfile(
-            inbounds=self._inbounds,
-            dns_mode=self._dns_mode
-        )
+        return ClientProfile(inbounds=self._inbounds, dns_mode=self._dns_mode)
 
 
 def build_client_profile_from_cli(
@@ -287,7 +289,7 @@ def build_client_profile_from_cli(
     tproxy_port: Optional[int] = None,
     tproxy_listen: Optional[str] = None,
     # General parameters
-    dns_mode: Optional[str] = None
+    dns_mode: Optional[str] = None,
 ) -> Optional[ClientProfile]:
     """Build ClientProfile from CLI parameters.
 
@@ -330,28 +332,13 @@ def build_client_profile_from_cli(
         inbound_type = inbound_type.strip().lower()
 
         if inbound_type == "tun":
-            builder.add_tun(
-                address=tun_address,
-                mtu=tun_mtu,
-                stack=tun_stack
-            )
+            builder.add_tun(address=tun_address, mtu=tun_mtu, stack=tun_stack)
         elif inbound_type == "socks":
-            builder.add_socks(
-                port=socks_port,
-                listen=socks_listen,
-                auth=socks_auth
-            )
+            builder.add_socks(port=socks_port, listen=socks_listen, auth=socks_auth)
         elif inbound_type == "http":
-            builder.add_http(
-                port=http_port,
-                listen=http_listen,
-                auth=http_auth
-            )
+            builder.add_http(port=http_port, listen=http_listen, auth=http_auth)
         elif inbound_type == "tproxy":
-            builder.add_tproxy(
-                port=tproxy_port,
-                listen=tproxy_listen
-            )
+            builder.add_tproxy(port=tproxy_port, listen=tproxy_listen)
         else:
             raise ValueError(f"Unsupported inbound type: {inbound_type}")
 

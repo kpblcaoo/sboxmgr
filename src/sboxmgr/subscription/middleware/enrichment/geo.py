@@ -1,7 +1,7 @@
 """Geographic enrichment functionality for server data."""
 
 import ipaddress
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from ...models import ParsedServer, PipelineContext
 
@@ -36,7 +36,7 @@ class GeoEnricher:
 
         # Check cache first
         if server_key in self._cache:
-            server.meta['geo'] = self._cache[server_key]
+            server.meta["geo"] = self._cache[server_key]
             return server
 
         geo_info = {}
@@ -49,10 +49,10 @@ class GeoEnricher:
             self._cache[server_key] = geo_info
 
         except Exception as e:
-            geo_info['error'] = str(e)
+            geo_info["error"] = str(e)
 
         if geo_info:
-            server.meta['geo'] = geo_info
+            server.meta["geo"] = geo_info
 
         return server
 
@@ -69,7 +69,7 @@ class GeoEnricher:
 
         # Skip private/local addresses
         if self._is_private_address(address):
-            geo_info['type'] = 'private'
+            geo_info["type"] = "private"
             return geo_info
 
         try:
@@ -82,8 +82,8 @@ class GeoEnricher:
 
         except Exception:
             # If all methods fail, mark as unknown
-            geo_info['country'] = 'unknown'
-            geo_info['source'] = 'unknown'
+            geo_info["country"] = "unknown"
+            geo_info["source"] = "unknown"
 
         return geo_info
 
@@ -103,15 +103,25 @@ class GeoEnricher:
 
         with geoip2.database.Reader(self.geo_database_path) as reader:
             response = reader.city(address)
-            geo_info.update({
-                'country': response.country.iso_code,
-                'country_name': response.country.name,
-                'city': response.city.name,
-                'latitude': float(response.location.latitude) if response.location.latitude else None,
-                'longitude': float(response.location.longitude) if response.location.longitude else None,
-                'timezone': response.location.time_zone,
-                'source': 'geoip2'
-            })
+            geo_info.update(
+                {
+                    "country": response.country.iso_code,
+                    "country_name": response.country.name,
+                    "city": response.city.name,
+                    "latitude": (
+                        float(response.location.latitude)
+                        if response.location.latitude
+                        else None
+                    ),
+                    "longitude": (
+                        float(response.location.longitude)
+                        if response.location.longitude
+                        else None
+                    ),
+                    "timezone": response.location.time_zone,
+                    "source": "geoip2",
+                }
+            )
 
         return geo_info
 
@@ -127,11 +137,11 @@ class GeoEnricher:
         geo_info = {}
 
         # Fallback: try to extract country from domain TLD
-        if '.' in address and not address.replace('.', '').isdigit():
-            tld = address.split('.')[-1].upper()
+        if "." in address and not address.replace(".", "").isdigit():
+            tld = address.split(".")[-1].upper()
             if len(tld) == 2:
-                geo_info['country'] = tld
-                geo_info['source'] = 'tld'
+                geo_info["country"] = tld
+                geo_info["source"] = "tld"
 
         return geo_info
 
@@ -149,4 +159,6 @@ class GeoEnricher:
             return ip.is_private or ip.is_loopback or ip.is_link_local
         except ValueError:
             # Not an IP address, assume it's a domain
-            return address in ['localhost', '127.0.0.1', '::1'] or address.startswith('192.168.')
+            return address in ["localhost", "127.0.0.1", "::1"] or address.startswith(
+                "192.168."
+            )

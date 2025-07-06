@@ -12,9 +12,6 @@ export functionality from the export module.
 """
 
 # Import the refactored export command
-from .export import export, app
+from .export import app, export
 
-__all__ = [
-    'export',
-    'app'
-]
+__all__ = ["export", "app"]

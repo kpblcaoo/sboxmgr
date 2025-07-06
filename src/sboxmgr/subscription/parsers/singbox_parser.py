@@ -7,10 +7,12 @@ and converts them into standardized ParsedServer objects.
 
 import json
 import re
-from typing import List, Tuple, Optional, Dict, Any
-from ..models import ParsedServer
-from ..base_parser import BaseParser
+from typing import Any, Dict, List, Optional, Tuple
+
 from sboxmgr.utils.env import get_debug_level
+
+from ..base_parser import BaseParser
+from ..models import ParsedServer
 from ..registry import register
 
 
@@ -66,7 +68,9 @@ class SingBoxParser(BaseParser):
                     continue
 
             if debug_level > 0:
-                print(f"[SingBoxParser] Parsed {len(servers)} servers from {len(outbounds)} outbounds")
+                print(
+                    f"[SingBoxParser] Parsed {len(servers)} servers from {len(outbounds)} outbounds"
+                )
 
             return servers
 
@@ -108,22 +112,22 @@ class SingBoxParser(BaseParser):
                 continue
 
             # Remove inline // and # comments
-            if '//' in line:
-                idx = line.index('//')
+            if "//" in line:
+                idx = line.index("//")
                 removed.append(line[idx:])
                 line = line[:idx]
-            if '#' in line and not line.lstrip().startswith('#'):
-                idx = line.index('#')
+            if "#" in line and not line.lstrip().startswith("#"):
+                idx = line.index("#")
                 removed.append(line[idx:])
                 line = line[:idx]
 
             clean_lines.append(line)
 
-        clean_json = '\n'.join(clean_lines)
+        clean_json = "\n".join(clean_lines)
 
         # Remove _comment fields and trailing commas
-        clean_json = re.sub(r'"_comment"\s*:\s*".*?",?', '', clean_json)
-        clean_json = re.sub(r',\s*([}\]])', r'\1', clean_json)
+        clean_json = re.sub(r'"_comment"\s*:\s*".*?",?', "", clean_json)
+        clean_json = re.sub(r",\s*([}\]])", r"\1", clean_json)
 
         return clean_json, removed
 
@@ -182,13 +186,11 @@ class SingBoxParser(BaseParser):
             return self._parse_socks_outbound(outbound, tag, server, port, index)
         else:
             # Unknown protocol - create basic server with safe metadata
-            meta = self._create_safe_meta({"tag": tag, "origin": "singbox", "chain": "outbound"})
+            meta = self._create_safe_meta(
+                {"tag": tag, "origin": "singbox", "chain": "outbound"}
+            )
             return ParsedServer(
-                type=outbound_type,
-                address=server,
-                port=port,
-                security=None,
-                meta=meta
+                type=outbound_type, address=server, port=port, security=None, meta=meta
             )
 
     def _create_safe_meta(self, fields: Dict[str, Any]) -> Dict[str, Any]:
@@ -203,207 +205,207 @@ class SingBoxParser(BaseParser):
         """
         return {k: v for k, v in fields.items() if v is not None}
 
-    def _parse_shadowsocks_outbound(self, outbound: dict, tag: str, server: str, port: int, index: int) -> ParsedServer:
+    def _parse_shadowsocks_outbound(
+        self, outbound: dict, tag: str, server: str, port: int, index: int
+    ) -> ParsedServer:
         """Parse shadowsocks outbound configuration."""
         method = outbound.get("method", "")
         password = outbound.get("password", "")
 
-        meta = self._create_safe_meta({
-            "password": password,
-            "tag": tag,
-            "origin": "singbox",
-            "chain": "outbound",
-            "server_id": f"ss_{index}"
-        })
-
-        return ParsedServer(
-            type="ss",
-            address=server,
-            port=port,
-            security=method,
-            meta=meta
+        meta = self._create_safe_meta(
+            {
+                "password": password,
+                "tag": tag,
+                "origin": "singbox",
+                "chain": "outbound",
+                "server_id": f"ss_{index}",
+            }
         )
 
-    def _parse_vmess_outbound(self, outbound: dict, tag: str, server: str, port: int, index: int) -> ParsedServer:
+        return ParsedServer(
+            type="ss", address=server, port=port, security=method, meta=meta
+        )
+
+    def _parse_vmess_outbound(
+        self, outbound: dict, tag: str, server: str, port: int, index: int
+    ) -> ParsedServer:
         """Parse vmess outbound configuration."""
         uuid = outbound.get("uuid", "")
         security = outbound.get("security", "auto")
 
-        meta = self._create_safe_meta({
-            "uuid": uuid,
-            "security": security,
-            "tag": tag,
-            "origin": "singbox",
-            "chain": "outbound",
-            "server_id": f"vmess_{index}"
-        })
-
-        return ParsedServer(
-            type="vmess",
-            address=server,
-            port=port,
-            security=security,
-            meta=meta
+        meta = self._create_safe_meta(
+            {
+                "uuid": uuid,
+                "security": security,
+                "tag": tag,
+                "origin": "singbox",
+                "chain": "outbound",
+                "server_id": f"vmess_{index}",
+            }
         )
 
-    def _parse_vless_outbound(self, outbound: dict, tag: str, server: str, port: int, index: int) -> ParsedServer:
+        return ParsedServer(
+            type="vmess", address=server, port=port, security=security, meta=meta
+        )
+
+    def _parse_vless_outbound(
+        self, outbound: dict, tag: str, server: str, port: int, index: int
+    ) -> ParsedServer:
         """Parse vless outbound configuration."""
         uuid = outbound.get("uuid", "")
         security = outbound.get("security", "none")
         flow = outbound.get("flow", "")
 
-        meta = self._create_safe_meta({
-            "uuid": uuid,
-            "security": security,
-            "flow": flow,
-            "tag": tag,
-            "origin": "singbox",
-            "chain": "outbound",
-            "server_id": f"vless_{index}"
-        })
-
-        return ParsedServer(
-            type="vless",
-            address=server,
-            port=port,
-            security=security,
-            meta=meta
+        meta = self._create_safe_meta(
+            {
+                "uuid": uuid,
+                "security": security,
+                "flow": flow,
+                "tag": tag,
+                "origin": "singbox",
+                "chain": "outbound",
+                "server_id": f"vless_{index}",
+            }
         )
 
-    def _parse_trojan_outbound(self, outbound: dict, tag: str, server: str, port: int, index: int) -> ParsedServer:
+        return ParsedServer(
+            type="vless", address=server, port=port, security=security, meta=meta
+        )
+
+    def _parse_trojan_outbound(
+        self, outbound: dict, tag: str, server: str, port: int, index: int
+    ) -> ParsedServer:
         """Parse trojan outbound configuration."""
         password = outbound.get("password", "")
         flow = outbound.get("flow", "")
 
-        meta = self._create_safe_meta({
-            "password": password,
-            "flow": flow,
-            "tag": tag,
-            "origin": "singbox",
-            "chain": "outbound",
-            "server_id": f"trojan_{index}"
-        })
-
-        return ParsedServer(
-            type="trojan",
-            address=server,
-            port=port,
-            security="tls",
-            meta=meta
+        meta = self._create_safe_meta(
+            {
+                "password": password,
+                "flow": flow,
+                "tag": tag,
+                "origin": "singbox",
+                "chain": "outbound",
+                "server_id": f"trojan_{index}",
+            }
         )
 
-    def _parse_hysteria_outbound(self, outbound: dict, tag: str, server: str, port: int, index: int) -> ParsedServer:
+        return ParsedServer(
+            type="trojan", address=server, port=port, security="tls", meta=meta
+        )
+
+    def _parse_hysteria_outbound(
+        self, outbound: dict, tag: str, server: str, port: int, index: int
+    ) -> ParsedServer:
         """Parse hysteria outbound configuration."""
         auth = outbound.get("auth", "")
         up_mbps = outbound.get("up_mbps", 100)
         down_mbps = outbound.get("down_mbps", 100)
 
-        meta = self._create_safe_meta({
-            "auth": auth,
-            "up_mbps": up_mbps,
-            "down_mbps": down_mbps,
-            "tag": tag,
-            "origin": "singbox",
-            "chain": "outbound",
-            "server_id": f"hysteria_{index}"
-        })
-
-        return ParsedServer(
-            type="hysteria",
-            address=server,
-            port=port,
-            security="udp",
-            meta=meta
+        meta = self._create_safe_meta(
+            {
+                "auth": auth,
+                "up_mbps": up_mbps,
+                "down_mbps": down_mbps,
+                "tag": tag,
+                "origin": "singbox",
+                "chain": "outbound",
+                "server_id": f"hysteria_{index}",
+            }
         )
 
-    def _parse_tuic_outbound(self, outbound: dict, tag: str, server: str, port: int, index: int) -> ParsedServer:
+        return ParsedServer(
+            type="hysteria", address=server, port=port, security="udp", meta=meta
+        )
+
+    def _parse_tuic_outbound(
+        self, outbound: dict, tag: str, server: str, port: int, index: int
+    ) -> ParsedServer:
         """Parse tuic outbound configuration."""
         uuid = outbound.get("uuid", "")
         password = outbound.get("password", "")
         congestion_control = outbound.get("congestion_control", "bbr")
 
-        meta = self._create_safe_meta({
-            "uuid": uuid,
-            "password": password,
-            "congestion_control": congestion_control,
-            "tag": tag,
-            "origin": "singbox",
-            "chain": "outbound",
-            "server_id": f"tuic_{index}"
-        })
-
-        return ParsedServer(
-            type="tuic",
-            address=server,
-            port=port,
-            security="udp",
-            meta=meta
+        meta = self._create_safe_meta(
+            {
+                "uuid": uuid,
+                "password": password,
+                "congestion_control": congestion_control,
+                "tag": tag,
+                "origin": "singbox",
+                "chain": "outbound",
+                "server_id": f"tuic_{index}",
+            }
         )
 
-    def _parse_wireguard_outbound(self, outbound: dict, tag: str, server: str, port: int, index: int) -> ParsedServer:
+        return ParsedServer(
+            type="tuic", address=server, port=port, security="udp", meta=meta
+        )
+
+    def _parse_wireguard_outbound(
+        self, outbound: dict, tag: str, server: str, port: int, index: int
+    ) -> ParsedServer:
         """Parse wireguard outbound configuration."""
         private_key = outbound.get("private_key", "")
         peer_public_key = outbound.get("peer_public_key", "")
         pre_shared_key = outbound.get("pre_shared_key", "")
 
-        meta = self._create_safe_meta({
-            "private_key": private_key,
-            "peer_public_key": peer_public_key,
-            "pre_shared_key": pre_shared_key,
-            "tag": tag,
-            "origin": "singbox",
-            "chain": "outbound",
-            "server_id": f"wireguard_{index}"
-        })
-
-        return ParsedServer(
-            type="wireguard",
-            address=server,
-            port=port,
-            security="udp",
-            meta=meta
+        meta = self._create_safe_meta(
+            {
+                "private_key": private_key,
+                "peer_public_key": peer_public_key,
+                "pre_shared_key": pre_shared_key,
+                "tag": tag,
+                "origin": "singbox",
+                "chain": "outbound",
+                "server_id": f"wireguard_{index}",
+            }
         )
 
-    def _parse_http_outbound(self, outbound: dict, tag: str, server: str, port: int, index: int) -> ParsedServer:
+        return ParsedServer(
+            type="wireguard", address=server, port=port, security="udp", meta=meta
+        )
+
+    def _parse_http_outbound(
+        self, outbound: dict, tag: str, server: str, port: int, index: int
+    ) -> ParsedServer:
         """Parse http outbound configuration."""
         username = outbound.get("username", "")
         password = outbound.get("password", "")
 
-        meta = self._create_safe_meta({
-            "username": username,
-            "password": password,
-            "tag": tag,
-            "origin": "singbox",
-            "chain": "outbound",
-            "server_id": f"http_{index}"
-        })
-
-        return ParsedServer(
-            type="http",
-            address=server,
-            port=port,
-            security="http",
-            meta=meta
+        meta = self._create_safe_meta(
+            {
+                "username": username,
+                "password": password,
+                "tag": tag,
+                "origin": "singbox",
+                "chain": "outbound",
+                "server_id": f"http_{index}",
+            }
         )
 
-    def _parse_socks_outbound(self, outbound: dict, tag: str, server: str, port: int, index: int) -> ParsedServer:
+        return ParsedServer(
+            type="http", address=server, port=port, security="http", meta=meta
+        )
+
+    def _parse_socks_outbound(
+        self, outbound: dict, tag: str, server: str, port: int, index: int
+    ) -> ParsedServer:
         """Parse socks outbound configuration."""
         username = outbound.get("username", "")
         password = outbound.get("password", "")
 
-        meta = self._create_safe_meta({
-            "username": username,
-            "password": password,
-            "tag": tag,
-            "origin": "singbox",
-            "chain": "outbound",
-            "server_id": f"socks_{index}"
-        })
+        meta = self._create_safe_meta(
+            {
+                "username": username,
+                "password": password,
+                "tag": tag,
+                "origin": "singbox",
+                "chain": "outbound",
+                "server_id": f"socks_{index}",
+            }
+        )
 
         return ParsedServer(
-            type="socks",
-            address=server,
-            port=port,
-            security="socks",
-            meta=meta
+            type="socks", address=server, port=port, security="socks", meta=meta
         )

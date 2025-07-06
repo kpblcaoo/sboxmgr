@@ -1,14 +1,19 @@
-from sboxmgr.subscription.postprocessor_base import DedupPostProcessor, PostProcessorChain
 from sboxmgr.subscription.models import ParsedServer, PipelineContext
+from sboxmgr.subscription.postprocessor_base import (
+    DedupPostProcessor,
+    PostProcessorChain,
+)
 
 
 def _server(tag: str):
-    return ParsedServer(type="vmess", address="example.com", port=443, meta={"tag": tag})
+    return ParsedServer(
+        type="vmess", address="example.com", port=443, meta={"tag": tag}
+    )
 
 
 class CustomThreeParamPostProcessor:
     """Custom postprocessor with 3 parameters but no context parameter."""
-    
+
     def process(self, servers, extra_param=None, another_param=None):
         """Process with custom parameters, not context."""
         return servers
@@ -36,7 +41,7 @@ def test_postprocessor_chain_custom_three_param():
     servers = [_server("a"), _server("b")]
     custom_processor = CustomThreeParamPostProcessor()
     chain = PostProcessorChain([custom_processor])
-    
+
     # Should not raise TypeError - context should be ignored
     result = chain.process(list(servers), PipelineContext())
-    assert len(result) == 2 
+    assert len(result) == 2

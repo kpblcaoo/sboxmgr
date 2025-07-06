@@ -8,4 +8,4 @@
 ## Process
 - LLM acted as an assistant in architecture, testing, and review
 - All key decisions were recorded in ADRs and logs
-- Logs of queries and decisions were saved for audit 
+- Logs of queries and decisions were saved for audit

@@ -1,6 +1,6 @@
 """Inbound generators for sing-box exporter."""
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 from sboxmgr.subscription.models import ClientProfile
 
@@ -23,10 +23,7 @@ def generate_inbounds(profile: ClientProfile) -> List[Dict[str, Any]]:
 
     for inbound in profile.inbounds:
         # Create base inbound structure
-        inb = {
-            "type": inbound.type,
-            "tag": _get_inbound_tag(inbound)
-        }
+        inb = {"type": inbound.type, "tag": _get_inbound_tag(inbound)}
 
         # Special handling for tun
         if inbound.type == "tun":
@@ -77,9 +74,9 @@ def _configure_regular_inbound(inb: Dict[str, Any], inbound) -> None:
         inbound: Source inbound object.
     """
     # Add listen and port fields
-    if hasattr(inbound, 'listen') and inbound.listen:
+    if hasattr(inbound, "listen") and inbound.listen:
         inb["listen"] = inbound.listen
-    if hasattr(inbound, 'port') and inbound.port:
+    if hasattr(inbound, "port") and inbound.port:
         inb["listen_port"] = inbound.port
 
     # Add other fields from options

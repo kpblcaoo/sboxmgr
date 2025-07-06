@@ -6,34 +6,76 @@ objects into appropriate sing-box outbound models using the modular Pydantic mod
 
 import logging
 from typing import Optional, Union
-from ...models import ParsedServer
 
 # Import new sing-box models
 from sboxmgr.models.singbox import (
-    ShadowsocksOutbound, VmessOutbound, VlessOutbound, TrojanOutbound,
-    Hysteria2Outbound, WireGuardOutbound, HttpOutbound, SocksOutbound,
-    TuicOutbound, ShadowTlsOutbound, DnsOutbound, DirectOutbound,
-    BlockOutbound, SelectorOutbound, UrlTestOutbound, HysteriaOutbound,
-    AnyTlsOutbound, SshOutbound, TorOutbound
+    AnyTlsOutbound,
+    BlockOutbound,
+    DirectOutbound,
+    DnsOutbound,
+    HttpOutbound,
+    Hysteria2Outbound,
+    HysteriaOutbound,
+    SelectorOutbound,
+    ShadowsocksOutbound,
+    ShadowTlsOutbound,
+    SocksOutbound,
+    SshOutbound,
+    TorOutbound,
+    TrojanOutbound,
+    TuicOutbound,
+    UrlTestOutbound,
+    VlessOutbound,
+    VmessOutbound,
+    WireGuardOutbound,
 )
 
+from ...models import ParsedServer
 from .protocol_converters import (
-    convert_shadowsocks, convert_vmess, convert_vless, convert_trojan,
-    convert_hysteria2, convert_wireguard, convert_tuic, convert_shadowtls,
-    convert_anytls, convert_tor, convert_ssh, convert_http, convert_socks,
-    convert_direct
+    convert_anytls,
+    convert_direct,
+    convert_http,
+    convert_hysteria2,
+    convert_shadowsocks,
+    convert_shadowtls,
+    convert_socks,
+    convert_ssh,
+    convert_tor,
+    convert_trojan,
+    convert_tuic,
+    convert_vless,
+    convert_vmess,
+    convert_wireguard,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def convert_parsed_server_to_outbound(server: ParsedServer) -> Optional[Union[
-    ShadowsocksOutbound, VmessOutbound, VlessOutbound, TrojanOutbound,
-    Hysteria2Outbound, WireGuardOutbound, HttpOutbound, SocksOutbound,
-    TuicOutbound, ShadowTlsOutbound, DnsOutbound, DirectOutbound,
-    BlockOutbound, SelectorOutbound, UrlTestOutbound, HysteriaOutbound,
-    AnyTlsOutbound, SshOutbound, TorOutbound
-]]:
+def convert_parsed_server_to_outbound(
+    server: ParsedServer,
+) -> Optional[
+    Union[
+        ShadowsocksOutbound,
+        VmessOutbound,
+        VlessOutbound,
+        TrojanOutbound,
+        Hysteria2Outbound,
+        WireGuardOutbound,
+        HttpOutbound,
+        SocksOutbound,
+        TuicOutbound,
+        ShadowTlsOutbound,
+        DnsOutbound,
+        DirectOutbound,
+        BlockOutbound,
+        SelectorOutbound,
+        UrlTestOutbound,
+        HysteriaOutbound,
+        AnyTlsOutbound,
+        SshOutbound,
+        TorOutbound,
+    ]
+]:
     """Convert ParsedServer to appropriate sing-box outbound model.
 
     Args:
