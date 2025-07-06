@@ -219,23 +219,27 @@ class ServerListScreen(Screen):
             if is_excluded:
                 item_classes += " excluded"
 
-            with Horizontal(classes=item_classes):
-                # Checkbox for inclusion/exclusion
-                checkbox = Checkbox(
-                    value=not is_excluded, id=f"server_{i}", classes="server-checkbox"
-                )
-                items.append(checkbox)
+            # Create horizontal container for server item
+            server_item = Horizontal(classes=item_classes)
 
-                # Server information
-                server_info = self._format_server_display(server)
-                info_widget = Static(server_info, classes="server-info")
-                items.append(info_widget)
+            # Checkbox for inclusion/exclusion
+            checkbox = Checkbox(
+                value=not is_excluded, id=f"server_{i}", classes="server-checkbox"
+            )
+            server_item.mount(checkbox)
 
-                # Server statistics (if available)
-                stats = self._get_server_stats(server)
-                if stats:
-                    stats_widget = Static(stats, classes="server-stats")
-                    items.append(stats_widget)
+            # Server information
+            server_info = self._format_server_display(server)
+            info_widget = Static(server_info, classes="server-info")
+            server_item.mount(info_widget)
+
+            # Server statistics (if available)
+            stats = self._get_server_stats(server)
+            if stats:
+                stats_widget = Static(stats, classes="server-stats")
+                server_item.mount(stats_widget)
+
+            items.append(server_item)
 
         return items
 
