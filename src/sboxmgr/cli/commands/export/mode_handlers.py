@@ -25,7 +25,7 @@ from .file_handlers import (
 
 # Import Phase 3 components
 try:
-    from sboxmgr.profiles.models import FullProfile
+    from sboxmgr.configs.models import FullProfile
 
     PHASE3_AVAILABLE = True
 except ImportError:
