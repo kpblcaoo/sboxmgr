@@ -192,14 +192,16 @@ class MainScreen(Screen):
     @on(Button.Pressed, "#view_servers")
     def on_view_servers_pressed(self) -> None:
         """Handle view servers button press."""
-        # TODO: Implement server list screen in Phase 3
-        self.app.notify("Server list view coming in Phase 3!", severity="info")
+        from sboxmgr.tui.screens.server_list import ServerListScreen
+
+        self.app.push_screen(ServerListScreen())
 
     @on(Button.Pressed, "#manage_subscriptions")
     def on_manage_subscriptions_pressed(self) -> None:
         """Handle manage subscriptions button press."""
-        # TODO: Implement subscription management screen in Phase 3
-        self.app.notify("Subscription management coming in Phase 3!", severity="info")
+        from sboxmgr.tui.screens.subscription_manager import SubscriptionManagerScreen
+
+        self.app.push_screen(SubscriptionManagerScreen())
 
     @on(Button.Pressed, "#profile_settings")
     def on_profile_settings_pressed(self) -> None:
