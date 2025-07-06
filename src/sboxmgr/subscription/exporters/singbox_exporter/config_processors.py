@@ -60,7 +60,18 @@ def process_shadowsocks_config(
         )
         return False
     
+    # Add required fields
     outbound["method"] = method
+    
+    # Add password - required field for shadowsocks
+    password = server.password or meta.get("password")
+    if not password:
+        logger.warning(
+            f"WARNING: shadowsocks outbound without password, skipping: {server.address}:{server.port}"
+        )
+        return False
+    outbound["password"] = password
+    
     return True
 
 

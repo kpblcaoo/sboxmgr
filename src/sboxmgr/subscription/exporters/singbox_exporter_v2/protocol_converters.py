@@ -70,11 +70,15 @@ def convert_vmess(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[V
     
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
-        outbound_data["tls"] = convert_tls_config(server)
+        tls_config = convert_tls_config(server)
+        if tls_config:
+            outbound_data["tls"] = tls_config
     
     # Add transport if present
     if server.meta.get("network") in ["ws", "grpc", "http"]:
-        outbound_data["transport"] = convert_transport_config(server)
+        transport_config = convert_transport_config(server)
+        if transport_config:
+            outbound_data["transport"] = transport_config
     
     return VmessOutbound(**outbound_data)
 
@@ -93,11 +97,15 @@ def convert_vless(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[V
     
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
-        outbound_data["tls"] = convert_tls_config(server)
+        tls_config = convert_tls_config(server)
+        if tls_config:
+            outbound_data["tls"] = tls_config
     
     # Add transport if present
     if server.meta.get("network") in ["ws", "grpc", "http"]:
-        outbound_data["transport"] = convert_transport_config(server)
+        transport_config = convert_transport_config(server)
+        if transport_config:
+            outbound_data["transport"] = transport_config
     
     return VlessOutbound(**outbound_data)
 
@@ -115,11 +123,15 @@ def convert_trojan(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[
     
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
-        outbound_data["tls"] = convert_tls_config(server)
+        tls_config = convert_tls_config(server)
+        if tls_config:
+            outbound_data["tls"] = tls_config
     
     # Add transport if present
     if server.meta.get("network") in ["ws", "grpc", "http"]:
-        outbound_data["transport"] = convert_transport_config(server)
+        transport_config = convert_transport_config(server)
+        if transport_config:
+            outbound_data["transport"] = transport_config
     
     return TrojanOutbound(**outbound_data)
 
@@ -143,7 +155,9 @@ def convert_hysteria2(server: ParsedServer, base_data: Dict[str, Any]) -> Option
     
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
-        outbound_data["tls"] = convert_tls_config(server)
+        tls_config = convert_tls_config(server)
+        if tls_config:
+            outbound_data["tls"] = tls_config
     
     return Hysteria2Outbound(**outbound_data)
 
@@ -191,7 +205,9 @@ def convert_tuic(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[Tu
     
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
-        outbound_data["tls"] = convert_tls_config(server)
+        tls_config = convert_tls_config(server)
+        if tls_config:
+            outbound_data["tls"] = tls_config
     
     return TuicOutbound(**outbound_data)
 
@@ -215,7 +231,9 @@ def convert_shadowtls(server: ParsedServer, base_data: Dict[str, Any]) -> Option
     
     # Add TLS if present
     if server.tls or server.meta.get("tls") or server.meta.get("servername") or server.meta.get("alpn"):
-        outbound_data["tls"] = convert_tls_config(server)
+        tls_config = convert_tls_config(server)
+        if tls_config:
+            outbound_data["tls"] = tls_config
     
     return ShadowTlsOutbound(**outbound_data)
 

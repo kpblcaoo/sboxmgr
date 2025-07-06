@@ -163,7 +163,8 @@ class UrlTestOutbound(OutboundBase):
     url: str = Field(..., description="URL for latency testing, e.g., 'http://www.google.com/generate_204'.")
     interval: Union[int, str] = Field(..., description="Test interval in seconds or duration string.")
     tolerance: Optional[int] = Field(default=None, ge=0, description="Latency tolerance in milliseconds.")
-    idle_timeout: Optional[int] = Field(default=None, ge=0, description="Idle timeout in seconds.")
+    idle_timeout: Optional[Union[int, str]] = Field(default=None, description="Idle timeout in seconds or duration string.")
+    interrupt_exist_connections: Optional[bool] = Field(default=None, description="Interrupt existing connections when switching outbounds.")
 
 class HysteriaOutbound(OutboundBase):
     """Hysteria outbound configuration (legacy version)."""

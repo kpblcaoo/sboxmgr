@@ -100,8 +100,9 @@ class SingBoxModelBase(BaseModel):
             data.pop('transport', None)
         
         elif protocol_type == 'shadowsocks':
-            # Shadowsocks inbound doesn't support transport
-            data.pop('transport', None)
+            # Shadowsocks doesn't support transport or TLS
+            for field in ['transport', 'tls']:
+                data.pop(field, None)
         
         elif protocol_type == 'tun':
             # TUN inbound doesn't support transport

@@ -8,6 +8,10 @@ from ..base_selector import DefaultSelector
 from ..postprocessor_base import DedupPostProcessor, PostProcessorChain
 from ..middleware_base import MiddlewareChain
 
+# Import fetchers and parsers for plugin registration
+from ..fetchers import *  # noqa: F401
+from ..parsers import *  # noqa: F401
+
 from .cache import CacheManager
 from .error_handler import ErrorHandler
 from .data_processor import DataProcessor
