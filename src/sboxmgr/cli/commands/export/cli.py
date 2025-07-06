@@ -18,7 +18,12 @@ from .mode_handlers import (
     handle_validate_only_mode,
 )
 from .profile_loaders import load_profiles
-from .validators import validate_and_parse_cli_parameters, validate_flag_combinations
+from .validators import (
+    validate_and_parse_cli_parameters,
+    validate_export_format,
+    validate_flag_combinations,
+    validate_output_format,
+)
 
 # Import Phase 3 components
 try:
@@ -211,7 +216,13 @@ def export(
         handle_profile_generation(generate_profile, postprocessors, middleware)
 
     # Validate flag combinations
-    validate_flag_combinations(dry_run, agent_check, validate_only, url)
+    validate_flag_combinations(
+        dry_run, agent_check, validate_only, url, user_agent, no_user_agent, output
+    )
+
+    # Validate format values
+    validate_output_format(format)
+    validate_export_format(export_format)
 
     # Handle validate-only mode
     if validate_only:

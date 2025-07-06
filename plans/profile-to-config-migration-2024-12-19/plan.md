@@ -1,6 +1,6 @@
 # План рефакторинга: profiles → configs + TOML
 
-**Дата:** 2024-12-19
+**Дата:** 2025-07-06
 **Ветка:** feature/profile-to-config-migration
 **Цель:** Переименование profiles в configs с добавлением TOML поддержки
 

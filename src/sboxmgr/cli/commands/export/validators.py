@@ -14,9 +14,19 @@ from .constants import (
     VALID_OUTBOUND_TYPES,
 )
 
+# Valid format values
+VALID_OUTPUT_FORMATS = {"json", "toml", "auto"}
+VALID_EXPORT_FORMATS = {"singbox", "clash", "v2ray"}
+
 
 def validate_flag_combinations(
-    dry_run: bool, agent_check: bool, validate_only: bool, url: Optional[str]
+    dry_run: bool,
+    agent_check: bool,
+    validate_only: bool,
+    url: Optional[str],
+    user_agent: Optional[str],
+    no_user_agent: bool,
+    output: Optional[str],
 ) -> None:
     """Validate flag combinations for mutual exclusivity.
 
@@ -25,10 +35,14 @@ def validate_flag_combinations(
         agent_check: Agent check mode flag
         validate_only: Validate only mode flag
         url: Subscription URL
+        user_agent: Custom User-Agent header
+        no_user_agent: Disable User-Agent header
+        output: Output file path
 
     Raises:
         typer.Exit: If invalid flag combination detected
     """
+    # Existing validations
     if dry_run and agent_check:
         typer.echo(
             "❌ Error: --dry-run and --agent-check are mutually exclusive", err=True
@@ -47,6 +61,26 @@ def validate_flag_combinations(
             err=True,
         )
         raise typer.Exit(1)
+
+    # NEW: validate-only + dry-run conflict
+    if validate_only and dry_run:
+        typer.echo(
+            "❌ Error: --validate-only and --dry-run are mutually exclusive", err=True
+        )
+        raise typer.Exit(1)
+
+    # NEW: user-agent + no-user-agent conflict
+    if user_agent and no_user_agent:
+        typer.echo(
+            "❌ Error: --user-agent and --no-user-agent are mutually exclusive",
+            err=True,
+        )
+        raise typer.Exit(1)
+
+    # NEW: warnings for ignored output
+    if output and (dry_run or agent_check):
+        mode = "dry-run" if dry_run else "agent-check"
+        typer.echo(f"⚠️  Warning: --output is ignored in --{mode} mode", err=True)
 
 
 def validate_postprocessors(processors: List[str]) -> None:
@@ -180,3 +214,37 @@ def validate_and_parse_cli_parameters(
         validate_exclude_outbounds(exclude_outbounds)
 
     return postprocessors_list, middleware_list
+
+
+def validate_output_format(format_value: str) -> None:
+    """Validate output format value.
+
+    Args:
+        format_value: Output format to validate
+
+    Raises:
+        typer.Exit: If format is invalid
+    """
+    if format_value not in VALID_OUTPUT_FORMATS:
+        typer.echo(f"❌ Invalid output format: {format_value}", err=True)
+        typer.echo(
+            f"💡 Valid formats: {', '.join(sorted(VALID_OUTPUT_FORMATS))}", err=True
+        )
+        raise typer.Exit(1)
+
+
+def validate_export_format(export_format: str) -> None:
+    """Validate export format value.
+
+    Args:
+        export_format: Export format to validate
+
+    Raises:
+        typer.Exit: If export format is invalid
+    """
+    if export_format not in VALID_EXPORT_FORMATS:
+        typer.echo(f"❌ Invalid export format: {export_format}", err=True)
+        typer.echo(
+            f"💡 Valid formats: {', '.join(sorted(VALID_EXPORT_FORMATS))}", err=True
+        )
+        raise typer.Exit(1)

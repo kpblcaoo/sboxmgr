@@ -13,11 +13,11 @@ import typer
 from dotenv import load_dotenv
 
 from sboxmgr.cli import plugin_template
-from sboxmgr.cli.commands.config import config_app
+from sboxmgr.cli.commands.config import app as new_config_app
+from sboxmgr.cli.commands.config import profile_app
 from sboxmgr.cli.commands.exclusions import exclusions
 from sboxmgr.cli.commands.export import export
 from sboxmgr.cli.commands.policy import app as policy_app
-from sboxmgr.cli.commands.profile import app as profile_app
 
 # Import commands for registration
 from sboxmgr.cli.commands.subscription import list_servers as subscription_list_servers
@@ -191,7 +191,10 @@ app.command("list-servers", help=t("cli.list_servers.help"))(subscription_list_s
 app.command("exclusions")(exclusions)
 
 # Регистрируем config команды
-app.add_typer(config_app)
+app.add_typer(new_config_app, name="config")
+
+# Регистрируем profile команды (deprecated)
+app.add_typer(profile_app, name="profile")
 
 # Регистрируем команду экспорта
 app.command("export", help="Export configurations in standardized formats")(export)
