@@ -57,6 +57,14 @@ def exclusions(
     Supports adding, removing, viewing exclusions with interactive selection,
     wildcard patterns, and JSON export capabilities.
     """
+    # Validate conflicting options
+    if add and remove:
+        typer.echo("❌ Error: --add and --remove are mutually exclusive", err=True)
+        raise typer.Exit(1)
+
+    if view and add:
+        typer.echo("⚠️  Warning: --view takes precedence over --add", err=True)
+
     manager = ExclusionManager.default()
 
     # Handle view-only operations first (no URL needed)
@@ -326,7 +334,9 @@ def _interactive_exclusions(
             servers = manager._servers_cache["servers"]
             protocols = manager._servers_cache["supported_protocols"]
             added = manager.add_by_wildcard(servers, [pattern], protocols, reason)
-            rprint(f"[green]✅ Added {len(added)} servers matching '{pattern}'.[/green]")
+            rprint(
+                f"[green]✅ Added {len(added)} servers matching '{pattern}'.[/green]"
+            )
         else:
             rprint(
                 "[yellow]❓ Unknown command. Try: add 0,1,2 or remove 0,1 or wildcard server-* or quit[/yellow]"

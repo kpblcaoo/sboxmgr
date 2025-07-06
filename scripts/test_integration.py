@@ -7,7 +7,7 @@ import json
 import subprocess
 import tempfile
 
-from src.sboxmgr.models import (
+from sboxmgr.models import (
     DirectOutbound,
     MixedInbound,
     ShadowsocksOutbound,

@@ -1,6 +1,21 @@
 # JSON Schemas
 
-This directory contains JSON schemas generated from Pydantic models for SBoxMgr configuration validation.
+This directory contains JSON schemas for validating SBoxMgr configuration files.
+
+## Configuration Schemas (ADR-0017)
+
+### User Configuration Schemas
+- **`full-config.schema.json`** - Complete user configuration
+- **`subscription-config.schema.json`** - Subscription settings
+- **`filter-config.schema.json`** - Filtering configuration
+- **`routing-config.schema.json`** - Routing settings
+- **`export-config.schema.json`** - Export configuration
+- **`agent-config.schema.json`** - Agent settings
+- **`ui-config.schema.json`** - UI preferences
+
+### Internal Configuration Schemas
+- **`client-config.schema.json`** - Client configuration
+- **`inbound-config.schema.json`** - Inbound settings
 
 ## 📋 Generated Schemas
 

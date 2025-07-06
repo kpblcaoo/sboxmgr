@@ -4,7 +4,7 @@ This document provides a comprehensive reference for all SBoxMgr CLI commands an
 
 ## Overview
 
-SBoxMgr provides a command-line interface for managing sing-box configurations, subscriptions, and profiles.
+SBoxMgr provides a command-line interface for managing sing-box configurations, subscriptions, and user configurations.
 
 ## Global Options
 
@@ -102,74 +102,40 @@ sboxctl exclusions --clear --yes
 Configuration management commands.
 
 **Subcommands:**
+- `list`: List available configurations
+- `create`: Create new configuration
+- `apply`: Apply configuration
 - `validate`: Validate configuration file
-- `dump`: Dump resolved configuration
-- `schema`: Generate JSON schema
-- `env-info`: Show environment detection
+- `migrate`: Convert JSON to TOML format
+- `switch`: Switch active configuration
+- `edit`: Edit configuration file
+- `status`: Show current active configuration
 
 **Examples:**
 ```bash
-# Validate config
-sboxctl config validate config.json
+# List configurations
+sboxctl config list
 
-# Dump configuration
-sboxctl config dump --format json
+# Create new configuration
+sboxctl config create home --description "Home configuration"
 
-# Generate schema
-sboxctl config schema --output schema.json
-```
+# Switch to configuration
+sboxctl config switch work
 
-### Profile Management
+# Show current status
+sboxctl config status
 
-#### `sboxctl profile`
-Profile management commands.
+# Apply configuration
+sboxctl config apply my-config.toml
 
-**Subcommands:**
-- `list`: List available profiles
-- `apply`: Apply profile to configuration
-- `validate`: Validate profile
-- `explain`: Explain profile settings
-- `diff`: Show differences between profiles
-- `switch`: Switch to different profile
+# Validate configuration
+sboxctl config validate config.toml
 
-**Examples:**
-```bash
-# List profiles
-sboxctl profile list
+# Edit configuration
+sboxctl config edit home
 
-# Apply profile
-sboxctl profile apply profile.json
-
-# Validate profile
-sboxctl profile validate profile.json
-
-# Switch profile
-sboxctl profile switch work
-```
-
-### Policy Management
-
-#### `sboxctl policy`
-Policy management commands.
-
-**Subcommands:**
-- `list`: List available policies
-- `test`: Test policies with context
-- `audit`: Audit servers against policies
-- `enable`: Enable policies
-- `disable`: Disable policies
-- `info`: Show policy system information
-
-**Examples:**
-```bash
-# List policies
-sboxctl policy list
-
-# Test policies
-sboxctl policy test --profile profile.json
-
-# Audit servers
-sboxctl policy audit --servers servers.json
+# Migrate from JSON to TOML
+sboxctl config migrate old-profile.json --target new-config.toml
 ```
 
 ### Language Management
@@ -179,30 +145,14 @@ Language management commands.
 
 **Options:**
 - `--set <code>`: Set language (en, ru, de, etc.)
-- `--list`: List available languages
 
 **Examples:**
 ```bash
 # Set language
 sboxctl lang --set ru
 
-# List languages
-sboxctl lang --list
-```
-
-### Plugin Development
-
-#### `sboxctl plugin-template`
-Generate plugin template.
-
-**Options:**
-- `<type>`: Plugin type (fetcher, parser, exporter, validator)
-- `<ClassName>`: Class name in CamelCase
-- `--output-dir <path>`: Output directory
-
-**Example:**
-```bash
-sboxctl plugin-template fetcher MyCustomFetcher --output-dir ./plugins/
+# Show current language
+sboxctl lang
 ```
 
 ## Environment Variables
@@ -213,14 +163,10 @@ sboxctl plugin-template fetcher MyCustomFetcher --output-dir ./plugins/
 - `SBOXMGR_LANG`: Interface language
 - `SBOXMGR_DEBUG`: Default debug level
 
-## Exit Codes
+## See Also
 
-- `0`: Success
-- `1`: General error
-- `2`: Configuration error
-- `3`: Validation error
-- `4`: Network error
-- `5`: Permission error
+- [Configurations](configs.md) - Working with configurations
+- [Subscriptions](subscriptions.md) - Subscription management
 
 ## Examples
 
@@ -251,8 +197,5 @@ sboxctl export -u "https://example.com/proxy.json" --index 1 --dry-run
 sboxctl list-servers -u "https://example.com/proxy.json" -d 2
 ```
 
-## See Also
-
-- [Profiles](profiles.md) - Working with profiles
-- [Subscriptions](subscriptions.md) - Subscription management
-- [Troubleshooting](troubleshooting.md) - Problem solving
+**Subcommands:**
+- `

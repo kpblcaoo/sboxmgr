@@ -12,14 +12,14 @@ from pathlib import Path
 
 import pytest
 
-from src.sboxmgr.models import SingBoxConfig, create_example_config
+from sboxmgr.models import SingBoxConfig, create_example_config
 
 
 def check_singbox_available() -> bool:
     """Check if sing-box binary is available for testing."""
     try:
         result = subprocess.run(
-            ["sing-box", "version"], capture_output=True, text=True, timeout=5
+            ["/usr/bin/sing-box", "version"], capture_output=True, text=True, timeout=5
         )
         return result.returncode == 0
     except (subprocess.TimeoutExpired, FileNotFoundError):
@@ -37,11 +37,13 @@ def validate_with_singbox(config_dict: dict) -> bool:
 
     try:
         result = subprocess.run(
-            ["sing-box", "check", "-c", config_path],
+            ["/usr/bin/sing-box", "check", "-c", config_path],
             capture_output=True,
             text=True,
             timeout=10,
         )
+        if result.returncode != 0:
+            print(f"sing-box check failed: {result.stderr}")
         return result.returncode == 0
     finally:
         Path(config_path).unlink(missing_ok=True)

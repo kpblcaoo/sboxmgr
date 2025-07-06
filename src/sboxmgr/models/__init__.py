@@ -65,8 +65,12 @@ from .singbox import (  # Main config; Enums; Common; DNS; Auth; NTP; Inbounds; 
     WireGuardOutbound,
 )
 
-# Утилиты (новые или совместимые с новой схемой)
-# (Если нужны create_example_config, validate_config и т.д. — импортировать из singbox/utils.py или аналогичного файла)
+# Утилиты
+from .utils import (
+    create_example_config,
+    generate_singbox_schema,
+    validate_singbox_config,
+)
 
 __all__ = [
     # Sing-box models
@@ -125,4 +129,8 @@ __all__ = [
     "V2RayApiConfig",
     "CacheFileConfig",
     "ObservatoryConfig",
+    # Utilities
+    "create_example_config",
+    "validate_singbox_config",
+    "generate_singbox_schema",
 ]

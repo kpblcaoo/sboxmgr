@@ -18,7 +18,12 @@ from .mode_handlers import (
     handle_validate_only_mode,
 )
 from .profile_loaders import load_profiles
-from .validators import validate_and_parse_cli_parameters, validate_flag_combinations
+from .validators import (
+    validate_and_parse_cli_parameters,
+    validate_export_format,
+    validate_flag_combinations,
+    validate_output_format,
+)
 
 # Import Phase 3 components
 try:
@@ -71,6 +76,12 @@ def export(
     # Phase 4 enhancements
     profile: str = typer.Option(
         None, "--profile", help="Profile JSON file for Phase 3 processing configuration"
+    ),
+    config: str = typer.Option(
+        None,
+        "--config",
+        help="User configuration file to use (TOML/JSON)",
+        envvar="SBOXMGR_ACTIVE_CONFIG",
     ),
     client_profile: str = typer.Option(
         None,
@@ -211,7 +222,13 @@ def export(
         handle_profile_generation(generate_profile, postprocessors, middleware)
 
     # Validate flag combinations
-    validate_flag_combinations(dry_run, agent_check, validate_only, url)
+    validate_flag_combinations(
+        dry_run, agent_check, validate_only, url, user_agent, no_user_agent, output
+    )
+
+    # Validate format values
+    validate_output_format(format)
+    validate_export_format(export_format)
 
     # Handle validate-only mode
     if validate_only:
@@ -226,6 +243,18 @@ def export(
     postprocessors_list, middleware_list = validate_and_parse_cli_parameters(
         postprocessors, middleware, final_route, exclude_outbounds
     )
+
+    # Load user config if provided
+    user_config = None
+    if config:
+        try:
+            from sboxmgr.configs.toml_support import load_config_auto
+
+            user_config = load_config_auto(config)
+            typer.echo(f"✅ Loaded user config: {user_config.id}")
+        except Exception as e:
+            typer.echo(f"❌ Failed to load user config '{config}': {e}", err=True)
+            raise typer.Exit(1)
 
     # Load profiles
     loaded_profile, loaded_client_profile = load_profiles(
@@ -244,6 +273,7 @@ def export(
         tproxy_port=tproxy_port,
         tproxy_listen=tproxy_listen,
         dns_mode=dns_mode,
+        user_config=user_config,
     )
 
     # Apply routing and filtering parameters if provided

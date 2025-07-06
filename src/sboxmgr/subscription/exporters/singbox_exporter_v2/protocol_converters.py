@@ -187,6 +187,8 @@ def convert_hysteria2(
         outbound_data["down_mbps"] = server.meta["down_mbps"]
     if server.meta.get("obfs"):
         outbound_data["obfs"] = server.meta["obfs"]
+    if server.meta.get("obfs_type"):
+        outbound_data["obfs_type"] = server.meta["obfs_type"]
     if server.meta.get("obfs_password"):
         outbound_data["obfs_password"] = server.meta["obfs_password"]
 
@@ -211,20 +213,27 @@ def convert_wireguard(
     outbound_data = {
         **base_data,
         "private_key": server.private_key or server.meta.get("private_key"),
-        "peer_public_key": server.public_key
+        "peer_public_key": getattr(server, "peer_public_key", None)
+        or getattr(server, "public_key", None)
         or server.meta.get("peer_public_key")
         or server.meta.get("public_key"),
     }
 
     # Add optional fields
-    if server.meta.get("local_address"):
-        outbound_data["local_address"] = server.meta["local_address"]
-    if server.meta.get("pre_shared_key"):
-        outbound_data["pre_shared_key"] = server.meta["pre_shared_key"]
+    if getattr(server, "local_address", None) or server.meta.get("local_address"):
+        outbound_data["local_address"] = getattr(
+            server, "local_address", None
+        ) or server.meta.get("local_address")
+    if getattr(server, "pre_shared_key", None) or server.meta.get("pre_shared_key"):
+        outbound_data["pre_shared_key"] = getattr(
+            server, "pre_shared_key", None
+        ) or server.meta.get("pre_shared_key")
     if server.meta.get("reserved"):
         outbound_data["reserved"] = server.meta["reserved"]
     if server.meta.get("mtu"):
         outbound_data["mtu"] = server.meta["mtu"]
+    if server.meta.get("keepalive"):
+        outbound_data["keepalive"] = server.meta["keepalive"]
     if server.meta.get("workers"):
         outbound_data["workers"] = server.meta["workers"]
 

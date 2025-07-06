@@ -295,10 +295,10 @@ class TestPolicyContextEnhanced:
 
 
 class TestIntegrationWithSubscriptionManager:
-    """Test integration with SubscriptionManager _apply_policies method."""
+    """Test integration with SubscriptionManager policy application."""
 
     def test_apply_policies_with_evaluate_all(self):
-        """Test that _apply_policies uses evaluate_all() correctly."""
+        """Test that policy application uses evaluate_all() correctly."""
         from sboxmgr.subscription.manager import SubscriptionManager
         from sboxmgr.subscription.models import PipelineContext
 
@@ -325,8 +325,16 @@ class TestIntegrationWithSubscriptionManager:
             # Create mock servers
             servers = [Mock(address="test.com", type="vmess")]
 
-            # Test _apply_policies
-            result = SubscriptionManager._apply_policies(None, servers, context)
+            # Test policy application through pipeline coordinator
+            from sboxmgr.subscription.manager import PipelineCoordinator
+            coordinator = PipelineCoordinator(
+                middleware_chain=Mock(),
+                postprocessor=Mock(),
+                selector=Mock(),
+                error_handler=Mock()
+            )
+
+            result = coordinator.apply_policies(servers, context)
 
             # Verify evaluate_all was called
             mock_registry.evaluate_all.assert_called_once()

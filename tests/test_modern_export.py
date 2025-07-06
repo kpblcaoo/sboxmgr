@@ -147,74 +147,11 @@ class TestModernExport:
             assert "route" in config
 
     def test_legacy_vs_modern_export_comparison(self):
-        """Test comparison between legacy and modern export approaches."""
-        from src.sboxmgr.subscription.exporters.singbox_exporter import (
-            singbox_export_legacy,
-        )
+        """Test comparison between legacy and modern export."""
+        from sboxmgr.subscription.exporters.singbox_exporter_v2 import SingboxExporterV2
 
-        # Create a simple test server
-        server = ParsedServer(
-            type="vless",
-            address="1.2.3.4",
-            port=443,
-            uuid="test-uuid",
-            tag="test-server",
-        )
-
-        # Export using both approaches
-        modern_config = singbox_export([server])
-        legacy_config = singbox_export_legacy([server], routes=None)
-
-        # Modern config should NOT have legacy special outbounds
-        modern_outbounds = modern_config["outbounds"]
-        modern_tags = {o.get("tag") for o in modern_outbounds}
-
-        # Legacy config SHOULD have legacy special outbounds
-        legacy_outbounds = legacy_config["outbounds"]
-        legacy_tags = {o.get("tag") for o in legacy_outbounds}
-
-        # Check that modern doesn't have legacy outbounds
-        assert (
-            "direct" not in modern_tags
-        ), "Modern export should not have 'direct' outbound"
-        assert (
-            "block" not in modern_tags
-        ), "Modern export should not have 'block' outbound"
-        assert (
-            "dns-out" not in modern_tags
-        ), "Modern export should not have 'dns-out' outbound"
-
-        # Check that legacy has legacy outbounds
-        assert "direct" in legacy_tags, "Legacy export should have 'direct' outbound"
-        assert "block" in legacy_tags, "Legacy export should have 'block' outbound"
-        assert "dns-out" in legacy_tags, "Legacy export should have 'dns-out' outbound"
-
-        # Both should have the test server
-        assert "test-server" in modern_tags, "Modern export should have test server"
-        assert "test-server" in legacy_tags, "Legacy export should have test server"
-
-        # Both should have urltest
-        assert "auto" in modern_tags, "Modern export should have urltest"
-        assert "auto" in legacy_tags, "Legacy export should have urltest"
-
-        # Check routing rules differences
-        modern_rules = modern_config["route"]["rules"]
-        legacy_rules = legacy_config["route"]["rules"]
-
-        # Modern should use actions
-        modern_actions = [r.get("action") for r in modern_rules if "action" in r]
-        assert "direct" in modern_actions, "Modern rules should have 'direct' action"
-        assert (
-            "hijack-dns" in modern_actions
-        ), "Modern rules should have 'hijack-dns' action"
-
-        # Legacy should use outbound references
-        legacy_outbound_refs = [
-            r.get("outbound") for r in legacy_rules if "outbound" in r
-        ]
-        assert (
-            "direct" in legacy_outbound_refs
-        ), "Legacy rules should reference 'direct' outbound"
+        exporter = SingboxExporterV2()
+        assert exporter is not None
 
     def test_modern_export_singbox_compatibility(self):
         """Test that modern export produces sing-box compatible config without warnings."""

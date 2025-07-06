@@ -165,7 +165,12 @@ def create_client_profile_from_profile(
                     options={
                         "tag": "socks-in",
                         "sniff": True,
-                        "users": [{"username": "test_user", "password": "test_pass"}],
+                        "users": [
+                            {
+                                "username": "test_user",
+                                "password": "test_pass",  # pragma: allowlist secret
+                            }
+                        ],
                     },
                 )
             )
@@ -214,7 +219,10 @@ def create_client_profile_from_profile(
                             "tag": "socks-in",
                             "sniff": True,
                             "users": [
-                                {"username": "test_user", "password": "test_pass"}
+                                {
+                                    "username": "test_user",
+                                    "password": "test_pass",  # pragma: allowlist secret
+                                }
                             ],
                         },
                     ),
@@ -250,10 +258,109 @@ def create_client_profile_from_profile(
     return None
 
 
+def create_client_profile_from_user_config(user_config) -> Optional["ClientProfile"]:
+    """Create ClientProfile from UserConfig export settings.
+
+    Args:
+        user_config: UserConfig with export settings
+
+    Returns:
+        ClientProfile with inbounds configured from user config, or None if no config
+    """
+    if not user_config or not hasattr(user_config, "export") or not user_config.export:
+        return None
+
+    inbounds = []
+
+    # Create inbound based on user_config.export.inbound_profile
+    if (
+        hasattr(user_config.export, "inbound_profile")
+        and user_config.export.inbound_profile
+    ):
+        inbound_type = user_config.export.inbound_profile
+
+        # Map profile names to actual inbound types with correct sing-box configuration
+        if inbound_type == "tun":
+            inbounds.append(
+                InboundProfile(
+                    type="tun",
+                    options={
+                        "tag": "tun-in",
+                        "interface_name": "tun0",
+                        "address": ["198.18.0.1/16"],
+                        "mtu": 1500,
+                        "auto_route": True,
+                        "endpoint_independent_nat": True,
+                        "stack": "system",
+                        "sniff": True,
+                        "strict_route": True,
+                    },
+                )
+            )
+        elif inbound_type == "tproxy":
+            inbounds.append(
+                InboundProfile(
+                    type="tproxy",
+                    listen="127.0.0.1",
+                    port=12345,
+                    options={
+                        "tag": "tproxy-in",
+                        "network": ["tcp", "udp"],
+                        "sniff": True,
+                    },
+                )
+            )
+        elif inbound_type == "socks" or inbound_type == "socks5":
+            inbounds.append(
+                InboundProfile(
+                    type="socks",
+                    listen="127.0.0.1",
+                    port=1080,
+                    options={
+                        "tag": "socks-in",
+                        "sniff": True,
+                    },
+                )
+            )
+        elif inbound_type == "http":
+            inbounds.append(
+                InboundProfile(
+                    type="http",
+                    listen="127.0.0.1",
+                    port=8080,
+                    options={"tag": "http-in", "sniff": True},
+                )
+            )
+        else:
+            # Default to tun if unknown
+            inbounds.append(
+                InboundProfile(
+                    type="tun",
+                    options={
+                        "tag": "tun-in",
+                        "interface_name": "tun0",
+                        "address": ["198.18.0.1/16"],
+                        "mtu": 1500,
+                        "auto_route": True,
+                        "endpoint_independent_nat": True,
+                        "stack": "system",
+                        "sniff": True,
+                        "strict_route": True,
+                    },
+                )
+            )
+
+    if inbounds:
+        return ClientProfile(inbounds=inbounds)
+
+    return None
+
+
 def load_profiles(
     profile: Optional[str],
     client_profile: Optional[str],
     inbound_types: Optional[str],
+    user_config=None,
     **inbound_params,
 ) -> tuple[Optional["FullProfile"], Optional["ClientProfile"]]:
     """Load profiles from files or CLI parameters.
@@ -262,6 +369,7 @@ def load_profiles(
         profile: Profile file path
         client_profile: Client profile file path
         inbound_types: Comma-separated inbound types
+        user_config: User configuration object (UserConfig)
         **inbound_params: Additional inbound parameters
 
     Returns:
@@ -277,6 +385,10 @@ def load_profiles(
     loaded_client_profile = None
     if client_profile:
         loaded_client_profile = load_client_profile_from_file(client_profile)
+
+    # Convert user_config to client_profile if provided and no explicit client_profile
+    if user_config and not loaded_client_profile:
+        loaded_client_profile = create_client_profile_from_user_config(user_config)
 
     # Build client profile from CLI parameters if provided
     if inbound_types and not loaded_client_profile:

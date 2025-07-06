@@ -173,28 +173,3 @@ class FullProfile(BaseModel):
         use_enum_values=True,
         extra="forbid",  # Reject unknown fields
     )
-
-
-# Convenience models for backward compatibility
-class LegacyProfile(BaseModel):
-    """Legacy profile format for migration."""
-
-    subscriptions: List[str] = Field(
-        default_factory=list, description="List of subscription URLs"
-    )
-    exclusions: List[str] = Field(
-        default_factory=list, description="List of exclusions"
-    )
-    export_format: str = Field(default="sing-box", description="Export format")
-
-    model_config = ConfigDict(extra="allow")  # Allow unknown fields for migration
-
-
-# Type aliases for convenience
-Profile = FullProfile
-SubscriptionConfig = SubscriptionProfile
-FilterConfig = FilterProfile
-RoutingConfig = RoutingProfile
-ExportConfig = ExportProfile
-AgentConfig = AgentProfile
-UIConfig = UIProfile
