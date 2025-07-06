@@ -9,7 +9,7 @@ App {
 /* Header and Footer */
 Header {
     background: $primary;
-    color: $text-on-primary;
+    color: $text;
 }
 
 Footer {
@@ -20,7 +20,7 @@ Footer {
 /* Button variants */
 Button.primary {
     background: $primary;
-    color: $text-on-primary;
+    color: $text;
 }
 
 Button.primary:hover {
@@ -29,7 +29,7 @@ Button.primary:hover {
 
 Button.error {
     background: $error;
-    color: $text-on-error;
+    color: $text;
 }
 
 Button.error:hover {
@@ -185,12 +185,12 @@ Input:focus {
 
 .server-excluded {
     color: $text-muted;
-    text-style: strikethrough;
+    text-style: strike;
 }
 
 .server-selected {
     background: $accent-darken-3;
-    color: $text-on-accent;
+    color: $text;
 }
 
 /* Modal and overlay styling */
@@ -220,18 +220,16 @@ ModalScreen {
 /* Animation classes */
 .fade-in {
     opacity: 0;
-    animate: opacity 0.3s ease-in;
 }
 
 .slide-in {
     offset-x: -100%;
-    animate: offset-x 0.3s ease-out;
 }
 
 /* Debug styling */
 .debug-info {
     background: $warning-darken-3;
-    color: $text-on-warning;
+    color: $text;
     border: solid $warning;
     padding: 1;
     text-style: bold;
