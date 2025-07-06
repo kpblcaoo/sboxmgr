@@ -19,10 +19,11 @@ class TagNormalizer(BaseMiddleware):
 
     Priority order:
     1. meta['name'] (human-readable from source)
-    2. meta['tag'] (explicit tag from source)
-    3. tag (parser-generated tag)
-    4. address (IP/domain fallback)
-    5. protocol-based fallback
+    2. meta['label'] (alternative human-readable label)
+    3. meta['tag'] (explicit tag from source)
+    4. tag (parser-generated tag)
+    5. address (IP/domain fallback)
+    6. protocol-based fallback (type + object id)
     """
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
