@@ -195,7 +195,7 @@ def export(
         
         # Generate configuration
         config_data = generate_config_from_subscription(
-            url, user_agent, no_user_agent, export_format, debug, 
+            url, user_agent, no_user_agent, export_format, debug,
             loaded_profile, loaded_client_profile
         )
         
@@ -211,4 +211,4 @@ def export(
 
 # Create Typer app for export commands
 app = typer.Typer(help="Export configurations in standardized formats")
-app.command()(export) 
+app.command()(export)

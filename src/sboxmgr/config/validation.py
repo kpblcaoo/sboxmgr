@@ -298,4 +298,4 @@ def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
         summary["valid"] = False
         errors.append(str(e))
     
-    return summary 
+    return summary

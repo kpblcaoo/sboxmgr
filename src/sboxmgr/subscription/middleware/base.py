@@ -39,8 +39,8 @@ class BaseMiddleware(ABC):
     
     @abstractmethod
     def process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -61,8 +61,8 @@ class BaseMiddleware(ABC):
         pass
     
     def can_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> bool:
@@ -120,8 +120,8 @@ class ProfileAwareMiddleware(BaseMiddleware):
         return middleware_config.get(middleware_name, {})
     
     def should_process_server(
-        self, 
-        server: ParsedServer, 
+        self,
+        server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> bool:
@@ -148,8 +148,8 @@ class ChainableMiddleware(ProfileAwareMiddleware):
     """
     
     def pre_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> None:
@@ -164,8 +164,8 @@ class ChainableMiddleware(ProfileAwareMiddleware):
         pass
     
     def post_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> None:
@@ -180,8 +180,8 @@ class ChainableMiddleware(ProfileAwareMiddleware):
         pass
     
     def process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -203,8 +203,8 @@ class ChainableMiddleware(ProfileAwareMiddleware):
     
     @abstractmethod
     def _do_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -245,8 +245,8 @@ class ConditionalMiddleware(ChainableMiddleware):
         self.execution_mode = self.conditions.get('execution_mode', 'always')
     
     def can_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> bool:
@@ -305,7 +305,7 @@ class TransformMiddleware(ConditionalMiddleware):
         self.metadata_enrichers = self.config.get('metadata_enrichers', [])
     
     def transform_server(
-        self, 
+        self,
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None
@@ -362,8 +362,8 @@ class TransformMiddleware(ConditionalMiddleware):
             return value
     
     def _apply_metadata_enricher(
-        self, 
-        server: ParsedServer, 
+        self,
+        server: ParsedServer,
         enricher_config: Dict[str, Any],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
@@ -386,4 +386,4 @@ class TransformMiddleware(ConditionalMiddleware):
             server.meta['trace_id'] = context.trace_id
         elif enricher_type == 'source':
             server.meta['source'] = context.source
-        # Add more enrichers as needed 
+        # Add more enrichers as needed

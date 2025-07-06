@@ -18,8 +18,8 @@ class SubscriptionManagerInterface(ABC):
     """
     
     @abstractmethod
-    def get_servers(self, user_routes: Optional[List[str]] = None, 
-                   exclusions: Optional[List[str]] = None, 
+    def get_servers(self, user_routes: Optional[List[str]] = None,
+                   exclusions: Optional[List[str]] = None,
                    mode: Optional[str] = None,
                    context: Optional[PipelineContext] = None,
                    force_reload: bool = False) -> PipelineResult:
@@ -68,7 +68,7 @@ class ExportManagerInterface(ABC):
     """
     
     @abstractmethod
-    def export(self, servers: List[Any], 
+    def export(self, servers: List[Any],
               exclusions: Optional[List[str]] = None,
               user_routes: Optional[List[Dict]] = None,
               context: Optional[Dict[str, Any]] = None,
@@ -97,7 +97,7 @@ class ExclusionManagerInterface(ABC):
     """
     
     @abstractmethod
-    def add(self, server_id: str, name: Optional[str] = None, 
+    def add(self, server_id: str, name: Optional[str] = None,
            reason: Optional[str] = None) -> bool:
         """Add server to exclusions.
         
@@ -169,4 +169,4 @@ class ExclusionManagerInterface(ABC):
             Filtered list without excluded servers.
 
         """
-        pass 
+        pass

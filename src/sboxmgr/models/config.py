@@ -181,4 +181,4 @@ class SingBoxConfig(BaseModel):
     @classmethod
     def generate_schema(cls) -> dict:
         """Generate JSON Schema for sing-box configuration."""
-        return cls.model_json_schema() 
+        return cls.model_json_schema()

@@ -428,4 +428,4 @@ def list(profiles_dir: Optional[str] = typer.Option(None, "--dir", help="Profile
 @app.command()
 def switch(profile_id: str, profiles_dir: Optional[str] = typer.Option(None, "--dir", help="Profiles directory")):
     """Switch to a different profile."""
-    switch_profile(profile_id, profiles_dir) 
+    switch_profile(profile_id, profiles_dir)

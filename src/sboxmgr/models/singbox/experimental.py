@@ -43,4 +43,4 @@ class ExperimentalConfig(BaseModel):
     geosite: Optional[Dict[str, Any]] = Field(default=None, description="Geosite database settings.")
     v2ray: Optional[Dict[str, Any]] = Field(default=None, description="V2Ray-specific experimental settings.")
 
-    model_config = {"extra": "forbid"} 
+    model_config = {"extra": "forbid"}

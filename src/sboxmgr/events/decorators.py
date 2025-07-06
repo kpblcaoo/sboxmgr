@@ -9,7 +9,7 @@ from .core import EventHandler, get_event_manager
 class DecoratedEventHandler(EventHandler):
     """Event handler wrapper for decorated functions."""
     
-    def __init__(self, func: Callable, event_types: Set[EventType], 
+    def __init__(self, func: Callable, event_types: Set[EventType],
                  source_filter: Optional[str] = None, priority: int = 50):
         """Initialize decorated event handler.
         
@@ -40,7 +40,7 @@ class DecoratedEventHandler(EventHandler):
         return self.func(event_data)
 
 
-def event_handler(*event_types: EventType, source: Optional[str] = None, 
+def event_handler(*event_types: EventType, source: Optional[str] = None,
                   priority: int = 50, auto_register: bool = True):
     """Mark a function as an event handler."""
     def decorator(func: Callable) -> Callable:

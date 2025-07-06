@@ -97,4 +97,4 @@ def create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
         middleware_instances.append(middleware_map[mw_name]({}))
         typer.echo(f"✅ {t('cli.success.middleware_added').format(name=mw_name)}")
     
-    return middleware_instances 
+    return middleware_instances

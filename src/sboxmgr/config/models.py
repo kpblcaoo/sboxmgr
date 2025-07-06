@@ -33,7 +33,7 @@ class LoggingConfig(BaseSettings):
         description="Log output format (text for CLI, json for service)"
     )
     
-    # Sink configuration  
+    # Sink configuration
     sinks: List[str] = Field(
         default=["auto"],
         description="Logging sinks (auto, stdout, journald, syslog, file)"
@@ -320,4 +320,4 @@ def create_config_from_dict(data: Dict) -> AppConfig:
     
     Used for loading configuration from files or CLI arguments.
     """
-    return AppConfig(**data) 
+    return AppConfig(**data)

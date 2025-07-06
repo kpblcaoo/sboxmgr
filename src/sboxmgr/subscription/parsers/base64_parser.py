@@ -65,4 +65,4 @@ class Base64Parser(BaseParser):
                 if debug_level > 1:
                     print(f"[WARN] Ignored line in base64 subscription: {line}")
                 continue
-        return servers 
+        return servers

@@ -105,4 +105,4 @@ class SingBoxConfig(BaseModel):
     @classmethod
     def from_json(cls, json_str: str):
         """Create configuration from JSON string."""
-        return cls.model_validate_json(json_str) 
+        return cls.model_validate_json(json_str)

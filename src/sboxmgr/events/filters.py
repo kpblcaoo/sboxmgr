@@ -223,4 +223,4 @@ class TraceFilter(EventFilter):
             True if trace ID matches
 
         """
-        return event_data.trace_id == self.trace_id 
+        return event_data.trace_id == self.trace_id

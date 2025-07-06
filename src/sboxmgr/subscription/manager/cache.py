@@ -83,4 +83,4 @@ class CacheManager:
             Number of cached items.
         """
         with self._cache_lock:
-            return len(self._get_servers_cache) 
+            return len(self._get_servers_cache)

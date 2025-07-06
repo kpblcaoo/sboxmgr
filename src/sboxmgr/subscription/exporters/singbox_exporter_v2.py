@@ -31,7 +31,7 @@ from sboxmgr.models.singbox import (
     MixedInbound, SocksInbound, HttpInbound, ShadowsocksInbound,
     VmessInbound, VlessInbound, TrojanInbound, Hysteria2Inbound,
     WireGuardInbound, TuicInbound, ShadowTlsInbound, DirectInbound,
-    # Outbounds  
+    # Outbounds
     ShadowsocksOutbound, VmessOutbound, VlessOutbound, TrojanOutbound,
     Hysteria2Outbound, WireGuardOutbound, HttpOutbound, SocksOutbound,
     TuicOutbound, ShadowTlsOutbound, DnsOutbound, DirectOutbound,
@@ -650,4 +650,4 @@ class SingboxExporterV2(BaseExporter):
             
         except Exception as e:
             logger.error(f"Export failed: {e}")
-            raise ValueError(f"Failed to export configuration: {e}") 
+            raise ValueError(f"Failed to export configuration: {e}")

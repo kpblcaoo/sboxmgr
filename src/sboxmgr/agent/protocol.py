@@ -179,11 +179,11 @@ class CheckResponse(AgentResponse):
     """
     
     clients: Dict[str, Dict[str, Any]] = Field(
-        default_factory=dict, 
+        default_factory=dict,
         description="Client availability status"
     )
 
 
 # Type aliases for convenience
 AnyRequest = Union[ValidationRequest, InstallRequest, CheckRequest, AgentRequest]
-AnyResponse = Union[ValidationResponse, InstallResponse, CheckResponse, AgentResponse] 
+AnyResponse = Union[ValidationResponse, InstallResponse, CheckResponse, AgentResponse]

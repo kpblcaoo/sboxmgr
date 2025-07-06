@@ -57,7 +57,7 @@ def convert_client_profile_to_inbounds(profile: ClientProfile) -> List[Union[
         return [MixedInbound(
             type="mixed",
             tag="mixed-in",
-            listen="127.0.0.1", 
+            listen="127.0.0.1",
             listen_port=7890
         )]
     
@@ -175,4 +175,4 @@ def _convert_single_inbound(inbound_config: dict) -> Union[
             
     except Exception as e:
         logger.error(f"Failed to convert inbound configuration: {e}")
-        return None 
+        return None

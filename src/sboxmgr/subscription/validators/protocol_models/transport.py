@@ -74,4 +74,4 @@ class QuicConfig(BaseModel):
     certificate: Optional[str] = Field(None, description="QUIC certificate")
 
     class Config:
-        extra = "forbid" 
+        extra = "forbid"

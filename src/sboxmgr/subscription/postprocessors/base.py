@@ -41,8 +41,8 @@ class BasePostProcessor(ABC):
     
     @abstractmethod
     def process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -149,8 +149,8 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
     """
     
     def pre_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> None:
@@ -165,8 +165,8 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
         pass
     
     def post_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> None:
@@ -181,8 +181,8 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
         pass
     
     def process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -204,8 +204,8 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
     
     @abstractmethod
     def _do_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -220,4 +220,4 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
             List of processed servers
 
         """
-        pass 
+        pass

@@ -31,7 +31,7 @@ def plugin_template(
     # Определяем правильный суффикс для каждого типа
     type_suffix = {
         "fetcher": "Fetcher",
-        "parser": "Parser", 
+        "parser": "Parser",
         "validator": "Validator",
         "exporter": "Exporter",
         "postprocessor": "PostProcessor",
@@ -286,4 +286,4 @@ def test_{class_name.lower()}_basic():
             typer.echo("[DX] Don't forget to register your plugin in the registry and add tests!")
     except Exception as e:
         typer.echo(f"[ERROR] Failed to write template files: {e}", err=True)
-        raise typer.Exit(1) 
+        raise typer.Exit(1)

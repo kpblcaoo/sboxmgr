@@ -18,8 +18,8 @@ __all__ = [
     
     # Individual enrichers
     "BasicEnricher",
-    "GeoEnricher", 
+    "GeoEnricher",
     "PerformanceEnricher",
     "SecurityEnricher",
     "CustomEnricher",
-] 
+]

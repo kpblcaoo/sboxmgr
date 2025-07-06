@@ -71,4 +71,4 @@ def convert_transport_config(server: ParsedServer) -> Optional[TransportConfig]:
                 transport_data["http_opts"] = transport_data.get("http_opts", {})
                 transport_data["http_opts"]["host"] = server.meta["http_host"]
     
-    return TransportConfig(**transport_data) if transport_data else None 
+    return TransportConfig(**transport_data) if transport_data else None

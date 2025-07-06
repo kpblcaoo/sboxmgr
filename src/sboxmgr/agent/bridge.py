@@ -129,7 +129,7 @@ class AgentBridge:
             self._available = False
             return False
     
-    def validate(self, config_path: Path, client_type: Optional[ClientType] = None, 
+    def validate(self, config_path: Path, client_type: Optional[ClientType] = None,
                 strict: bool = True) -> ValidationResponse:
         """Validate configuration file using sboxagent.
         
@@ -409,4 +409,4 @@ class AgentBridge:
         except subprocess.SubprocessError as e:
             raise AgentError(f"Agent subprocess error: {e}") from e
         except Exception as e:
-            raise AgentError(f"Unexpected agent error: {e}") from e 
+            raise AgentError(f"Unexpected agent error: {e}") from e

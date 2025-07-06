@@ -2,8 +2,8 @@
 
 # Supported protocol types
 SUPPORTED_PROTOCOLS = {
-    "vless", "vmess", "trojan", "ss", "shadowsocks", 
-    "wireguard", "hysteria2", "tuic", "shadowtls", 
+    "vless", "vmess", "trojan", "ss", "shadowsocks",
+    "wireguard", "hysteria2", "tuic", "shadowtls",
     "anytls", "tor", "ssh"
 }
 
@@ -14,7 +14,7 @@ PROTOCOL_NORMALIZATION = {
 
 # Configuration whitelisted fields
 CONFIG_WHITELIST = {
-    "password", "method", "multiplex", "packet_encoding", 
+    "password", "method", "multiplex", "packet_encoding",
     "udp_over_tcp", "udp_relay_mode", "udp_fragment", "udp_timeout"
 }
 
@@ -33,4 +33,4 @@ TRANSPORT_TYPES = ("ws", "grpc", "tcp", "udp")
 # TLS configuration fields
 TLS_CONFIG_FIELDS = {
     "tls", "sni", "alpn", "server_name", "insecure", "utls"
-} 
+}

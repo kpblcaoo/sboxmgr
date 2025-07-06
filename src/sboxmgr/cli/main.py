@@ -16,7 +16,7 @@ from sboxmgr.i18n.t import t
 from sboxmgr.cli import plugin_template
 from sboxmgr.cli.commands.config import config_app
 
-# Import commands for registration  
+# Import commands for registration
 from sboxmgr.cli.commands.subscription import list_servers as subscription_list_servers
 from sboxmgr.cli.commands.exclusions import exclusions
 from sboxmgr.cli.commands.export import export
@@ -187,4 +187,4 @@ app.add_typer(profile_app)
 app.add_typer(policy_app)
 
 if __name__ == "__main__":
-    app() 
+    app()

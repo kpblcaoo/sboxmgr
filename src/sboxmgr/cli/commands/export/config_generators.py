@@ -151,4 +151,4 @@ def generate_profile_from_cli(
         
     except Exception as e:
         typer.echo(f"❌ Failed to generate profile: {e}", err=True)
-        raise typer.Exit(1) 
+        raise typer.Exit(1)

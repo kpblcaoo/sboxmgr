@@ -162,4 +162,4 @@ class DefaultRouter(BaseRoutingPlugin):
             ipaddress.ip_address(address)
             return True
         except ValueError:
-            return False 
+            return False

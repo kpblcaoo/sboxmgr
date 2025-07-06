@@ -440,4 +440,4 @@ class URIListParser(BaseParser):
             )
         except (binascii.Error, UnicodeDecodeError, json.JSONDecodeError, ValueError, KeyError) as e:
             logger.warning(f"Failed to parse vmess URI: {str(e)}")
-            return ParsedServer(type="vmess", address="invalid", port=0, meta={"error": f"decode failed: {type(e).__name__}"}) 
+            return ParsedServer(type="vmess", address="invalid", port=0, meta={"error": f"decode failed: {type(e).__name__}"})

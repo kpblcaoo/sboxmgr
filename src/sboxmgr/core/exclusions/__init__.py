@@ -20,4 +20,4 @@ def get_default_manager() -> ExclusionManager:
         Default ExclusionManager singleton
 
     """
-    return ExclusionManager.default() 
+    return ExclusionManager.default()

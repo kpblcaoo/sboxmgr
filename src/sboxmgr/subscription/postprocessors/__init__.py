@@ -27,7 +27,7 @@ from .chain import PostProcessorChain
 __all__ = [
     # Base classes
     'BasePostProcessor',
-    'ProfileAwarePostProcessor', 
+    'ProfileAwarePostProcessor',
     'ChainablePostProcessor',
     
     # Concrete postprocessors
@@ -38,4 +38,4 @@ __all__ = [
     
     # Legacy postprocessors (for backward compatibility)
     'GeoFilterPostProcessorPostprocessor',
-] 
+]

@@ -54,7 +54,7 @@ __all__ = [
     
     # Protocol handlers
     "export_wireguard",
-    "export_hysteria2", 
+    "export_hysteria2",
     "export_tuic",
     "export_shadowtls",
     "export_anytls",
@@ -73,4 +73,4 @@ __all__ = [
     "CONFIG_WHITELIST",
     "DEFAULT_URLTEST_CONFIG",
     "TLS_CONFIG_FIELDS",
-] 
+]

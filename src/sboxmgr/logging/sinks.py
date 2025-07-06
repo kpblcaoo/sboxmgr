@@ -65,7 +65,7 @@ def detect_available_sinks() -> List[LogSink]:
 
 
 def create_handler(
-    sink: LogSink, 
+    sink: LogSink,
     config: 'LoggingConfig',
     level: Optional[str] = None
 ) -> logging.Handler:
@@ -392,4 +392,4 @@ def _get_syslog_priority(level: int) -> int:
         logging.ERROR: 3,    # LOG_ERR
         logging.CRITICAL: 2, # LOG_CRIT
     }
-    return mapping.get(level, 6)  # Default to INFO 
+    return mapping.get(level, 6)  # Default to INFO

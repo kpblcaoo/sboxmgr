@@ -90,4 +90,4 @@ def convert_parsed_server_to_outbound(server: ParsedServer) -> Optional[Union[
             
     except Exception as e:
         logger.error(f"Failed to convert server {server.address}:{server.port}: {e}")
-        return None 
+        return None

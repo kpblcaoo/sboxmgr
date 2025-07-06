@@ -355,4 +355,4 @@ def build_client_profile_from_cli(
         else:
             raise ValueError(f"Unsupported inbound type: {inbound_type}")
     
-    return builder.build() 
+    return builder.build()

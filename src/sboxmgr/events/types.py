@@ -108,4 +108,4 @@ class EventData(BaseModel):
 
 # Type aliases for convenience
 EventPayload = Dict[str, Any]
-EventCallback = Union[Callable[..., Any], Any] 
+EventCallback = Union[Callable[..., Any], Any]

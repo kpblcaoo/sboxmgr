@@ -18,10 +18,10 @@ class ErrorHandler:
         pass
     
     def create_pipeline_error(
-        self, 
-        error_type: ErrorType, 
-        stage: str, 
-        message: str, 
+        self,
+        error_type: ErrorType,
+        stage: str,
+        message: str,
         context_data: Optional[Dict[str, Any]] = None
     ) -> PipelineError:
         """Create standardized pipeline error.
@@ -57,9 +57,9 @@ class ErrorHandler:
             Fetch error object.
         """
         return self.create_pipeline_error(
-            ErrorType.FETCH, 
-            "fetch", 
-            message, 
+            ErrorType.FETCH,
+            "fetch",
+            message,
             context_data
         )
     
@@ -75,9 +75,9 @@ class ErrorHandler:
             Validation error object.
         """
         return self.create_pipeline_error(
-            ErrorType.VALIDATION, 
-            stage, 
-            message, 
+            ErrorType.VALIDATION,
+            stage,
+            message,
             context_data
         )
     
@@ -92,9 +92,9 @@ class ErrorHandler:
             Parse error object.
         """
         return self.create_pipeline_error(
-            ErrorType.PARSE, 
-            "parse", 
-            message, 
+            ErrorType.PARSE,
+            "parse",
+            message,
             context_data
         )
     
@@ -110,9 +110,9 @@ class ErrorHandler:
             Internal error object.
         """
         return self.create_pipeline_error(
-            ErrorType.INTERNAL, 
-            stage, 
-            message, 
+            ErrorType.INTERNAL,
+            stage,
+            message,
             context_data
         )
     
@@ -140,8 +140,8 @@ class ErrorHandler:
             True if context has errors, False otherwise.
         """
         return (
-            hasattr(context, 'metadata') 
-            and context.metadata 
+            hasattr(context, 'metadata')
+            and context.metadata
             and context.metadata.get('errors')
         )
     
@@ -156,4 +156,4 @@ class ErrorHandler:
         """
         if not self.has_errors(context):
             return 0
-        return len(context.metadata['errors']) 
+        return len(context.metadata['errors'])

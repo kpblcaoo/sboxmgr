@@ -14,7 +14,7 @@ from .interfaces import (
 
 __all__ = [
     'Orchestrator',
-    'OrchestratorConfig', 
+    'OrchestratorConfig',
     'OrchestratorError',
     'ManagerFactory',
     'create_default_exclusion_manager',
@@ -24,4 +24,4 @@ __all__ = [
     'ExclusionManagerInterface',
 ]
 
-# Core modules will be imported as needed 
+# Core modules will be imported as needed

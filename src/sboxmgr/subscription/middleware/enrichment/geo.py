@@ -149,4 +149,4 @@ class GeoEnricher:
             return ip.is_private or ip.is_loopback or ip.is_link_local
         except ValueError:
             # Not an IP address, assume it's a domain
-            return address in ['localhost', '127.0.0.1', '::1'] or address.startswith('192.168.') 
+            return address in ['localhost', '127.0.0.1', '::1'] or address.startswith('192.168.')

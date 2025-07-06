@@ -133,4 +133,4 @@ class BaseFetcher(ABC):
             Size limit in bytes (default: 2MB).
 
         """
-        return get_fetch_size_limit() 
+        return get_fetch_size_limit()

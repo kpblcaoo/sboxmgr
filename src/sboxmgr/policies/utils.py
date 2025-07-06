@@ -3,7 +3,7 @@
 from typing import Any, Optional
 
 
-def extract_metadata_field(obj: Any, field_name: str, 
+def extract_metadata_field(obj: Any, field_name: str,
                           fallback_fields: Optional[list] = None) -> Optional[Any]:
     """Extract field value from object with fallback options.
     
@@ -88,4 +88,4 @@ def validate_mode(mode: str, allowed_modes: list) -> bool:
     """
     if mode not in allowed_modes:
         raise ValueError(f"Mode '{mode}' not allowed. Must be one of: {allowed_modes}")
-    return True 
+    return True

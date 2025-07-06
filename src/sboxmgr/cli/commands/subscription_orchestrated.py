@@ -341,4 +341,4 @@ def list_servers_orchestrated(
         
     except Exception as e:
         typer.echo(f"{t('error.subscription_failed')}: {e}", err=True)
-        raise typer.Exit(1) 
+        raise typer.Exit(1)

@@ -55,8 +55,8 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
         self.fallback_mode = self.config.get('fallback_mode', 'allow_all')
     
     def process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -122,8 +122,8 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
         return geo_config
     
     def _should_include_server(
-        self, 
-        server: ParsedServer, 
+        self,
+        server: ParsedServer,
         geo_config: Dict[str, Any],
         context: Optional[PipelineContext] = None
     ) -> bool:
@@ -227,4 +227,4 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
             'max_distance_km': self.max_distance_km,
             'fallback_mode': self.fallback_mode
         })
-        return metadata 
+        return metadata

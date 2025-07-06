@@ -26,4 +26,4 @@ def save_selected_config(data, selected_config_file=None):
     """Save selected configuration to file."""
     if selected_config_file is None:
         selected_config_file = get_selected_config_file()
-    atomic_write_json(data, selected_config_file) 
+    atomic_write_json(data, selected_config_file)

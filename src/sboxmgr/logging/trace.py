@@ -138,4 +138,4 @@ def copy_trace_context() -> str:
         >>> # Pass to external system or different context
 
     """
-    return get_trace_id() 
+    return get_trace_id()

@@ -66,4 +66,4 @@ class DefaultSelector(BaseSelector):
         if user_routes:
             filtered = [s for s in filtered if getattr(s, 'meta', {}).get('tag') in user_routes or '*' in user_routes]
         # mode пока не используется, но можно расширить
-        return filtered 
+        return filtered

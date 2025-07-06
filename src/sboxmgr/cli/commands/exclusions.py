@@ -186,9 +186,9 @@ def _view_exclusions(manager: ExclusionManager, json_output: bool) -> None:
     
     for exc in exclusions:
         table.add_row(
-            exc["id"][:12] + "...", 
-            exc.get("name", "N/A"), 
-            exc.get("reason", "N/A"), 
+            exc["id"][:12] + "...",
+            exc.get("name", "N/A"),
+            exc.get("reason", "N/A"),
             exc.get("timestamp", "N/A")[:10]
         )
     
@@ -448,4 +448,4 @@ def _get_server_id(server: dict) -> str:
 ExclusionManager._get_server_id = lambda self, server: _get_server_id(server)
 
 # В конце файла, если есть Typer registration или __all__:
-__all__ = ["exclusions"] 
+__all__ = ["exclusions"]

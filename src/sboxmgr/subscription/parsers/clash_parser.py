@@ -60,4 +60,4 @@ class ClashParser(BaseParser):
                 meta=p
             ))
         # Убираем безусловный print - логирование будет в manager.py
-        return servers 
+        return servers

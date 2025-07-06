@@ -47,8 +47,8 @@ class PostProcessorChain(ProfileAwarePostProcessor):
     """
     
     def __init__(
-        self, 
-        processors: List[BasePostProcessor], 
+        self,
+        processors: List[BasePostProcessor],
         config: Optional[Dict[str, Any]] = None
     ):
         """Initialize postprocessor chain.
@@ -70,8 +70,8 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         self._execution_metadata: Dict[str, Any] = {}
     
     def process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -126,13 +126,13 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             import time
             self._execution_metadata['end_time'] = time.time()
             self._execution_metadata['duration'] = (
-                self._execution_metadata.get('end_time', 0) - 
+                self._execution_metadata.get('end_time', 0) -
                 self._execution_metadata.get('start_time', 0)
             )
     
     def _execute_sequential(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -193,8 +193,8 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         return current_servers
     
     def _execute_parallel(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -262,8 +262,8 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                 return servers
     
     def _execute_conditional(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -485,4 +485,4 @@ class PostProcessorChain(ProfileAwarePostProcessor):
             except ValueError:
                 pass
         
-        return False 
+        return False

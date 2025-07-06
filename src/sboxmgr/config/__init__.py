@@ -17,7 +17,7 @@ from .detection import detect_service_mode, detect_container_environment, get_en
 __all__ = [
     "AppConfig",
     "AppSettings",
-    "LoggingConfig", 
+    "LoggingConfig",
     "ServiceConfig",
     "load_config",
     "load_config_file",
@@ -26,4 +26,4 @@ __all__ = [
     "detect_service_mode",
     "detect_container_environment",
     "get_environment_info",
-] 
+]

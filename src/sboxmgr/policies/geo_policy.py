@@ -20,7 +20,7 @@ class CountryPolicy(BasePolicy):
     description = "Restricts servers by country code"
     group = "geo"
 
-    def __init__(self, allowed_countries: Optional[List[str]] = None, 
+    def __init__(self, allowed_countries: Optional[List[str]] = None,
                  blocked_countries: Optional[List[str]] = None,
                  mode: str = "whitelist"):
         """Initialize country policy.
@@ -89,8 +89,8 @@ class CountryPolicy(BasePolicy):
 
         """
         country = extract_metadata_field(
-            server, 
-            "country", 
+            server,
+            "country",
             fallback_fields=["cc", "geo", "location"]
         )
         return str(country).upper() if country else None
@@ -176,8 +176,8 @@ class ASNPolicy(BasePolicy):
 
         """
         asn = extract_metadata_field(
-            server, 
-            "asn", 
+            server,
+            "asn",
             fallback_fields=["autonomous_system"]
         )
         if asn:
@@ -185,4 +185,4 @@ class ASNPolicy(BasePolicy):
                 return int(asn)
             except (ValueError, TypeError):
                 return None
-        return None 
+        return None

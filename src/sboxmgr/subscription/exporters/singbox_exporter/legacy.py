@@ -47,7 +47,7 @@ def create_enhanced_routing_rules() -> List[Dict[str, Any]]:
         {
             "ip_cidr": [
                 "10.0.0.0/8",
-                "172.16.0.0/12", 
+                "172.16.0.0/12",
                 "192.168.0.0/16",
                 "127.0.0.0/8"
             ],
@@ -140,4 +140,4 @@ def singbox_export_legacy(
     if client_profile is not None:
         config["inbounds"] = generate_inbounds(client_profile)
     
-    return config 
+    return config

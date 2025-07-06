@@ -129,7 +129,7 @@ def find_config_file() -> Optional[str]:
     
     config_names = [
         "config.toml",
-        "config.yaml", 
+        "config.yaml",
         "config.yml",
         "config.json",
         "sboxmgr.toml",
@@ -273,4 +273,4 @@ def merge_cli_args_to_config(
         config_dict["config_file"] = config_file
     
     # Create new configuration with overrides
-    return AppConfig(**config_dict) 
+    return AppConfig(**config_dict)

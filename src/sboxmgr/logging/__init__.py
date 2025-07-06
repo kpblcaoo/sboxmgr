@@ -46,4 +46,4 @@ __all__ = [
     'detect_available_sinks',
     'create_formatter',
     'get_default_formatter',
-] 
+]

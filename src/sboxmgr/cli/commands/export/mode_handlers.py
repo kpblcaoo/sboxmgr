@@ -293,4 +293,4 @@ def handle_legacy_modes(
             os.unlink(temp_path)
             typer.echo("🗑️  Temporary file deleted")
             
-        raise typer.Exit(exit_code) 
+        raise typer.Exit(exit_code)

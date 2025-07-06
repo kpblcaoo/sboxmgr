@@ -43,4 +43,4 @@ def load_entry_points():
             PLUGIN_REGISTRY[ep.name] = ep.load()
     except Exception as e:
         # entry points optional, не критично для MVP
-        logging.debug(f"Failed to load entry points: {e}") 
+        logging.debug(f"Failed to load entry points: {e}")

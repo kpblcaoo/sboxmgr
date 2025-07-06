@@ -68,8 +68,8 @@ class EnrichmentMiddleware(TransformMiddleware):
         self.custom_enricher = CustomEnricher(self.custom_enrichers)
     
     def _do_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -141,8 +141,8 @@ class EnrichmentMiddleware(TransformMiddleware):
         return enrichment_config
     
     def _enrich_server(
-        self, 
-        server: ParsedServer, 
+        self,
+        server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
         enrichment_config: Optional[Dict[str, Any]] = None
@@ -179,10 +179,10 @@ class EnrichmentMiddleware(TransformMiddleware):
         # Apply custom enrichment
         if enrichment_config['enable_custom_enrichment']:
             server = self.custom_enricher.enrich(
-                server, 
-                context, 
-                profile, 
+                server,
+                context,
+                profile,
                 enrichment_config['custom_enrichers']
             )
         
-        return server 
+        return server

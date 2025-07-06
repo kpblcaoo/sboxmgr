@@ -44,4 +44,4 @@ class TransportConfig(BaseModel):
     httpupgrade_opts: Optional[Dict[str, Any]] = Field(default=None, description="HTTPUpgrade settings.")
     quic_opts: Optional[Dict[str, Any]] = Field(default=None, description="QUIC settings.")
 
-    model_config = {"extra": "forbid"} 
+    model_config = {"extra": "forbid"}

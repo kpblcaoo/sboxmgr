@@ -341,4 +341,4 @@ def convert_direct(server: ParsedServer, base_data: Dict[str, Any]) -> Optional[
     if server.meta.get("proxy"):
         outbound_data["proxy"] = server.meta["proxy"]
     
-    return DirectOutbound(**outbound_data) 
+    return DirectOutbound(**outbound_data)

@@ -519,9 +519,9 @@ class SubscriptionManager:
             
             # Server selection
             selected_servers = self.selector.select(
-                processed_servers, 
-                user_routes=user_routes, 
-                exclusions=exclusions, 
+                processed_servers,
+                user_routes=user_routes,
+                exclusions=exclusions,
                 mode=mode
             )
             
@@ -687,4 +687,4 @@ class SubscriptionManager:
                 timestamp=datetime.now(timezone.utc)
             )
             context.metadata['errors'].append(err)
-            return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False) 
+            return PipelineResult(config=None, context=context, errors=context.metadata['errors'], success=False)

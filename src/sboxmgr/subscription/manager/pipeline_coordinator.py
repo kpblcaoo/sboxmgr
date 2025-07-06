@@ -14,9 +14,9 @@ class PipelineCoordinator:
     """
     
     def __init__(
-        self, 
-        middleware_chain=None, 
-        postprocessor=None, 
+        self,
+        middleware_chain=None,
+        postprocessor=None,
         selector=None,
         error_handler: ErrorHandler = None
     ):
@@ -106,10 +106,10 @@ class PipelineCoordinator:
             return servers, False
     
     def postprocess_and_select(
-        self, 
-        servers: List[Any], 
-        user_routes: Optional[List[str]], 
-        exclusions: Optional[List[str]], 
+        self,
+        servers: List[Any],
+        user_routes: Optional[List[str]],
+        exclusions: Optional[List[str]],
         mode: str
     ) -> Tuple[List[Any], bool]:
         """Post-process and select servers based on criteria.
@@ -136,9 +136,9 @@ class PipelineCoordinator:
             # Apply server selection
             if self.selector:
                 selected_servers = self.selector.select(
-                    processed_servers, 
-                    user_routes, 
-                    exclusions, 
+                    processed_servers,
+                    user_routes,
+                    exclusions,
                     mode
                 )
             else:
@@ -150,9 +150,9 @@ class PipelineCoordinator:
             return servers, False
     
     def create_pipeline_result(
-        self, 
-        servers: List[Any], 
-        context: PipelineContext, 
+        self,
+        servers: List[Any],
+        context: PipelineContext,
         success: bool
     ) -> PipelineResult:
         """Create pipeline result object.
@@ -175,7 +175,7 @@ class PipelineCoordinator:
         )
     
     def export_configuration(
-        self, 
+        self,
         servers_result: PipelineResult,
         exclusions: Optional[List[str]] = None,
         user_routes: Optional[List[str]] = None,
@@ -207,9 +207,9 @@ class PipelineCoordinator:
             config = mgr.export(servers_result.config, exclusions, user_routes, context)
             
             return PipelineResult(
-                config=config, 
-                context=context, 
-                errors=context.metadata.get('errors', []) if context else [], 
+                config=config,
+                context=context,
+                errors=context.metadata.get('errors', []) if context else [],
                 success=True
             )
             
@@ -225,8 +225,8 @@ class PipelineCoordinator:
                 errors = []
             
             return PipelineResult(
-                config=None, 
-                context=context, 
-                errors=errors, 
+                config=None,
+                context=context,
+                errors=errors,
                 success=False
-            ) 
+            )

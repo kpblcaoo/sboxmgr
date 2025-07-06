@@ -87,7 +87,7 @@ class SingboxExporterV2(BaseExporter):
             routing_rules.append(RouteRule(
                 source_ip_cidr=[
                     "10.0.0.0/8",
-                    "172.16.0.0/12", 
+                    "172.16.0.0/12",
                     "192.168.0.0/16",
                     "127.0.0.0/8"
                 ],
@@ -101,7 +101,7 @@ class SingboxExporterV2(BaseExporter):
                     outbound="auto"
                 ))
                 routing_rules.append(RouteRule(
-                    network="udp", 
+                    network="udp",
                     outbound="auto"
                 ))
             
@@ -128,4 +128,4 @@ class SingboxExporterV2(BaseExporter):
             
         except Exception as e:
             logger.error(f"Export failed: {e}")
-            raise ValueError(f"Failed to export configuration: {e}") 
+            raise ValueError(f"Failed to export configuration: {e}")

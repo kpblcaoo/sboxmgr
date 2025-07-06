@@ -370,4 +370,4 @@ def info():
     typer.echo("  sboxctl policy test --server server.json --user admin --detailed")
     typer.echo("  sboxctl policy list --group security")
     typer.echo("  sboxctl policy enable CountryPolicy")
-    typer.echo("  sboxctl policy audit --servers servers.json --output audit.json") 
+    typer.echo("  sboxctl policy audit --servers servers.json --output audit.json")

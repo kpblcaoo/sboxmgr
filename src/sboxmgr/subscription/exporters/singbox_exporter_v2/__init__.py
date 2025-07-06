@@ -50,7 +50,7 @@ __all__ = [
     
     # Protocol converters
     "convert_shadowsocks",
-    "convert_vmess", 
+    "convert_vmess",
     "convert_vless",
     "convert_trojan",
     "convert_hysteria2",
@@ -73,4 +73,4 @@ __all__ = [
     
     # Main exporter
     "SingboxExporterV2",
-] 
+]

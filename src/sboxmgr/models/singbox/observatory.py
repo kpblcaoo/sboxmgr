@@ -10,4 +10,4 @@ class ObservatoryConfig(BaseModel):
     probe_interval: Optional[str] = Field(default=None, description="Interval for probing, e.g., '1h'.")
     subject_selector: Optional[List[str]] = Field(default=None, description="Outbound tags to probe.")
 
-    model_config = {"extra": "forbid"} 
+    model_config = {"extra": "forbid"}

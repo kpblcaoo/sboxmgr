@@ -45,10 +45,10 @@ class SubscriptionManager:
     """
     
     def __init__(
-        self, 
-        source: SubscriptionSource, 
-        detect_parser=None, 
-        postprocessor_chain=None, 
+        self,
+        source: SubscriptionSource,
+        detect_parser=None,
+        postprocessor_chain=None,
         middleware_chain=None
     ):
         """Initialize subscription manager with configuration.
@@ -240,11 +240,11 @@ class SubscriptionManager:
         
         # Determine overall success
         overall_success = (
-            fetch_success and 
-            parse_success and 
+            fetch_success and
+            parse_success and
             (validation_success or mode == 'strict') and
-            middleware_success and 
+            middleware_success and
             selection_success
         )
         
-        return self.pipeline_coordinator.create_pipeline_result(final_servers, context, overall_success) 
+        return self.pipeline_coordinator.create_pipeline_result(final_servers, context, overall_success)

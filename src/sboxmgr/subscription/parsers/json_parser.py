@@ -44,7 +44,7 @@ class JSONParser(BaseParser):
                 print(f"[WARN] JSON parse error: {e}")
             raise  # выбрасываем ошибку дальше
         # TODO: распарсить data в список ParsedServer (заглушка)
-        return [] 
+        return []
 
 @register("tolerant_json")
 class TolerantJSONParser(BaseParser):
@@ -114,7 +114,7 @@ class TolerantJSONParser(BaseParser):
         # Удаляем поля _comment и trailing commas
         clean_json = re.sub(r'"_comment"\s*:\s*".*?",?', '', clean_json)
         clean_json = re.sub(r',\s*([}\]])', r'\1', clean_json)
-        return clean_json, removed 
+        return clean_json, removed
 
 @register("ssr_json")
 class SSRJSONParser(BaseParser):

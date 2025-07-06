@@ -212,4 +212,4 @@ class PerformanceEnricher:
             elif country in ['CN', 'RU', 'IR', 'PK']:
                 score -= 0.05
         
-        return min(1.0, max(0.0, score)) 
+        return min(1.0, max(0.0, score))

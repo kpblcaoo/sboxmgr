@@ -98,8 +98,8 @@ class ProtocolPolicy(BasePolicy):
 
         """
         protocol = extract_metadata_field(
-            server, 
-            "protocol", 
+            server,
+            "protocol",
             fallback_fields=["type", "method"]
         )
         return str(protocol).lower() if protocol else None
@@ -192,8 +192,8 @@ class EncryptionPolicy(BasePolicy):
         """
         # Try direct fields first
         encryption = extract_metadata_field(
-            server, 
-            "encryption", 
+            server,
+            "encryption",
             fallback_fields=["security", "cipher", "method"]
         )
         
@@ -299,8 +299,8 @@ class AuthenticationPolicy(BasePolicy):
 
         """
         method = extract_metadata_field(
-            server, 
-            "auth_method", 
+            server,
+            "auth_method",
             fallback_fields=["authentication", "auth_type"]
         )
         return str(method).lower() if method else None
@@ -317,8 +317,8 @@ class AuthenticationPolicy(BasePolicy):
         """
         # Try direct fields first
         credentials = extract_metadata_field(
-            server, 
-            "password", 
+            server,
+            "password",
             fallback_fields=["uuid", "psk", "secret", "token"]
         )
         
@@ -334,4 +334,4 @@ class AuthenticationPolicy(BasePolicy):
             if meta.get('password'):
                 return str(meta['password'])
         
-        return None 
+        return None

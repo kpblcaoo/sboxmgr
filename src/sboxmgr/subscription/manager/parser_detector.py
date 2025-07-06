@@ -180,4 +180,4 @@ def _try_uri_list_parser(text: str) -> Optional[ParserProtocol]:
         from ..parsers.uri_list_parser import URIListParser
         return URIListParser()
     
-    return None 
+    return None

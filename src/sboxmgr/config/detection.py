@@ -224,4 +224,4 @@ def get_environment_info() -> dict:
             "/run/systemd/system": os.path.exists("/run/systemd/system"),
             "/proc/1/cgroup": os.path.exists("/proc/1/cgroup"),
         }
-    } 
+    }

@@ -271,7 +271,7 @@ class ExclusionManager(ExclusionManagerInterface):
         }
         self.logger.debug(f"Cached {len(self._servers_cache['supported_servers'])} supported servers")
 
-    def list_servers(self, json_data: Optional[Dict[str, Any]] = None, 
+    def list_servers(self, json_data: Optional[Dict[str, Any]] = None,
                     supported_protocols: Optional[List[str]] = None,
                     show_excluded: bool = True) -> List[Tuple[int, Dict[str, Any], bool]]:
         """List available servers with indices and exclusion status.
@@ -327,7 +327,7 @@ class ExclusionManager(ExclusionManagerInterface):
             except Exception as save_error:
                 self.logger.error(f"Failed to restore exclusion file {self.file_path}: {save_error}")
 
-    def add_by_index(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], indices: List[int], 
+    def add_by_index(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], indices: List[int],
                     supported_protocols: List[str], reason: str = "Added by index") -> List[str]:
         """Add exclusions by server indices.
         
@@ -374,7 +374,7 @@ class ExclusionManager(ExclusionManagerInterface):
         
         return added_ids
 
-    def add_by_wildcard(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], patterns: List[str], 
+    def add_by_wildcard(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], patterns: List[str],
                        supported_protocols: List[str], reason: str = "Added by wildcard") -> List[str]:
         """Add exclusions by wildcard patterns matching server tags.
         
@@ -415,7 +415,7 @@ class ExclusionManager(ExclusionManagerInterface):
         return added_ids
 
     # NEW: Enhanced remove methods with index support
-    def remove_by_index(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], indices: List[int], 
+    def remove_by_index(self, json_data: Union[Dict[str, Any], List[Dict[str, Any]]], indices: List[int],
                        supported_protocols: List[str]) -> List[str]:
         """Remove exclusions by server indices.
         
@@ -495,4 +495,4 @@ class ExclusionManager(ExclusionManagerInterface):
                 if self.remove(server_id):
                     removed_ids.append(server_id)
         
-        return removed_ids 
+        return removed_ids

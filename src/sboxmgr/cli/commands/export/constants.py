@@ -3,7 +3,7 @@
 # Allowed postprocessor types
 ALLOWED_POSTPROCESSORS = [
     'geo_filter',
-    'tag_filter', 
+    'tag_filter',
     'latency_sort'
 ]
 
@@ -96,4 +96,4 @@ DEFAULT_TPROXY_LISTEN = "0.0.0.0"
 DEFAULT_DNS_MODE = "system"
 DEFAULT_OUTPUT_FORMAT = "json"
 DEFAULT_EXPORT_FORMAT = "singbox"
-DEFAULT_OUTPUT_FILE = "config.json" 
+DEFAULT_OUTPUT_FILE = "config.json"

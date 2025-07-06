@@ -218,4 +218,4 @@ Outbound = Annotated[
         AnyTlsOutbound, SshOutbound, TorOutbound
     ],
     Field(discriminator="type")
-] 
+]

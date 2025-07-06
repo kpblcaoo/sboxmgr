@@ -7,8 +7,8 @@ generating schemas, and converting between different model types.
 from typing import Dict, Any, Optional
 from .protocol_configs import ProtocolConfig, ShadowsocksConfig, VmessConfig, VlessConfig, TrojanConfig, WireGuardConfig
 from .outbound_models import (
-    OutboundModel, OutboundConfig, ShadowsocksOutbound, VmessOutbound, VlessOutbound, 
-    TrojanOutbound, WireguardOutbound, HysteriaOutbound, TuicOutbound, HttpOutbound, 
+    OutboundModel, OutboundConfig, ShadowsocksOutbound, VmessOutbound, VlessOutbound,
+    TrojanOutbound, WireguardOutbound, HysteriaOutbound, TuicOutbound, HttpOutbound,
     SocksOutbound, DirectOutbound, BlockOutbound, DnsOutbound
 )
 
@@ -217,4 +217,4 @@ def create_outbound_from_dict(config: Dict[str, Any], tag: Optional[str] = None)
         config = config.copy()
         config["tag"] = tag
     
-    return validate_outbound_config(config) 
+    return validate_outbound_config(config)

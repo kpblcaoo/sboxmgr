@@ -38,4 +38,4 @@ class BaseParser(ABC):
             NotImplementedError: If called directly on base class.
 
         """
-        pass 
+        pass

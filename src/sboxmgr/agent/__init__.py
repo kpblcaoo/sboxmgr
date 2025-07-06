@@ -10,7 +10,7 @@ from .protocol import AgentRequest, AgentResponse, ValidationRequest, InstallReq
 
 __all__ = [
     'AgentBridge',
-    'AgentError', 
+    'AgentError',
     'AgentNotAvailableError',
     'AgentRequest',
     'AgentResponse',
@@ -18,4 +18,4 @@ __all__ = [
     'InstallRequest',
     'ClientType',
     'AgentCommand',
-] 
+]

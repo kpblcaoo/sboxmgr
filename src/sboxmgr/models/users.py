@@ -66,4 +66,4 @@ class TuicUser(BaseModel):
     """TUIC user configuration."""
 
     uuid: str
-    password: str 
+    password: str

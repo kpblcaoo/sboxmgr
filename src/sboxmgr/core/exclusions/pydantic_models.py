@@ -249,7 +249,7 @@ class ExclusionListModel(BaseModel):
             "version": version,
             "last_modified": data.get("last_modified", ""),
             "exclusions": [
-                ExclusionEntryModel.from_dict(ex_data) 
+                ExclusionEntryModel.from_dict(ex_data)
                 for ex_data in data.get("exclusions", [])
             ]
         }

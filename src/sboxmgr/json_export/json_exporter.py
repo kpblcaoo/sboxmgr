@@ -31,8 +31,8 @@ class JSONExporter:
         self.logger = logger
         self.validate = validate
     
-    def export_config(self, 
-                     client_type: str, 
+    def export_config(self,
+                     client_type: str,
                      config_data: Dict[str, Any],
                      subscription_url: Optional[str] = None,
                      metadata: Optional[Dict[str, Any]] = None,
@@ -169,7 +169,7 @@ class JSONExporter:
         
         return created_files
     
-    def _generate_metadata(self, 
+    def _generate_metadata(self,
                           subscription_url: Optional[str] = None,
                           additional_metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Generate metadata for exported configuration."""
@@ -208,7 +208,7 @@ class JSONExporter:
         # This could be enhanced to detect actual client versions
         client_versions = {
             "sing-box": "1.8.0",
-            "clash": "1.18.0", 
+            "clash": "1.18.0",
             "xray": "1.8.0",
             "mihomo": "1.8.0"
         }
@@ -276,4 +276,4 @@ class JSONExporterFactory:
     @staticmethod
     def create_batch_exporter() -> JSONExporter:
         """Create exporter optimized for batch operations."""
-        return JSONExporter(validate=True) 
+        return JSONExporter(validate=True)

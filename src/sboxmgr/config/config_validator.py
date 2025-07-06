@@ -325,4 +325,4 @@ def validate_route_rule(rule: Dict[str, Any], index: int) -> None:
         raise ConfigValidationError(f"Route rule {index} must contain 'outbound' field")
     
     if not isinstance(rule["outbound"], str):
-        raise ConfigValidationError(f"Route rule {index} 'outbound' must be a string") 
+        raise ConfigValidationError(f"Route rule {index} 'outbound' must be a string")

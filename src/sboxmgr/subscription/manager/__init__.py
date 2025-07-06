@@ -19,7 +19,7 @@ __all__ = [
     # Individual components
     "detect_parser",
     "CacheManager",
-    "ErrorHandler", 
+    "ErrorHandler",
     "DataProcessor",
     "PipelineCoordinator",
-] 
+]

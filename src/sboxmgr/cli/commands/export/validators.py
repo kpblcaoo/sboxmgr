@@ -157,4 +157,4 @@ def validate_and_parse_cli_parameters(
     if exclude_outbounds:
         validate_exclude_outbounds(exclude_outbounds)
     
-    return postprocessors_list, middleware_list 
+    return postprocessors_list, middleware_list

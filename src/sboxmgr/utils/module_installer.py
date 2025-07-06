@@ -28,4 +28,4 @@ def install_dependencies():
         logging.error(f"Error installing dependencies: {e}")
 
 if __name__ == "__main__":
-    install_dependencies() 
+    install_dependencies()

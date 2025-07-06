@@ -48,7 +48,7 @@ __all__ = [
     "SingBoxConfig", "LogLevel", "Network", "DomainStrategy",
     "TlsConfig", "MultiplexConfig", "TransportConfig",
     "DnsConfig", "DnsServer", "DnsRule",
-    "AuthenticationConfig", "User", "NtpConfig", "InboundBase", 
+    "AuthenticationConfig", "User", "NtpConfig", "InboundBase",
     "MixedInbound", "SocksInbound", "HttpInbound", "ShadowsocksInbound",
     "VmessInbound", "VlessInbound", "TrojanInbound", "Hysteria2Inbound",
     "WireGuardInbound", "TuicInbound", "ShadowTlsInbound", "DirectInbound", "Inbound",
@@ -59,4 +59,4 @@ __all__ = [
     "AnyTlsOutbound", "SshOutbound", "TorOutbound", "Outbound", "RouteConfig",
     "RouteRule", "ExperimentalConfig", "ClashApiConfig", "V2RayApiConfig", "CacheFileConfig",
     "ObservatoryConfig"
-] 
+]

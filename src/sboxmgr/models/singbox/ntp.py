@@ -14,4 +14,4 @@ class NtpConfig(BaseModel):
     write_system: Optional[bool] = Field(default=None, description="Allow writing to system clock.")
     set_system: Optional[bool] = Field(default=None, description="Set system clock on startup.")
 
-    model_config = {"extra": "forbid"} 
+    model_config = {"extra": "forbid"}

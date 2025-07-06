@@ -39,8 +39,8 @@ def normalize_protocol_type(server_type: str) -> str:
 
 
 def process_shadowsocks_config(
-    outbound: Dict[str, Any], 
-    server: ParsedServer, 
+    outbound: Dict[str, Any],
+    server: ParsedServer,
     meta: Dict[str, Any]
 ) -> bool:
     """Process Shadowsocks configuration.
@@ -95,8 +95,8 @@ def process_transport_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> 
 
 
 def process_tls_config(
-    outbound: Dict[str, Any], 
-    meta: Dict[str, Any], 
+    outbound: Dict[str, Any],
+    meta: Dict[str, Any],
     protocol_type: str
 ) -> None:
     """Process TLS configuration.
@@ -145,8 +145,8 @@ def process_auth_and_flow_config(outbound: Dict[str, Any], meta: Dict[str, Any])
 
 
 def process_tag_config(
-    outbound: Dict[str, Any], 
-    server: ParsedServer, 
+    outbound: Dict[str, Any],
+    server: ParsedServer,
     meta: Dict[str, Any]
 ) -> None:
     """Process tag configuration.
@@ -203,4 +203,4 @@ def process_standard_server(server: ParsedServer, protocol_type: str) -> Optiona
     process_tag_config(outbound, server, meta)
     process_additional_config(outbound, meta)
     
-    return outbound 
+    return outbound

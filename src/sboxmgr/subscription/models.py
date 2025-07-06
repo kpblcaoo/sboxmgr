@@ -230,4 +230,4 @@ class ClientProfile(BaseModel):
     dns_mode: Optional[str] = Field(default="system", description="DNS resolution mode.")
     routing: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Routing configuration overrides.")
     exclude_outbounds: Optional[List[str]] = Field(default_factory=list, description="List of outbound types to exclude.")
-    extra: Optional[dict] = Field(default_factory=dict, description="Additional profile parameters.") 
+    extra: Optional[dict] = Field(default_factory=dict, description="Additional profile parameters.")

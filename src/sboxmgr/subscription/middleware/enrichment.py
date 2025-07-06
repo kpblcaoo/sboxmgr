@@ -16,4 +16,4 @@ __all__ = ['EnrichmentMiddleware']
 
 # Note: This compatibility layer ensures that existing code continues to work
 # without any changes. The actual implementation is now in the enrichment/
-# package with separate modules for different types of enrichment. 
+# package with separate modules for different types of enrichment.

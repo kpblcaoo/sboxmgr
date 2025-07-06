@@ -192,4 +192,4 @@ ProtocolConfig = Union[
     VlessConfig,
     TrojanConfig,
     WireGuardConfig
-] 
+]

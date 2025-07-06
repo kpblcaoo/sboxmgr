@@ -18,7 +18,7 @@ def export_wireguard(server: ParsedServer) -> Optional[Dict[str, Any]]:
         Outbound configuration dict or None if incomplete.
     """
     required_fields = [
-        server.address, server.port, server.private_key, 
+        server.address, server.port, server.private_key,
         server.peer_public_key, server.local_address
     ]
     
@@ -286,4 +286,4 @@ def get_protocol_dispatcher() -> Dict[str, callable]:
         "anytls": export_anytls,
         "tor": export_tor,
         "ssh": export_ssh,
-    } 
+    }

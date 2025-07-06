@@ -155,4 +155,4 @@ class EnrichMiddleware(BaseMiddleware):
             if not hasattr(s, 'meta') or s.meta is None:
                 s.meta = {}
             s.meta['country'] = '??'
-        return servers 
+        return servers

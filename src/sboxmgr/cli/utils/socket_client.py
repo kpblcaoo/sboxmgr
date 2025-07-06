@@ -62,4 +62,4 @@ class SocketClient:
         # TODO: framed JSON decode
         raise NotImplementedError
 
-# TODO: интеграция с CLI-командами и event sender 
+# TODO: интеграция с CLI-командами и event sender

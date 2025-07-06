@@ -56,7 +56,7 @@ class DedupPostProcessor(BasePostProcessor):
             if key not in seen:
                 seen.add(key)
                 result.append(s)
-        return result 
+        return result
 
 class PostProcessorChain(BasePostProcessor):
     """Chain of postprocessor plugins called in sequence to process ParsedServer list.
@@ -97,4 +97,4 @@ class PostProcessorChain(BasePostProcessor):
                 servers = proc.process(servers, context=context)
             else:
                 servers = proc.process(servers)
-        return servers 
+        return servers

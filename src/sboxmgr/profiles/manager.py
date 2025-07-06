@@ -30,7 +30,7 @@ class ProfileInfo:
 
     """
     
-    def __init__(self, path: str, name: str, size: int, modified: datetime, 
+    def __init__(self, path: str, name: str, size: int, modified: datetime,
                  valid: bool = True, error: Optional[str] = None):
         """Initialize ProfileInfo.
         
@@ -61,7 +61,7 @@ class ValidationResult:
 
     """
     
-    def __init__(self, valid: bool = True, errors: Optional[List[str]] = None, 
+    def __init__(self, valid: bool = True, errors: Optional[List[str]] = None,
                  warnings: Optional[List[str]] = None):
         """Initialize ValidationResult.
         
@@ -306,4 +306,4 @@ class ProfileManager:
     def clear_cache(self) -> None:
         """Clear the profile cache."""
         self.profile_cache.clear()
-        logger.debug("Profile cache cleared") 
+        logger.debug("Profile cache cleared")

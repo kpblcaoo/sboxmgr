@@ -213,4 +213,4 @@ class DataProcessor:
         else:
             # In tolerant mode, return only valid servers
             validated_servers = getattr(parsed_result, 'valid_servers', servers)
-            return validated_servers, bool(validated_servers) 
+            return validated_servers, bool(validated_servers)

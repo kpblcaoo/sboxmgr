@@ -73,4 +73,4 @@ class ExclusionList(BaseModel):
     
     def get_ids(self) -> set:
         """Get set of excluded server IDs."""
-        return {ex.id for ex in self.exclusions} 
+        return {ex.id for ex in self.exclusions}

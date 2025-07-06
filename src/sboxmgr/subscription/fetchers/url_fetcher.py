@@ -106,4 +106,4 @@ class URLFetcher(BaseFetcher):
             except Exception as e:
                 print(f"[fetcher][WARN] Failed to decompress gzip data: {e}")
                 return data
-        return data 
+        return data

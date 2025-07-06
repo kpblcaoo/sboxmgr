@@ -65,8 +65,8 @@ class LoggingMiddleware(ChainableMiddleware):
         self._start_time = 0.0
     
     def pre_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> None:
@@ -103,8 +103,8 @@ class LoggingMiddleware(ChainableMiddleware):
                 self._log_server_details(servers, context, "input")
     
     def post_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> None:
@@ -146,8 +146,8 @@ class LoggingMiddleware(ChainableMiddleware):
                 self._log_server_details(servers, context, "output")
     
     def _do_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -208,8 +208,8 @@ class LoggingMiddleware(ChainableMiddleware):
         return log_config
     
     def _log_server_details(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         stage: str
     ) -> None:
@@ -250,8 +250,8 @@ class LoggingMiddleware(ChainableMiddleware):
             self.logger.debug(f"... and {len(servers) - self.max_servers_logged} more servers")
     
     def _log_performance_metrics(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         duration: float
     ) -> None:
@@ -350,8 +350,8 @@ class LoggingMiddleware(ChainableMiddleware):
             return 0.0
     
     def can_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> bool:
@@ -392,4 +392,4 @@ class LoggingMiddleware(ChainableMiddleware):
             'log_format': self.log_format,
             'max_servers_logged': self.max_servers_logged
         })
-        return metadata 
+        return metadata

@@ -16,4 +16,4 @@ __all__ = ['SubscriptionManager', 'detect_parser']
 
 # Note: This compatibility layer ensures that existing code continues to work
 # without any changes. The actual implementation is now in the manager/
-# package with separate modules for different responsibilities. 
+# package with separate modules for different responsibilities.

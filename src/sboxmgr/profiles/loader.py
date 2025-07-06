@@ -401,4 +401,4 @@ class ProfileLoader:
             for key in ('exclude_tags', 'only_tags', 'exclusions'):
                 if key in filters_section and isinstance(filters_section[key], str):
                     filters_section[key] = [filters_section[key]]
-        return data 
+        return data

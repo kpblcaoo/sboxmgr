@@ -237,4 +237,4 @@ class LanguageLoader:
         except (TypeError, AttributeError):
             pass
         
-        return "en", "default" 
+        return "en", "default"

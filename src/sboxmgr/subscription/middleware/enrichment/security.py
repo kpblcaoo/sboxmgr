@@ -129,7 +129,7 @@ class SecurityEnricher:
         vulnerabilities = {
             'vmess': [
                 'timing_attack_v1',
-                'weak_uuid_generation', 
+                'weak_uuid_generation',
                 'aead_deprecation'
             ],
             'shadowsocks': [
@@ -216,4 +216,4 @@ class SecurityEnricher:
             'test_url': 'https://www.gstatic.com/generate_204'
         })
         
-        return recommendations 
+        return recommendations

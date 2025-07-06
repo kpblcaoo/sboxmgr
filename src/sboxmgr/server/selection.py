@@ -35,4 +35,4 @@ def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
             name = f"{name} [excluded]"
         if debug_level >= 0:
             logging.info(f"{index} | {name} | {protocol} | {port}")
-        typer.echo(f"{index} | {name} | {protocol} | {port}") 
+        typer.echo(f"{index} | {name} | {protocol} | {port}")

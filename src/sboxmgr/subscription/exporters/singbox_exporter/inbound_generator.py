@@ -86,4 +86,4 @@ def _configure_regular_inbound(inb: Dict[str, Any], inbound) -> None:
     if inbound.options:
         for key, value in inbound.options.items():
             if key not in ["tag", "listen", "port"]:  # These fields already processed
-                inb[key] = value 
+                inb[key] = value

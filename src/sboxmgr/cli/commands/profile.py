@@ -288,4 +288,4 @@ def _show_profile_diff(profile1: FullProfile, profile2: FullProfile) -> None:
         f"• Output file: {profile1.export.output_file} vs {profile2.export.output_file}",
         title="Profile Diff",
         border_style="yellow"
-    )) 
+    ))

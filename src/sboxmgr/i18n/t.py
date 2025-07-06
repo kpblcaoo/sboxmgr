@@ -29,4 +29,4 @@ def t(key: str) -> str:
         Translated string or the key itself if no translation found.
 
     """
-    return current_lang().get(key) 
+    return current_lang().get(key)

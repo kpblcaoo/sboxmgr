@@ -17,4 +17,4 @@ class AuthenticationConfig(BaseModel):
     users: List[AuthenticationUser] = Field(..., description="List of users for authentication.")
     set_system_proxy: Optional[bool] = Field(default=None, description="Set as system proxy.")
 
-    model_config = {"extra": "forbid"} 
+    model_config = {"extra": "forbid"}

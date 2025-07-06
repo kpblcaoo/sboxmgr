@@ -40,4 +40,4 @@ class BaseExporter(ABC):
         """
         pass
 
-# TODO: реализовать sing-box exporter и расширяемую архитектуру для других форматов 
+# TODO: реализовать sing-box exporter и расширяемую архитектуру для других форматов

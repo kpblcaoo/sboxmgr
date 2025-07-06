@@ -164,4 +164,4 @@ FilterConfig = FilterProfile
 RoutingConfig = RoutingProfile
 ExportConfig = ExportProfile
 AgentConfig = AgentProfile
-UIConfig = UIProfile 
+UIConfig = UIProfile

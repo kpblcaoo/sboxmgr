@@ -11,8 +11,8 @@ import logging
 from pydantic import BaseModel, ConfigDict
 
 from .interfaces import (
-    SubscriptionManagerInterface, 
-    ExportManagerInterface, 
+    SubscriptionManagerInterface,
+    ExportManagerInterface,
     ExclusionManagerInterface
 )
 from sboxmgr.subscription.models import SubscriptionSource, PipelineContext, PipelineResult
@@ -84,7 +84,7 @@ class Orchestrator:
 
     """
     
-    def __init__(self, 
+    def __init__(self,
                  subscription_manager: Optional[SubscriptionManagerInterface] = None,
                  export_manager: Optional[ExportManagerInterface] = None,
                  exclusion_manager: Optional[ExclusionManagerInterface] = None,
@@ -156,7 +156,7 @@ class Orchestrator:
             self._exclusion_manager = create_default_exclusion_manager()
         return self._exclusion_manager
     
-    def get_subscription_servers(self, url: str, 
+    def get_subscription_servers(self, url: str,
                                 source_type: str = "url_base64",
                                 user_routes: Optional[List[str]] = None,
                                 exclusions: Optional[List[str]] = None,
@@ -197,7 +197,7 @@ class Orchestrator:
                 debug_level=self.config.debug_level
             )
             # Always create subscription manager for the specific source URL
-            # SubscriptionManager is tied to a specific source, so we can't reuse 
+            # SubscriptionManager is tied to a specific source, so we can't reuse
             # it for different URLs as it would fetch from the wrong source
             from sboxmgr.subscription.manager import SubscriptionManager
             sub_manager = SubscriptionManager(source)
@@ -325,7 +325,7 @@ class Orchestrator:
                 raise OrchestratorError(error_msg, operation="manage_exclusions", cause=e)
     
     def export_configuration(self, source_url: str,
-                           source_type: str = "url_base64", 
+                           source_type: str = "url_base64",
                            export_format: str = "singbox",
                            exclusions: Optional[List[str]] = None,
                            user_routes: Optional[List[str]] = None,
@@ -451,4 +451,4 @@ class Orchestrator:
             exclusion_manager=managers.get('exclusion_manager', self._exclusion_manager),
             config=self.config,
             logger=self.logger
-        ) 
+        )

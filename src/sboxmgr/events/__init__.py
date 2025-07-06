@@ -12,7 +12,7 @@ from .filters import EventFilter, TypeFilter, SourceFilter, CompositeFilter
 
 __all__ = [
     'EventManager',
-    'Event', 
+    'Event',
     'EventHandler',
     'EventType',
     'EventPriority',
@@ -25,4 +25,4 @@ __all__ = [
     'CompositeFilter',
     'emit_event',
     'get_event_manager',
-] 
+]

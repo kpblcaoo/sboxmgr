@@ -116,4 +116,4 @@ class SingBoxModelBase(BaseModel):
             # TProxy inbound doesn't support transport
             data.pop('transport', None)
         
-        return data 
+        return data

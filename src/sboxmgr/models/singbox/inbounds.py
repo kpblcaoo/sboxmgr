@@ -208,4 +208,4 @@ Inbound = Annotated[
         AnyTlsInbound, NaiveInbound, RedirectInbound, TproxyInbound, TunInbound
     ],
     Field(discriminator="type")
-] 
+]

@@ -29,7 +29,7 @@ __all__ = [
     "FullProfile",
     "Profile",
     "SubscriptionProfile",
-    "FilterProfile", 
+    "FilterProfile",
     "RoutingProfile",
     "ExportProfile",
     "AgentProfile",
@@ -39,8 +39,8 @@ __all__ = [
     "UIMode",
     "SubscriptionConfig",
     "FilterConfig",
-    "RoutingConfig", 
+    "RoutingConfig",
     "ExportConfig",
     "AgentConfig",
     "UIConfig",
-] 
+]

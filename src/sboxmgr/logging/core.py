@@ -344,4 +344,4 @@ def reconfigure_logging(config: LoggingConfig) -> None:
     if _logging_core is None:
         raise RuntimeError("Logging not initialized. Call initialize_logging() first.")
     
-    _logging_core.reconfigure(config) 
+    _logging_core.reconfigure(config)

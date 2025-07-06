@@ -22,4 +22,4 @@ def generate_server_id(server):
 
     """
     identifier = f"{server.get('tag', '')}{server.get('type', '')}{server.get('server_port', '')}"
-    return hashlib.sha256(identifier.encode()).hexdigest() 
+    return hashlib.sha256(identifier.encode()).hexdigest()

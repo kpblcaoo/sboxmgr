@@ -82,7 +82,7 @@ def create_modern_routing_rules(proxy_tags: List[str]) -> List[Dict[str, Any]]:
     rules.append({
         "ip_cidr": [
             "10.0.0.0/8",
-            "172.16.0.0/12", 
+            "172.16.0.0/12",
             "192.168.0.0/16",
             "127.0.0.0/8"
         ],
@@ -229,4 +229,4 @@ def singbox_export_with_middleware(
     if client_profile:
         config["inbounds"] = generate_inbounds(client_profile)
     
-    return config 
+    return config

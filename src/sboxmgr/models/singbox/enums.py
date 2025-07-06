@@ -36,4 +36,4 @@ class Network(str, Enum):
         """Convert string to Network enum, handling legacy formats."""
         if value == "tcp_udp":
             return cls.tcp_udp
-        return cls(value) 
+        return cls(value)

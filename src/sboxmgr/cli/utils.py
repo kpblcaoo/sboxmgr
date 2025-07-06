@@ -74,4 +74,4 @@ def detect_lang_source():
     except Exception as e:
         # Обрабатываем возможные исключения при работе с locale
         logging.debug(f"Failed to detect system locale: {e}")
-    return "en", "default" 
+    return "en", "default"

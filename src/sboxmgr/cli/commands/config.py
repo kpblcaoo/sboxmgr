@@ -33,7 +33,7 @@ def dump_config(
     ),
     include_env_info: bool = typer.Option(
         False,
-        "--include-env-info", 
+        "--include-env-info",
         help="Include environment detection information"
     ),
     config_file: Optional[str] = typer.Option(
@@ -272,4 +272,4 @@ def _output_env_format(data: dict, prefix: str = "") -> None:
 
 
 # For backward compatibility
-config_group = config_app 
+config_group = config_app

@@ -81,8 +81,8 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
         return compiled
     
     def process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -162,8 +162,8 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
         return tag_config
     
     def _should_include_server(
-        self, 
-        server: ParsedServer, 
+        self,
+        server: ParsedServer,
         tag_config: Dict[str, Any],
         context: Optional[PipelineContext] = None
     ) -> bool:
@@ -314,4 +314,4 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             'fallback_mode': self.fallback_mode,
             'require_tags': self.require_tags
         })
-        return metadata 
+        return metadata

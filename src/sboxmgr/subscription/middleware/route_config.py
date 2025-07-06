@@ -49,8 +49,8 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
         self.override_mode = self.config.get('override_mode', 'profile_overrides')
     
     def process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -178,4 +178,4 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
             'final_action': self.final_action,
             'override_mode': self.override_mode,
             'preserve_metadata': self.preserve_metadata
-        } 
+        }

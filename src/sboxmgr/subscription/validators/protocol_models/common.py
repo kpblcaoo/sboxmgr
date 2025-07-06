@@ -56,4 +56,4 @@ class MultiplexConfig(BaseModel):
     padding: Optional[bool] = Field(None, description="Enable padding for obfuscation")
 
     class Config:
-        extra = "forbid" 
+        extra = "forbid"

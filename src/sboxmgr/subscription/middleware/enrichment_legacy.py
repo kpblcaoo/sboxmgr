@@ -67,8 +67,8 @@ class EnrichmentMiddleware(TransformMiddleware):
         self._security_cache: Dict[str, Dict[str, Any]] = {}
     
     def _do_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -142,8 +142,8 @@ class EnrichmentMiddleware(TransformMiddleware):
         return enrichment_config
     
     def _enrich_server(
-        self, 
-        server: ParsedServer, 
+        self,
+        server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
         enrichment_config: Optional[Dict[str, Any]] = None
@@ -591,8 +591,8 @@ class EnrichmentMiddleware(TransformMiddleware):
         return recommendations
     
     def _apply_custom_enrichment(
-        self, 
-        server: ParsedServer, 
+        self,
+        server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
         enrichment_config: Optional[Dict[str, Any]] = None
@@ -693,4 +693,4 @@ class EnrichmentMiddleware(TransformMiddleware):
                 compatibility['compatible'] = False
                 compatibility['issues'].append(f'Protocol {server.type} not supported by clash')
         
-        server.meta['compatibility'] = compatibility 
+        server.meta['compatibility'] = compatibility

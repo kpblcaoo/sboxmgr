@@ -123,4 +123,4 @@ def clear_exclusions():
             typer.echo(f"[Ошибка] Не удалось удалить exclusions.json: {e}", err=True)
     else:
         logging.info("No exclusions to clear.")
-        typer.echo("No exclusions to clear.") 
+        typer.echo("No exclusions to clear.")

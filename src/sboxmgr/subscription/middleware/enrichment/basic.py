@@ -46,4 +46,4 @@ class BasicEnricher:
         elif not server.tag:
             server.tag = f"{server.type}-{server.address}"
         
-        return server 
+        return server

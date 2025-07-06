@@ -155,4 +155,4 @@ class OutboundConfig(BaseModel):
     outbound: OutboundModel = Field(..., discriminator="type")
 
     class Config:
-        extra = "forbid" 
+        extra = "forbid"

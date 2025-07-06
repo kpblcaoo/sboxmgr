@@ -60,8 +60,8 @@ class LatencySortPostProcessor(ChainablePostProcessor):
         self._latency_cache: Dict[str, Tuple[float, float]] = {}  # server_key -> (latency, timestamp)
     
     def _do_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -148,8 +148,8 @@ class LatencySortPostProcessor(ChainablePostProcessor):
         return latency_config
     
     def _get_server_latency(
-        self, 
-        server: ParsedServer, 
+        self,
+        server: ParsedServer,
         latency_config: Dict[str, Any],
         context: Optional[PipelineContext] = None
     ) -> float:
@@ -295,7 +295,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             
             start_time = time.time()
             response = requests.head(
-                url, 
+                url,
                 timeout=config['timeout_ms'] / 1000,
                 allow_redirects=False
             )
@@ -308,8 +308,8 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             return config['fallback_latency']
     
     def pre_process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> None:
@@ -361,4 +361,4 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             'remove_unreachable': self.remove_unreachable,
             'cached_measurements': len(self._latency_cache)
         })
-        return metadata 
+        return metadata

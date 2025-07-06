@@ -33,4 +33,4 @@ class Network(str, Enum):
 
     tcp = "tcp"
     udp = "udp"
-    tcp_udp = "tcp,udp" 
+    tcp_udp = "tcp,udp"

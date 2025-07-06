@@ -317,4 +317,4 @@ def get_default_formatter(service_mode: bool = False, component: str = "sboxmgr"
     if service_mode:
         return JSONFormatter(component=component)
     else:
-        return HumanFormatter(component=component) 
+        return HumanFormatter(component=component)

@@ -8,7 +8,7 @@ dependency injection while maintaining backward compatibility.
 from typing import Optional
 from .interfaces import (
     SubscriptionManagerInterface,
-    ExportManagerInterface, 
+    ExportManagerInterface,
     ExclusionManagerInterface
 )
 
@@ -110,4 +110,4 @@ class ManagerFactory:
             from pathlib import Path
             return ExclusionManager(file_path=Path(file_path), **kwargs)
         else:
-            return ExclusionManager.default() 
+            return ExclusionManager.default()

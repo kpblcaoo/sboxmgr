@@ -82,8 +82,8 @@ __all__ = [
     
     # Inbounds
     "InboundBase", "MixedInbound", "SocksInbound", "HttpInbound", "ShadowsocksInbound",
-    "VmessInbound", "VlessInbound", "TrojanInbound", "Hysteria2Inbound", "WireGuardInbound", 
-    "TuicInbound", "ShadowTlsInbound", "DirectInbound", "AnyTlsInbound", "NaiveInbound", 
+    "VmessInbound", "VlessInbound", "TrojanInbound", "Hysteria2Inbound", "WireGuardInbound",
+    "TuicInbound", "ShadowTlsInbound", "DirectInbound", "AnyTlsInbound", "NaiveInbound",
     "RedirectInbound", "TproxyInbound", "TunInbound", "Inbound",
     
     # Outbounds
@@ -104,4 +104,4 @@ __all__ = [
     
     # Main
     "SingBoxConfig", "LogConfig"
-] 
+]

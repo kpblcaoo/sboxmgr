@@ -79,4 +79,4 @@ def create_example_config() -> dict:
             "rules": [{"type": "default", "domain": ["example.com"], "outbound": "ss-out"}],
             "final": "ss-out"
         }
-    } 
+    }

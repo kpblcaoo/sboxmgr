@@ -40,4 +40,4 @@ class RouteConfig(BaseModel):
     geoip: Optional[Dict[str, Any]] = Field(default=None, description="GeoIP database settings.")
     geosite: Optional[Dict[str, Any]] = Field(default=None, description="Geosite database settings.")
 
-    model_config = {"extra": "forbid"} 
+    model_config = {"extra": "forbid"}

@@ -18,4 +18,4 @@ class GeoTestPolicy(BasePolicy):
             PolicyResult allowing all requests.
             
         """
-        return PolicyResult.allow("GeoTestPolicy always allows") 
+        return PolicyResult.allow("GeoTestPolicy always allows")

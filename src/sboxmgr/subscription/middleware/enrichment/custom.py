@@ -22,8 +22,8 @@ class CustomEnricher:
         self.custom_enrichers = custom_enrichers or []
     
     def enrich(
-        self, 
-        server: ParsedServer, 
+        self,
+        server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
         enrichers: Optional[List[str]] = None
@@ -64,9 +64,9 @@ class CustomEnricher:
         return server
     
     def _apply_subscription_tags(
-        self, 
-        server: ParsedServer, 
-        context: PipelineContext, 
+        self,
+        server: ParsedServer,
+        context: PipelineContext,
         profile: FullProfile
     ) -> None:
         """Apply subscription-based tags.
@@ -88,9 +88,9 @@ class CustomEnricher:
                     break
     
     def _apply_priority_scoring(
-        self, 
-        server: ParsedServer, 
-        context: PipelineContext, 
+        self,
+        server: ParsedServer,
+        context: PipelineContext,
         profile: FullProfile
     ) -> None:
         """Apply priority scoring based on profile preferences.
@@ -143,9 +143,9 @@ class CustomEnricher:
         server.meta['priority_score'] = max(0.0, min(1.0, priority_score))
     
     def _apply_compatibility_check(
-        self, 
-        server: ParsedServer, 
-        context: PipelineContext, 
+        self,
+        server: ParsedServer,
+        context: PipelineContext,
         profile: FullProfile
     ) -> None:
         """Check compatibility with export format.
@@ -194,9 +194,9 @@ class CustomEnricher:
         server.meta['compatibility'] = compatibility
     
     def _apply_region_preference(
-        self, 
-        server: ParsedServer, 
-        context: PipelineContext, 
+        self,
+        server: ParsedServer,
+        context: PipelineContext,
         profile: FullProfile
     ) -> None:
         """Apply region-based preferences.
@@ -229,9 +229,9 @@ class CustomEnricher:
         server.meta.update(region_info)
     
     def _apply_usage_hints(
-        self, 
-        server: ParsedServer, 
-        context: PipelineContext, 
+        self,
+        server: ParsedServer,
+        context: PipelineContext,
         profile: FullProfile
     ) -> None:
         """Apply usage hints based on server characteristics.
@@ -285,4 +285,4 @@ class CustomEnricher:
                 usage_hints.append('May require elevated privileges')
         
         if usage_hints:
-            server.meta['usage_hints'] = usage_hints 
+            server.meta['usage_hints'] = usage_hints

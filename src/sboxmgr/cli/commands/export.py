@@ -15,6 +15,6 @@ export functionality from the export module.
 from .export import export, app
 
 __all__ = [
-    'export', 
+    'export',
     'app'
 ]

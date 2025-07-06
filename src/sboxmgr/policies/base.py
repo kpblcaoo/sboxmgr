@@ -347,4 +347,4 @@ class BasePolicy(ABC):
             True if configuration is valid
 
         """
-        return True 
+        return True

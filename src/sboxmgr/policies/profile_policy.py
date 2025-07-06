@@ -180,4 +180,4 @@ class LimitPolicy(BasePolicy):
         except Exception as e:
             return PolicyResult.allow("Could not calculate profile size", error=str(e))
         
-        return PolicyResult.allow("Resource limits check passed") 
+        return PolicyResult.allow("Resource limits check passed")

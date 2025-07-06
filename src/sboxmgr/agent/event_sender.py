@@ -112,7 +112,7 @@ class EventSender:
         """
         return self._connected and self._client is not None
     
-    def send_event(self, 
+    def send_event(self,
                    event_type: str,
                    event_data: Dict[str, Any],
                    source: str = "sboxmgr",
@@ -193,7 +193,7 @@ class EventSender:
             self._connected = False
             raise EventSenderError(f"Failed to send event: {e}") from e
     
-    def send_heartbeat(self, 
+    def send_heartbeat(self,
                       agent_id: str = "sboxmgr",
                       status: str = "healthy",
                       version: Optional[str] = None) -> bool:
@@ -450,4 +450,4 @@ def ping_agent() -> bool:
 
     """
     sender = get_event_sender()
-    return sender.ping() 
+    return sender.ping()

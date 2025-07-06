@@ -65,4 +65,4 @@ class DnsConfig(BaseModel):
             return {k: v if isinstance(v, list) else [v] for k, v in v.items()}
         return v
 
-    model_config = {"extra": "forbid"} 
+    model_config = {"extra": "forbid"}

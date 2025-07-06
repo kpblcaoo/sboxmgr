@@ -175,4 +175,4 @@ class PolicyEngine:
         for policy in self.policies:
             if policy.name == name:
                 return policy
-        return None 
+        return None

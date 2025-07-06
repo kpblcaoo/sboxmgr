@@ -49,8 +49,8 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         self.preserve_metadata = self.config.get('preserve_metadata', True)
     
     def process(
-        self, 
-        servers: List[ParsedServer], 
+        self,
+        servers: List[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None
     ) -> List[ParsedServer]:
@@ -188,4 +188,4 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
             'exclude_types': list(self.exclude_types),
             'strict_mode': self.strict_mode,
             'preserve_metadata': self.preserve_metadata
-        } 
+        }

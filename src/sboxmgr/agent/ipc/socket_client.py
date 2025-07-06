@@ -125,4 +125,4 @@ class SocketClient:
 
         """
         import struct
-        return struct.unpack('>II', header) 
+        return struct.unpack('>II', header)

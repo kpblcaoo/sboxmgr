@@ -65,9 +65,9 @@ class ExportManager:
 
     """
     
-    def __init__(self, 
-                 routing_plugin=None, 
-                 export_format="singbox", 
+    def __init__(self,
+                 routing_plugin=None,
+                 export_format="singbox",
                  client_profile: Optional[ClientProfile] = None,
                  postprocessor_chain: Optional['PostProcessorChain'] = None,
                  middleware_chain: Optional[List['BaseMiddleware']] = None,
@@ -95,12 +95,12 @@ class ExportManager:
         if client_profile and PHASE3_AVAILABLE and not middleware_chain:
             self._auto_configure_middleware_from_client_profile(client_profile)
 
-    def export(self, 
-               servers: List[ParsedServer], 
-               exclusions: Optional[List[str]] = None, 
-               user_routes: Optional[List[Dict]] = None, 
-               context: Union[Dict[str, Any], PipelineContext] = None, 
-               client_profile: Optional[ClientProfile] = None, 
+    def export(self,
+               servers: List[ParsedServer],
+               exclusions: Optional[List[str]] = None,
+               user_routes: Optional[List[Dict]] = None,
+               context: Union[Dict[str, Any], PipelineContext] = None,
+               client_profile: Optional[ClientProfile] = None,
                profile: Optional[FullProfile] = None) -> Dict:
         """Export servers to configuration format with optional Phase 3 processing.
         
@@ -132,8 +132,8 @@ class ExportManager:
         if self.routing_plugin:
             try:
                 routes = self.routing_plugin.generate_routes(
-                    filtered_servers, 
-                    exclusions or [], 
+                    filtered_servers,
+                    exclusions or [],
                     user_routes or [],
                     context
                 )
@@ -151,8 +151,8 @@ class ExportManager:
                 for middleware in self.middleware_chain:
                     try:
                         processed_servers = middleware.process(
-                            processed_servers, 
-                            context, 
+                            processed_servers,
+                            context,
                             active_profile
                         )
                     except Exception as e:
@@ -162,8 +162,8 @@ class ExportManager:
             if self.postprocessor_chain:
                 try:
                     processed_servers = self.postprocessor_chain.process(
-                        processed_servers, 
-                        context, 
+                        processed_servers,
+                        context,
                         active_profile
                     )
                 except Exception as e:
@@ -181,8 +181,8 @@ class ExportManager:
                 try:
                     from sboxmgr.subscription.exporters.singbox_exporter import singbox_export_with_middleware
                     return singbox_export_with_middleware(
-                        processed_servers, 
-                        routes, 
+                        processed_servers,
+                        routes,
                         client_profile=client_profile or self.client_profile,
                         context=context
                     )
@@ -190,17 +190,17 @@ class ExportManager:
                     _get_logger().warning("Middleware-aware export not available, falling back to standard export")
             
             return exporter_func(
-                processed_servers, 
-                routes, 
+                processed_servers,
+                routes,
                 client_profile=client_profile or self.client_profile
             )
         else:
             return exporter_func(processed_servers, routes)
     
-    def export_to_singbox(self, 
-                         servers: List[ParsedServer], 
-                         routes: Optional[List[Dict]] = None, 
-                         client_profile: Optional[ClientProfile] = None, 
+    def export_to_singbox(self,
+                         servers: List[ParsedServer],
+                         routes: Optional[List[Dict]] = None,
+                         client_profile: Optional[ClientProfile] = None,
                          apply_phase3_processing: bool = True,
                          context: Optional[PipelineContext] = None,
                          profile: Optional[FullProfile] = None) -> Dict:
@@ -236,8 +236,8 @@ class ExportManager:
                 for middleware in self.middleware_chain:
                     try:
                         processed_servers = middleware.process(
-                            processed_servers, 
-                            pipeline_context, 
+                            processed_servers,
+                            pipeline_context,
                             active_profile
                         )
                     except Exception as e:
@@ -247,8 +247,8 @@ class ExportManager:
             if self.postprocessor_chain:
                 try:
                     processed_servers = self.postprocessor_chain.process(
-                        processed_servers, 
-                        pipeline_context, 
+                        processed_servers,
+                        pipeline_context,
                         active_profile
                     )
                 except Exception as e:
@@ -256,8 +256,8 @@ class ExportManager:
         
         exporter_func = EXPORTER_REGISTRY.get("singbox", singbox_export)
         return exporter_func(
-            processed_servers, 
-            routes, 
+            processed_servers,
+            routes,
             client_profile=client_profile
         )
     
@@ -332,7 +332,7 @@ class ExportManager:
                 'blocked_countries': getattr(filter_profile, 'blocked_countries', [])
             }
         
-        # Tag filter configuration  
+        # Tag filter configuration
         if hasattr(filter_profile, 'include_tags') and filter_profile.include_tags:
             config['tag_filter'] = {
                 'include_tags': filter_profile.include_tags,
@@ -423,8 +423,8 @@ class ExportManager:
             True if Phase 3 components are available and configured.
 
         """
-        return (PHASE3_AVAILABLE and 
-                (self.postprocessor_chain is not None or 
+        return (PHASE3_AVAILABLE and
+                (self.postprocessor_chain is not None or
                  len(self.middleware_chain) > 0))
     
     def get_processing_metadata(self) -> Dict[str, Any]:
@@ -489,4 +489,4 @@ class ExportManager:
         except ImportError:
             _get_logger().warning("Phase 3 middleware not available for auto-configuration")
         except Exception as e:
-            _get_logger().warning(f"Failed to auto-configure middleware: {e}") 
+            _get_logger().warning(f"Failed to auto-configure middleware: {e}")

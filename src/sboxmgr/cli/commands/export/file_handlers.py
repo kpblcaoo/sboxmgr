@@ -82,4 +82,4 @@ def write_config_to_file(config_data: dict, output_file: str, output_format: str
         
     except Exception as e:
         typer.echo(f"❌ {t('cli.error_config_update')}: {e}", err=True)
-        raise typer.Exit(1) 
+        raise typer.Exit(1)

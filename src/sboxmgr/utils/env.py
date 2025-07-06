@@ -160,4 +160,4 @@ def get_url():
         str or None: Subscription URL if found in environment variables.
 
     """
-    return os.getenv("SBOXMGR_URL") or os.getenv("SINGBOX_URL") or os.getenv("TEST_URL") 
+    return os.getenv("SBOXMGR_URL") or os.getenv("SINGBOX_URL") or os.getenv("TEST_URL")

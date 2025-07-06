@@ -187,7 +187,7 @@ class EventManager:
             except ValueError:
                 return False
     
-    def emit(self, event_type: EventType, payload: EventPayload, 
+    def emit(self, event_type: EventType, payload: EventPayload,
              source: str = "unknown", priority: EventPriority = EventPriority.NORMAL,
              trace_id: Optional[str] = None) -> Event:
         """Emit an event synchronously.
@@ -429,7 +429,7 @@ def get_event_manager() -> EventManager:
     return _event_manager
 
 
-def emit_event(event_type: EventType, payload: EventPayload, 
+def emit_event(event_type: EventType, payload: EventPayload,
                source: str = "unknown", priority: EventPriority = EventPriority.NORMAL) -> Event:
     """Emit events using global manager.
     
@@ -443,4 +443,4 @@ def emit_event(event_type: EventType, payload: EventPayload,
         Event object with processing results
 
     """
-    return get_event_manager().emit(event_type, payload, source, priority) 
+    return get_event_manager().emit(event_type, payload, source, priority)
