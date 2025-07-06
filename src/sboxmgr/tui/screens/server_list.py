@@ -519,8 +519,7 @@ class ServerListScreen(Screen):
             # Добавляем новый контент
             if self._servers:
                 scroll = VerticalScroll(classes="server-list-scroll")
-                for item in self._create_server_items():
-                    scroll.mount(item)
+                scroll.mount_all(self._create_server_items())
                 server_container.mount(scroll)
             else:
                 empty_state = Vertical(classes="empty-state")
