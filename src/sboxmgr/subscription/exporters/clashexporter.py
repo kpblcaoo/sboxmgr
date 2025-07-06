@@ -100,36 +100,45 @@ def _convert_server_to_clash_proxy(server: ParsedServer) -> Dict[str, Any]:
         )
     elif server.type == "vless":
         # VLESS configuration for ClashMeta
+        # Get UUID from meta or server attributes
+        uuid = server.meta.get("uuid") if server.meta else None
+        if not uuid:
+            uuid = getattr(server, "uuid", "")
+
         proxy.update(
             {
-                "uuid": getattr(server, "uuid", ""),
-                "network": "tcp",  # Default to tcp
-                "udp": True,
+                "uuid": uuid,
+                "network": server.meta.get("network", "tcp") if server.meta else "tcp",
+                "udp": server.meta.get("udp", True) if server.meta else True,
             }
         )
 
         # Handle TLS/Reality
-        security = server.meta.get("security") if server.meta else None
-        if security == "reality":
+        # Check for Reality (has tls: true and reality-opts)
+        if server.meta and server.meta.get("tls") and server.meta.get("reality-opts"):
+            reality_opts = server.meta.get("reality-opts", {})
             proxy.update(
                 {
                     "tls": True,
-                    "servername": server.meta.get("sni", ""),
+                    "servername": server.meta.get("servername", ""),
                     "reality-opts": {
-                        "public-key": server.meta.get("pbk", ""),
-                        "short-id": server.meta.get("sid", ""),
+                        "public-key": reality_opts.get("public-key", ""),
+                        "short-id": reality_opts.get("short-id", ""),
                     },
-                    "client-fingerprint": server.meta.get("fp", "chrome"),
+                    "client-fingerprint": server.meta.get(
+                        "client-fingerprint", "chrome"
+                    ),
                 }
             )
             # Add flow if present
             if server.meta.get("flow"):
                 proxy["flow"] = server.meta["flow"]
-        elif security == "tls":
+        elif server.meta and server.meta.get("tls"):
+            # Regular TLS
             proxy.update(
                 {
                     "tls": True,
-                    "servername": server.meta.get("sni", ""),
+                    "servername": server.meta.get("servername", ""),
                 }
             )
 
