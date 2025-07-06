@@ -104,7 +104,7 @@ class TagNormalizer(BaseMiddleware):
 
     def _sanitize_tag(self, tag: str) -> str:
         """
-        Sanitize tag to ensure it's valid for sing-box.
+        Sanitize tag to ensure it's valid for various formats (JSON, YAML, etc.).
 
         Args:
             tag: Raw tag string
@@ -112,15 +112,12 @@ class TagNormalizer(BaseMiddleware):
         Returns:
             Sanitized tag string
         """
-        # Remove or replace problematic characters
-        # Keep alphanumeric, spaces, hyphens, underscores, and common symbols
-        # Remove parentheses from the regex pattern to exclude them
-        sanitized = re.sub(r"[^\w\s\-_\.\[\]🇦-🇿]", "", tag)
+        # Only remove control characters and normalize whitespace
+        # Keep all printable characters including emojis, symbols, etc.
+        sanitized = re.sub(r"[\x00-\x1f\x7f]", "", tag)  # Remove control chars only
 
-        # Collapse multiple spaces to single space
+        # Normalize whitespace (collapse multiple spaces, trim)
         sanitized = re.sub(r"\s+", " ", sanitized)
-
-        # Strip leading/trailing whitespace
         sanitized = sanitized.strip()
 
         # Ensure non-empty
@@ -143,11 +140,11 @@ class TagNormalizer(BaseMiddleware):
             self._used_tags.add(tag)
             return tag
 
-        # Find unique suffix
+        # Find unique suffix using parentheses (safe for JSON/YAML)
         counter = 1
-        while f"{tag}-{counter}" in self._used_tags:
+        while f"{tag} ({counter})" in self._used_tags:
             counter += 1
 
-        unique_tag = f"{tag}-{counter}"
+        unique_tag = f"{tag} ({counter})"
         self._used_tags.add(unique_tag)
         return unique_tag

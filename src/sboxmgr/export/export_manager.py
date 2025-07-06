@@ -103,8 +103,8 @@ class ExportManager:
         if PHASE3_AVAILABLE and not middleware_chain:
             self._ensure_tag_normalizer()
 
-        # Auto-configure middleware from client_profile if available
-        if client_profile and PHASE3_AVAILABLE:
+        # Auto-configure middleware from client_profile if available and no manual chain
+        if client_profile and PHASE3_AVAILABLE and not middleware_chain:
             self._auto_configure_middleware_from_client_profile(client_profile)
 
     def export(

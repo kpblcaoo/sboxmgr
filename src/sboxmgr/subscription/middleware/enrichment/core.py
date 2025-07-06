@@ -11,7 +11,7 @@ from .custom import CustomEnricher
 from .geo import GeoEnricher
 from .performance import PerformanceEnricher
 from .security import SecurityEnricher
-from .tag_normalizer import TagNormalizer
+from .tag_normalizer import EnrichmentTagNormalizer
 
 
 class EnrichmentMiddleware(TransformMiddleware):
@@ -70,7 +70,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         # Initialize enrichers
         self.basic_enricher = BasicEnricher()
-        self.tag_normalizer = TagNormalizer(prefer_names=True)
+        self.tag_normalizer = EnrichmentTagNormalizer(prefer_names=True)
         self.geo_enricher = GeoEnricher(self.geo_database_path)
         self.performance_enricher = PerformanceEnricher(self.performance_cache_duration)
         self.security_enricher = SecurityEnricher()
@@ -183,6 +183,8 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         # Apply tag normalization (always enabled)
         server.tag = self.tag_normalizer._normalize_tag(server)
+        # Note: This bypasses uniqueness check. Consider using full process method
+        # or implementing uniqueness check here if needed.
 
         # Apply geographic enrichment
         if enrichment_config["enable_geo_enrichment"]:

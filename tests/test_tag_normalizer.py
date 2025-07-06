@@ -41,6 +41,19 @@ class TestTagNormalizer:
         result = self.normalizer._normalize_tag(server)
         assert result == "nl-server"
 
+    def test_priority_2_label_from_meta(self):
+        """Test that meta['label'] has second priority."""
+        server = ParsedServer(
+            type="vless",
+            address="192.168.1.1",
+            port=443,
+            tag="old-tag",
+            meta={"label": "🇨🇦 Canada Server"}
+        )
+
+        result = self.normalizer._normalize_tag(server)
+        assert result == "🇨🇦 Canada Server"
+
     def test_priority_3_existing_tag(self):
         """Test that existing tag has third priority."""
         server = ParsedServer(
@@ -84,7 +97,7 @@ class TestTagNormalizer:
         """Test that tags are properly sanitized."""
         test_cases = [
             ("Server with spaces", "Server with spaces"),
-            ("Server@#$%^&*()+=", "Server"),
+            ("Server@#$%^&*()+=", "Server@#$%^&*()+="),  # Keep all printable chars
             ("🇳🇱 Netherlands-1", "🇳🇱 Netherlands-1"),
             ("Server   with   multiple   spaces", "Server with multiple spaces"),
             ("", "unnamed-server"),
@@ -103,11 +116,11 @@ class TestTagNormalizer:
 
         # Second identical tag should get suffix
         tag2 = self.normalizer._ensure_unique_tag("server")
-        assert tag2 == "server-1"
+        assert tag2 == "server (1)"
 
         # Third identical tag should get next suffix
         tag3 = self.normalizer._ensure_unique_tag("server")
-        assert tag3 == "server-2"
+        assert tag3 == "server (2)"
 
     def test_process_servers_integration(self):
         """Test full server processing integration."""
@@ -142,7 +155,7 @@ class TestTagNormalizer:
 
         # Check tag normalization
         assert result[0].tag == "🇳🇱 Netherlands Server"
-        assert result[1].tag == "🇳🇱 Netherlands Server-1"  # Duplicate gets suffix
+        assert result[1].tag == "🇳🇱 Netherlands Server (1)"  # Duplicate gets suffix
         assert result[2].tag == "unique-tag"
 
     def test_empty_servers_list(self):
@@ -271,3 +284,19 @@ class TestTagNormalizer:
         assert result[0].tag == "🇺🇸 United States"
         assert result[1].tag == "🇯🇵 日本サーバー"
         assert result[2].tag == "🇷🇺 Российский сервер"
+
+    def test_flag_emoji_handling(self):
+        """Test that flag emojis are preserved correctly."""
+        test_cases = [
+            "🇳🇱 Netherlands",
+            "🇺🇸 USA",
+            "🇯🇵 Japan",
+            "🇷🇺 Russia",
+            "🇨🇦 Canada",
+            "🇩🇪 Germany",
+            "🇺🇦 Ukraine",
+        ]
+
+        for flag_emoji in test_cases:
+            sanitized = self.normalizer._sanitize_tag(flag_emoji)
+            assert sanitized == flag_emoji, f"Flag emoji '{flag_emoji}' was modified: '{sanitized}'"

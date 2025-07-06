@@ -99,8 +99,43 @@ def _convert_server_to_clash_proxy(server: ParsedServer) -> Dict[str, Any]:
             }
         )
     elif server.type == "vless":
-        # Clash doesn't support VLESS with Reality, skip for now
-        return None
+        # VLESS configuration for ClashMeta
+        proxy.update(
+            {
+                "uuid": getattr(server, "uuid", ""),
+                "network": "tcp",  # Default to tcp
+                "udp": True,
+            }
+        )
+
+        # Handle TLS/Reality
+        security = server.meta.get("security") if server.meta else None
+        if security == "reality":
+            proxy.update(
+                {
+                    "tls": True,
+                    "servername": server.meta.get("sni", ""),
+                    "reality-opts": {
+                        "public-key": server.meta.get("pbk", ""),
+                        "short-id": server.meta.get("sid", ""),
+                    },
+                    "client-fingerprint": server.meta.get("fp", "chrome"),
+                }
+            )
+            # Add flow if present
+            if server.meta.get("flow"):
+                proxy["flow"] = server.meta["flow"]
+        elif security == "tls":
+            proxy.update(
+                {
+                    "tls": True,
+                    "servername": server.meta.get("sni", ""),
+                }
+            )
+
+        # Add ALPN if present
+        if server.meta and "alpn" in server.meta:
+            proxy["alpn"] = server.meta["alpn"]
     elif server.type == "trojan":
         proxy.update({"password": getattr(server, "password", "")})
     elif server.type in ["ss", "shadowsocks"]:

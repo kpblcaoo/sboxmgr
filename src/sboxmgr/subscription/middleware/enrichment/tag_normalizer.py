@@ -9,8 +9,8 @@ from typing import List
 from ...models import ParsedServer, PipelineContext
 
 
-class TagNormalizer:
-    """Normalizes server tags for consistent naming across parsers.
+class EnrichmentTagNormalizer:
+    """Enrichment-specific tag normalizer for consistent naming across parsers.
 
     Ensures that all servers have consistent tag naming regardless of
     the source parser or data format. Prioritizes human-readable names
