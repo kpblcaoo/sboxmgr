@@ -3,7 +3,7 @@
 import time
 from typing import Any, Dict, List, Optional
 
-from ....profiles.models import FullProfile
+from ....configs.models import FullProfile
 from ...models import ParsedServer, PipelineContext
 from ..base import TransformMiddleware
 from .basic import BasicEnricher
@@ -11,6 +11,7 @@ from .custom import CustomEnricher
 from .geo import GeoEnricher
 from .performance import PerformanceEnricher
 from .security import SecurityEnricher
+from .tag_normalizer import TagNormalizer
 
 
 class EnrichmentMiddleware(TransformMiddleware):
@@ -69,6 +70,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         # Initialize enrichers
         self.basic_enricher = BasicEnricher()
+        self.tag_normalizer = TagNormalizer(prefer_names=True)
         self.geo_enricher = GeoEnricher(self.geo_database_path)
         self.performance_enricher = PerformanceEnricher(self.performance_cache_duration)
         self.security_enricher = SecurityEnricher()
@@ -178,6 +180,9 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         # Apply basic metadata enrichment (always enabled)
         server = self.basic_enricher.enrich(server, context)
+
+        # Apply tag normalization (always enabled)
+        server.tag = self.tag_normalizer._normalize_tag(server)
 
         # Apply geographic enrichment
         if enrichment_config["enable_geo_enrichment"]:

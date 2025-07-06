@@ -22,9 +22,8 @@ _Часть ADR написана ретроспективно для фикса�
 | ADR-0018  | Subscription Management Architecture         | Accepted | 2025-06-29 | Subscription lifecycle, validation, and management patterns |
 | ADR-0019  | Full Profile UX & Runtime Management         | Accepted | 2025-06-29 | Production-ready UX and runtime aspects for profiles and subscriptions |
 | ADR-0020  | Profile Runtime Semantics & Outbound Management | In Progress | 2025-07-01 | Runtime semantics, outbound policies, caching, and versioning |
-| ADR-0017  | Full Profile Architecture | Accepted | 2025-06-29 | Unified configuration entity covering all pipeline components |
-| ADR-0018  | Subscription Management Architecture | Accepted | 2025-06-29 | Extended subscription management with isolation, auto-switching, and CLI UX |
-| ADR-0019  | Full Profile UX & Runtime Management | Accepted | 2025-06-29 | Production-ready UX and runtime aspects for profiles and subscriptions |
+| ADR-0021  | Licensing Architecture | Accepted | 2025-07-01 | AGPL-3.0 license selection and compliance framework |
+| ADR-0022  | Tag Normalization Architecture | Proposed | 2025-07-06 | Centralized tag normalization middleware for consistent server naming |
 
 ## Summary
 - **Security**: ADR-0001 establishes CLI security foundation
@@ -43,3 +42,5 @@ _Часть ADR написана ретроспективно для фикса�
 - **Profiles**: ADR-0017 establishes unified configuration entity for all pipeline components
 - **Subscriptions**: ADR-0018 provides extended subscription management with isolation and auto-switching
 - **UX**: ADR-0019 covers production-ready UX and runtime management for profiles and subscriptions
+- **Licensing**: ADR-0021 establishes AGPL-3.0 license selection and compliance framework
+- **Tag Normalization**: ADR-0022 centralizes tag normalization for consistent server naming across User-Agent types

@@ -99,8 +99,12 @@ class ExportManager:
         self.middleware_chain = middleware_chain or []
         self.profile = profile
 
-        # Auto-configure middleware from client_profile if available and no manual middleware
-        if client_profile and PHASE3_AVAILABLE and not middleware_chain:
+        # Always add TagNormalizer if no manual middleware chain provided
+        if PHASE3_AVAILABLE and not middleware_chain:
+            self._ensure_tag_normalizer()
+
+        # Auto-configure middleware from client_profile if available
+        if client_profile and PHASE3_AVAILABLE:
             self._auto_configure_middleware_from_client_profile(client_profile)
 
     def export(
@@ -157,8 +161,14 @@ class ExportManager:
         if PHASE3_AVAILABLE:
             # Apply middleware
             if self.middleware_chain:
+                _get_logger().debug(
+                    f"Applying {len(self.middleware_chain)} middleware components"
+                )
                 for middleware in self.middleware_chain:
                     try:
+                        _get_logger().debug(
+                            f"Applying middleware: {middleware.__class__.__name__}"
+                        )
                         processed_servers = middleware.process(
                             processed_servers, context, active_profile
                         )
@@ -166,6 +176,8 @@ class ExportManager:
                         _get_logger().warning(
                             f"Middleware {middleware.__class__.__name__} failed: {e}"
                         )
+            else:
+                _get_logger().debug("No middleware chain configured")
 
             # Apply postprocessor chain
             if self.postprocessor_chain:
@@ -418,6 +430,14 @@ class ExportManager:
 
         middleware_chain = []
 
+        # Add tag normalizer middleware (always enabled for consistent behavior)
+        try:
+            from sboxmgr.subscription.middleware import TagNormalizer
+
+            middleware_chain.append(TagNormalizer())
+        except ImportError:
+            pass
+
         # Add logging middleware if enabled
         if config.get("logging", {}).get("enabled", False):
             try:
@@ -528,3 +548,30 @@ class ExportManager:
             )
         except Exception as e:
             _get_logger().warning(f"Failed to auto-configure middleware: {e}")
+
+    def _ensure_tag_normalizer(self) -> None:
+        """Ensure TagNormalizer is present in middleware chain.
+
+        TagNormalizer is always added to provide consistent server naming
+        across different User-Agent types and parsers.
+        """
+        if not PHASE3_AVAILABLE:
+            return
+
+        try:
+            from sboxmgr.subscription.middleware import TagNormalizer
+
+            # Check if TagNormalizer is already in the chain
+            has_tag_normalizer = any(
+                isinstance(middleware, TagNormalizer)
+                for middleware in self.middleware_chain
+            )
+
+            if not has_tag_normalizer:
+                tag_normalizer = TagNormalizer()
+                self.middleware_chain.append(tag_normalizer)
+
+        except ImportError:
+            _get_logger().warning("TagNormalizer not available for auto-configuration")
+        except Exception as e:
+            _get_logger().warning(f"Failed to add TagNormalizer: {e}")

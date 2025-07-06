@@ -9,7 +9,7 @@ Implements Phase 3 architecture with profile integration.
 
 from typing import Any, Dict, List, Optional
 
-from ...profiles.models import FullProfile
+from ...configs.models import FullProfile
 from ..models import ClientProfile, ParsedServer, PipelineContext
 from ..registry import register
 from .base import ProfileAwareMiddleware

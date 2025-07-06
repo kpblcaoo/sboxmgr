@@ -109,7 +109,7 @@ def convert_parsed_server_to_outbound(
             "server_port": server.port,
         }
 
-        # Add tag
+        # Add tag (prioritize normalized server.tag from middleware)
         if server.tag:
             outbound_data["tag"] = server.tag
         elif server.meta.get("name"):
@@ -345,9 +345,9 @@ def _convert_tuic(
 
     # Add optional fields
     if server.congestion_control or server.meta.get("congestion_control"):
-        outbound_data[
-            "congestion_control"
-        ] = server.congestion_control or server.meta.get("congestion_control")
+        outbound_data["congestion_control"] = (
+            server.congestion_control or server.meta.get("congestion_control")
+        )
     if server.meta.get("zero_rtt_handshake"):
         outbound_data["zero_rtt_handshake"] = server.meta["zero_rtt_handshake"]
     if server.meta.get("udp_relay_mode"):

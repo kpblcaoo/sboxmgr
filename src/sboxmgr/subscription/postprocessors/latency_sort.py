@@ -10,7 +10,7 @@ Implements Phase 3 architecture with profile integration.
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
-from ...profiles.models import FullProfile
+from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
 from ..registry import register
 from .base import ChainablePostProcessor

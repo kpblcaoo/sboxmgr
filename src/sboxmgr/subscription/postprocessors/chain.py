@@ -11,7 +11,7 @@ Implements Phase 3 architecture with profile integration.
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Optional, Union
 
-from ...profiles.models import FullProfile
+from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
 from ..registry import register
 from .base import BasePostProcessor, ProfileAwarePostProcessor

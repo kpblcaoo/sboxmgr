@@ -11,8 +11,8 @@ Implements Phase 3 architecture with profile integration.
 import time
 from typing import Any, Dict, List, Optional
 
+from ...configs.models import FullProfile
 from ...logging.core import get_logger
-from ...profiles.models import FullProfile
 from ..models import ParsedServer, PipelineContext
 from .base import ChainableMiddleware
 

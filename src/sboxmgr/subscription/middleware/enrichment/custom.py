@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 
-from ....profiles.models import FullProfile
+from ....configs.models import FullProfile
 from ...models import ParsedServer, PipelineContext
 
 

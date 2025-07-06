@@ -97,7 +97,7 @@ def convert_parsed_server_to_outbound(
             "server_port": server.port,
         }
 
-        # Add tag
+        # Add tag (prioritize normalized server.tag from middleware)
         if server.tag:
             outbound_data["tag"] = server.tag
         elif server.meta.get("name"):
