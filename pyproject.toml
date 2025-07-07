@@ -1,6 +1,6 @@
 [project]
 name = "sboxmgr"
-version = "1.4.0"
+version = "0.1.0-pre"
 description = "Sing-box config manager CLI (sboxctl)"
 authors = [
     { name = "Mikhail Stepanov", email = "kpblcaoo@gmail.com" }
