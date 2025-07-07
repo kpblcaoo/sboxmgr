@@ -3,7 +3,7 @@ include LICENSE
 include pyproject.toml
 include CHANGELOG.md
 include docs/**/*.md
-include src/**/*.py
+recursive-include src *
 include tests/**/*.py
 include i18n/**/*.json
 include .env.example
