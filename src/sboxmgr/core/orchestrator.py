@@ -419,10 +419,21 @@ class Orchestrator:
                         # Already a routing rule dict
                         user_routes_dicts.append(route)
 
+            # Extract client_profile and profile from kwargs if provided
+            client_profile = kwargs.get("client_profile")
+            profile = kwargs.get("profile")
+
+            if client_profile:
+                self.logger.debug(f"Using client profile: {client_profile}")
+            if profile:
+                self.logger.debug(f"Using profile: {profile}")
+
             config = self.export_manager.export(
                 servers=servers_result.config,
                 exclusions=exclusions,
                 user_routes=user_routes_dicts,
+                client_profile=client_profile,
+                profile=profile,
             )
 
             result = {
