@@ -43,7 +43,6 @@ dependencies = [
     "packaging>=21.0",
     "toml>=0.10.2",
     "textual>=0.52.0",
-    "sbox-common @ file:///home/kpblc/projects/subbox/sbox-common",
 ]
 
 [project.scripts]
@@ -56,6 +55,9 @@ dev = [
     "black",
     "pre-commit",
     "detect-secrets",
+]
+ipc = [
+    "sbox-common @ file:///home/kpblc/projects/subbox/sbox-common",
 ]
 
 [build-system]

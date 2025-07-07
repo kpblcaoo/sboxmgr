@@ -23,6 +23,18 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
+For IPC functionality (agent communication), you also need to install sbox-common:
+
+```bash
+# Clone sbox-common repository
+git clone https://github.com/kpblcaoo/sbox-common.git
+cd sbox-common
+pip install -e .
+
+# Or install with optional dependencies
+pip install sboxmgr[ipc]
+```
+
 ### 2. Create configuration profile
 Create a profile file with your configuration preferences:
 
