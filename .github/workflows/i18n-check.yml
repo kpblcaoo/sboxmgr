@@ -18,14 +18,17 @@ jobs:
   i18n-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+      - name: Make script executable
+        run: |
+          chmod +x scripts/i18n/sync_keys.py
       - name: Check i18n keys
         run: |
           python scripts/i18n/sync_keys.py --check --fail-on-missing --fail-on-unused
