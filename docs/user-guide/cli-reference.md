@@ -6,6 +6,8 @@ This document provides a comprehensive reference for all SBoxMgr CLI commands an
 
 SBoxMgr provides a command-line interface for managing sing-box configurations, subscriptions, and user configurations.
 
+> **💡 Tip**: New users may prefer the [TUI (Text User Interface)](tui-guide.md) for a more interactive experience.
+
 ## Global Options
 
 All commands support these global options:
@@ -14,6 +16,30 @@ All commands support these global options:
 - `--help`, `-h`: Show help message
 
 ## Commands
+
+### Text User Interface
+
+#### `sboxctl tui`
+Launch the interactive Text User Interface.
+
+**Options:**
+- `--debug <level>`: Set debug level (0-3)
+
+**Example:**
+```bash
+# Launch TUI
+sboxctl tui
+
+# With debug logging
+sboxctl tui --debug 2
+```
+
+**Features:**
+- Interactive subscription management
+- Visual server list with exclusions
+- Configuration generation
+- Profile integration
+- Keyboard and mouse navigation
 
 ### Server Management
 

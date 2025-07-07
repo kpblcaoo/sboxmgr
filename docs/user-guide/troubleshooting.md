@@ -4,6 +4,30 @@ This guide helps you resolve common issues with SBoxMgr.
 
 ## Common Issues
 
+### TUI (Text User Interface) Issues
+
+If you're experiencing problems with the Text User Interface, see the dedicated [TUI Troubleshooting Guide](tui-troubleshooting.md) for detailed solutions.
+
+**Common TUI Problems:**
+- Interface won't start or crashes
+- Navigation issues (arrow keys, checkboxes)
+- Subscriptions not loading
+- Exclusions not saving
+- Configuration generation fails
+- Display and layout problems
+
+**Quick TUI Fixes:**
+```bash
+# Enable debug mode for troubleshooting
+python -m sboxmgr.cli.main tui --debug 2
+
+# Check terminal compatibility
+echo $TERM
+
+# Reset configuration if corrupted
+rm ~/.config/sboxmgr/config.toml
+```
+
 ### Network Problems
 
 #### Connection Timeout
@@ -271,6 +295,7 @@ When reporting issues, include:
 
 ## See Also
 
+- [TUI Troubleshooting](tui-troubleshooting.md) - Text User Interface issues
 - [CLI Reference](cli-reference.md) - Command line interface
 - [Profiles](profiles.md) - Profile management
 - [Subscriptions](subscriptions.md) - Subscription management
