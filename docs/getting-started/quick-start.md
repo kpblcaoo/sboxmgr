@@ -2,6 +2,25 @@
 
 ## 🚀 Quick Start
 
+SBoxMgr provides two interfaces: **TUI (Text User Interface)** for beginners and **CLI** for advanced users.
+
+### Option 1: TUI (Recommended for New Users)
+
+```bash
+# Launch the interactive interface
+python -m sboxmgr.cli.main tui
+
+# Or from installed package
+sboxctl tui
+```
+
+The TUI will guide you through:
+1. Adding subscriptions
+2. Managing server exclusions
+3. Generating configurations
+
+### Option 2: CLI (For Advanced Users)
+
 ```bash
 # Basic command
 sboxctl export -u "YOUR_SUBSCRIPTION_URL" --index 1

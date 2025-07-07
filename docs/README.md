@@ -11,6 +11,7 @@
 
 ### 👥 User Guide
 - [Getting Started](getting-started/) - Installation and quick start
+- [TUI Guide](user-guide/tui-guide.md) - Text User Interface
 - [CLI Reference](user-guide/cli-reference.md) - Command line interface
 - [Configurations](user-guide/configs.md) - Working with configuration files
 - [Subscriptions](user-guide/subscriptions.md) - Managing subscription sources
