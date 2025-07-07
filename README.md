@@ -215,6 +215,10 @@ This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE)
 
 This project supersedes the earlier `update-singbox` script. While some internal components originated from it, `sboxmgr` is a full rewrite and represents a new generation of flexible, extensible configuration generation tools.
 
+## Author
+
+Mikhail Stepanov (<kpblcaoo@gmail.com>), [github.com/kpblcaoo](https://github.com/kpblcaoo)
+
 ---
 
 **Need help?** Check the [troubleshooting guide](docs/user-guide/troubleshooting.md) or open an issue on GitHub.
