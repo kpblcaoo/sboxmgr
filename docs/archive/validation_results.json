@@ -1,0 +1,159 @@
+{
+  "pydantic_validation": {
+    "selector": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "anytls": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "block": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "http": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "tuic": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "shadowsocks": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "hysteria": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "trojan": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "wireguard": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "vmess": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "dns": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "hysteria2": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "ssh": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "socks": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "vless": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "tor": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "urltest": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    },
+    "direct": {
+      "success": true,
+      "message": "✅ Pydantic валидация прошла успешно"
+    }
+  },
+  "singbox_validation": {
+    "selector": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "anytls": {
+      "success": false,
+      "message": "❌ Sing-box ошибка: \u001b[31mFATAL\u001b[0m[0000] decode config at /tmp/singbox_test_anytls.json: outbounds[0]: unknown outbound type: anytls"
+    },
+    "block": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "http": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "tuic": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "shadowsocks": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "hysteria": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "trojan": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "wireguard": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "vmess": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "dns": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "hysteria2": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "ssh": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "socks": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "vless": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "tor": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "urltest": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    },
+    "direct": {
+      "success": true,
+      "message": "✅ Sing-box валидация прошла успешно"
+    }
+  },
+  "summary": {
+    "total_configs": 18,
+    "pydantic_success": 18,
+    "pydantic_failure": 0,
+    "singbox_success": 17,
+    "singbox_failure": 1,
+    "pydantic_coverage": 100.0,
+    "singbox_coverage": 94.44444444444444
+  }
+}

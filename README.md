@@ -1,167 +1,220 @@
-# update-singbox
+# sboxmgr — Subbox Configuration Manager
 
-[![Build Status](https://github.com/kpblcaoo/update-singbox/actions/workflows/ci-dev.yml/badge.svg)](https://github.com/kpblcaoo/update-singbox/actions)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/kpblcaoo/update-singbox/actions)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Build Status](https://github.com/kpblcaoo/sboxmgr/actions/workflows/ci-dev.yml/badge.svg)](https://github.com/kpblcaoo/sboxmgr/actions)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/kpblcaoo/sboxmgr/actions)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green.svg)](LICENSE)
 
-## Other languages / Другие языки
-- [Русский (docs/ru/README.md)](docs/ru/README.md)
+A Python CLI tool for managing configuration files. Part of the subbox ecosystem for configuration management and generation.
 
-A Python CLI tool for automating and managing [sing-box](https://sing-box.sagernet.org/) proxy configurations. Fetches server lists from a URL, applies exclusions, generates configs, and supports advanced routing and testing.
+**Note**: This tool is designed for configuration management purposes. Users are responsible for ensuring compliance with local laws and regulations.
 
----
+## 🚀 Quick Start
 
-## ✨ Features
-- Fetch and apply proxy server configs from a URL
-- Supported protocols: VLESS, Shadowsocks, VMess, Trojan, TUIC, Hysteria2
-- Direct routing for Russian domains and geoip-ru, proxy for other traffic
-- Logging, backup, exclusions, dry-run, and full CLI test coverage
-- All paths and artifacts are configurable via environment variables
-- Modular architecture, fully tested with pytest + Typer.CliRunner
-
----
-
-## 🚀 Quick start
-
+### 1. Install
 ```bash
+# Install from TestPyPI
+pip install -i https://test.pypi.org/simple sboxmgr
+
+# Or install in development mode
+git clone https://github.com/kpblcaoo/sboxmgr.git
+cd sboxmgr
 python -m venv .venv
-source .venv/bin/activate
-pip install .
-cp .env.example .env  # Edit as needed
-sboxctl run -u https://example.com/proxy-config.json --index 1
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -e .
 ```
 
-- See `.env.example` for all environment variables you can configure (paths, URLs, debug, etc).
-- **Note:** By default, the config is written to `/etc/sing-box/config.json` (default for sing-box). If your sing-box installation uses a different path, set `SBOXMGR_CONFIG_FILE` accordingly in your `.env`.
-- For development, see DEVELOPMENT.md.
-
----
-
-## 🚀 Installation
+### 2. Create configuration profile
+Create a profile file with your configuration preferences:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install .
-cp .env.example .env  # Edit as needed
+# Example profile.json
+{
+  "export": {
+    "format": "json",
+    "output": "./config.json"
+  }
+}
 ```
 
-Requirements: Python 3.10+, sing-box, requests[socks], python-dotenv
-
----
-
-## ⚙️ Usage
-
-All commands are available via the `sboxctl` CLI (Typer-based):
-
-### Typical scenarios
-
-- **Run with server selection by index:**
-  ```bash
-  sboxctl run -u https://example.com/proxy-config.json --index 1
-  # Generates config.json for the selected server
-  ```
-- **Dry-run (simulate config generation, no file changes):**
-  ```bash
-  sboxctl dry-run -u https://example.com/proxy-config.json
-  # Prints config to stdout, does not write files
-  ```
-- **List all available servers:**
-  ```bash
-  sboxctl list-servers -u https://example.com/proxy-config.json
-  # Shows a table of all servers with indices and remarks
-  ```
-- **Add server to exclusions:**
-  ```bash
-  sboxctl exclusions -u https://example.com/proxy-config.json --add 1
-  # Adds server with index 1 to exclusions.json
-  ```
-- **Remove server from exclusions:**
-  ```bash
-  sboxctl exclusions -u https://example.com/proxy-config.json --remove 1
-  # Removes server with index 1 from exclusions.json
-  ```
-- **View current exclusions:**
-  ```bash
-  sboxctl exclusions --view
-  # Prints the current exclusions list
-  ```
-- **Clear all exclusions:**
-  ```bash
-  sboxctl clear-exclusions
-  # Empties exclusions.json
-  ```
-
-### Options
-| Option                  | Description                                      |
-|------------------------|--------------------------------------------------|
-| `-u, --url <URL>`      | Proxy config URL (required)                      |
-| `--index <n>`          | Select server by index                           |
-| `--remarks <name>`     | Select server by remarks                         |
-| `--dry-run`            | Simulate config generation, no file changes      |
-| `--list-servers`       | List all available servers                       |
-| `--exclusions`         | Manage exclusions (add/remove/list)              |
-| `--clear-exclusions`   | Remove all exclusions                            |
-| `-d, --debug <level>`  | Set log verbosity (0=min, 1=info, 2=debug)       |
-
----
-
-## 🛠 CLI architecture
-
-- The CLI is built with [Typer](https://typer.tiangolo.com/), providing modular commands and automatic help.
-- Each scenario (run, dry-run, exclusions, list-servers, clear-exclusions) is implemented as a separate command in the `cli/` package.
-- CLI wrappers are thin: they only orchestrate, all business logic is in core modules (see `core/`, `utils/`).
-- All paths and artifacts (config, log, exclusions, etc.) are controlled via environment variables (see `.env.example`).
-- To add or extend commands, create a new file in `cli/` and register it in the main Typer app.
-- For development and contribution guidelines, see DEVELOPMENT.md.
-
-## 🐞 Known bugs & limitations
-
-- Server indices in `list-servers` may start from a non-zero value if the list is filtered. [Planned: re-index from 0]
-- Removing exclusions by index or ID may not work as expected. Use `sboxctl clear-exclusions --yes` or edit `exclusions.json` as a workaround. [Planned: improve UX]
-- See [TODO.md](./TODO.md) or [plans/struct_refactor_next_steps.md](./plans/struct_refactor_next_steps.md) for the full list of known issues and plans.
-
----
-
-## 🧪 Testing
-
-Run all tests:
+### 3. Generate configuration
 ```bash
-pytest -v tests/
+# Export configuration using profile
+sboxmgr export -p profile.json
+
+# Or use command line options
+sboxmgr export --format json --output config.json
 ```
 
-All CLI logic is covered by tests using Typer.CliRunner and pytest. Artifacts and paths are isolated via environment variables in tests.
+That's it! Your configuration file is ready.
 
----
+## ✨ Key Features
 
-## 🛠 Configuration & Environment
+- **Simple CLI**: One command to generate configuration files
+- **Multiple formats**: JSON, YAML, and other configuration formats
+- **Profile-based**: Use configuration profiles for consistent settings
+- **Plugin system**: Extensible architecture with custom plugins
+- **Flexible input**: Supports various input formats and sources
+- **Production ready**: Comprehensive error handling and validation
 
-All paths are configurable via environment variables:
+## 📖 Common Usage
 
-| Variable                        | Default Value                |
-|---------------------------------|------------------------------|
-| `SBOXMGR_CONFIG_FILE`           | ./config.json                |
-| `SBOXMGR_TEMPLATE_FILE`         | ./config.template.json       |
-| `SBOXMGR_LOG_FILE`              | ./sboxmgr.log                |
-| `SBOXMGR_EXCLUSION_FILE`        | ./exclusions.json            |
-| `SBOXMGR_SELECTED_CONFIG_FILE`  | ./selected_config.json       |
-| `SBOXMGR_URL`                   | (no default, must be set)    |
+### Basic Operations
+```bash
+# Export configuration using profile
+sboxmgr export -p profile.json
 
-You can use a `.env` file in the project root for local development.
+# Export with command line options
+sboxmgr export --format json --output config.json
 
----
+# Preview configuration without saving (dry-run)
+sboxmgr export -p profile.json --dry-run
+
+# List available configuration options
+sboxmgr list --help
+```
+
+### Profile Management
+```bash
+# Create a new profile
+sboxmgr profile create my-profile
+
+# List available profiles
+sboxmgr profile list
+
+# Export using specific profile
+sboxmgr export --profile my-profile
+```
+
+### Advanced Configuration
+```bash
+# Use custom configuration format
+sboxmgr export --format yaml --output config.yaml
+
+# Set custom output directory
+sboxmgr export -p profile.json --output-dir ./configs/
+
+# Validate configuration before export
+sboxmgr export -p profile.json --validate
+```
+
+## ⚙️ Configuration
+
+### Environment Variables
+Create a `.env` file in the project root:
+
+```bash
+# Config file location (default: ./config.json)
+SBOXMGR_CONFIG_FILE=./config.json
+
+# Log file location
+SBOXMGR_LOG_FILE=./sboxmgr.log
+
+# Profile directory
+SBOXMGR_PROFILE_DIR=./profiles/
+
+# Language (en, ru, de, zh, etc.)
+SBOXMGR_LANG=en
+```
+
+### Default Behavior
+- **Config output**: `./config.json` (or `SBOXMGR_CONFIG_FILE`)
+- **Logging**: `./sboxmgr.log` (or `SBOXMGR_LOG_FILE`)
+- **Profiles**: `./profiles/` (or `SBOXMGR_PROFILE_DIR`)
+- **Language**: English (or `SBOXMGR_LANG`)
+
+## 🔧 Advanced Features
+
+### Plugin System
+Create custom plugins for data processing:
+
+```bash
+# Generate plugin template
+sboxmgr plugin-template fetcher MyCustomFetcher --output-dir ./plugins/
+
+# Use custom plugin
+sboxmgr export --fetcher my-custom-fetcher
+```
+
+### Policy Engine
+Configure processing policies:
+
+```bash
+# List available policies
+sboxmgr policy list
+
+# Apply custom policy
+sboxmgr export --policy my-policy
+```
+
+### Internationalization
+```bash
+# Set language
+sboxmgr lang --set ru
+
+# View available languages
+sboxmgr lang
+```
+
+## 🛠 Development
+
+### Setup Development Environment
+```bash
+# Install with development dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest -v
+
+# Run linting
+ruff check src/
+
+# Format code
+black src/
+```
+
+### Project Structure
+```
+src/sboxmgr/
+├── cli/          # Command-line interface
+├── core/         # Core business logic
+├── config/       # Configuration management
+├── export/       # Configuration export
+├── models/       # Data models
+├── i18n/         # Internationalization
+└── utils/        # Utilities
+```
+
+## 📚 Documentation
+
+- [User Guide](docs/user-guide/) - Detailed usage instructions
+- [CLI Reference](docs/user-guide/cli-reference.md) - Complete command reference
+- [Configuration Guide](docs/getting-started/configuration.md) - Advanced configuration
+- [Security](docs/security.md) - Security considerations
+- [Development](docs/developer/) - Contributing guidelines
 
 ## 🤝 Contributing
 
-Contributions are welcome! Fork, make changes, and submit a Pull Request.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+See [CONTRIBUTING.md](docs/developer/contributing.md) for detailed guidelines.
+
+## 📄 License
+
+This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Related Projects
+
+- [subbox](https://github.com/kpblcaoo/subbox) - Configuration management ecosystem
+- [sbox-common](https://github.com/kpblcaoo/sbox-common) - Common utilities
+
+## 📚 Legacy
+
+This project supersedes the earlier `update-singbox` script. While some internal components originated from it, `sboxmgr` is a full rewrite and represents a new generation of flexible, extensible configuration generation tools.
 
 ---
 
-## 📜 License
-
-This project is licensed under the terms of the MIT License. See the LICENSE file for details.
-
-
-
-
-
+**Need help?** Check the [troubleshooting guide](docs/user-guide/troubleshooting.md) or open an issue on GitHub.

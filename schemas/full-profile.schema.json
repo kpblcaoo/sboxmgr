@@ -1,0 +1,340 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FullProfile",
+  "description": "Complete profile configuration (ADR-0017).",
+  "generator": "sboxmgr-schema-generator",
+  "version": "1.0.0",
+  "$defs": {
+    "AgentProfile": {
+      "description": "Profile configuration for agent settings.",
+      "properties": {
+        "auto_restart": {
+          "default": false,
+          "description": "Auto-restart on failure",
+          "title": "Auto Restart",
+          "type": "boolean"
+        },
+        "monitor_latency": {
+          "default": true,
+          "description": "Monitor server latency",
+          "title": "Monitor Latency",
+          "type": "boolean"
+        },
+        "health_check_interval": {
+          "default": "30s",
+          "description": "Health check interval",
+          "title": "Health Check Interval",
+          "type": "string"
+        },
+        "log_level": {
+          "default": "info",
+          "description": "Logging level",
+          "title": "Log Level",
+          "type": "string"
+        }
+      },
+      "title": "AgentProfile",
+      "type": "object"
+    },
+    "ExportFormat": {
+      "description": "Supported export formats.",
+      "enum": [
+        "sing-box",
+        "clash",
+        "json"
+      ],
+      "title": "ExportFormat",
+      "type": "string"
+    },
+    "ExportProfile": {
+      "description": "Profile configuration for export settings.",
+      "properties": {
+        "format": {
+          "$ref": "#/$defs/ExportFormat",
+          "default": "sing-box",
+          "description": "Export format"
+        },
+        "outbound_profile": {
+          "default": "vless-real",
+          "description": "Outbound profile name",
+          "title": "Outbound Profile",
+          "type": "string"
+        },
+        "inbound_profile": {
+          "default": "tun",
+          "description": "Inbound profile name",
+          "title": "Inbound Profile",
+          "type": "string"
+        },
+        "output_file": {
+          "default": "config.json",
+          "description": "Output file path",
+          "title": "Output File",
+          "type": "string"
+        },
+        "template": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Custom template path",
+          "title": "Template"
+        }
+      },
+      "title": "ExportProfile",
+      "type": "object"
+    },
+    "FilterProfile": {
+      "description": "Profile configuration for filtering and exclusions.",
+      "properties": {
+        "exclude_tags": {
+          "description": "Tags to exclude",
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude Tags",
+          "type": "array"
+        },
+        "only_tags": {
+          "description": "Only include servers with these tags",
+          "items": {
+            "type": "string"
+          },
+          "title": "Only Tags",
+          "type": "array"
+        },
+        "exclusions": {
+          "description": "Server names/IPs to exclude",
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "only_enabled": {
+          "default": true,
+          "description": "Only include enabled subscriptions",
+          "title": "Only Enabled",
+          "type": "boolean"
+        }
+      },
+      "title": "FilterProfile",
+      "type": "object"
+    },
+    "RoutingProfile": {
+      "description": "Profile configuration for routing rules.",
+      "properties": {
+        "by_source": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Route by subscription source ID",
+          "title": "By Source",
+          "type": "object"
+        },
+        "default_route": {
+          "default": "tunnel",
+          "description": "Default routing mode",
+          "title": "Default Route",
+          "type": "string"
+        },
+        "custom_routes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Custom routing rules",
+          "title": "Custom Routes",
+          "type": "object"
+        }
+      },
+      "title": "RoutingProfile",
+      "type": "object"
+    },
+    "SubscriptionProfile": {
+      "description": "Profile configuration for subscriptions.",
+      "properties": {
+        "id": {
+          "description": "Unique subscription identifier",
+          "title": "Id",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Whether subscription is enabled",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "priority": {
+          "default": 1,
+          "description": "Priority for ordering (lower = higher priority)",
+          "title": "Priority",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "SubscriptionProfile",
+      "type": "object"
+    },
+    "UIMode": {
+      "description": "Supported UI modes.",
+      "enum": [
+        "cli",
+        "tui",
+        "gui"
+      ],
+      "title": "UIMode",
+      "type": "string"
+    },
+    "UIProfile": {
+      "description": "Profile configuration for UI preferences.",
+      "properties": {
+        "default_language": {
+          "default": "en",
+          "description": "Default language",
+          "title": "Default Language",
+          "type": "string"
+        },
+        "mode": {
+          "$ref": "#/$defs/UIMode",
+          "default": "cli",
+          "description": "UI mode"
+        },
+        "theme": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "UI theme",
+          "title": "Theme"
+        },
+        "show_debug_info": {
+          "default": false,
+          "description": "Show debug information",
+          "title": "Show Debug Info",
+          "type": "boolean"
+        }
+      },
+      "title": "UIProfile",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "description": "Unique profile identifier",
+      "title": "Id",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Profile description",
+      "title": "Description"
+    },
+    "subscriptions": {
+      "description": "Subscription configurations",
+      "items": {
+        "$ref": "#/$defs/SubscriptionProfile"
+      },
+      "title": "Subscriptions",
+      "type": "array"
+    },
+    "filters": {
+      "$ref": "#/$defs/FilterProfile",
+      "description": "Filtering and exclusion rules"
+    },
+    "routing": {
+      "$ref": "#/$defs/RoutingProfile",
+      "description": "Routing configuration"
+    },
+    "export": {
+      "$ref": "#/$defs/ExportProfile",
+      "description": "Export settings"
+    },
+    "agent": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AgentProfile"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Agent configuration"
+    },
+    "ui": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/UIProfile"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "UI preferences"
+    },
+    "version": {
+      "default": "1.0",
+      "description": "Profile version",
+      "title": "Version",
+      "type": "string"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Creation timestamp",
+      "title": "Created At"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Last update timestamp",
+      "title": "Updated At"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "description": "Additional metadata",
+      "title": "Metadata",
+      "type": "object"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "type": "object"
+}

@@ -1,11 +1,21 @@
-from sboxmgr.server.exclusions import load_exclusions
-from sboxmgr.utils.id import generate_server_id
+"""Server selection utilities and algorithms.
+
+This module provides functions for selecting servers from parsed subscription
+data based on various criteria such as performance, availability, geographic
+location, and user preferences. It implements selection algorithms used during
+the subscription processing pipeline.
+"""
+
 import logging
+
 import typer
 
+from sboxmgr.server.exclusions import load_exclusions
+from sboxmgr.utils.id import generate_server_id
+
+
 def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
-    """
-    List all supported outbounds with indices and details.
+    """List all supported outbounds with indices and details.
     Excluded servers помечаются как (excluded), индексация сквозная.
     """
     exclusions = load_exclusions(dry_run=dry_run)
@@ -29,4 +39,4 @@ def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
             name = f"{name} [excluded]"
         if debug_level >= 0:
             logging.info(f"{index} | {name} | {protocol} | {port}")
-        typer.echo(f"{index} | {name} | {protocol} | {port}") 
+        typer.echo(f"{index} | {name} | {protocol} | {port}")

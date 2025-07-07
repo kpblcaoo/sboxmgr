@@ -1,0 +1,51 @@
+{
+  "inbounds": [
+    {
+      "type": "tun",
+      "listen": "127.0.0.1",
+      "port": null,
+      "options": {
+        "tag": "tun-in",
+        "interface_name": "tun0",
+        "address": ["198.18.0.1/16"],
+        "mtu": 1500,
+        "auto_route": true,
+        "endpoint_independent_nat": true,
+        "stack": "system",
+        "sniff": true,
+        "strict_route": true
+      }
+    },
+    {
+      "type": "socks",
+      "listen": "127.0.0.1",
+      "port": 1080,
+      "options": {
+        "tag": "socks-in",
+        "sniff": true,
+        "users": [
+          {
+            "username": "user",
+            "password": "pass"
+          }
+        ]
+      }
+    }
+  ],
+  "dns_mode": "system",
+  "routing": {
+    "final": "direct"
+  },
+  "exclude_outbounds": [
+    "vmess",
+    "shadowsocks"
+  ],
+  "extra": {
+    "description": "Production-ready client profile with modern sing-box features",
+    "features": [
+      "Override final action (direct instead of auto)",
+      "Exclude legacy protocols (vmess, shadowsocks)",
+      "Modern rule actions instead of legacy special outbounds"
+    ]
+  }
+}

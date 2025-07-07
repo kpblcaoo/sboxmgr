@@ -1,0 +1,60 @@
+{
+  "name": "phase4-demo-profile",
+  "description": "Demo profile for Phase 4 Generator Refactoring",
+  "version": "1.0.0",
+  "filter": {
+    "allowed_countries": ["US", "CA", "UK"],
+    "blocked_countries": ["CN", "RU"],
+    "include_tags": ["Premium", "Fast"],
+    "exclude_tags": ["Blocked", "Slow"]
+  },
+  "export": {
+    "format": "sing-box",
+    "outbound_profile": "vless-real",
+    "inbound_profile": "tun",
+    "output_file": "config.json"
+  },
+  "metadata": {
+    "middleware": {
+      "logging": {
+        "enabled": true,
+        "log_performance": true,
+        "log_server_details": false
+      },
+      "enrichment": {
+        "enabled": true,
+        "enable_geo_enrichment": true,
+        "enable_performance_enrichment": false
+      }
+    },
+    "postprocessors": {
+      "chain": [
+        {
+          "type": "geo_filter",
+          "config": {
+            "allowed_countries": ["US", "CA", "UK"],
+            "blocked_countries": ["CN", "RU"]
+          }
+        },
+        {
+          "type": "tag_filter",
+          "config": {
+            "include_tags": ["Premium", "Fast"],
+            "exclude_tags": ["Blocked", "Slow"],
+            "fallback_mode": "allow"
+          }
+        },
+        {
+          "type": "latency_sort",
+          "config": {
+            "sort_order": "asc",
+            "max_latency_ms": 300,
+            "measurement_method": "cached"
+          }
+        }
+      ],
+      "execution_mode": "sequential",
+      "error_strategy": "continue"
+    }
+  }
+}

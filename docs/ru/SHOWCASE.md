@@ -20,7 +20,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install .
 cp .env.example .env  # Отредактируйте при необходимости
-sboxctl run -u https://example.com/proxy-config.json --index 1
+sboxctl export -u "https://example.com/proxy-config.json" --index 1
 ```
 
 ---
@@ -29,31 +29,31 @@ sboxctl run -u https://example.com/proxy-config.json --index 1
 
 ### Применить сервер по индексу
 ```bash
-sboxctl run -u https://example.com/proxy-config.json --index 1
+sboxctl export -u "https://example.com/proxy-config.json" --index 1
 # Вывод: создан config.json для выбранного сервера
 ```
 
 ### Предпросмотр конфига (dry-run, без изменений файлов)
 ```bash
-sboxctl dry-run -u https://example.com/proxy-config.json
+sboxctl export -u "https://example.com/proxy-config.json" --index 1 --dry-run
 # Вывод: конфиг напечатан в stdout, файлы не изменяются
 ```
 
 ### Список всех доступных серверов
 ```bash
-sboxctl list-servers -u https://example.com/proxy-config.json
+sboxctl list-servers -u "https://example.com/proxy-config.json"
 # Вывод: таблица серверов с индексами, remarks, протоколами и т.д.
 ```
 
 ### Исключить сервер по индексу
 ```bash
-sboxctl exclusions -u https://example.com/proxy-config.json --add 2
+sboxctl exclusions -u "https://example.com/proxy-config.json" --add 2
 # Вывод: сервер с индексом 2 добавлен в exclusions.json
 ```
 
 ### Удалить сервер из exclusions
 ```bash
-sboxctl exclusions -u https://example.com/proxy-config.json --remove 2
+sboxctl exclusions -u "https://example.com/proxy-config.json" --remove 2
 # Вывод: сервер с индексом 2 удалён из exclusions.json
 ```
 
@@ -65,8 +65,25 @@ sboxctl exclusions --view
 
 ### Очистить exclusions
 ```bash
-sboxctl clear-exclusions
+sboxctl exclusions --clear --yes
 # Вывод: exclusions.json очищен
+```
+
+### Выбрать сервер по имени
+```bash
+sboxctl export -u "https://example.com/proxy-config.json" --remarks "Быстрый сервер"
+# Вывод: конфиг создан для сервера с указанным именем
+```
+
+### Продвинутая конфигурация
+```bash
+# SOCKS прокси на порту 1080
+sboxctl export -u "https://example.com/proxy-config.json" --index 1 \
+  --inbound-types socks --socks-port 1080
+
+# Вся маршрутизация через прокси
+sboxctl export -u "https://example.com/proxy-config.json" --index 1 \
+  --final-route proxy
 ```
 
 ---
@@ -75,14 +92,20 @@ sboxctl clear-exclusions
 
 ### Не указан или пустой URL
 ```bash
-sboxctl run -u ""
+sboxctl export -u ""
 # Вывод: Ошибка: требуется URL (код возврата 1)
 ```
 
 ### Попытка выбрать несуществующий сервер
 ```bash
-sboxctl run -u https://example.com/proxy-config.json --index 99
+sboxctl export -u "https://example.com/proxy-config.json" --index 99
 # Вывод: Ошибка: сервер с индексом 99 не найден (код возврата 1)
+```
+
+### Неверный формат URL
+```bash
+sboxctl export -u "invalid-url"
+# Вывод: Ошибка: неверный формат URL (код возврата 1)
 ```
 
 ---
@@ -92,16 +115,16 @@ sboxctl run -u https://example.com/proxy-config.json --index 99
 - Для скриптов проверяйте коды возврата: `0` = успех, `1` = ошибка.
 - Используйте `--dry-run` для предварительного просмотра изменений.
 - Все команды CLI поддерживают `--help` для справки.
-- **Если не удаётся удалить exclusion по индексу или ID, используйте `sboxctl clear-exclusions --yes` для полной очистки или вручную отредактируйте exclusions.json. Это временное решение до улучшения UX.**
-- Для продвинутого использования и разработки см. [README.md](../README.md) и [DEVELOPMENT.md](../DEVELOPMENT.md).
+- **Если не удаётся удалить exclusion по индексу или ID, используйте `sboxctl exclusions --clear --yes` для полной очистки или вручную отредактируйте exclusions.json.**
+- Для продвинутого использования и разработки см. [README.md](README.md) и [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---
 
 ## 📎 Ссылки
-- [README.md](../README.md) — полная документация
-- [.env.example](../.env.example) — все переменные окружения
-- [CHANGELOG.md](../CHANGELOG.md) — последние изменения
+- [README.md](README.md) — полная документация
+- [.env.example](../../.env.example) — все переменные окружения
+- [CHANGELOG.md](CHANGELOG.md) — последние изменения
 
 ---
 
-> Хотите визуальную демонстрацию? Предложите GIF или видео в issues! 
+> Хотите визуальную демонстрацию? Предложите GIF или видео в issues!

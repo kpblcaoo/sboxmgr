@@ -28,4 +28,4 @@ pytest --cov=. --cov-report=term-missing
 - Тесты находятся в папке `tests/`.
 - Каждый модуль имеет соответствующий файл тестов, например:
   - `config_fetch.py` -> `tests/test_config_fetch.py`
-  - `protocol_validation.py` -> `tests/test_protocol_validation.py`. 
+  - `protocol_validation.py` -> `tests/test_protocol_validation.py`.

@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SubscriptionProfile",
+  "description": "Profile configuration for subscriptions.",
+  "generator": "sboxmgr-schema-generator",
+  "version": "1.0.0",
+  "properties": {
+    "id": {
+      "description": "Unique subscription identifier",
+      "title": "Id",
+      "type": "string"
+    },
+    "enabled": {
+      "default": true,
+      "description": "Whether subscription is enabled",
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "priority": {
+      "default": 1,
+      "description": "Priority for ordering (lower = higher priority)",
+      "title": "Priority",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "type": "object"
+}

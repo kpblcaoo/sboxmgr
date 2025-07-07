@@ -13,8 +13,8 @@ tests/ # Commented out to include tests in dev branch
 struct.json
 
 # plans (project logs, drafts)
-plans/
 
+plans/
 # pytest/coverage
 .pytest_cache/
 .coverage
@@ -38,6 +38,7 @@ struct.json
 exclusions.json
 selected_config.json
 backup.json
+config.json
 __pycache__
 build/
 *.egg-info/
@@ -50,3 +51,23 @@ build/
 *.pywz
 *.pyzw
 event_log/
+.cursor/
+
+# Mutation testing
+mutants/
+.mutmut-cache
+.mutmut
+mutation_testing/
+struct_src.json
+
+# Ignore generated LLM index
+struct_src_index.json
+test_subscription.json
+
+# User configs (profiles → configs migration)
+configs/
+*.toml
+!config.template.toml
+!pyproject.toml
+
+custom.json

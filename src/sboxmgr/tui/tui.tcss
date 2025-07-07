@@ -1,0 +1,236 @@
+/* TUI Styles for sboxmgr */
+
+/* Global theme */
+App {
+    background: $background;
+    color: $text;
+}
+
+/* Header and Footer */
+Header {
+    background: $primary;
+    color: $text;
+}
+
+Footer {
+    background: $surface;
+    color: $text;
+}
+
+/* Button variants */
+Button.primary {
+    background: $primary;
+    color: $text;
+}
+
+Button.primary:hover {
+    background: $primary-lighten-1;
+}
+
+Button.error {
+    background: $error;
+    color: $text;
+}
+
+Button.error:hover {
+    background: $error-lighten-1;
+}
+
+/* Input styling */
+Input {
+    border: solid $primary;
+}
+
+Input:focus {
+    border: solid $accent;
+}
+
+/* Common container styles */
+.container {
+    padding: 1;
+    margin: 1;
+}
+
+.centered {
+    align: center middle;
+}
+
+/* Status and info displays */
+.status-info {
+    background: $surface;
+    color: $text;
+    padding: 1;
+    border: solid $primary;
+}
+
+.info-text {
+    color: $text-muted;
+    text-style: italic;
+}
+
+.success-text {
+    color: $success;
+    text-style: bold;
+}
+
+.error-text {
+    color: $error;
+    text-style: bold;
+}
+
+.warning-text {
+    color: $warning;
+    text-style: bold;
+}
+
+/* Form elements */
+.form-container {
+    background: $surface;
+    border: thick $primary;
+    padding: 2;
+}
+
+.form-title {
+    text-align: center;
+    text-style: bold;
+    color: $primary;
+}
+
+.form-field {
+    margin-bottom: 1;
+}
+
+.form-buttons {
+    align: center middle;
+    margin-top: 1;
+}
+
+/* Menu styling */
+.menu-container {
+    align: center middle;
+    padding: 1;
+}
+
+.menu-title {
+    text-align: center;
+    text-style: bold;
+    color: $primary;
+}
+
+.menu-item {
+    width: 100%;
+    margin: 0 0 1 0;
+}
+
+/* Advanced sections */
+.advanced-section {
+    border-top: solid $primary;
+    padding-top: 1;
+    margin-top: 1;
+}
+
+.advanced-title {
+    text-align: center;
+    text-style: italic;
+    color: $text-muted;
+}
+
+/* Notification styling */
+.notification {
+    background: $surface;
+    border: solid $primary;
+    padding: 1;
+}
+
+.notification.success {
+    border: solid $success;
+    background: $success-darken-3;
+}
+
+.notification.error {
+    border: solid $error;
+    background: $error-darken-3;
+}
+
+.notification.warning {
+    border: solid $warning;
+    background: $warning-darken-3;
+}
+
+/* Loading and progress indicators */
+.loading {
+    text-align: center;
+    color: $text-muted;
+    text-style: italic;
+}
+
+.progress-container {
+    padding: 1;
+    background: $surface;
+    border: solid $primary;
+}
+
+/* Table styling for future server lists */
+.server-table {
+    border: solid $primary;
+}
+
+.server-row {
+    padding: 0 1;
+}
+
+.server-row:hover {
+    background: $primary-darken-3;
+}
+
+.server-excluded {
+    color: $text-muted;
+    text-style: strike;
+}
+
+.server-selected {
+    background: $accent-darken-3;
+    color: $text;
+}
+
+/* Modal and overlay styling */
+ModalScreen {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-container {
+    background: $surface;
+    border: thick $primary;
+    padding: 2;
+}
+
+/* Responsive design helpers */
+.small-screen {
+    width: 40;
+}
+
+.medium-screen {
+    width: 60;
+}
+
+.large-screen {
+    width: 80;
+}
+
+/* Animation classes */
+.fade-in {
+    opacity: 0;
+}
+
+.slide-in {
+    offset-x: -100%;
+}
+
+/* Debug styling */
+.debug-info {
+    background: $warning-darken-3;
+    color: $text;
+    border: solid $warning;
+    padding: 1;
+    text-style: bold;
+}

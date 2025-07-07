@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RoutingProfile",
+  "description": "Profile configuration for routing rules.",
+  "generator": "sboxmgr-schema-generator",
+  "version": "1.0.0",
+  "properties": {
+    "by_source": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Route by subscription source ID",
+      "title": "By Source",
+      "type": "object"
+    },
+    "default_route": {
+      "default": "tunnel",
+      "description": "Default routing mode",
+      "title": "Default Route",
+      "type": "string"
+    },
+    "custom_routes": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Custom routing rules",
+      "title": "Custom Routes",
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

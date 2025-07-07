@@ -35,7 +35,7 @@
       "rules": [
           {
               "protocol": "dns",
-              "outbound": "dns-out"
+              "action": "hijack-dns"
           },
           {
               "ip_is_private": true,
@@ -66,7 +66,7 @@
               "outbound": "direct"
           },
           {
-            "ip_cidr": "$excluded_servers", 
+            "ip_cidr": "$excluded_servers",
             "outbound": "direct"
           }
       ],

@@ -1,0 +1,58 @@
+{
+  "id": "home",
+  "description": "Домашний профиль с Pi-hole, VPN и минимальным обходом",
+  "version": "1.0",
+  "subscriptions": [
+    {
+      "id": "china_vless",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "id": "backup_ss",
+      "enabled": false,
+      "priority": 2
+    }
+  ],
+  "filters": {
+    "exclude_tags": ["ads", "test"],
+    "only_tags": ["trusted", "stable"],
+    "exclusions": ["slow-server-1", "broken-server-2"],
+    "only_enabled": true
+  },
+  "routing": {
+    "by_source": {
+      "china_vless": "tunnel",
+      "backup_ss": "direct"
+    },
+    "default_route": "tunnel",
+    "custom_routes": {
+      "*.local": "direct",
+      "192.168.*": "direct"
+    }
+  },
+  "export": {
+    "format": "sing-box",
+    "outbound_profile": "vless-real",
+    "inbound_profile": "tun",
+    "output_file": "config.json"
+  },
+  "agent": {
+    "auto_restart": false,
+    "monitor_latency": true,
+    "health_check_interval": "30s",
+    "log_level": "info"
+  },
+  "ui": {
+    "default_language": "ru",
+    "mode": "cli",
+    "show_debug_info": false
+  },
+  "created_at": "2025-06-29T10:00:00Z",
+  "updated_at": "2025-06-29T10:00:00Z",
+  "metadata": {
+    "author": "user",
+    "use_case": "home_vpn",
+    "tested": true
+  }
+}

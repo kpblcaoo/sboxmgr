@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FilterProfile",
+  "description": "Profile configuration for filtering and exclusions.",
+  "generator": "sboxmgr-schema-generator",
+  "version": "1.0.0",
+  "properties": {
+    "exclude_tags": {
+      "description": "Tags to exclude",
+      "items": {
+        "type": "string"
+      },
+      "title": "Exclude Tags",
+      "type": "array"
+    },
+    "only_tags": {
+      "description": "Only include servers with these tags",
+      "items": {
+        "type": "string"
+      },
+      "title": "Only Tags",
+      "type": "array"
+    },
+    "exclusions": {
+      "description": "Server names/IPs to exclude",
+      "items": {
+        "type": "string"
+      },
+      "title": "Exclusions",
+      "type": "array"
+    },
+    "only_enabled": {
+      "default": true,
+      "description": "Only include enabled subscriptions",
+      "title": "Only Enabled",
+      "type": "boolean"
+    }
+  },
+  "type": "object"
+}

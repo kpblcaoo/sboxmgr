@@ -3,6 +3,141 @@
 ## Other languages / Другие языки
 - [Русский (ru/CHANGELOG.md)](ru/CHANGELOG.md)
 
+# pre-mvp0.1.0 (2025-07-03)
+
+## Added
+- **Full Profile Architecture**: Complete profile system with Pydantic models (ADR-0017)
+  - `sboxmgr profile apply/validate/explain/diff/list/switch` commands
+  - FullProfile, SubscriptionProfile, FilterProfile, RoutingProfile models
+  - ExportProfile, AgentProfile, UIProfile, LegacyProfile support
+  - 8 new JSON schemas for profile validation
+  - Example profiles in `examples/profiles/`
+- **Policy & Security Framework**: Comprehensive security policy system (Phase 5)
+  - EncryptionPolicy, ProtocolPolicy, AuthenticationPolicy
+  - GeoTestPolicy, CountryPolicy, ASNPolicy
+  - IntegrityPolicy, PermissionPolicy, LimitPolicy
+  - Policy evaluation with detailed logging and metadata
+- **Agent Cleanup**: Complete agent architecture refactoring (Phase 2-3)
+  - Removed service management from agent (ADR-0015)
+  - Agent-installer separation for clean architecture
+  - Pydantic schema generation (ADR-0016)
+- **Pydantic Migration**: Major type safety improvements (Phase 1)
+  - Extensive type annotation improvements across codebase
+  - Fixed critical type errors in CLI, parsers, and fetchers
+  - Enhanced type safety for core modules and exporters
+- **CLI Enhancements**: Improved user experience and functionality
+  - Auto-detect subscription format in list-servers
+  - Robust SingBoxParser with comprehensive format support
+  - `--format` option for forced format detection
+  - UX improvements: hide service outbounds, better User-Agent logging
+- **Routing Improvements**: Enhanced DefaultRouter with fallback rules
+  - Fixed dead code in DefaultRouter
+  - Added fallback routing rule for remaining traffic
+  - Comprehensive routing tests and validation
+
+## Changed
+- **Profile Management**: New unified configuration approach
+  - Single JSON profile replaces multiple config files
+  - Backward compatibility with existing CLI commands
+  - Gradual migration path from legacy configuration
+- **Security Validation**: Enhanced policy evaluation
+  - Real-time policy evaluation with detailed reporting
+  - Policy violations, warnings, and info tracking
+  - Integration with subscription pipeline
+- **Type System**: Improved type annotations and validation
+  - Better error messages for type validation
+  - Enhanced Pydantic model integration
+  - Improved type safety across all modules
+
+## Fixed
+- **DefaultRouter**: Fixed dead code and improved fallback logic
+  - Server tag computation now properly used in routing
+  - Fallback rules handle edge cases correctly
+  - All routing tests pass with proper rule generation
+- **CLI UX**: Improved user experience issues
+  - Service outbounds (urltest/auto) hidden from list-servers output
+  - Better User-Agent logging (shows actual values instead of [default])
+  - Enhanced error handling and validation
+- **Test Stability**: Fixed integration test issues
+  - Comprehensive test cleanup and config.json pollution prevention
+  - Fixed CLI matrix tests for real data scenarios
+  - Improved test isolation and reliability
+
+## Technical Details
+- **Architecture**: Full profile system with Pydantic validation
+- **Backward Compatibility**: Existing workflows continue to work
+- **Performance**: No significant impact on existing operations
+- **Documentation**: Comprehensive ADR documentation (0017-0019)
+- **Type Safety**: Significant improvements in type annotations
+- **Policy System**: Comprehensive security evaluation framework
+- **Test Coverage**: Enhanced integration and unit test coverage
+
+## Migration Notes
+- Existing CLI commands continue to work unchanged
+- New profile system is optional and additive
+- Gradual migration to profiles recommended for complex configurations
+- Policy system provides enhanced security validation
+
+---
+
+# 1.5.0 (2025-07-01)
+
+## Added
+- **CLI Inbound Parameters**: Added comprehensive CLI parameters for inbound configuration in export command
+  - `--inbound-types`: Specify inbound types (tun, socks, http, tproxy)
+  - `--tun-address`, `--tun-mtu`, `--tun-stack`: TUN interface configuration
+  - `--socks-port`, `--socks-listen`, `--socks-auth`: SOCKS proxy configuration
+  - `--http-port`, `--http-listen`, `--http-auth`: HTTP proxy configuration
+  - `--tproxy-port`, `--tproxy-listen`: TPROXY configuration
+  - `--dns-mode`: DNS resolution mode (system, tunnel, off)
+- **InboundBuilder Class**: Dynamic ClientProfile creation from CLI parameters
+- **Enhanced Validation**: Port range validation, address validation, format validation
+- **Improved UX**: No need to create JSON profiles manually for simple inbound configurations
+- **Agent-Installer Separation**: ADR-0015 implementation for clean separation of concerns
+- **Pydantic Schema Generation**: ADR-0016 implementation for automatic schema generation
+- **Type Annotation Audit**: Complete type safety improvements across all modules
+- **CLI Matrix Testing**: Comprehensive CLI behavior testing with real data
+- **Event System**: Comprehensive event system for sboxmgr operations
+- **Agent Bridge**: IPC protocol implementation for future sboxagent integration
+
+## Changed
+- **Export Command**: Enhanced with inbound parameter support while maintaining backward compatibility
+- **SingBox Exporter**: Updated to use `listen_port` field instead of `port` for better compatibility
+- **Test Coverage**: Added 41 new tests (25 unit + 16 integration) for inbound functionality
+- **CLI Reorganization**: Complete CLI refactoring with new export command structure
+- **DefaultRouter Implementation**: Enhanced routing with fallback rules and improved logic
+- **Exclusion Management**: Robust error handling and file recovery mechanisms
+- **Logging System**: Improved initialization and error handling
+- **Configuration System**: Enhanced validation and error handling
+
+## Fixed
+- **Edge Case Tests**: Fixed compatibility issues with new inbound field names
+- **Validation**: Proper error handling for invalid inbound types and parameters
+- **Security**: Address validation prevents unsafe bind configurations
+- **Critical Type Issues**: Resolved all type annotation errors across codebase
+- **Dead Code Removal**: Eliminated unused code and improved code quality
+- **Context Argument Bugs**: Fixed postprocessor chain context handling
+- **Validation Bypass**: Resolved critical Pydantic validation bypass issues
+- **CLI Error Handling**: Improved error messages and exception handling
+- **Test Stability**: Fixed 23 test regressions after Event System integration
+
+## Technical Details
+- **Architecture**: Clean separation between CLI parameters and core logic
+- **Backward Compatibility**: Existing JSON profiles continue to work
+- **Performance**: No significant impact on export performance
+- **Documentation**: Comprehensive examples and architecture documentation
+- **Type Safety**: 100% type annotation coverage with mypy compliance
+- **Event System**: Comprehensive event handling with middleware support
+- **IPC Protocol**: Robust socket-based communication for agent integration
+- **Test Infrastructure**: Comprehensive CLI matrix testing with real data
+
+## Migration Notes
+- Existing workflows continue to work unchanged
+- New CLI parameters are optional and additive
+- JSON profiles can be gradually migrated to CLI parameters
+
+---
+
 # 1.4.0 (2025-06-20)
 
 ## Added
@@ -50,7 +185,7 @@
 - Full test isolation and CLI matrix ensure robust coverage.
 - Documenting lessons and architecture helps future contributors.
 
-## [1.3.1] — 2024-06-18
+## [1.3.1] — 2025-05-15
 
 ### Added
 - Full automation of CLI testing: exclusions, clear-exclusions, idempotency, error handling, user-friendly messages, dry-run, selected_config.json, --list-servers, excluded selection.
@@ -294,3 +429,36 @@
 ## [1.5.0] - 2025-xx-xx
 ### Changed
 - License changed from GPLv3 to MIT License (full project relicensing).
+
+### Fixed
+- **sing-box 1.11.0+ Compatibility**: Updated sing-box exporter to remove deprecated legacy special outbounds (`block`, `dns`) and replaced them with modern rule actions (`hijack-dns`) as per sing-box 1.11.0+ requirements
+- **Configuration Template**: Updated config template to use `action: "hijack-dns"` instead of deprecated `outbound: "dns-out"` for DNS protocol rules
+- **Tests**: Updated test expectations to reflect removal of deprecated outbounds
+
+### Technical Details
+- Removed automatic generation of `{"type": "block", "tag": "block"}` and `{"type": "dns", "tag": "dns-out"}` outbounds
+- Updated route rules to use rule actions instead of special outbounds
+- DNS protocol routing now uses `"action": "hijack-dns"` instead of `"outbound": "dns-out"`
+- Maintains backward compatibility with sing-box versions that support the new syntax
+
+### Added
+- **Sing-box Version Compatibility**: Automatic version detection and graceful degradation for sing-box < 1.11.0
+  - Detects installed sing-box version automatically
+  - Uses modern rule actions syntax for sing-box 1.11.0+
+  - Falls back to legacy special outbounds for older versions
+  - Shows compatibility warnings for outdated versions
+  - Added `--skip-version-check` option to bypass version checking
+- **Version Utilities**: New `sboxmgr.utils.version` module with version checking functions
+
+### Fixed
+- **sing-box 1.11.0+ Compatibility**: Updated sing-box exporter to remove deprecated legacy special outbounds (`block`, `dns`) and replaced them with modern rule actions as per sing-box 1.11.0+ requirements
+- **Configuration Template**: Updated config template to use `action: \"hijack-dns\"` instead of deprecated `outbound: \"dns-out\"` for DNS protocol rules
+- **Tests**: Updated test expectations to reflect removal of deprecated outbounds
+
+### Technical Details
+- Removed automatic generation of `{\"type\": \"block\", \"tag\": \"block\"}` and `{\"type\": \"dns\", \"tag\": \"dns-out\"}` outbounds for sing-box 1.11.0+
+- Added automatic legacy outbound generation for sing-box < 1.11.0 compatibility
+- Updated route rules to use rule actions instead of special outbounds
+- DNS protocol routing now uses `\"action\": \"hijack-dns\"` instead of `\"outbound\": \"dns-out\"` for modern versions
+- Added `packaging` dependency for version comparison
+- Version checking integrated into CLI commands (`run`, `dry-run`) with debug output

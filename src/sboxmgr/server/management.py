@@ -1,14 +1,22 @@
-import json
-import os
-import datetime
-import sys
-from sboxmgr.utils.id import generate_server_id
-from sboxmgr.utils.file import handle_temp_file as atomic_handle_temp_file
-import logging
-from sboxmgr.utils.env import get_config_file, get_backup_file, get_template_file
-from sboxmgr.utils.file import atomic_write_json, file_exists, read_json, write_json
+"""Server management and configuration persistence.
 
-SELECTED_CONFIG_FILE = os.getenv("SINGBOX_SELECTED_CONFIG_FILE", "./selected_config.json")
+This module handles server configuration management including saving selected
+configurations, managing server state, and providing utilities for server
+lifecycle management. It includes atomic file operations for safe configuration
+updates.
+"""
+
+import datetime
+import json
+import logging
+import os
+
+from sboxmgr.utils.file import handle_temp_file as atomic_handle_temp_file
+from sboxmgr.utils.id import generate_server_id
+
+SELECTED_CONFIG_FILE = os.getenv(
+    "SINGBOX_SELECTED_CONFIG_FILE", "./selected_config.json"
+)
 
 
 def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
@@ -28,14 +36,27 @@ def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
 def load_selected_config():
     """Load selected configuration from file."""
     if os.path.exists(SELECTED_CONFIG_FILE):
-        with open(SELECTED_CONFIG_FILE, 'r') as f:
+        with open(SELECTED_CONFIG_FILE, "r") as f:
             return json.load(f)
     return {"last_modified": "", "selected": []}
 
 
 def save_selected_config(selected):
-    selected["last_modified"] = datetime.datetime.now(datetime.UTC).isoformat().replace("+00:00", "Z")
-    atomic_handle_temp_file(selected, SELECTED_CONFIG_FILE, lambda x: True)  # Add proper validation
+    """Save selected server configuration to persistent storage.
+
+    Saves the selected server configuration with a timestamp and performs
+    atomic file operations to ensure data integrity during writes.
+
+    Args:
+        selected: Dictionary containing selected server configuration data.
+
+    """
+    selected["last_modified"] = (
+        datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+    )
+    atomic_handle_temp_file(
+        selected, SELECTED_CONFIG_FILE, lambda x: True
+    )  # Add proper validation
 
 
 def apply_exclusions(configs, excluded_ids, debug_level):
@@ -45,7 +66,9 @@ def apply_exclusions(configs, excluded_ids, debug_level):
         server_id = generate_server_id(config)
         if server_id in excluded_ids:
             if debug_level >= 1:
-                logging.info(f"Skipping server {config.get('name', 'N/A')} (ID: {server_id}) due to exclusion.")
+                logging.info(
+                    f"Skipping server {config.get('name', 'N/A')} (ID: {server_id}) due to exclusion."
+                )
             continue
         valid_configs.append(config)
     return valid_configs

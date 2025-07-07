@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UIProfile",
+  "description": "Profile configuration for UI preferences.",
+  "generator": "sboxmgr-schema-generator",
+  "version": "1.0.0",
+  "$defs": {
+    "UIMode": {
+      "description": "Supported UI modes.",
+      "enum": [
+        "cli",
+        "tui",
+        "gui"
+      ],
+      "title": "UIMode",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "default_language": {
+      "default": "en",
+      "description": "Default language",
+      "title": "Default Language",
+      "type": "string"
+    },
+    "mode": {
+      "$ref": "#/$defs/UIMode",
+      "default": "cli",
+      "description": "UI mode"
+    },
+    "theme": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "UI theme",
+      "title": "Theme"
+    },
+    "show_debug_info": {
+      "default": false,
+      "description": "Show debug information",
+      "title": "Show Debug Info",
+      "type": "boolean"
+    }
+  },
+  "type": "object"
+}

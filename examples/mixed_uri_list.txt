@@ -1,0 +1,4 @@
+# comment
+ss://YWVzLTI1Ni1nY206cGFzc0BleGFtcGxlLmNvbTo4Mzg4#emoji🚀?plugin=obfs  # pragma: allowlist secret
+vmess://eyJhZGQiOiJ2bS5jb20iLCJwb3J0Ijo0NDN9  # pragma: allowlist secret
+ss://aes-256-gcm:pass@example.com:8388#ssuri  # pragma: allowlist secret

@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LegacyProfile",
+  "description": "Legacy profile format for migration.",
+  "generator": "sboxmgr-schema-generator",
+  "version": "1.0.0",
+  "additionalProperties": true,
+  "properties": {
+    "subscriptions": {
+      "description": "List of subscription URLs",
+      "items": {
+        "type": "string"
+      },
+      "title": "Subscriptions",
+      "type": "array"
+    },
+    "exclusions": {
+      "description": "List of exclusions",
+      "items": {
+        "type": "string"
+      },
+      "title": "Exclusions",
+      "type": "array"
+    },
+    "export_format": {
+      "default": "sing-box",
+      "description": "Export format",
+      "title": "Export Format",
+      "type": "string"
+    }
+  },
+  "type": "object"
+}
