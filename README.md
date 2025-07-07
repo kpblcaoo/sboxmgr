@@ -13,7 +13,7 @@ A Python CLI tool for managing configuration files. Part of the subbox ecosystem
 ### 1. Install
 ```bash
 # Install from TestPyPI
-pip install -i https://test.pypi.org/simple sboxmgr
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple sboxmgr
 
 # Or install in development mode
 git clone https://github.com/kpblcaoo/sboxmgr.git
@@ -234,3 +234,11 @@ Mikhail Stepanov (<kpblcaoo@gmail.com>), [github.com/kpblcaoo](https://github.co
 ---
 
 **Need help?** Check the [troubleshooting guide](docs/user-guide/troubleshooting.md) or open an issue on GitHub.
+
+## Installation from TestPyPI (pre-release/testing)
+
+> **Warning:** TestPyPI is for testing only. Packages may be deleted at any time. Use only for pre-release/testing!
+
+```bash
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple sboxmgr
+```
