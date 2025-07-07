@@ -60,50 +60,45 @@ class ServerListScreen(Screen):
 
     .server-item {
         layout: horizontal;
-        height: 3;
+        height: 4;
         padding: 0 1;
         margin-bottom: 1;
         border: solid $primary;
         background: $surface;
+        align: center middle;
     }
 
     .server-item:hover {
         background: $primary-darken-3;
+        border: solid $accent;
     }
 
     .server-item.excluded {
         background: $error-darken-3;
         color: $text-muted;
+        border: solid $error;
     }
 
     .server-checkbox {
         width: 4;
+        height: 2;
         margin-right: 1;
+        align: center middle;
     }
 
     .server-info {
         width: 1fr;
-        height: 3;
-    }
-
-    .server-protocol {
-        color: $accent;
-        text-style: bold;
-    }
-
-    .server-address {
-        color: $text;
-    }
-
-    .server-tag {
-        color: $text-muted;
-        text-style: italic;
+        height: 4;
+        content-align: left middle;
+        padding: 0 1;
     }
 
     .server-stats {
         color: $text-muted;
         text-align: right;
         margin-right: 1;
+        align: center middle;
+        width: 20;
     }
 
     .action-buttons {
@@ -149,7 +144,7 @@ class ServerListScreen(Screen):
 
             # Info panel
             with Vertical(classes="server-list-info"):
-                yield self._create_info_panel()
+                yield Static(self._create_info_panel())
 
             # Server list or empty state
             if self._servers:
@@ -181,14 +176,14 @@ class ServerListScreen(Screen):
         # Обновляем layout с новыми данными
         self._update_server_layout()
 
-    def _create_info_panel(self) -> Static:
+    def _create_info_panel(self) -> str:
         """Create the information panel.
 
         Returns:
-            Static widget with server statistics
+            String with server statistics
         """
         if not self._servers:
-            return Static("No servers loaded")
+            return "No servers loaded"
 
         total_servers = len(self._servers)
         excluded_count = len(self._excluded_servers)
@@ -200,7 +195,7 @@ class ServerListScreen(Screen):
             f"Excluded: {excluded_count}"
         )
 
-        return Static(info_text)
+        return info_text
 
     def _create_server_items(self) -> List:
         """Create server item widgets.
@@ -209,38 +204,24 @@ class ServerListScreen(Screen):
             List of server item widgets
         """
         items = []
-
         for i, server in enumerate(self._servers):
             server_id = self._get_server_id(server)
             is_excluded = server_id in self._excluded_servers
-
-            # Create server item container
             item_classes = "server-item"
             if is_excluded:
                 item_classes += " excluded"
-
-            # Create horizontal container for server item
-            server_item = Horizontal(classes=item_classes)
-
-            # Checkbox for inclusion/exclusion
             checkbox = Checkbox(
                 value=not is_excluded, id=f"server_{i}", classes="server-checkbox"
             )
-            server_item.mount(checkbox)
-
-            # Server information
             server_info = self._format_server_display(server)
             info_widget = Static(server_info, classes="server-info")
-            server_item.mount(info_widget)
-
-            # Server statistics (if available)
+            children = [checkbox, info_widget]
             stats = self._get_server_stats(server)
             if stats:
                 stats_widget = Static(stats, classes="server-stats")
-                server_item.mount(stats_widget)
-
+                children.append(stats_widget)
+            server_item = Horizontal(*children, classes=item_classes)
             items.append(server_item)
-
         return items
 
     def _load_servers(self) -> None:
@@ -367,31 +348,25 @@ class ServerListScreen(Screen):
         Args:
             event: The checkbox changed event
         """
-        # Extract server index from checkbox ID
         checkbox_id = event.checkbox.id
         if not checkbox_id or not checkbox_id.startswith("server_"):
             return
-
         try:
             server_index = int(checkbox_id.replace("server_", ""))
             if 0 <= server_index < len(self._servers):
                 server = self._servers[server_index]
                 server_id = self._get_server_id(server)
-
                 if event.value:
-                    # Include server (remove from exclusions)
                     self._excluded_servers.discard(server_id)
                 else:
-                    # Exclude server (add to exclusions)
                     self._excluded_servers.add(server_id)
-
-                # Update app state if available
-                app_state = self.app.state
-                if hasattr(app_state, "toggle_server_exclusion"):
-                    app_state.toggle_server_exclusion(server_id)
-
-                # Update visual state
+                # Сохраняем exclusions в app.state
+                if hasattr(self.app.state, "set_exclusions"):
+                    self.app.state.set_exclusions(list(self._excluded_servers))
                 self._update_server_item_visual(server_index, not event.value)
+                info_panel = self.query_one(".server-list-info Static")
+                if info_panel:
+                    info_panel.update(self._create_info_panel())
         except (ValueError, IndexError):
             pass
 
@@ -402,9 +377,17 @@ class ServerListScreen(Screen):
             server_index: Index of the server
             is_excluded: Whether the server is excluded
         """
-        # This would update the visual styling of the server item
-        # Implementation depends on how Textual handles dynamic styling
-        pass
+        try:
+            checkbox = self.query_one(f"#server_{server_index}", Checkbox)
+            server_item = checkbox.parent
+            if server_item:
+                if is_excluded:
+                    server_item.add_class("excluded")
+                else:
+                    server_item.remove_class("excluded")
+                server_item.refresh()
+        except Exception:
+            self.refresh()
 
     @on(Button.Pressed, "#select_all")
     def on_select_all_pressed(self) -> None:
@@ -471,18 +454,40 @@ class ServerListScreen(Screen):
         self.app.notify("Servers refreshed", severity="info")
 
     def on_key(self, event) -> None:
-        """Handle arrow key navigation for checkboxes."""
+        """Handle arrow key navigation and space key for checkboxes."""
         if not self._servers:
             return
-        focused = self.focused
-        # Find currently focused checkbox
+        if event.key == "space":
+            # Найти чекбокс с фокусом
+            focused_checkbox = None
+            for i in range(len(self._servers)):
+                try:
+                    checkbox = self.query_one(f"#server_{i}", Checkbox)
+                    if checkbox.has_focus:
+                        focused_checkbox = checkbox
+                        break
+                except Exception:
+                    continue
+            if focused_checkbox:
+                # Переключить состояние чекбокса
+                focused_checkbox.value = not focused_checkbox.value
+                return
+            else:
+                # Если ни один чекбокс не в фокусе, сфокусироваться на первом
+                try:
+                    first_checkbox = self.query_one("#server_0", Checkbox)
+                    first_checkbox.focus()
+                except Exception:
+                    pass
+                return
+        # стрелки — как раньше
         current_index = None
         for i in range(len(self._servers)):
             try:
                 checkbox = self.query_one(f"#server_{i}", Checkbox)
             except Exception:
                 continue
-            if checkbox is focused:
+            if checkbox.has_focus:
                 current_index = i
                 break
         if event.key == "down":
@@ -519,16 +524,16 @@ class ServerListScreen(Screen):
             # Добавляем новый контент
             if self._servers:
                 scroll = VerticalScroll(classes="server-list-scroll")
-                scroll.mount_all(self._create_server_items())
                 server_container.mount(scroll)
+                scroll.mount_all(self._create_server_items())
             else:
                 empty_state = Vertical(classes="empty-state")
+                server_container.mount(empty_state)
                 empty_state.mount(
                     Static(
                         "No servers available.\nAdd a subscription to see servers here."
                     )
                 )
-                server_container.mount(empty_state)
 
         # Обновляем info panel
         info_panel = self.query_one(".server-list-info Static")

@@ -204,9 +204,28 @@ class MainScreen(Screen):
     @on(Button.Pressed, "#manage_subscriptions")
     def on_manage_subscriptions_pressed(self) -> None:
         """Handle manage subscriptions button press."""
-        from sboxmgr.tui.screens.subscription_manager import SubscriptionManagerScreen
+        import logging
 
-        self.app.push_screen(SubscriptionManagerScreen())
+        logger = logging.getLogger("tui_debug")
+        logger.debug("[DEBUG] MainScreen: manage_subscriptions button pressed")
+
+        try:
+            from sboxmgr.tui.screens.subscription_manager import (
+                SubscriptionManagerScreen,
+            )
+
+            logger.debug("[DEBUG] MainScreen: SubscriptionManagerScreen imported")
+
+            screen = SubscriptionManagerScreen()
+            logger.debug("[DEBUG] MainScreen: SubscriptionManagerScreen created")
+
+            self.app.push_screen(screen)
+            logger.debug("[DEBUG] MainScreen: SubscriptionManagerScreen pushed")
+        except Exception as e:
+            logger.error(f"[ERROR] MainScreen: Exception in manage_subscriptions: {e}")
+            import traceback
+
+            traceback.print_exc()
 
     @on(Button.Pressed, "#profile_settings")
     def on_profile_settings_pressed(self) -> None:

@@ -35,6 +35,7 @@ class SubscriptionManagerScreen(Screen):
         layout: vertical;
         padding: 1;
         height: 1fr;
+        min-height: 20;
     }
 
     .subscription-title {
@@ -54,6 +55,8 @@ class SubscriptionManagerScreen(Screen):
 
     .subscription-list {
         height: 1fr;
+        min-height: 10;
+        max-height: 15;
         border: solid $primary;
         padding: 1;
     }
@@ -116,11 +119,13 @@ class SubscriptionManagerScreen(Screen):
 
     .action-buttons {
         layout: horizontal;
-        height: 3;
+        height: 5;
+        min-height: 5;
         padding: 1;
         background: $surface;
         border-top: solid $primary;
         align: center middle;
+        dock: bottom;
     }
 
     .action-buttons Button {
@@ -138,6 +143,17 @@ class SubscriptionManagerScreen(Screen):
         color: $text;
     }
 
+    .action-buttons Button#add_subscription {
+        background: $success;
+        color: $text;
+        border: solid $success-darken-2;
+    }
+
+    .action-buttons Button#add_subscription:hover {
+        background: $success-darken-2;
+        color: $text;
+    }
+
     .empty-state {
         align: center middle;
         height: 1fr;
@@ -152,9 +168,16 @@ class SubscriptionManagerScreen(Screen):
         Args:
             **kwargs: Additional arguments passed to Screen
         """
+        import logging
+
+        logger = logging.getLogger("tui_debug")
+        logger.debug("[DEBUG] SubscriptionManagerScreen.__init__ called")
+
         super().__init__(**kwargs)
         self._subscriptions: List = []
         self._active_subscription: str = ""
+
+        logger.debug("[DEBUG] SubscriptionManagerScreen.__init__ completed")
 
     def compose(self) -> ComposeResult:
         """Compose the subscription manager screen layout.
@@ -162,43 +185,100 @@ class SubscriptionManagerScreen(Screen):
         Returns:
             The composed result containing the subscription manager widgets
         """
-        yield Header()
+        import logging
 
-        with Vertical(classes="subscription-container"):
-            yield Static("Subscription Management", classes="subscription-title")
+        logger = logging.getLogger("tui_debug")
+        logger.debug("[DEBUG] SubscriptionManagerScreen.compose called")
 
-            # Info panel
-            with Vertical(classes="subscription-info"):
-                yield self._create_info_panel()
+        try:
+            yield Header()
 
-            # Subscription table
-            with Vertical(classes="subscription-list"):
-                yield DataTable(id="subscription-table")
+            with Vertical(classes="subscription-container"):
+                yield Static("Subscription Management", classes="subscription-title")
 
-            # Action buttons
-            with Horizontal(classes="action-buttons"):
-                yield Button(
-                    "➕ Add Subscription", id="add_subscription", variant="primary"
-                )
-                yield Button("🔄 Refresh All", id="refresh_all", variant="default")
-                yield Button("← Back", id="back", variant="default")
+                # Info panel
+                with Vertical(classes="subscription-info"):
+                    yield self._create_info_panel()
 
-        yield Footer()
+                # Subscription table
+                with Vertical(classes="subscription-list"):
+                    yield DataTable(id="subscription-table")
+
+                # Action buttons
+                with Horizontal(classes="action-buttons"):
+                    logger.debug("[DEBUG] Creating action buttons")
+                    add_button = Button(
+                        "➕ Add New Subscription",
+                        id="add_subscription",
+                        variant="primary",
+                    )
+                    refresh_button = Button(
+                        "🔄 Refresh All", id="refresh_all", variant="default"
+                    )
+                    back_button = Button("← Back", id="back", variant="default")
+
+                    logger.debug(
+                        f"[DEBUG] Created buttons: add={add_button}, refresh={refresh_button}, back={back_button}"
+                    )
+
+                    yield add_button
+                    yield refresh_button
+                    yield back_button
+
+                    logger.debug("[DEBUG] Action buttons yielded")
+
+            yield Footer()
+            logger.debug("[DEBUG] SubscriptionManagerScreen.compose completed")
+        except Exception as e:
+            logger.error(f"[ERROR] Exception in compose: {e}")
+            import traceback
+
+            traceback.print_exc()
+            # Fallback to basic layout
+            yield Header()
+            yield Static(
+                "Error loading subscription manager", classes="subscription-title"
+            )
+            yield Footer()
 
     def on_mount(self) -> None:
         """Called when screen is mounted."""
-        self.load_subscriptions()
+        import logging
+
+        logger = logging.getLogger("tui_debug")
+        logger.debug("[DEBUG] SubscriptionManagerScreen.on_mount called")
+        try:
+            self.load_subscriptions()
+            logger.debug("[DEBUG] load_subscriptions completed")
+        except Exception as e:
+            logger.error(f"[ERROR] Exception in on_mount: {e}")
+            import traceback
+
+            traceback.print_exc()
 
     def load_subscriptions(self) -> None:
         """Load subscriptions from state."""
-        table = self.query_one("#subscription-table", DataTable)
-        table.clear()
+        import logging
 
-        # Add columns
-        table.add_columns("№", "URL", "Status", "Type", "Actions")
+        logger = logging.getLogger("tui_debug")
+        logger.debug("[DEBUG] load_subscriptions called")
 
-        # Load from app state (which now uses profiles)
-        subscriptions = self.app.state.subscriptions
+        try:
+            table = self.query_one("#subscription-table", DataTable)
+            table.clear()
+
+            # Add columns
+            table.add_columns("№", "URL", "Status", "Type", "Actions")
+
+            # Load from app state (which now uses profiles)
+            subscriptions = self.app.state.subscriptions
+            logger.debug(f"[DEBUG] Found {len(subscriptions)} subscriptions")
+        except Exception as e:
+            logger.error(f"[ERROR] Exception in load_subscriptions: {e}")
+            import traceback
+
+            traceback.print_exc()
+            return
 
         for i, subscription in enumerate(subscriptions):
             # Get subscription config from profile if available
@@ -250,19 +330,36 @@ class SubscriptionManagerScreen(Screen):
         subscriptions = self.app.state.subscriptions
         total_subs = len(subscriptions) if subscriptions else 0
 
+        info_lines = []
+
         if total_subs == 0:
-            return Static("No subscriptions configured")
+            info_lines.extend(
+                [
+                    "No subscriptions configured",
+                    "",
+                    "💡 Click 'Add New Subscription' to add your first subscription",
+                    "💡 You can add multiple subscriptions for different purposes",
+                ]
+            )
+        else:
+            info_lines.append(f"Total Subscriptions: {total_subs}")
 
-        info_lines = [f"Total Subscriptions: {total_subs}"]
+            # Get active subscription
+            active_sub = self.app.state.active_subscription
+            if active_sub:
+                # Truncate long URLs for display
+                display_url = active_sub
+                if len(display_url) > 50:
+                    display_url = display_url[:47] + "..."
+                info_lines.append(f"Active: {display_url}")
 
-        # Get active subscription
-        active_sub = self.app.state.active_subscription
-        if active_sub:
-            # Truncate long URLs for display
-            display_url = active_sub
-            if len(display_url) > 50:
-                display_url = display_url[:47] + "..."
-            info_lines.append(f"Active: {display_url}")
+            info_lines.extend(
+                [
+                    "",
+                    "💡 Click 'Add New Subscription' to add more subscriptions",
+                    "💡 Use table actions to manage existing subscriptions",
+                ]
+            )
 
         return Static("\n".join(info_lines))
 
@@ -380,6 +477,7 @@ class SubscriptionManagerScreen(Screen):
     @on(Button.Pressed, "#add_subscription")
     def on_add_subscription_pressed(self) -> None:
         """Handle add subscription button press."""
+        self.app.notify("Opening subscription form...", severity="information")
         self.app.push_screen(SubscriptionForm(), self._handle_subscription_result)
 
     @on(Button.Pressed, "#refresh_all")
@@ -451,11 +549,16 @@ class SubscriptionManagerScreen(Screen):
             )
 
             self.app.push_screen(SubscriptionManagerScreen())
-            self.app.notify("Subscription added successfully", severity="success")
+            self.app.notify(
+                "✅ Subscription added successfully! You can now manage it in the table.",
+                severity="success",
+            )
         elif isinstance(result, str):
             # Handle error case
-            self.app.notify(f"Error adding subscription: {result}", severity="error")
-        # If result is False, user cancelled - do nothing
+            self.app.notify(f"❌ Error adding subscription: {result}", severity="error")
+        else:
+            # User cancelled
+            self.app.notify("Subscription addition cancelled", severity="information")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button press events for dynamic buttons.

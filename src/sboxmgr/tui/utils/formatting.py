@@ -18,29 +18,85 @@ def format_server_info(server: ParsedServer) -> str:
     Returns:
         Formatted server information string
     """
+    # Get normalized tag using middleware logic
+    tag = _get_normalized_tag(server)
+
     # Get basic info
-    name = server.name or f"{server.type}-{server.address}"
     protocol = server.type.upper()
     address = f"{server.address}:{server.port}"
 
     # Get optional metadata
     country = server.meta.get("country", "Unknown")
     latency = server.meta.get("latency")
-    tags = server.meta.get("tags", [])
+    ping = server.meta.get("ping")
+    speed = server.meta.get("speed")
 
-    # Build formatted string
-    info_parts = [f"[{protocol}] {name}"]
+    # Build formatted string starting with tag
+    info_parts = [f"[{protocol}] {tag}"]
 
-    if country != "Unknown":
+    # Add country if available
+    if country and country != "Unknown":
         info_parts.append(f"📍 {country}")
 
-    if latency is not None:
+    # Add performance metrics
+    if ping is not None:
+        info_parts.append(f"⏱️ {ping}ms")
+    elif latency is not None:
         info_parts.append(f"⏱️ {latency}ms")
 
-    if tags:
-        info_parts.append(f"🏷️ {', '.join(tags)}")
+    if speed is not None:
+        info_parts.append(f"🚀 {speed}")
 
-    return f"{address} - {' | '.join(info_parts)}"
+    # Add address info
+    info_parts.append(f"🌐 {address}")
+
+    return " | ".join(info_parts)
+
+
+def _get_normalized_tag(server: ParsedServer) -> str:
+    """Get normalized tag using middleware logic.
+
+    Priority order:
+    1. meta['name'] (human-readable from source)
+    2. meta['label'] (alternative human-readable label)
+    3. meta['tag'] (explicit tag from source)
+    4. tag (parser-generated tag)
+    5. address (IP/domain fallback)
+
+    Args:
+        server: Server to get tag for
+
+    Returns:
+        Normalized tag string
+    """
+    # Priority 1: meta['name'] (human-readable from source)
+    if server.meta and server.meta.get("name"):
+        name = server.meta["name"]
+        if isinstance(name, str) and name.strip():
+            return name.strip()
+
+    # Priority 2: meta['label'] (alternative human-readable label)
+    if server.meta and server.meta.get("label"):
+        label = server.meta["label"]
+        if isinstance(label, str) and label.strip():
+            return label.strip()
+
+    # Priority 3: meta['tag'] (explicit tag from source)
+    if server.meta and server.meta.get("tag"):
+        tag = server.meta["tag"]
+        if isinstance(tag, str) and tag.strip():
+            return tag.strip()
+
+    # Priority 4: tag (parser-generated tag)
+    if server.tag and server.tag.strip():
+        return server.tag.strip()
+
+    # Priority 5: address (IP/domain fallback)
+    if server.address:
+        return f"{server.type}-{server.address}"
+
+    # Fallback
+    return "unnamed-server"
 
 
 def format_subscription_info(

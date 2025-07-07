@@ -387,6 +387,12 @@ class ConfigGenerationForm(ModalScreen[bool | str]):
         Returns:
             The composed result containing the form widgets
         """
+        # Get default path from profile settings
+        app_state = self.app.state
+        default_path = "./config.json"
+        if app_state.active_config and app_state.active_config.export:
+            default_path = app_state.active_config.export.output_file or "./config.json"
+
         with Center():
             with Vertical(classes="form-container"):
                 yield Static("Generate Configuration", classes="form-title")
@@ -398,8 +404,8 @@ class ConfigGenerationForm(ModalScreen[bool | str]):
                 with Vertical(classes="form-field"):
                     yield Label("Export Path:")
                     yield Input(
-                        value="./config.json",
-                        placeholder="./config.json",
+                        value=default_path,
+                        placeholder=default_path,
                         id="path_input",
                     )
                     yield Static("", id="path_error", classes="error-message")
@@ -408,7 +414,8 @@ class ConfigGenerationForm(ModalScreen[bool | str]):
                     yield Static(
                         "✅ Auto-select best server per protocol\n"
                         "✅ Enable url-test for multiple servers\n"
-                        "⬜ Advanced exclusion rules (coming soon)",
+                        "✅ Profile-based configuration\n"
+                        "✅ Exclusion rules support",
                         classes="info-message",
                     )
 
@@ -454,46 +461,25 @@ class ConfigGenerationForm(ModalScreen[bool | str]):
             path_input.focus()
             return
 
-        # Generate configuration using orchestrator
+        # Generate configuration using TUIState.generate_config
         try:
             app_state = self.app.state
 
-            # Check if we have subscriptions
-            if not app_state.subscriptions:
-                self.query_one("#path_error", Static).update(
-                    "No subscriptions available"
-                )
-                return
+            # Use the improved generate_config method that respects profile settings
+            success = app_state.generate_config(output_path=path)
 
-            # Get active subscription or use first one
-            active_url = app_state.active_subscription
-            if not active_url and app_state.subscriptions:
-                active_url = app_state.subscriptions[0].url
-
-            if not active_url:
-                self.query_one("#path_error", Static).update("No active subscription")
-                return
-
-            # Use orchestrator to export configuration
-            result = app_state.orchestrator.export_configuration(
-                source_url=active_url,
-                source_type="url_base64",  # Default type
-                export_format="singbox",
-            )
-
-            if result["success"]:
-                # Write configuration to file
-                import json
-
-                with open(path, "w", encoding="utf-8") as f:
-                    json.dump(result["config"], f, indent=2, ensure_ascii=False)
-
+            if success:
                 self.dismiss(True)
             else:
-                error_msg = result.get("error", "Unknown error occurred")
-                self.dismiss(f"Failed to generate config: {error_msg}")
+                self.dismiss(
+                    "Failed to generate configuration. Check logs for details."
+                )
 
         except Exception as e:
+            logger.error(f"Exception in config generation: {e}")
+            import traceback
+
+            traceback.print_exc()
             self.dismiss(f"Failed to generate config: {str(e)}")
 
     @on(Button.Pressed, "#preview_btn")

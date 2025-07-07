@@ -122,9 +122,20 @@ class TUIState:
             # If no active config, create default
             if not self.active_config:
                 logger.debug("No active config found, creating default...")
+                logger.debug(
+                    f"[DEBUG] Configs directory contents: {list(self.config_manager.configs_dir.glob('*'))}"
+                )
                 self.config_manager._create_default_config()
                 self.active_config = self.config_manager.get_active_config()
                 logger.debug(f"Created default config: {self.active_config}")
+            else:
+                logger.debug(f"[DEBUG] Active config found: {self.active_config.id}")
+                logger.debug(
+                    f"[DEBUG] Active config subscriptions: {len(self.active_config.subscriptions)}"
+                )
+                logger.debug(
+                    f"[DEBUG] Active config metadata keys: {list(self.active_config.metadata.keys())}"
+                )
 
             if self.active_config:
                 logger.debug(f"Active config ID: {self.active_config.id}")
@@ -222,47 +233,38 @@ class TUIState:
             url: Subscription URL
             enabled: Whether subscription is enabled
         """
-        logger.debug(
-            f"[DEBUG] _save_subscription_to_profile called with URL: {url}, enabled: {enabled}"
-        )
-
+        if self.debug >= 2:
+            logger.debug(
+                f"[DEBUG] _save_subscription_to_profile called with URL: {url}, enabled: {enabled}"
+            )
+            logger.debug(
+                f"[DEBUG] active_config.subscriptions before add: {self.active_config.subscriptions if self.active_config else None}"
+            )
+            logger.debug(
+                f"[DEBUG] active_config.metadata before add: {self.active_config.metadata if self.active_config else None}"
+            )
         if not self.active_config:
             logger.error("[ERROR] No active config available")
             return
-
         try:
-            logger.debug(
-                f"[DEBUG] Current subscriptions in profile: {len(self.active_config.subscriptions)}"
-            )
-
-            # Create subscription config
             sub_id = f"sub_{len(self.active_config.subscriptions) + 1}"
-            logger.debug(f"[DEBUG] Creating subscription config with ID: {sub_id}")
-
             subscription_config = SubscriptionConfig(
                 id=sub_id,
                 enabled=enabled,
                 priority=len(self.active_config.subscriptions) + 1,
             )
-            logger.debug(f"[DEBUG] Created subscription config: {subscription_config}")
-
-            # Add to active config
             self.active_config.subscriptions.append(subscription_config)
-            logger.debug("[DEBUG] Added to active config subscriptions list")
-
-            # Also store URL in metadata
             if "subscription_urls" not in self.active_config.metadata:
                 self.active_config.metadata["subscription_urls"] = {}
-                logger.debug("[DEBUG] Created subscription_urls in metadata")
-
             self.active_config.metadata["subscription_urls"][sub_id] = url
-            logger.debug(f"[DEBUG] Stored URL in metadata: {sub_id} -> {url}")
-
-            # Save config
-            logger.debug("[DEBUG] Calling _save_active_config...")
+            if self.debug >= 2:
+                logger.debug(
+                    f"[DEBUG] active_config.subscriptions after add: {self.active_config.subscriptions}"
+                )
+                logger.debug(
+                    f"[DEBUG] active_config.metadata after add: {self.active_config.metadata}"
+                )
             self._save_active_config()
-            logger.debug("[DEBUG] _save_subscription_to_profile completed successfully")
-
         except Exception as e:
             logger.error(f"[ERROR] Exception in _save_subscription_to_profile: {e}")
             import traceback
@@ -271,34 +273,40 @@ class TUIState:
 
     def _save_active_config(self) -> None:
         """Save the active configuration to file."""
-        logger.debug("[DEBUG] _save_active_config called")
+        import traceback
 
+        if self.debug >= 2:
+            logger.debug("[DEBUG] _save_active_config called")
+            logger.debug(f"[DEBUG] Call stack: {traceback.format_stack()[-3:]}")
+            logger.debug(
+                f"[DEBUG] active_config.subscriptions: {self.active_config.subscriptions if self.active_config else None}"
+            )
+            logger.debug(
+                f"[DEBUG] active_config.metadata: {self.active_config.metadata if self.active_config else None}"
+            )
         if not self.config_manager or not self.active_config:
             logger.error("[ERROR] Missing config_manager or active_config")
             logger.debug(f"[DEBUG] config_manager: {self.config_manager}")
             logger.debug(f"[DEBUG] active_config: {self.active_config}")
             return
-
         try:
             from datetime import datetime
 
             from sboxmgr.configs.toml_support import save_config_to_toml
 
-            logger.debug("[DEBUG] Imported dependencies successfully")
-
-            # Update timestamp
             self.active_config.updated_at = datetime.now().isoformat()
-            logger.debug(f"[DEBUG] Updated timestamp: {self.active_config.updated_at}")
+            # Логируем, что реально будет сериализовано
+            if self.debug >= 2:
+                import pprint
 
-            # Save to file
+                logger.debug(
+                    f"[DEBUG] Will save config: {pprint.pformat(self.active_config.model_dump(exclude_none=True))}"
+                )
             config_path = (
                 self.config_manager.configs_dir / f"{self.active_config.id}.toml"
             )
-            logger.debug(f"[DEBUG] Saving to path: {config_path}")
-
             save_config_to_toml(self.active_config, config_path)
             logger.debug("[DEBUG] _save_active_config completed successfully")
-
         except Exception as e:
             logger.error(f"[ERROR] Exception in _save_active_config: {e}")
             import traceback
@@ -383,53 +391,43 @@ class TUIState:
 
     def _load_existing_data(self) -> None:
         """Load existing subscriptions and data from profile."""
-        logger.debug("[DEBUG] _load_existing_data called")
-
+        if self.debug >= 2:
+            logger.debug("[DEBUG] _load_existing_data called")
         if not self.active_config:
             logger.debug("[DEBUG] No active config, skipping data loading")
             return
-
         try:
-            logger.debug("[DEBUG] Loading subscriptions from profile metadata...")
-            # Load subscriptions from profile metadata
             subscription_urls = self.active_config.metadata.get("subscription_urls", {})
-            logger.debug(
-                f"[DEBUG] Found subscription URLs in metadata: {subscription_urls}"
-            )
-
+            if self.debug >= 2:
+                logger.debug(
+                    f"[DEBUG] Found subscription URLs in metadata: {subscription_urls}"
+                )
             for sub_id, url in subscription_urls.items():
-                logger.debug(f"[DEBUG] Processing subscription {sub_id}: {url}")
-
-                # Find corresponding subscription config
                 sub_config = None
                 for sub in self.active_config.subscriptions:
                     if sub.id == sub_id:
                         sub_config = sub
                         break
-
-                logger.debug(f"[DEBUG] Found subscription config: {sub_config}")
-
+                if self.debug >= 2:
+                    logger.debug(f"[DEBUG] Found subscription config: {sub_config}")
                 if sub_config and sub_config.enabled:
-                    logger.debug(
-                        "[DEBUG] Subscription is enabled, adding to local state"
-                    )
                     source = SubscriptionSource(url=url, source_type="url")
                     self.subscriptions.append(source)
-                    logger.debug(f"[DEBUG] Added subscription source: {source}")
-                else:
-                    logger.debug(
-                        "[DEBUG] Subscription disabled or config not found, skipping"
-                    )
-
-            logger.debug(
-                f"[DEBUG] Total subscriptions loaded: {len(self.subscriptions)}"
-            )
-
-            # Load servers from subscriptions
-            logger.debug("[DEBUG] Reloading servers...")
+                    if self.debug >= 2:
+                        logger.debug(f"[DEBUG] Added subscription source: {source}")
+            if self.debug >= 2:
+                logger.debug(
+                    f"[DEBUG] Total subscriptions loaded: {len(self.subscriptions)}"
+                )
             self._reload_servers()
-            logger.debug(f"[DEBUG] Total servers loaded: {len(self.servers)}")
-
+            if self.debug >= 2:
+                logger.debug(f"[DEBUG] Total servers loaded: {len(self.servers)}")
+            saved_exclusions = self.active_config.metadata.get("excluded_servers", [])
+            self.excluded_servers = saved_exclusions.copy()
+            if self.debug >= 2:
+                logger.debug(
+                    f"[DEBUG] Loaded {len(self.excluded_servers)} exclusions: {self.excluded_servers}"
+                )
         except Exception as e:
             logger.error(f"[ERROR] Exception in _load_existing_data: {e}")
             import traceback
@@ -499,6 +497,26 @@ class TUIState:
         """Clear all server exclusions."""
         self.excluded_servers.clear()
 
+    def set_exclusions(self, exclusions: List[str]) -> None:
+        """Set server exclusions and save to profile.
+
+        Args:
+            exclusions: List of server IDs to exclude
+        """
+        self.excluded_servers = exclusions.copy()
+        if self.debug >= 2:
+            logger.debug(f"[DEBUG] set_exclusions called with: {exclusions}")
+            logger.debug(
+                f"[DEBUG] active_config.subscriptions before exclusions: {self.active_config.subscriptions if self.active_config else None}"
+            )
+            logger.debug(
+                f"[DEBUG] active_config.metadata before exclusions: {self.active_config.metadata if self.active_config else None}"
+            )
+        # Save to profile if available
+        if self.active_config:
+            self.active_config.metadata["excluded_servers"] = exclusions
+            self._save_active_config()
+
     def set_advanced_mode(self, enabled: bool) -> None:
         """Set advanced mode visibility.
 
@@ -516,6 +534,14 @@ class TUIState:
         Returns:
             bool: True if configuration was generated successfully
         """
+        if self.debug >= 2:
+            logger.debug(
+                f"[DEBUG] generate_config called with output_path: {output_path}"
+            )
+            logger.debug(f"[DEBUG] active_config: {self.active_config}")
+            logger.debug(f"[DEBUG] subscriptions count: {len(self.subscriptions)}")
+            logger.debug(f"[DEBUG] excluded_servers: {self.excluded_servers}")
+
         if not self.active_config:
             logger.error("Error: No active profile configuration")
             return False
@@ -525,17 +551,87 @@ class TUIState:
             return False
 
         try:
-            # Use the first subscription for now
-            # TODO: Support multiple subscriptions
-            subscription = self.subscriptions[0]
+            # Get export settings from profile
+            export_settings = self.get_export_settings()
+            if self.debug >= 2:
+                logger.debug(f"[DEBUG] Export settings: {export_settings}")
 
-            # Generate configuration using orchestrator
-            result = self.orchestrator.export_configuration(
-                source_url=subscription.url,
-                source_type=subscription.source_type or "url",
-                export_format=self.active_config.export.format,
+            # Use output path from profile if not specified
+            if output_path == "config.json":
+                output_path = export_settings.get("output_file", "config.json")
+
+            # Convert UserConfig to FullProfile for orchestrator
+            full_profile = self._convert_to_full_profile()
+            if self.debug >= 2:
+                logger.debug(f"[DEBUG] Converted to FullProfile: {full_profile}")
+
+            # Collect all servers from all subscriptions
+            all_servers = []
+            for subscription in self.subscriptions:
+                if self.debug >= 2:
+                    logger.debug(f"[DEBUG] Processing subscription: {subscription.url}")
+
+                # Get servers from this subscription
+                servers_result = self.orchestrator.get_subscription_servers(
+                    url=subscription.url,
+                    source_type=subscription.source_type or "url",
+                    exclusions=self.excluded_servers,
+                )
+
+                if servers_result.success and servers_result.config:
+                    all_servers.extend(servers_result.config)
+                    if self.debug >= 2:
+                        logger.debug(
+                            f"[DEBUG] Added {len(servers_result.config)} servers from {subscription.url}"
+                        )
+                else:
+                    if self.debug >= 2:
+                        logger.debug(
+                            f"[DEBUG] Failed to get servers from {subscription.url}: {servers_result.errors}"
+                        )
+
+            if not all_servers:
+                logger.error("Error: No servers available from any subscription")
+                return False
+
+            if self.debug >= 2:
+                logger.debug(f"[DEBUG] Total servers collected: {len(all_servers)}")
+
+            # TEMPORARY SOLUTION: Direct export manager usage for multiple subscriptions
+            # TODO: Fix orchestrator.export_configuration() to support multiple subscriptions
+            # This is a workaround until the core orchestrator supports multiple subscriptions
+            # The CLI should also be updated to support multiple subscriptions properly
+            #
+            # Current issue: orchestrator.export_configuration() only accepts single source_url
+            # Proper fix: Update orchestrator to accept list of subscriptions or multiple URLs
+            #
+            # Generate configuration using export manager directly with all servers
+            if self.debug >= 2:
+                logger.debug(
+                    f"[DEBUG] Calling export_manager.export with {len(all_servers)} servers"
+                )
+                logger.debug(
+                    "[DEBUG] TEMPORARY: Using direct export_manager instead of orchestrator"
+                )
+
+            config = self.orchestrator.export_manager.export(
+                servers=all_servers,
                 exclusions=self.excluded_servers,
+                user_routes=None,
+                client_profile=None,
+                profile=full_profile,
             )
+
+            result = {
+                "success": True,
+                "format": export_settings["format"],
+                "server_count": len(all_servers),
+                "config": config,
+                "metadata": {
+                    "subscription_count": len(self.subscriptions),
+                    "exclusions_applied": len(self.excluded_servers),
+                },
+            }
 
             if not result.get("success", False):
                 logger.error(
@@ -558,89 +654,67 @@ class TUIState:
                 json.dump(config_data, f, indent=2, ensure_ascii=False)
 
             logger.info(f"Configuration saved to: {output_path}")
+            if self.debug >= 2:
+                logger.debug(
+                    f"[DEBUG] Config file created successfully at: {output_path}"
+                )
+                logger.debug(
+                    f"[DEBUG] Generated config with {result.get('server_count', 0)} servers from {result.get('metadata', {}).get('subscription_count', 0)} subscriptions"
+                )
             return True
 
         except Exception as e:
             logger.error(f"Error generating configuration: {e}")
+            import traceback
+
+            traceback.print_exc()
             return False
 
-    def _create_client_profile_from_config(self) -> Optional[Any]:
-        """Create ClientProfile from active configuration.
+    def _convert_to_full_profile(self) -> Optional[Any]:
+        """Convert UserConfig to FullProfile for orchestrator.
 
         Returns:
-            ClientProfile or None if creation failed
+            FullProfile or None if conversion failed
         """
-        if not self.active_config or not self.active_config.export:
+        if self.debug >= 2:
+            logger.debug("[DEBUG] _convert_to_full_profile called")
+            logger.debug(f"[DEBUG] active_config: {self.active_config}")
+
+        if not self.active_config:
+            logger.warning("[WARNING] No active config available")
             return None
 
         try:
-            from sboxmgr.subscription.models import ClientProfile, InboundProfile
+            # Import FullProfile if available
+            try:
+                from sboxmgr.configs.models import FullProfile
+            except ImportError:
+                logger.warning("[WARNING] FullProfile not available")
+                return None
 
-            inbound_type = self.active_config.export.inbound_profile
-            inbounds = []
+            # Convert UserConfig to FullProfile
+            # Note: This is a simplified conversion - in a real implementation,
+            # you might want to map all fields properly
+            full_profile = FullProfile(
+                id=self.active_config.id,
+                description=self.active_config.description,
+                subscriptions=self.active_config.subscriptions,
+                export=self.active_config.export,
+                metadata=self.active_config.metadata,
+                version=self.active_config.version,
+                created_at=self.active_config.created_at,
+                updated_at=self.active_config.updated_at,
+            )
 
-            # Create inbound based on profile setting
-            if inbound_type == "tun":
-                inbounds.append(
-                    InboundProfile(
-                        type="tun",
-                        options={
-                            "tag": "tun-in",
-                            "interface_name": "tun0",
-                            "address": ["198.18.0.1/16"],
-                            "mtu": 1500,
-                            "auto_route": True,
-                            "endpoint_independent_nat": True,
-                            "stack": "system",
-                            "sniff": True,
-                            "strict_route": True,
-                        },
-                    )
-                )
-            elif inbound_type == "socks":
-                inbounds.append(
-                    InboundProfile(
-                        type="socks",
-                        listen="127.0.0.1",
-                        port=1080,
-                        options={
-                            "tag": "socks-in",
-                            "sniff": True,
-                        },
-                    )
-                )
-            elif inbound_type == "http":
-                inbounds.append(
-                    InboundProfile(
-                        type="http",
-                        listen="127.0.0.1",
-                        port=8080,
-                        options={"tag": "http-in", "sniff": True},
-                    )
-                )
-            else:
-                # Default to tun
-                inbounds.append(
-                    InboundProfile(
-                        type="tun",
-                        options={
-                            "tag": "tun-in",
-                            "interface_name": "tun0",
-                            "address": ["198.18.0.1/16"],
-                            "mtu": 1500,
-                            "auto_route": True,
-                            "endpoint_independent_nat": True,
-                            "stack": "system",
-                            "sniff": True,
-                            "strict_route": True,
-                        },
-                    )
-                )
-
-            return ClientProfile(inbounds=inbounds)
+            if self.debug >= 2:
+                logger.debug(f"[DEBUG] Converted to FullProfile: {full_profile}")
+            return full_profile
 
         except Exception as e:
-            logger.error(f"Error creating client profile: {e}")
+            logger.error(f"Error converting to FullProfile: {e}")
+            import traceback
+
+            traceback.print_exc()
             return None
 
     def get_active_profile_name(self) -> str:
