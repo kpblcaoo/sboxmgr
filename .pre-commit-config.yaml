@@ -90,6 +90,15 @@ repos:
       - id: check-toml
       - id: debug-statements
 
+  # 6. Wheel integrity check
+  - repo: local
+    hooks:
+      - id: check-wheel-integrity
+        name: Check that build includes all expected modules
+        entry: python .hooks/check_build_contents.py
+        language: system
+        pass_filenames: false
+
 # Global settings
 default_language_version:
   python: python3.12
