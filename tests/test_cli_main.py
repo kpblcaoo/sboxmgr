@@ -106,7 +106,7 @@ class TestMainModuleIntegration:
         """Test is_ai_lang handles file read errors."""
         with patch("sboxmgr.cli.main.Path") as mock_path:
             mock_path.return_value.parent.parent = tmp_path
-            with patch("builtins.open", side_effect=IOError("Permission denied")):
+            with patch("builtins.open", side_effect=OSError("Permission denied")):
                 result = is_ai_lang("de")
                 assert result is False
 

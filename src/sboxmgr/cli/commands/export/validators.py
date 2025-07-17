@@ -1,7 +1,7 @@
 """Validators for export command parameters."""
 
 import re
-from typing import List, Optional
+from typing import Optional
 
 import typer
 
@@ -76,7 +76,7 @@ def validate_flag_combinations(
         typer.echo(f"⚠️  Warning: --output is ignored in --{mode} mode", err=True)
 
 
-def validate_postprocessors(processors: List[str]) -> None:
+def validate_postprocessors(processors: list[str]) -> None:
     """Validate postprocessor names.
 
     Args:
@@ -97,7 +97,7 @@ def validate_postprocessors(processors: List[str]) -> None:
         raise typer.Exit(1)
 
 
-def validate_middleware(middleware: List[str]) -> None:
+def validate_middleware(middleware: list[str]) -> None:
     """Validate middleware names.
 
     Args:

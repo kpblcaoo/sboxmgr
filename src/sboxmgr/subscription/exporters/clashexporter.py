@@ -6,15 +6,15 @@ configuration structure, proxy groups, and routing rules for seamless
 integration with Clash clients.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 from ..base_exporter import BaseExporter
 from ..models import ParsedServer
 
 
 def clash_export(
-    servers: List[ParsedServer], routes: List[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    servers: list[ParsedServer], routes: list[dict[str, Any]] = None
+) -> dict[str, Any]:
     """Export servers to Clash configuration format.
 
     Args:
@@ -66,7 +66,7 @@ def clash_export(
     return config
 
 
-def _convert_server_to_clash_proxy(server: ParsedServer) -> Dict[str, Any]:
+def _convert_server_to_clash_proxy(server: ParsedServer) -> dict[str, Any]:
     """Convert ParsedServer to Clash proxy format.
 
     Args:

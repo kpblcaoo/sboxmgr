@@ -8,7 +8,8 @@ Implements Phase 3 architecture with profile integration.
 """
 
 import re
-from typing import Any, Dict, List, Optional, Pattern
+from re import Pattern
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
@@ -43,7 +44,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
 
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize tag filter with configuration.
 
         Args:
@@ -63,7 +64,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             self.config.get("exclude_patterns", [])
         )
 
-    def _compile_patterns(self, patterns: List[str]) -> List[Pattern[str]]:
+    def _compile_patterns(self, patterns: list[str]) -> list[Pattern[str]]:
         """Compile regex patterns with appropriate flags.
 
         Args:
@@ -87,10 +88,10 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
 
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Filter servers based on tag criteria.
 
         Args:
@@ -116,7 +117,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
 
         return filtered_servers
 
-    def _extract_tag_config(self, profile: Optional[FullProfile]) -> Dict[str, Any]:
+    def _extract_tag_config(self, profile: Optional[FullProfile]) -> dict[str, Any]:
         """Extract tag configuration from profile.
 
         Args:
@@ -169,7 +170,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
     def _should_include_server(
         self,
         server: ParsedServer,
-        tag_config: Dict[str, Any],
+        tag_config: dict[str, Any],
         context: Optional[PipelineContext] = None,
     ) -> bool:
         """Check if server should be included based on tag criteria.
@@ -237,7 +238,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
 
         return True
 
-    def _extract_server_tags(self, server: ParsedServer) -> List[str]:
+    def _extract_server_tags(self, server: ParsedServer) -> list[str]:
         """Extract tags from server metadata.
 
         Args:
@@ -278,10 +279,10 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
             tags.extend([part for part in tag_parts if part and part != server.tag])
 
         # Remove duplicates and empty tags
-        return list(set(tag for tag in tags if tag and tag.strip()))
+        return list({tag for tag in tags if tag and tag.strip()})
 
     def can_process(
-        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+        self, servers: list[ParsedServer], context: Optional[PipelineContext] = None
     ) -> bool:
         """Check if tag filtering can be applied.
 
@@ -304,7 +305,7 @@ class TagFilterPostProcessor(ProfileAwarePostProcessor):
         # Can still process servers without tags (fallback mode)
         return True
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get metadata about this postprocessor.
 
         Returns:

@@ -4,15 +4,15 @@ This module tests the validation logic for user inputs
 in the TUI interface, ensuring proper validation behavior.
 """
 
-import pytest
-import tempfile
 import os
-from pathlib import Path
+import tempfile
+
+import pytest
 
 from sboxmgr.tui.utils.validation import (
-    validate_subscription_url,
     validate_output_path,
-    validate_tags
+    validate_subscription_url,
+    validate_tags,
 )
 
 

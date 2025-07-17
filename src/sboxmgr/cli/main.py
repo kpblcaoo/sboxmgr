@@ -58,12 +58,33 @@ def is_ai_lang(code):
     lang_file = i18n_dir / f"{code}.json"
     if lang_file.exists():
         try:
-            with open(lang_file, "r", encoding="utf-8") as f:
+            with open(lang_file, encoding="utf-8") as f:
                 data = json.load(f)
             return "__note__" in data and "AI-generated" in data["__note__"]
         except Exception:
             return False
     return False
+
+
+@app.callback(invoke_without_command=True)
+def main_callback(
+    version: bool = typer.Option(
+        None,
+        "--version",
+        "-V",
+        help="Show version and exit",
+        is_eager=True,
+    ),
+):
+    """Root callback to handle global options like --version."""
+    if version:
+        try:
+            from importlib.metadata import version as _version
+
+            typer.echo(_version("sboxmgr"))
+        except Exception:
+            typer.echo("unknown")
+        raise typer.Exit(0)
 
 
 @app.command("lang")
@@ -127,8 +148,8 @@ def lang_cmd(
                 toml.dump({"default_lang": set_lang}, f)
             typer.echo(f"Language set to '{set_lang}' and persisted in {config_path}.")
         except Exception as e:
-            typer.echo(f"[Error] Failed to write config: {e}", err=True)
-            raise typer.Exit(1)
+            typer.echo(f"❌ {t('cli.error.config_save_failed')}: {e}", err=True)
+            raise typer.Exit(1) from e
     else:
         lang_code, source = detect_lang_source()
         loader = LanguageLoader(lang_code)
@@ -242,10 +263,10 @@ def tui_cmd(
             "Please install with: pip install textual>=0.52.0",
             err=True,
         )
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         typer.echo(f"TUI error: {e}", err=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 if __name__ == "__main__":

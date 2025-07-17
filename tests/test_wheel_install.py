@@ -1,11 +1,10 @@
+import logging
 import os
+import pkgutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-import pkgutil
-import importlib
-import logging
 
 import pytest
 
@@ -28,7 +27,7 @@ def build_wheel():
 def find_all_submodules(package_path: Path, package_prefix: str):
     """Рекурсивно находит все подмодули и поддиректории пакета."""
     modules = set()
-    for finder, name, ispkg in pkgutil.walk_packages([str(package_path)], prefix=package_prefix + "."):
+    for _finder, name, _ispkg in pkgutil.walk_packages([str(package_path)], prefix=package_prefix + "."):
         modules.add(name)
     return modules
 
@@ -38,14 +37,14 @@ def test_wheel_install_and_all_imports(tmp_path):
 
     # Собираем список всех подмодулей ТОЛЬКО из sboxmgr пакета
     all_modules = {"sboxmgr"}
-    for finder, name, ispkg in pkgutil.walk_packages([str(src_root)], prefix="sboxmgr."):
+    for _finder, name, _ispkg in pkgutil.walk_packages([str(src_root)], prefix="sboxmgr."):
         all_modules.add(name)
 
     # Добавляем также logsetup как отдельный пакет
     logsetup_root = project_root / "src" / "logsetup"
     if logsetup_root.exists():
         all_modules.add("logsetup")
-        for finder, name, ispkg in pkgutil.walk_packages([str(logsetup_root)], prefix="logsetup."):
+        for _finder, name, _ispkg in pkgutil.walk_packages([str(logsetup_root)], prefix="logsetup."):
             all_modules.add(name)
 
     with tempfile.TemporaryDirectory() as venv_dir:

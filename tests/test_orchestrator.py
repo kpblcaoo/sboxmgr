@@ -4,7 +4,6 @@ This module tests the Orchestrator class and its dependency injection,
 unified interface, and error handling capabilities.
 """
 
-from typing import Dict
 from unittest.mock import Mock, patch
 
 import pytest
@@ -77,7 +76,7 @@ class MockSubscriptionManager(SubscriptionManagerInterface):
 class MockExportManager(ExportManagerInterface):
     """Mock export manager for testing."""
 
-    def __init__(self, mock_config: Dict = None):
+    def __init__(self, mock_config: dict = None):
         self.mock_config = mock_config or {"outbounds": []}
 
     def export(

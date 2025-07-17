@@ -5,7 +5,7 @@ ClientProfile objects from CLI parameters, eliminating the need for manual
 JSON profile creation while maintaining architectural integrity.
 """
 
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import typer
 
@@ -29,12 +29,12 @@ class InboundBuilder:
 
     def __init__(self):
         """Initialize empty inbound builder."""
-        self._inbounds: List[InboundProfile] = []
+        self._inbounds: list[InboundProfile] = []
         self._dns_mode: str = "system"
 
     def add_tun(
         self,
-        address: Optional[Union[str, List[str]]] = None,
+        address: Optional[Union[str, list[str]]] = None,
         mtu: Optional[int] = None,
         stack: Optional[str] = None,
         auto_route: bool = True,

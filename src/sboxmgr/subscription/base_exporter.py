@@ -7,7 +7,6 @@ interface to ensure consistent behavior across different output formats.
 """
 
 from abc import ABC, abstractmethod
-from typing import List
 
 from .models import ParsedServer
 
@@ -27,7 +26,7 @@ class BaseExporter(ABC):
     plugin_type = "exporter"
 
     @abstractmethod
-    def export(self, servers: List[ParsedServer]) -> str:
+    def export(self, servers: list[ParsedServer]) -> str:
         """Export a list of parsed servers to a configuration string.
 
         Args:

@@ -4,7 +4,7 @@ This module provides the main SingBoxConfig class that combines all
 sing-box configuration components into a single validated model.
 """
 
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -52,10 +52,10 @@ class SingBoxConfig(BaseModel):
     ntp: Optional[NtpConfig] = Field(
         default=None, description="NTP configuration for time synchronization."
     )
-    inbounds: Optional[List[Inbound]] = Field(
+    inbounds: Optional[list[Inbound]] = Field(
         default=None, description="List of inbound configurations."
     )
-    outbounds: Optional[List[Outbound]] = Field(
+    outbounds: Optional[list[Outbound]] = Field(
         default=None, description="List of outbound configurations."
     )
     route: Optional[RouteConfig] = Field(

@@ -4,11 +4,9 @@ This module tests the core logic of TUIState class,
 including subscription management and server exclusions.
 """
 
-import pytest
 from unittest.mock import Mock, patch
 
 from sboxmgr.tui.state.tui_state import TUIState
-from sboxmgr.subscription.models import SubscriptionSource, ParsedServer
 
 
 class TestTUIState:

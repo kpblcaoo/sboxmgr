@@ -1,7 +1,7 @@
 """Core enrichment middleware implementation."""
 
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ....configs.models import FullProfile
 from ...models import ParsedServer, PipelineContext
@@ -44,7 +44,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
     middleware_type = "enrichment"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize enrichment middleware.
 
         Args:
@@ -79,10 +79,10 @@ class EnrichmentMiddleware(TransformMiddleware):
 
     def _do_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Enrich servers with additional metadata.
 
         Args:
@@ -125,7 +125,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
     def _extract_enrichment_config(
         self, profile: Optional[FullProfile]
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Extract enrichment configuration from profile.
 
         Args:
@@ -163,7 +163,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-        enrichment_config: Optional[Dict[str, Any]] = None,
+        enrichment_config: Optional[dict[str, Any]] = None,
     ) -> ParsedServer:
         """Enrich a single server with metadata.
 

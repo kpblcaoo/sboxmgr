@@ -4,7 +4,7 @@ This module provides transport-specific configuration models for various protoco
 including WebSocket, HTTP/2, gRPC, and QUIC transports.
 """
 
-from typing import Dict, List, Literal, Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -50,7 +50,7 @@ class WsConfig(BaseModel):
     """WebSocket transport configuration."""
 
     path: str = Field(..., description="WebSocket path")
-    headers: Optional[Dict[str, str]] = Field(None, description="WebSocket headers")
+    headers: Optional[dict[str, str]] = Field(None, description="WebSocket headers")
     max_early_data: Optional[int] = Field(
         None, ge=0, description="Maximum early data size"
     )
@@ -65,7 +65,7 @@ class WsConfig(BaseModel):
 class HttpConfig(BaseModel):
     """HTTP/2 transport configuration."""
 
-    host: List[str] = Field(..., description="HTTP host list")
+    host: list[str] = Field(..., description="HTTP host list")
     path: str = Field(..., description="HTTP path")
 
     class Config:

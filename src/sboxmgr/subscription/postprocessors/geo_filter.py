@@ -8,7 +8,7 @@ based on user location and preferences.
 Implements Phase 3 architecture with profile integration.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
@@ -41,7 +41,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
 
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize geo filter with configuration.
 
         Args:
@@ -57,10 +57,10 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
 
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Filter servers based on geographic criteria.
 
         Args:
@@ -90,7 +90,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
 
         return filtered_servers
 
-    def _extract_geo_config(self, profile: Optional[FullProfile]) -> Dict[str, Any]:
+    def _extract_geo_config(self, profile: Optional[FullProfile]) -> dict[str, Any]:
         """Extract geographic configuration from profile.
 
         Args:
@@ -125,7 +125,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
     def _should_include_server(
         self,
         server: ParsedServer,
-        geo_config: Dict[str, Any],
+        geo_config: dict[str, Any],
         context: Optional[PipelineContext] = None,
     ) -> bool:
         """Check if server should be included based on geographic criteria.
@@ -192,7 +192,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
         return None
 
     def can_process(
-        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+        self, servers: list[ParsedServer], context: Optional[PipelineContext] = None
     ) -> bool:
         """Check if geo filtering can be applied.
 
@@ -215,7 +215,7 @@ class GeoFilterPostProcessor(ProfileAwarePostProcessor):
         # Can still process even without geo data (fallback mode)
         return True
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get metadata about this postprocessor.
 
         Returns:

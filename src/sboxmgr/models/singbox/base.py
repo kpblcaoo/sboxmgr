@@ -1,6 +1,6 @@
 """Base classes for sing-box models with smart export functionality."""
 
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -10,7 +10,7 @@ class SingBoxModelBase(BaseModel):
 
     def smart_dump(
         self, exclude_unset: bool = True, exclude_none: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Smart export method that removes unsupported fields based on type.
 
         This method intelligently exports the model by:
@@ -36,8 +36,8 @@ class SingBoxModelBase(BaseModel):
         return data
 
     def _cleanup_by_type(
-        self, data: Dict[str, Any], protocol_type: str
-    ) -> Dict[str, Any]:
+        self, data: dict[str, Any], protocol_type: str
+    ) -> dict[str, Any]:
         """Remove unsupported fields based on protocol type.
 
         Args:

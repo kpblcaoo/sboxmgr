@@ -8,7 +8,7 @@ to provide a unified subscription processing interface.
 
 import threading
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Protocol, Tuple
+from typing import Any, Optional, Protocol
 
 from sboxmgr.export.export_manager import ExportManager
 
@@ -24,7 +24,7 @@ from .registry import get_plugin, load_entry_points
 class ParserProtocol(Protocol):
     """Protocol for parser objects that can parse subscription data."""
 
-    def parse(self, raw: bytes) -> List[Any]:
+    def parse(self, raw: bytes) -> list[Any]:
         """Parse raw subscription data into server configurations."""
         ...
 
@@ -144,7 +144,7 @@ class SubscriptionManager:
     """
 
     _cache_lock = threading.Lock()
-    _get_servers_cache: Dict[Tuple, Any] = {}
+    _get_servers_cache: dict[tuple, Any] = {}
 
     def __init__(
         self,

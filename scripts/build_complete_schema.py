@@ -12,7 +12,7 @@ def extract_protocol_fields(doc_path):
     if not doc_path.exists():
         return {}
 
-    with open(doc_path, "r", encoding="utf-8") as f:
+    with open(doc_path, encoding="utf-8") as f:
         content = f.read()
 
     fields = {}
@@ -126,8 +126,6 @@ def compare_with_existing_models(schema):
         from sboxmgr.models import SingBoxConfig
 
         # Get existing outbound types
-        existing_outbounds = set()
-        existing_inbounds = set()
 
         # This is a simplified check - in reality we'd need to inspect the models more thoroughly
         print("📋 Existing models found:")

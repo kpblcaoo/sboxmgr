@@ -314,7 +314,7 @@ class TestPluginTemplate:
         """Test plugin_template handles file write errors."""
         output_dir = str(tmp_path / "test_output")
 
-        with patch("builtins.open", side_effect=IOError("Disk full")), patch(
+        with patch("builtins.open", side_effect=OSError("Disk full")), patch(
             "typer.echo"
         ) as mock_echo:
             with pytest.raises(typer.Exit) as exc_info:

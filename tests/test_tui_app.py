@@ -1,11 +1,10 @@
 """Tests for TUI application components."""
 
-import pytest
 from unittest.mock import Mock, patch
 
 from sboxmgr.tui.app import SboxmgrTUI
-from sboxmgr.tui.screens.welcome import WelcomeScreen
 from sboxmgr.tui.screens.main import MainScreen
+from sboxmgr.tui.screens.welcome import WelcomeScreen
 
 
 class TestSboxmgrTUI:

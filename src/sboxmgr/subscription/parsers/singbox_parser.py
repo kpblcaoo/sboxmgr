@@ -7,7 +7,7 @@ and converts them into standardized ParsedServer objects.
 
 import json
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from sboxmgr.utils.env import get_debug_level
 
@@ -26,7 +26,7 @@ class SingBoxParser(BaseParser):
     fail-tolerance.
     """
 
-    def parse(self, raw: bytes) -> List[ParsedServer]:
+    def parse(self, raw: bytes) -> list[ParsedServer]:
         """Parse sing-box JSON configuration into ParsedServer objects.
 
         Args:
@@ -79,7 +79,7 @@ class SingBoxParser(BaseParser):
                 print(f"[SingBoxParser] Parse error: {e}")
             raise
 
-    def _strip_comments_and_validate(self, raw_data: str) -> Tuple[str, list]:
+    def _strip_comments_and_validate(self, raw_data: str) -> tuple[str, list]:
         """Strip comments and validate JSON data.
 
         Args:
@@ -193,7 +193,7 @@ class SingBoxParser(BaseParser):
                 type=outbound_type, address=server, port=port, security=None, meta=meta
             )
 
-    def _create_safe_meta(self, fields: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_safe_meta(self, fields: dict[str, Any]) -> dict[str, Any]:
         """Create safe metadata dictionary filtering out None values.
 
         Args:

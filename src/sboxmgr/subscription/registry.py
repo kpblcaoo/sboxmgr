@@ -1,9 +1,8 @@
 """Plugin registry for subscription parsers and exporters."""
 
 import logging
-from typing import Dict, Type
 
-PLUGIN_REGISTRY: Dict[str, Type] = {}
+PLUGIN_REGISTRY: dict[str, type] = {}
 
 # Явная регистрация через декоратор
 

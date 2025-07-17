@@ -7,7 +7,6 @@ parsers based on the decoded content format (URI lists, JSON, YAML, etc.).
 
 import base64
 import re
-from typing import List
 
 from sboxmgr.utils.env import get_debug_level
 
@@ -33,7 +32,7 @@ class Base64Parser(BaseParser):
     - Debug output for unsupported formats
     """
 
-    def parse(self, raw: bytes) -> List[ParsedServer]:
+    def parse(self, raw: bytes) -> list[ParsedServer]:
         """Parse base64-encoded subscription data into server configurations.
 
         Decodes base64 content, splits into lines, and processes each line
@@ -64,7 +63,7 @@ class Base64Parser(BaseParser):
             elif ss_pattern.match(line):
                 if debug_level > 1:
                     print(f"[WARN] Adding ss:// prefix to legacy base64 line: {line}")
-                servers.extend(URIListParser().parse(f"ss://{line}".encode("utf-8")))
+                servers.extend(URIListParser().parse(f"ss://{line}".encode()))
             else:
                 if debug_level > 1:
                     print(f"[WARN] Ignored line in base64 subscription: {line}")

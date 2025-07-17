@@ -5,11 +5,11 @@ in the TUI interface, ensuring data integrity and user feedback.
 """
 
 import os
-from typing import List, Optional, Tuple
+from typing import Optional
 from urllib.parse import urlparse
 
 
-def validate_subscription_url(url: str) -> Tuple[bool, Optional[str]]:
+def validate_subscription_url(url: str) -> tuple[bool, Optional[str]]:
     """Validate subscription URL format.
 
     Args:
@@ -50,7 +50,7 @@ def validate_subscription_url(url: str) -> Tuple[bool, Optional[str]]:
         return False, f"Invalid URL format: {str(e)}"
 
 
-def validate_output_path(path: str) -> Tuple[bool, Optional[str]]:
+def validate_output_path(path: str) -> tuple[bool, Optional[str]]:
     """Validate output file path.
 
     Args:
@@ -89,7 +89,7 @@ def validate_output_path(path: str) -> Tuple[bool, Optional[str]]:
         return False, f"Invalid path: {str(e)}"
 
 
-def validate_tags(tags_text: str) -> Tuple[bool, Optional[str], List[str]]:
+def validate_tags(tags_text: str) -> tuple[bool, Optional[str], list[str]]:
     """Validate and parse tags input.
 
     Args:

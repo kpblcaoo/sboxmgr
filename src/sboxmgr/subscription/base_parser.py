@@ -7,7 +7,6 @@ must register themselves for automatic format detection and processing.
 """
 
 from abc import ABC, abstractmethod
-from typing import List
 
 from .models import ParsedServer
 
@@ -27,7 +26,7 @@ class BaseParser(ABC):
     plugin_type = "parser"
 
     @abstractmethod
-    def parse(self, raw: bytes) -> List[ParsedServer]:
+    def parse(self, raw: bytes) -> list[ParsedServer]:
         """Parse subscription data into a list of server configurations.
 
         Args:

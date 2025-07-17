@@ -1,6 +1,6 @@
 """Experimental models for sing-box configuration."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -69,13 +69,13 @@ class ExperimentalConfig(BaseModel):
     cache_file: Optional[CacheFileConfig] = Field(
         default=None, description="Cache file settings."
     )
-    geoip: Optional[Dict[str, Any]] = Field(
+    geoip: Optional[dict[str, Any]] = Field(
         default=None, description="GeoIP database settings."
     )
-    geosite: Optional[Dict[str, Any]] = Field(
+    geosite: Optional[dict[str, Any]] = Field(
         default=None, description="Geosite database settings."
     )
-    v2ray: Optional[Dict[str, Any]] = Field(
+    v2ray: Optional[dict[str, Any]] = Field(
         default=None, description="V2Ray-specific experimental settings."
     )
 

@@ -6,7 +6,7 @@ consistent server naming across all User-Agent types and parsers.
 """
 
 import re
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
@@ -26,16 +26,16 @@ class TagNormalizer(BaseMiddleware):
     6. protocol-based fallback (type + object id)
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         super().__init__(config)
-        self._used_tags: Set[str] = set()
+        self._used_tags: set[str] = set()
 
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """
         Process servers to normalize their tags.
 

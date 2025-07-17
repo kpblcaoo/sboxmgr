@@ -1,6 +1,6 @@
 """Custom enrichment functionality for server data."""
 
-from typing import List, Optional
+from typing import Optional
 
 from ....configs.models import FullProfile
 from ...models import ParsedServer, PipelineContext
@@ -13,7 +13,7 @@ class CustomEnricher:
     priority scoring, and compatibility checks based on export format.
     """
 
-    def __init__(self, custom_enrichers: Optional[List[str]] = None):
+    def __init__(self, custom_enrichers: Optional[list[str]] = None):
         """Initialize custom enricher.
 
         Args:
@@ -26,7 +26,7 @@ class CustomEnricher:
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-        enrichers: Optional[List[str]] = None,
+        enrichers: Optional[list[str]] = None,
     ) -> ParsedServer:
         """Apply custom enrichment to a server.
 

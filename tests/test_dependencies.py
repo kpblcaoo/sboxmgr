@@ -7,13 +7,12 @@ are actually importable and that no critical imports fail.
 import importlib
 import sys
 from pathlib import Path
-from typing import List, Dict, Any
 
 import pytest
 import toml
 
 
-def load_pyproject_dependencies() -> List[str]:
+def load_pyproject_dependencies() -> list[str]:
     """Load dependencies from pyproject.toml.
 
     Returns:
@@ -104,7 +103,7 @@ def test_critical_modules_importable():
             importlib.import_module(module_name)
         except ImportError as e:
             failed_imports.append(f"{module_name}: {e}")
-        except Exception as e:
+        except Exception:
             # Other exceptions (like missing optional deps) are OK
             # as long as the module can be imported
             pass

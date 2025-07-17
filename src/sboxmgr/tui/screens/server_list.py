@@ -4,7 +4,7 @@ This module implements the server list screen that displays available
 servers with checkboxes for inclusion/exclusion management.
 """
 
-from typing import List, Optional
+from typing import Optional
 
 from textual import on
 from textual.app import ComposeResult
@@ -128,7 +128,7 @@ class ServerListScreen(Screen):
             **kwargs: Additional arguments passed to Screen
         """
         super().__init__(**kwargs)
-        self._servers: List = []
+        self._servers: list = []
         self._excluded_servers: set = set()
 
     def compose(self) -> ComposeResult:
@@ -197,7 +197,7 @@ class ServerListScreen(Screen):
 
         return info_text
 
-    def _create_server_items(self) -> List:
+    def _create_server_items(self) -> list:
         """Create server item widgets.
 
         Returns:

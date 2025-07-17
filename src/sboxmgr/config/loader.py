@@ -4,14 +4,17 @@ Implements multi-layer configuration loading from files, environment variables,
 and CLI arguments with proper precedence handling.
 """
 
+import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import toml
 import yaml
 from pydantic import ValidationError
 
 from .models import AppConfig
+
+logger = logging.getLogger(__name__)
 
 
 def load_config(config_file_path: Optional[str] = None) -> AppConfig:
@@ -44,9 +47,12 @@ def load_config(config_file_path: Optional[str] = None) -> AppConfig:
     except ValidationError:
         # Re-raise original ValidationError to preserve structured error details
         raise
+    except Exception as e:
+        logger.error(f"Failed to load config: {e}")
+        raise ValueError(f"Config loading failed: {e}") from e
 
 
-def load_config_file(file_path: str) -> Dict[str, Any]:
+def load_config_file(file_path: str) -> dict[str, Any]:
     """Load configuration from TOML or YAML file.
 
     Args:
@@ -72,7 +78,7 @@ def load_config_file(file_path: str) -> Dict[str, Any]:
     suffix = path.suffix.lower()
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             if suffix in [".toml"]:
                 return toml.load(f)
             elif suffix in [".yaml", ".yml"]:
@@ -108,7 +114,7 @@ def load_config_file(file_path: str) -> Dict[str, Any]:
                 raise ValueError(f"Unsupported configuration file format: {suffix}")
 
     except Exception as e:
-        raise ValueError(f"Error reading configuration file {file_path}: {e}")
+        raise ValueError(f"Error reading configuration file {file_path}: {e}") from e
 
 
 def find_config_file() -> Optional[str]:
@@ -182,7 +188,7 @@ def save_config(config: AppConfig, file_path: str) -> None:
                 raise ValueError(f"Unsupported configuration file format: {suffix}")
 
     except Exception as e:
-        raise OSError(f"Error writing configuration file {file_path}: {e}")
+        raise OSError(f"Error writing configuration file {file_path}: {e}") from e
 
 
 def create_default_config_file(output_path: str) -> None:
@@ -221,7 +227,7 @@ def create_default_config_file(output_path: str) -> None:
             toml.dump(default_config, f)
 
     except Exception as e:
-        raise OSError(f"Cannot create config file {output_path}: {e}")
+        raise OSError(f"Cannot create config file {output_path}: {e}") from e
 
 
 def merge_cli_args_to_config(

@@ -299,7 +299,6 @@ class TestIntegrationWithSubscriptionManager:
 
     def test_apply_policies_with_evaluate_all(self):
         """Test that policy application uses evaluate_all() correctly."""
-        from sboxmgr.subscription.manager import SubscriptionManager
         from sboxmgr.subscription.models import PipelineContext
 
         # Mock the policy registry - patch the import path used in the method

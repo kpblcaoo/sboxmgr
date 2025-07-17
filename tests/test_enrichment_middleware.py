@@ -1,7 +1,7 @@
-import pytest
 from sboxmgr.subscription.middleware.enrichment.core import EnrichmentMiddleware
 from sboxmgr.subscription.middleware.tag_normalizer import TagNormalizer
 from sboxmgr.subscription.models import ParsedServer, PipelineContext
+
 
 class TestEnrichmentMiddleware:
     def setup_method(self):

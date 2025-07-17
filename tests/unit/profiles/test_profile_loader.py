@@ -211,7 +211,7 @@ class TestSectionValidatorsRegistry:
 
     def test_section_validators_registry_validate_methods(self):
         """Test that all validators in registry have validate method."""
-        for section, validator in SECTION_VALIDATORS.items():
+        for _section, validator in SECTION_VALIDATORS.items():
             assert hasattr(validator, "validate")
             assert callable(validator.validate)
 

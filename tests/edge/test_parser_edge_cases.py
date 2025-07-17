@@ -28,9 +28,7 @@ vmess://eyJ2IjoiMiIsInBzIjoiVGVzdCIsImFkZCI6IjEyNy4wLjAuMSIsInBvcnQiOiI0NDMiLCJp
 ss://method:password@host:8388#tag2?plugin=obfs-local;obfs=tls
 emoji://😀@host:1234
 invalidline
-""".encode(
-        "utf-8"
-    )
+""".encode()
     parser = URIListParser()
     servers = parser.parse(raw)
     # Проверяем, что парсер не падает и возвращает ParsedServer для каждой строки
@@ -273,14 +271,12 @@ def test_line_numbering():
     parser = URIListParser()
 
     # Создаём данные с ошибками на разных строках
-    test_data = """
+    test_data = b"""
 # comment
 ss://aes-256-gcm:password@example.com:8388#Valid
 ss://invalid-uri#Invalid
 ss://aes-256-gcm:password@example.com:8388#Valid2
-""".encode(
-        "utf-8"
-    )
+"""
 
     # Устанавливаем debug level для получения логов
     os.environ["SBOXMGR_DEBUG"] = "1"
@@ -474,28 +470,28 @@ def test_tagfilter_middleware_invalid_input():
     context.tag_filters = "A"
     try:
         chain.process(servers, context)
-        assert False, "Should raise ValueError for non-list tag_filters"
+        raise AssertionError("Should raise ValueError for non-list tag_filters")
     except ValueError as e:
         assert "list" in str(e)
     # Слишком длинная строка
     context.tag_filters = ["A" * 100]
     try:
         chain.process(servers, context)
-        assert False, "Should raise ValueError for too long tag"
+        raise AssertionError("Should raise ValueError for too long tag")
     except ValueError as e:
         assert "Invalid tag" in str(e)
     # Не строка
     context.tag_filters = [123]
     try:
         chain.process(servers, context)
-        assert False, "Should raise ValueError for non-str tag"
+        raise AssertionError("Should raise ValueError for non-str tag")
     except ValueError as e:
         assert "Invalid tag" in str(e)
     # Не printable
     context.tag_filters = ["A\x00B"]
     try:
         chain.process(servers, context)
-        assert False, "Should raise ValueError for non-printable tag"
+        raise AssertionError("Should raise ValueError for non-printable tag")
     except ValueError as e:
         assert "Invalid tag" in str(e)
 
@@ -523,9 +519,7 @@ def test_enrichmiddleware_external_lookup_timeout(monkeypatch):
     signal.alarm(1)  # 1 секунда на enrichment
     try:
         BadEnrich().process(servers, context)
-        assert (
-            False
-        ), "EnrichMiddleware must not do long external lookup without timeout"
+        raise AssertionError("EnrichMiddleware must not do long external lookup without timeout")
     except TimeoutError:
         pass
     finally:
@@ -546,7 +540,7 @@ def test_hookmiddleware_privilege_escalation():
                 os.setuid(0)  # попытка стать root
             except Exception:
                 return servers  # sandbox: не даём эскалировать
-            assert False, "HookMiddleware must not be able to escalate privileges!"
+            raise AssertionError("HookMiddleware must not be able to escalate privileges!")
             return servers
 
     servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={})]
@@ -695,7 +689,7 @@ def test_hookmiddleware_sandbox_forbidden_action():
     context = None
     try:
         evil.process(servers, context)
-        assert False, "HookMiddleware must not allow forbidden actions!"
+        raise AssertionError("HookMiddleware must not allow forbidden actions!")
     except Exception as e:
         assert (
             "forbid" in str(e).lower()

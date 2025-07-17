@@ -1,7 +1,7 @@
 """Error handling functionality for subscription manager."""
 
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from ..errors import ErrorType, PipelineError
 
@@ -22,7 +22,7 @@ class ErrorHandler:
         error_type: ErrorType,
         stage: str,
         message: str,
-        context_data: Optional[Dict[str, Any]] = None,
+        context_data: Optional[dict[str, Any]] = None,
     ) -> PipelineError:
         """Create standardized pipeline error.
 
@@ -47,7 +47,7 @@ class ErrorHandler:
         )
 
     def create_fetch_error(
-        self, message: str, context_data: Optional[Dict[str, Any]] = None
+        self, message: str, context_data: Optional[dict[str, Any]] = None
     ) -> PipelineError:
         """Create fetch stage error.
 
@@ -63,7 +63,7 @@ class ErrorHandler:
         )
 
     def create_validation_error(
-        self, stage: str, message: str, context_data: Optional[Dict[str, Any]] = None
+        self, stage: str, message: str, context_data: Optional[dict[str, Any]] = None
     ) -> PipelineError:
         """Create validation stage error.
 
@@ -80,7 +80,7 @@ class ErrorHandler:
         )
 
     def create_parse_error(
-        self, message: str, context_data: Optional[Dict[str, Any]] = None
+        self, message: str, context_data: Optional[dict[str, Any]] = None
     ) -> PipelineError:
         """Create parse stage error.
 
@@ -96,7 +96,7 @@ class ErrorHandler:
         )
 
     def create_internal_error(
-        self, stage: str, message: str, context_data: Optional[Dict[str, Any]] = None
+        self, stage: str, message: str, context_data: Optional[dict[str, Any]] = None
     ) -> PipelineError:
         """Create internal stage error.
 

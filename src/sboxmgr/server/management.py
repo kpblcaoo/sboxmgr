@@ -36,7 +36,7 @@ def list_servers(json_data, supported_protocols, debug_level=0, dry_run=False):
 def load_selected_config():
     """Load selected configuration from file."""
     if os.path.exists(SELECTED_CONFIG_FILE):
-        with open(SELECTED_CONFIG_FILE, "r") as f:
+        with open(SELECTED_CONFIG_FILE) as f:
             return json.load(f)
     return {"last_modified": "", "selected": []}
 
@@ -62,7 +62,7 @@ def save_selected_config(selected):
 def apply_exclusions(configs, excluded_ids, debug_level):
     """Apply exclusions to the list of server configurations."""
     valid_configs = []
-    for idx, config in enumerate(configs):
+    for _idx, config in enumerate(configs):
         server_id = generate_server_id(config)
         if server_id in excluded_ids:
             if debug_level >= 1:

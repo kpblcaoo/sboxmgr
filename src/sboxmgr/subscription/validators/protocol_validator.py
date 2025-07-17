@@ -8,7 +8,7 @@ invalid configurations.
 Implements ADR-0016: Pydantic as Single Source of Truth for Validation and Schema Generation.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 from sboxmgr.subscription.models import PipelineContext
 
@@ -79,7 +79,7 @@ class ProtocolSpecificValidator(BaseParsedValidator):
             valid=bool(valid_servers), errors=errors, valid_servers=valid_servers
         )
 
-    def _parsed_server_to_dict(self, server) -> Dict[str, Any]:
+    def _parsed_server_to_dict(self, server) -> dict[str, Any]:
         """Convert ParsedServer to dictionary for protocol validation.
 
         Args:
@@ -164,7 +164,7 @@ class EnhancedRequiredFieldsValidator(BaseParsedValidator):
             valid=bool(valid_servers), errors=errors, valid_servers=valid_servers
         )
 
-    def _validate_protocol_specific_fields(self, server) -> List[str]:
+    def _validate_protocol_specific_fields(self, server) -> list[str]:
         """Validate protocol-specific required fields.
 
         Args:
@@ -218,8 +218,8 @@ class EnhancedRequiredFieldsValidator(BaseParsedValidator):
 
 
 def validate_single_protocol_config(
-    config: Dict[str, Any], protocol: str
-) -> Dict[str, Any]:
+    config: dict[str, Any], protocol: str
+) -> dict[str, Any]:
     """Validate a single protocol configuration.
 
     Args:
@@ -236,7 +236,7 @@ def validate_single_protocol_config(
     return validate_protocol_config(config, protocol)
 
 
-def get_protocol_schema(protocol: str) -> Dict[str, Any]:
+def get_protocol_schema(protocol: str) -> dict[str, Any]:
     """Get JSON schema for a protocol configuration.
 
     Args:

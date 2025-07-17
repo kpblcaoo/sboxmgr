@@ -8,7 +8,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ..config.config_validator import validate_temp_config_json
 from ..config.validation import ConfigValidationError
@@ -34,11 +34,11 @@ class JSONExporter:
     def export_config(
         self,
         client_type: str,
-        config_data: Dict[str, Any],
+        config_data: dict[str, Any],
         subscription_url: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
         validate: Optional[bool] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Export configuration in standardized JSON format.
 
         Args:
@@ -54,7 +54,7 @@ class JSONExporter:
         """
         try:
             # Create base export structure
-            exported: Dict[str, Any] = {
+            exported: dict[str, Any] = {
                 "client": client_type,
                 "version": self._get_client_version(client_type),
                 "created_at": datetime.now(timezone.utc).isoformat(),
@@ -88,10 +88,10 @@ class JSONExporter:
     def export_to_file(
         self,
         client_type: str,
-        config_data: Dict[str, Any],
+        config_data: dict[str, Any],
         output_path: Path,
         subscription_url: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
         pretty: bool = True,
         validate: Optional[bool] = None,
     ) -> Path:
@@ -129,19 +129,18 @@ class JSONExporter:
             self.logger.info(f"Exported {client_type} configuration to {output_path}")
             return output_path
 
-        except Exception as e:
-            self.logger.error(
-                f"Failed to export {client_type} configuration to file: {e}"
-            )
-            raise
+        except Exception:
+            raise Exception(
+                f"Failed to export {client_type} configuration to file"
+            ) from None
 
     def export_multiple(
         self,
-        configs: List[Dict[str, Any]],
+        configs: list[dict[str, Any]],
         output_dir: Path,
         pretty: bool = True,
         validate: Optional[bool] = None,
-    ) -> List[Path]:
+    ) -> list[Path]:
         """Export multiple configurations.
 
         Args:
@@ -191,8 +190,8 @@ class JSONExporter:
     def _generate_metadata(
         self,
         subscription_url: Optional[str] = None,
-        additional_metadata: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        additional_metadata: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
         """Generate metadata for exported configuration."""
         metadata = {
             "source": subscription_url or "manual",
@@ -206,7 +205,7 @@ class JSONExporter:
 
         return metadata
 
-    def _calculate_checksum(self, data: Dict[str, Any]) -> str:
+    def _calculate_checksum(self, data: dict[str, Any]) -> str:
         """Calculate SHA256 checksum of configuration data."""
         # Create a copy without checksum for consistent hashing
         data_copy = data.copy()
@@ -236,7 +235,7 @@ class JSONExporter:
         }
         return client_versions.get(client_type, "unknown")
 
-    def _validate_export(self, exported: Dict[str, Any]) -> None:
+    def _validate_export(self, exported: dict[str, Any]) -> None:
         """Validate exported configuration structure.
 
         Args:
@@ -263,7 +262,7 @@ class JSONExporter:
             raise ConfigValidationError("'metadata' field must be a dictionary")
 
     def _validate_client_config(
-        self, client_type: str, config_data: Dict[str, Any]
+        self, client_type: str, config_data: dict[str, Any]
     ) -> None:
         """Validate client-specific configuration.
 
@@ -298,7 +297,7 @@ class JSONExporterFactory:
     """Factory for creating JSON exporters with different configurations."""
 
     @staticmethod
-    def create_exporter(config: Optional[Dict[str, Any]] = None) -> JSONExporter:
+    def create_exporter(config: Optional[dict[str, Any]] = None) -> JSONExporter:
         """Create JSON exporter with optional configuration."""
         validate = config.get("validate", True) if config else True
         return JSONExporter(validate=validate)

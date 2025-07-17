@@ -4,7 +4,7 @@ This module provides formatting functions for displaying
 data in the TUI interface in a user-friendly way.
 """
 
-from typing import List, Optional
+from typing import Optional
 
 from sboxmgr.subscription.models import ParsedServer
 
@@ -100,7 +100,7 @@ def _get_normalized_tag(server: ParsedServer) -> str:
 
 
 def format_subscription_info(
-    url: str, server_count: int = 0, tags: Optional[List[str]] = None
+    url: str, server_count: int = 0, tags: Optional[list[str]] = None
 ) -> str:
     """Format subscription information for display.
 

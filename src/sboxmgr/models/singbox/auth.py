@@ -1,6 +1,6 @@
 """Authentication models for sing-box configuration."""
 
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -17,7 +17,7 @@ class AuthenticationUser(BaseModel):
 class AuthenticationConfig(BaseModel):
     """Global authentication configuration."""
 
-    users: List[AuthenticationUser] = Field(
+    users: list[AuthenticationUser] = Field(
         ..., description="List of users for authentication."
     )
     set_system_proxy: Optional[bool] = Field(

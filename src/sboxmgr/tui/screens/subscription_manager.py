@@ -4,7 +4,6 @@ This module implements the subscription management screen that allows
 users to add, remove, and manage their subscription sources.
 """
 
-from typing import List
 
 from textual import on
 from textual.app import ComposeResult
@@ -174,7 +173,7 @@ class SubscriptionManagerScreen(Screen):
         logger.debug("[DEBUG] SubscriptionManagerScreen.__init__ called")
 
         super().__init__(**kwargs)
-        self._subscriptions: List = []
+        self._subscriptions: list = []
         self._active_subscription: str = ""
 
         logger.debug("[DEBUG] SubscriptionManagerScreen.__init__ completed")
@@ -363,7 +362,7 @@ class SubscriptionManagerScreen(Screen):
 
         return Static("\n".join(info_lines))
 
-    def _create_subscription_items(self) -> List:
+    def _create_subscription_items(self) -> list:
         """Create subscription item widgets.
 
         Returns:

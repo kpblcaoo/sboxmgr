@@ -1,6 +1,6 @@
 """Routing models for sing-box configuration."""
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -11,7 +11,7 @@ class RouteRule(BaseModel):
     type: Optional[str] = Field(
         default=None, description="Rule type, e.g., 'default', 'logical'."
     )
-    inbound: Optional[List[str]] = Field(
+    inbound: Optional[list[str]] = Field(
         default=None, description="List of inbound tags to match."
     )
     ip_version: Optional[Literal[4, 6]] = Field(
@@ -20,46 +20,46 @@ class RouteRule(BaseModel):
     network: Optional[str] = Field(
         default=None, description="Network type to match, e.g., 'tcp', 'udp'."
     )
-    protocol: Optional[Union[str, List[str]]] = Field(
+    protocol: Optional[Union[str, list[str]]] = Field(
         default=None, description="Protocols to match, e.g., 'dns' or ['http', 'tls']."
     )
-    domain: Optional[List[str]] = Field(
+    domain: Optional[list[str]] = Field(
         default=None, description="Exact domain names to match."
     )
-    domain_suffix: Optional[List[str]] = Field(
+    domain_suffix: Optional[list[str]] = Field(
         default=None, description="Domain suffixes to match."
     )
-    domain_keyword: Optional[List[str]] = Field(
+    domain_keyword: Optional[list[str]] = Field(
         default=None, description="Domain keywords to match."
     )
-    domain_regex: Optional[List[str]] = Field(
+    domain_regex: Optional[list[str]] = Field(
         default=None, description="Domain regex patterns to match."
     )
-    geosite: Optional[List[str]] = Field(
+    geosite: Optional[list[str]] = Field(
         default=None, description="Geosite categories to match."
     )
-    source_geoip: Optional[List[str]] = Field(
+    source_geoip: Optional[list[str]] = Field(
         default=None, description="Source GeoIP codes to match."
     )
-    source_ip_cidr: Optional[List[str]] = Field(
+    source_ip_cidr: Optional[list[str]] = Field(
         default=None, description="Source IP CIDR ranges to match."
     )
-    source_port: Optional[List[int]] = Field(
+    source_port: Optional[list[int]] = Field(
         default=None, description="Source ports to match."
     )
-    source_port_range: Optional[List[str]] = Field(
+    source_port_range: Optional[list[str]] = Field(
         default=None, description="Source port ranges to match, e.g., ['80:90']."
     )
-    port: Optional[List[int]] = Field(
+    port: Optional[list[int]] = Field(
         default=None, description="Destination ports to match."
     )
-    port_range: Optional[List[str]] = Field(
+    port_range: Optional[list[str]] = Field(
         default=None, description="Destination port ranges to match."
     )
-    process_name: Optional[List[str]] = Field(
+    process_name: Optional[list[str]] = Field(
         default=None, description="Process names to match."
     )
-    user: Optional[List[str]] = Field(default=None, description="Usernames to match.")
+    user: Optional[list[str]] = Field(default=None, description="Usernames to match.")
     invert: Optional[bool] = Field(
         default=None, description="Invert rule matching logic."
     )
@@ -71,7 +71,7 @@ class RouteRule(BaseModel):
 class RouteConfig(BaseModel):
     """Routing configuration."""
 
-    rules: Optional[List[RouteRule]] = Field(
+    rules: Optional[list[RouteRule]] = Field(
         default=None, description="List of routing rules."
     )
     final: Optional[str] = Field(default=None, description="Default outbound tag.")
@@ -84,10 +84,10 @@ class RouteConfig(BaseModel):
     default_mark: Optional[int] = Field(
         default=None, ge=0, description="Default routing mark."
     )
-    geoip: Optional[Dict[str, Any]] = Field(
+    geoip: Optional[dict[str, Any]] = Field(
         default=None, description="GeoIP database settings."
     )
-    geosite: Optional[Dict[str, Any]] = Field(
+    geosite: Optional[dict[str, Any]] = Field(
         default=None, description="Geosite database settings."
     )
 

@@ -1,7 +1,8 @@
 """Tests for SubscriptionManagerScreen."""
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import Mock, patch
 
 from sboxmgr.tui.screens.subscription_manager import SubscriptionManagerScreen
 

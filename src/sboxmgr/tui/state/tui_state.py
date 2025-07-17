@@ -8,7 +8,7 @@ Integrated with the profile system for persistent storage.
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from sboxmgr.core.orchestrator import Orchestrator
 from sboxmgr.subscription.models import ParsedServer, SubscriptionSource
@@ -87,13 +87,13 @@ class TUIState:
     active_config: Optional[UserConfig] = None
 
     # Subscription state
-    subscriptions: List[SubscriptionSource] = field(default_factory=list)
+    subscriptions: list[SubscriptionSource] = field(default_factory=list)
     active_subscription: Optional[str] = None
 
     # Server state
-    servers: List[ParsedServer] = field(default_factory=list)
-    excluded_servers: List[str] = field(default_factory=list)
-    selected_servers: List[str] = field(default_factory=list)
+    servers: list[ParsedServer] = field(default_factory=list)
+    excluded_servers: list[str] = field(default_factory=list)
+    selected_servers: list[str] = field(default_factory=list)
 
     # UI state
     current_screen: str = "welcome"
@@ -497,7 +497,7 @@ class TUIState:
         """Clear all server exclusions."""
         self.excluded_servers.clear()
 
-    def set_exclusions(self, exclusions: List[str]) -> None:
+    def set_exclusions(self, exclusions: list[str]) -> None:
         """Set server exclusions and save to profile.
 
         Args:

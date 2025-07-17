@@ -47,7 +47,7 @@ def test_cli_export_with_real_url(
         assert config_file.exists()
 
         # Verify file content
-        with open(config_file, "r") as f:
+        with open(config_file) as f:
             content = f.read()
             assert len(content) > 0
             assert '"log"' in content or '"outbounds"' in content
@@ -179,7 +179,7 @@ def test_cli_with_different_formats(
             assert config_file.exists()
 
             # Verify file content
-            with open(config_file, "r") as f:
+            with open(config_file) as f:
                 content = f.read()
                 assert len(content) > 0
 
