@@ -1,6 +1,6 @@
 """DNS models for sing-box configuration."""
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -23,7 +23,7 @@ class DnsServer(BaseModel):
     strategy: Optional[DomainStrategy] = Field(
         default=None, description="Domain resolution strategy."
     )
-    detours: Optional[List[str]] = Field(
+    detours: Optional[list[str]] = Field(
         default=None, description="List of detour outbound tags."
     )
     client_ip: Optional[str] = Field(
@@ -37,7 +37,7 @@ class DnsRule(BaseModel):
     """DNS routing rule."""
 
     type: str = Field(..., description="Rule type, e.g., 'default', 'logical'.")
-    inbound: Optional[List[str]] = Field(
+    inbound: Optional[list[str]] = Field(
         default=None, description="List of inbound tags to match."
     )
     ip_version: Optional[Literal[4, 6]] = Field(
@@ -46,46 +46,46 @@ class DnsRule(BaseModel):
     network: Optional[str] = Field(
         default=None, description="Network type to match, e.g., 'tcp', 'udp'."
     )
-    protocol: Optional[List[str]] = Field(
+    protocol: Optional[list[str]] = Field(
         default=None, description="Protocols to match, e.g., ['http', 'tls']."
     )
-    domain: Optional[List[str]] = Field(
+    domain: Optional[list[str]] = Field(
         default=None, description="Exact domain names to match."
     )
-    domain_suffix: Optional[List[str]] = Field(
+    domain_suffix: Optional[list[str]] = Field(
         default=None, description="Domain suffixes to match."
     )
-    domain_keyword: Optional[List[str]] = Field(
+    domain_keyword: Optional[list[str]] = Field(
         default=None, description="Domain keywords to match."
     )
-    domain_regex: Optional[List[str]] = Field(
+    domain_regex: Optional[list[str]] = Field(
         default=None, description="Domain regex patterns to match."
     )
-    geosite: Optional[List[str]] = Field(
+    geosite: Optional[list[str]] = Field(
         default=None, description="Geosite categories to match."
     )
-    source_geoip: Optional[List[str]] = Field(
+    source_geoip: Optional[list[str]] = Field(
         default=None, description="Source GeoIP codes to match."
     )
-    source_ip_cidr: Optional[List[str]] = Field(
+    source_ip_cidr: Optional[list[str]] = Field(
         default=None, description="Source IP CIDR ranges to match."
     )
-    source_port: Optional[List[int]] = Field(
+    source_port: Optional[list[int]] = Field(
         default=None, description="Source ports to match."
     )
-    source_port_range: Optional[List[str]] = Field(
+    source_port_range: Optional[list[str]] = Field(
         default=None, description="Source port ranges to match, e.g., ['80:90']."
     )
-    port: Optional[List[int]] = Field(
+    port: Optional[list[int]] = Field(
         default=None, description="Destination ports to match."
     )
-    port_range: Optional[List[str]] = Field(
+    port_range: Optional[list[str]] = Field(
         default=None, description="Destination port ranges to match."
     )
-    process_name: Optional[List[str]] = Field(
+    process_name: Optional[list[str]] = Field(
         default=None, description="Process names to match."
     )
-    user: Optional[List[str]] = Field(default=None, description="Usernames to match.")
+    user: Optional[list[str]] = Field(default=None, description="Usernames to match.")
     invert: Optional[bool] = Field(
         default=None, description="Invert rule matching logic."
     )
@@ -98,10 +98,10 @@ class DnsRule(BaseModel):
 class DnsConfig(BaseModel):
     """DNS configuration for sing-box."""
 
-    servers: Optional[List[DnsServer]] = Field(
+    servers: Optional[list[DnsServer]] = Field(
         default=None, description="List of DNS servers."
     )
-    rules: Optional[List[DnsRule]] = Field(
+    rules: Optional[list[DnsRule]] = Field(
         default=None, description="DNS routing rules."
     )
     final: Optional[str] = Field(default=None, description="Default DNS server tag.")
@@ -120,11 +120,11 @@ class DnsConfig(BaseModel):
     reverse_mapping: Optional[bool] = Field(
         default=None, description="Enable reverse DNS mapping."
     )
-    fakeip: Optional[Dict[str, Any]] = Field(
+    fakeip: Optional[dict[str, Any]] = Field(
         default=None,
         description="FakeIP settings, e.g., {'enabled': true, 'inet4_range': '198.18.0.0/15'}.",
     )
-    hosts: Optional[Dict[str, Union[str, List[str]]]] = Field(
+    hosts: Optional[dict[str, Union[str, list[str]]]] = Field(
         default=None, description="Host mappings, e.g., {'example.com': '1.2.3.4'}."
     )
     client_subnet: Optional[str] = Field(

@@ -58,15 +58,13 @@ def test_subscription_with_enhanced_validation():
     """Test subscription processing with enhanced validation."""
 
     # Создаем тестовую подписку с разными протоколами
-    test_data = """
+    test_data = b"""
 # Test subscription with various protocols
 ss://aes-256-gcm:password@example.com:8388#TestSS
 vless://uuid@host:443?encryption=none#TestVLESS
 vmess://eyJ2IjoiMiIsInBzIjoiVGVzdCIsImFkZCI6IjEyNy4wLjAuMSIsInBvcnQiOiI0NDMiLCJpZCI6InV1aWQiLCJhaWQiOiIwIiwibmV0IjoidGNwIiwidHlwZSI6Im5vbmUiLCJob3N0IjoiIiwicGF0aCI6IiIsInRscyI6IiJ9
 trojan://password@host:443#TestTrojan
-""".encode(
-        "utf-8"
-    )
+"""
 
     # Сохраняем во временный файл
     import tempfile

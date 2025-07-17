@@ -93,11 +93,12 @@ repos:
   # 6. Wheel integrity check
   - repo: local
     hooks:
-      - id: check-wheel-integrity
-        name: Check that build includes all expected modules
+      - id: check-wheel-contents
+        name: Check Wheel Contents
         entry: python .hooks/check_build_contents.py
         language: system
         pass_filenames: false
+        always_run: true
 
 # Global settings
 default_language_version:

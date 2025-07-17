@@ -37,7 +37,7 @@ def load_profile_from_file(profile_path: str) -> Optional["FullProfile"]:
         raise typer.Exit(1)
 
     try:
-        with open(profile_path, "r", encoding="utf-8") as f:
+        with open(profile_path, encoding="utf-8") as f:
             profile_data = json.load(f)
 
         # Create FullProfile from loaded data with better error handling
@@ -52,12 +52,12 @@ def load_profile_from_file(profile_path: str) -> Optional["FullProfile"]:
         for error in ve.errors():
             field_path = ".".join(str(loc) for loc in error["loc"])
             typer.echo(f"   - {field_path}: {error['msg']}", err=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from ve
     except Exception as e:
         typer.echo(
             f"❌ {t('cli.error.failed_to_load_profile').format(error=str(e))}", err=True
         )
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 def load_client_profile_from_file(
@@ -79,7 +79,7 @@ def load_client_profile_from_file(
         raise typer.Exit(1)
 
     try:
-        with open(client_profile_path, "r", encoding="utf-8") as f:
+        with open(client_profile_path, encoding="utf-8") as f:
             client_profile_data = json.load(f)
 
         # Create ClientProfile from loaded data with better error handling
@@ -94,10 +94,10 @@ def load_client_profile_from_file(
         for error in ve.errors():
             field_path = ".".join(str(loc) for loc in error["loc"])
             typer.echo(f"   - {field_path}: {error['msg']}", err=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from ve
     except Exception as e:
         typer.echo(f"❌ Failed to load client profile: {e}", err=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 def create_client_profile_from_profile(

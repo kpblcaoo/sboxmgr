@@ -5,7 +5,7 @@ transforming ParsedServer objects into appropriate sing-box outbound models.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Import new sing-box models
 from sboxmgr.models.singbox import (
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 def convert_shadowsocks(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[ShadowsocksOutbound]:
     """Convert ParsedServer to ShadowsocksOutbound."""
     method = server.meta.get("cipher") or server.meta.get("method") or server.security
@@ -60,7 +60,7 @@ def convert_shadowsocks(
 
 
 def convert_vmess(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[VmessOutbound]:
     """Convert ParsedServer to VmessOutbound."""
     outbound_data = {
@@ -105,7 +105,7 @@ def convert_vmess(
 
 
 def convert_vless(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[VlessOutbound]:
     """Convert ParsedServer to VlessOutbound."""
     outbound_data = {
@@ -139,7 +139,7 @@ def convert_vless(
 
 
 def convert_trojan(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[TrojanOutbound]:
     """Convert ParsedServer to TrojanOutbound."""
     outbound_data = {
@@ -172,7 +172,7 @@ def convert_trojan(
 
 
 def convert_hysteria2(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[Hysteria2Outbound]:
     """Convert ParsedServer to Hysteria2Outbound."""
     outbound_data = {
@@ -207,7 +207,7 @@ def convert_hysteria2(
 
 
 def convert_wireguard(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[WireGuardOutbound]:
     """Convert ParsedServer to WireGuardOutbound."""
     outbound_data = {
@@ -241,7 +241,7 @@ def convert_wireguard(
 
 
 def convert_tuic(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[TuicOutbound]:
     """Convert ParsedServer to TuicOutbound."""
     outbound_data = {
@@ -275,7 +275,7 @@ def convert_tuic(
 
 
 def convert_shadowtls(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[ShadowTlsOutbound]:
     """Convert ParsedServer to ShadowTlsOutbound."""
     outbound_data = {
@@ -310,7 +310,7 @@ def convert_shadowtls(
 
 
 def convert_anytls(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[AnyTlsOutbound]:
     """Convert ParsedServer to AnyTlsOutbound."""
     outbound_data = {
@@ -332,7 +332,7 @@ def convert_anytls(
 
 
 def convert_tor(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[TorOutbound]:
     """Convert ParsedServer to TorOutbound."""
     outbound_data = base_data.copy()
@@ -351,7 +351,7 @@ def convert_tor(
 
 
 def convert_ssh(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[SshOutbound]:
     """Convert ParsedServer to SshOutbound."""
     outbound_data = {**base_data, "user": server.username or server.meta.get("user")}
@@ -378,7 +378,7 @@ def convert_ssh(
 
 
 def convert_http(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[HttpOutbound]:
     """Convert ParsedServer to HttpOutbound."""
     outbound_data = base_data.copy()
@@ -395,7 +395,7 @@ def convert_http(
 
 
 def convert_socks(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[SocksOutbound]:
     """Convert ParsedServer to SocksOutbound."""
     outbound_data = base_data.copy()
@@ -412,7 +412,7 @@ def convert_socks(
 
 
 def convert_direct(
-    server: ParsedServer, base_data: Dict[str, Any]
+    server: ParsedServer, base_data: dict[str, Any]
 ) -> Optional[DirectOutbound]:
     """Convert ParsedServer to DirectOutbound."""
     outbound_data = base_data.copy()

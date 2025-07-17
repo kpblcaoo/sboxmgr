@@ -4,13 +4,13 @@ import base64
 import json
 import logging
 import re
-from typing import Any, List, Optional, Protocol
+from typing import Any, Optional, Protocol
 
 
 class ParserProtocol(Protocol):
     """Protocol for parser objects that can parse subscription data."""
 
-    def parse(self, raw: bytes) -> List[Any]:
+    def parse(self, raw: bytes) -> list[Any]:
         """Parse raw subscription data into server configurations."""
         ...
 

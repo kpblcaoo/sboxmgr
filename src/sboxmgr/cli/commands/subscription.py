@@ -5,7 +5,6 @@ and displays available server configurations. This is the only remaining
 command in this module after the CLI reorganization.
 """
 
-from typing import List
 
 import typer
 
@@ -146,7 +145,7 @@ def list_servers(
         mgr = SubscriptionManager(source)
         exclusions = load_exclusions(dry_run=True)
         context = PipelineContext(mode="default", debug_level=debug)
-        user_routes: List[str] = []
+        user_routes: list[str] = []
         config = mgr.export_config(
             exclusions=exclusions, user_routes=user_routes, context=context
         )
@@ -161,10 +160,10 @@ def list_servers(
             if violations or warnings or info_results:
                 typer.echo("\n📊 Policy Evaluation Summary:")
                 typer.echo(
-                    f"   Servers denied: {len(set(v['server'] for v in violations))}"
+                    f"   Servers denied: {len({v['server'] for v in violations})}"
                 )
                 typer.echo(
-                    f"   Servers with warnings: {len(set(w['server'] for w in warnings))}"
+                    f"   Servers with warnings: {len({w['server'] for w in warnings})}"
                 )
                 typer.echo(f"   Total policy violations: {len(violations)}")
                 typer.echo(f"   Total policy warnings: {len(warnings)}")
@@ -224,11 +223,9 @@ def list_servers(
 
             typer.echo("\n📊 Policy Evaluation Summary:")
             typer.echo(f"   Total servers processed: {len(servers)}")
+            typer.echo(f"   Servers denied: {len({v['server'] for v in violations})}")
             typer.echo(
-                f"   Servers denied: {len(set(v['server'] for v in violations))}"
-            )
-            typer.echo(
-                f"   Servers with warnings: {len(set(w['server'] for w in warnings))}"
+                f"   Servers with warnings: {len({w['server'] for w in warnings})}"
             )
             typer.echo(f"   Total policy violations: {len(violations)}")
             typer.echo(f"   Total policy warnings: {len(warnings)}")
@@ -259,5 +256,5 @@ def list_servers(
                 typer.echo(server_info)
 
     except Exception as e:
-        typer.echo(f"{t('error.subscription_failed')}: {e}", err=True)
-        raise typer.Exit(1)
+        typer.echo(f"❌ {t('cli.error.subscription_export_failed')}: {e}", err=True)
+        raise typer.Exit(1) from e

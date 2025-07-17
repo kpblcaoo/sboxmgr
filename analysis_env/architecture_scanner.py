@@ -9,7 +9,6 @@ import json
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List
 
 import networkx as nx
 
@@ -58,7 +57,7 @@ class ArchitecturalAnalyzer:
     def _analyze_file(self, file_path: Path):
         """Анализ одного файла через AST"""
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 tree = ast.parse(f.read(), filename=str(file_path))
 
             relative_path = file_path.relative_to(self.project_root)
@@ -144,7 +143,7 @@ class ArchitecturalAnalyzer:
                         }
                     )
 
-    def get_orchestrator_candidates(self) -> List[Dict]:
+    def get_orchestrator_candidates(self) -> list[dict]:
         """Поиск кандидатов на роль Orchestrator"""
         candidates = []
 
@@ -197,7 +196,7 @@ class ArchitecturalAnalyzer:
 
         return sorted(candidates, key=lambda x: x["score"], reverse=True)
 
-    def get_missing_components(self, target_schema: Dict) -> Dict:
+    def get_missing_components(self, target_schema: dict) -> dict:
         """Сравнение с целевой схемой"""
         missing = {"classes": [], "interfaces": [], "patterns": []}
 
@@ -237,7 +236,7 @@ class ArchitecturalAnalyzer:
 
         return missing
 
-    def generate_report(self) -> Dict:
+    def generate_report(self) -> dict:
         """Генерация полного отчета"""
         orchestrator_candidates = self.get_orchestrator_candidates()
         missing_components = self.get_missing_components({})

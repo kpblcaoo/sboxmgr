@@ -4,7 +4,7 @@ This module provides utility functions for validating protocol configurations,
 generating schemas, and converting between different model types.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from .outbound_models import (
     BlockOutbound,
@@ -32,7 +32,7 @@ from .protocol_configs import (
 )
 
 
-def validate_protocol_config(config: Dict[str, Any], protocol: str) -> ProtocolConfig:
+def validate_protocol_config(config: dict[str, Any], protocol: str) -> ProtocolConfig:
     """Validate protocol-specific configuration.
 
     Args:
@@ -62,7 +62,7 @@ def validate_protocol_config(config: Dict[str, Any], protocol: str) -> ProtocolC
     return config_class(**config)
 
 
-def generate_protocol_schema(protocol: str) -> Dict[str, Any]:
+def generate_protocol_schema(protocol: str) -> dict[str, Any]:
     """Generate JSON schema for protocol configuration.
 
     Args:
@@ -87,7 +87,7 @@ def generate_protocol_schema(protocol: str) -> Dict[str, Any]:
     return protocol_map[protocol].model_json_schema()
 
 
-def validate_outbound_config(config: Dict[str, Any]) -> OutboundModel:
+def validate_outbound_config(config: dict[str, Any]) -> OutboundModel:
     """Validate outbound configuration.
 
     Args:
@@ -123,7 +123,7 @@ def validate_outbound_config(config: Dict[str, Any]) -> OutboundModel:
     return outbound_class(**config)
 
 
-def generate_outbound_schema() -> Dict[str, Any]:
+def generate_outbound_schema() -> dict[str, Any]:
     """Generate JSON schema for outbound configuration.
 
     Returns:
@@ -236,7 +236,7 @@ def convert_protocol_to_outbound(
 
 
 def create_outbound_from_dict(
-    config: Dict[str, Any], tag: Optional[str] = None
+    config: dict[str, Any], tag: Optional[str] = None
 ) -> OutboundModel:
     """Create outbound configuration from dictionary.
 

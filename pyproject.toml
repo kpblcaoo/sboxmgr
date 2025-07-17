@@ -97,6 +97,11 @@ ignore = [
     "B008",  # do not perform function calls in argument defaults
     "B006",  # do not use mutable data structures for argument defaults
     "F403",  # wildcard imports (used for plugin registration)
+    # B904: raise exceptions with 'from' in except blocks (CLI patterns)
+    # Исключено, потому что большинство срабатываний связано с Typer CLI и raise typer.Exit(1),
+    # что является стандартной практикой для CLI-приложений и не несёт пользы для читаемости или надёжности.
+    # См. обсуждение в https://github.com/astral-sh/ruff/issues/10038 и https://github.com/tiangolo/typer/issues/570
+    "B904",
 ]
 
 [tool.ruff.format]

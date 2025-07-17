@@ -4,7 +4,6 @@ This module provides tag normalization functionality to ensure consistent
 server naming across different parsers and data sources.
 """
 
-from typing import List
 
 from ...models import ParsedServer, PipelineContext
 
@@ -30,8 +29,8 @@ class EnrichmentTagNormalizer:
         self.prefer_names = prefer_names
 
     def process(
-        self, servers: List[ParsedServer], context: PipelineContext
-    ) -> List[ParsedServer]:
+        self, servers: list[ParsedServer], context: PipelineContext
+    ) -> list[ParsedServer]:
         """Normalize tags for all servers.
 
         Args:

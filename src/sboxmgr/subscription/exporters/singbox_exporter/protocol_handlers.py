@@ -1,14 +1,14 @@
 """Protocol handlers for sing-box exporter."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from sboxmgr.subscription.models import ParsedServer
 
 logger = logging.getLogger(__name__)
 
 
-def export_wireguard(server: ParsedServer) -> Optional[Dict[str, Any]]:
+def export_wireguard(server: ParsedServer) -> Optional[dict[str, Any]]:
     """Export WireGuard server configuration.
 
     Args:
@@ -57,7 +57,7 @@ def export_wireguard(server: ParsedServer) -> Optional[Dict[str, Any]]:
     return outbound
 
 
-def export_hysteria2(server: ParsedServer) -> Optional[Dict[str, Any]]:
+def export_hysteria2(server: ParsedServer) -> Optional[dict[str, Any]]:
     """Export Hysteria2 server configuration.
 
     Args:
@@ -87,7 +87,7 @@ def export_hysteria2(server: ParsedServer) -> Optional[Dict[str, Any]]:
     return outbound
 
 
-def export_tuic(server: ParsedServer) -> Optional[Dict[str, Any]]:
+def export_tuic(server: ParsedServer) -> Optional[dict[str, Any]]:
     """Export TUIC server configuration.
 
     Args:
@@ -131,7 +131,7 @@ def export_tuic(server: ParsedServer) -> Optional[Dict[str, Any]]:
     return outbound
 
 
-def export_shadowtls(server: ParsedServer) -> Optional[Dict[str, Any]]:
+def export_shadowtls(server: ParsedServer) -> Optional[dict[str, Any]]:
     """Export ShadowTLS server configuration.
 
     Args:
@@ -168,7 +168,7 @@ def export_shadowtls(server: ParsedServer) -> Optional[Dict[str, Any]]:
     return outbound
 
 
-def export_anytls(server: ParsedServer) -> Optional[Dict[str, Any]]:
+def export_anytls(server: ParsedServer) -> Optional[dict[str, Any]]:
     """Export AnyTLS server configuration.
 
     Args:
@@ -202,7 +202,7 @@ def export_anytls(server: ParsedServer) -> Optional[Dict[str, Any]]:
     return outbound
 
 
-def export_tor(server: ParsedServer) -> Optional[Dict[str, Any]]:
+def export_tor(server: ParsedServer) -> Optional[dict[str, Any]]:
     """Export Tor server configuration.
 
     Args:
@@ -231,7 +231,7 @@ def export_tor(server: ParsedServer) -> Optional[Dict[str, Any]]:
     return outbound
 
 
-def export_ssh(server: ParsedServer) -> Optional[Dict[str, Any]]:
+def export_ssh(server: ParsedServer) -> Optional[dict[str, Any]]:
     """Export SSH server configuration.
 
     Args:
@@ -289,7 +289,7 @@ def _get_server_tag(server: ParsedServer, protocol_type: str) -> str:
         return f"{protocol_type}-{server.address}"
 
 
-def get_protocol_dispatcher() -> Dict[str, callable]:
+def get_protocol_dispatcher() -> dict[str, callable]:
     """Get protocol dispatcher mapping.
 
     Returns:

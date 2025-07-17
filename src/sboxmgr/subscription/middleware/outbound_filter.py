@@ -7,7 +7,7 @@ types from the final configuration.
 Implements Phase 3 architecture with profile integration.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ..models import ClientProfile, ParsedServer, PipelineContext
@@ -37,7 +37,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
 
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize outbound filter with configuration.
 
         Args:
@@ -51,10 +51,10 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
 
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Filter servers based on outbound type exclusions.
 
         Args:
@@ -113,7 +113,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
 
         return filtered_servers
 
-    def _extract_exclude_config(self, profile: Optional[FullProfile]) -> Dict[str, Any]:
+    def _extract_exclude_config(self, profile: Optional[FullProfile]) -> dict[str, Any]:
         """Extract exclude configuration from profile.
 
         Args:
@@ -156,7 +156,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
 
     def can_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
     ) -> bool:
@@ -183,7 +183,7 @@ class OutboundFilterMiddleware(ProfileAwareMiddleware):
         server_types = {server.type for server in servers}
         return bool(server_types & exclude_config["exclude_types"])
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get middleware metadata.
 
         Returns:

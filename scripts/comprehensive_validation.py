@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any
 
 # Добавляем путь к проекту
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -54,8 +54,8 @@ class ComprehensiveValidator:
         return None
 
     def validate_with_pydantic(
-        self, config: Dict[str, Any], protocol: str
-    ) -> Tuple[bool, str]:
+        self, config: dict[str, Any], protocol: str
+    ) -> tuple[bool, str]:
         """Валидирует конфигурацию с помощью Pydantic."""
         try:
             # Создаем полную конфигурацию sing-box
@@ -76,8 +76,8 @@ class ComprehensiveValidator:
             return False, f"❌ Pydantic ошибка: {str(e)}"
 
     def validate_with_singbox(
-        self, config: Dict[str, Any], protocol: str
-    ) -> Tuple[bool, str]:
+        self, config: dict[str, Any], protocol: str
+    ) -> tuple[bool, str]:
         """Валидирует конфигурацию с помощью sing-box."""
         if not self.singbox_path:
             return False, "❌ Sing-box не установлен"
@@ -123,7 +123,7 @@ class ComprehensiveValidator:
             print(f"\n📋 Валидация {protocol}...")
 
             try:
-                with open(config_file, "r", encoding="utf-8") as f:
+                with open(config_file, encoding="utf-8") as f:
                     config = json.load(f)
 
                 # Pydantic валидация

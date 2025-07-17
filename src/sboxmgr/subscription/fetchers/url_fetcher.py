@@ -8,7 +8,7 @@ for secure and efficient subscription data fetching.
 
 import gzip
 import threading
-from typing import Dict, Optional, Tuple
+from typing import Optional
 
 import requests
 
@@ -36,7 +36,7 @@ class URLFetcher(BaseFetcher):
     """
 
     _cache_lock = threading.Lock()
-    _fetch_cache: Dict[Tuple[str, Optional[str], str], bytes] = {}
+    _fetch_cache: dict[tuple[str, Optional[str], str], bytes] = {}
 
     def __init__(self, source: SubscriptionSource):
         """Initialize URLFetcher.

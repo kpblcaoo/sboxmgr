@@ -247,7 +247,7 @@ class MainScreen(Screen):
     def on_key(self, event) -> None:
         """Handle arrow key navigation for menu buttons."""
         # Собираем все кнопки меню
-        buttons = [w for w in self.query(".menu-buttons Button")]
+        buttons = list(self.query(".menu-buttons Button"))
         if not buttons:
             return
         focused = self.focused

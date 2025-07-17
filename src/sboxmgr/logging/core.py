@@ -6,7 +6,7 @@ structured logging, and trace ID propagation.
 
 import logging
 import logging.config
-from typing import Dict, Optional
+from typing import Optional
 
 from ..config.models import LoggingConfig
 from .formatters import create_formatter
@@ -31,7 +31,7 @@ class LoggingCore:
         """
         self.config = config
         self._configured = False
-        self._handlers: Dict[str, logging.Handler] = {}
+        self._handlers: dict[str, logging.Handler] = {}
         self._root_logger = logging.getLogger("sboxmgr")
 
     def configure(self) -> None:
@@ -82,7 +82,7 @@ class LoggingCore:
         structured_adapter = getattr(logger, "_structured_adapter", None)
         if structured_adapter is None:
             structured_adapter = StructuredLoggerAdapter(logger)
-            setattr(logger, "_structured_adapter", structured_adapter)
+            logger._structured_adapter = structured_adapter
 
         return structured_adapter
 
@@ -123,7 +123,7 @@ class LoggingCore:
                     f"Warning: Failed to setup {sink_name} sink: {e}", file=sys.stderr
                 )
 
-    def _determine_sinks(self) -> Dict[str, Dict]:
+    def _determine_sinks(self) -> dict[str, dict]:
         """Determine which sinks to set up based on configuration.
 
         Returns:
@@ -153,7 +153,7 @@ class LoggingCore:
         return sinks
 
     def _create_sink_handler(
-        self, sink_name: str, sink_config: Dict
+        self, sink_name: str, sink_config: dict
     ) -> logging.Handler:
         """Create handler for a specific sink.
 

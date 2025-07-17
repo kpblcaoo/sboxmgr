@@ -2,12 +2,14 @@
 
 import pytest
 from typer.testing import CliRunner
+
 from sboxmgr.cli.commands.export.cli import app as export_app
+
 
 @pytest.fixture(autouse=True)
 def mock_all_fetchers_and_parser():
-    from unittest.mock import patch, Mock
     import base64
+    from unittest.mock import Mock, patch
     valid_data = b"ss://YWVzLTI1Ni1nY206cGFzc0BleGFtcGxlLmNvbTo4Mzg4#test"
     encoded = base64.b64encode(valid_data)
     # Mock fetchers

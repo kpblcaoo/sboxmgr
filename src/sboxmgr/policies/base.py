@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class PolicySeverity(Enum):
@@ -35,7 +35,7 @@ class PolicyResult:
 
     allowed: bool
     reason: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     policy_name: str = ""
     timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     severity: PolicySeverity = PolicySeverity.DENY
@@ -108,7 +108,7 @@ class PolicyEvaluationResult:
 
     """
 
-    results: List[PolicyResult] = field(default_factory=list)
+    results: list[PolicyResult] = field(default_factory=list)
     server_identifier: str = ""
 
     def add_result(self, result: PolicyResult) -> None:
@@ -141,7 +141,7 @@ class PolicyEvaluationResult:
         return any(r.severity == PolicySeverity.WARNING for r in self.results)
 
     @property
-    def denials(self) -> List[PolicyResult]:
+    def denials(self) -> list[PolicyResult]:
         """Get all denial results.
 
         Returns:
@@ -151,7 +151,7 @@ class PolicyEvaluationResult:
         return [r for r in self.results if r.severity == PolicySeverity.DENY]
 
     @property
-    def warnings(self) -> List[PolicyResult]:
+    def warnings(self) -> list[PolicyResult]:
         """Get all warning results.
 
         Returns:
@@ -161,7 +161,7 @@ class PolicyEvaluationResult:
         return [r for r in self.results if r.severity == PolicySeverity.WARNING]
 
     @property
-    def info_results(self) -> List[PolicyResult]:
+    def info_results(self) -> list[PolicyResult]:
         """Get all info results.
 
         Returns:
@@ -197,7 +197,7 @@ class PolicyEvaluationResult:
         else:
             return "Allowed by all policies"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization.
 
         Returns:
@@ -242,8 +242,8 @@ class PolicyContext:
     server: Optional[Any] = None
     user: Optional[str] = None
     location: Optional[Any] = None
-    env: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    env: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def get_server_identifier(self) -> str:
         """Get a consistent identifier for the server being evaluated.
@@ -363,7 +363,7 @@ class BasePolicy(ABC):
         """
         raise NotImplementedError
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """Validate policy configuration.
 
         Args:

@@ -8,7 +8,7 @@ better error handling and debugging throughout the subscription pipeline.
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -47,5 +47,5 @@ class PipelineError(BaseModel):
     type: ErrorType
     stage: str
     message: str
-    context: Dict[str, Any] = Field(default_factory=dict)
+    context: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

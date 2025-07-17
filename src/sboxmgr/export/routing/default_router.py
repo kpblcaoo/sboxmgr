@@ -6,7 +6,7 @@ that direct traffic through the configured proxy servers with basic fallback
 handling.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from .base_router import BaseRoutingPlugin
 
@@ -21,11 +21,11 @@ class DefaultRouter(BaseRoutingPlugin):
 
     def generate_routes(
         self,
-        servers: List[Any],
-        exclusions: List[str],
-        user_routes: List[Dict],
-        context: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
+        servers: list[Any],
+        exclusions: list[str],
+        user_routes: list[dict],
+        context: Optional[dict[str, Any]] = None,
+    ) -> list[dict[str, Any]]:
         """Generate default routing rules for sing-box configuration.
 
         Creates basic routing rules that direct traffic through proxy servers
@@ -48,7 +48,7 @@ class DefaultRouter(BaseRoutingPlugin):
                 f"[DefaultRouter] context={context}, exclusions={exclusions}, user_routes={user_routes}"
             )
 
-        rules: List[Dict[str, Any]] = []
+        rules: list[dict[str, Any]] = []
 
         # 1. DNS hijacking rule (высокий приоритет)
         rules.append({"protocol": "dns", "action": "hijack-dns"})
@@ -59,8 +59,8 @@ class DefaultRouter(BaseRoutingPlugin):
         # 3. Process exclusions - excluded IPs should go direct
         if exclusions:
             # Convert exclusions to CIDR if they are IP addresses
-            excluded_cidrs: List[str] = []
-            excluded_domains: List[str] = []
+            excluded_cidrs: list[str] = []
+            excluded_domains: list[str] = []
 
             for exclusion in exclusions:
                 # Try to determine if it's an IP or domain

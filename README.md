@@ -1,7 +1,7 @@
 # sboxmgr — Subbox Configuration Manager
 
-[![Build Status](https://github.com/kpblcaoo/sboxmgr/actions/workflows/ci-dev.yml/badge.svg)](https://github.com/kpblcaoo/sboxmgr/actions)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/kpblcaoo/sboxmgr/actions)
+[![Release Pipeline](https://github.com/kpblcaoo/sboxmgr/actions/workflows/release.yml/badge.svg)](https://github.com/kpblcaoo/sboxmgr/actions/workflows/release.yml)
+[![Quality Check](https://github.com/kpblcaoo/sboxmgr/actions/workflows/quality-check.yml/badge.svg)](https://github.com/kpblcaoo/sboxmgr/actions/workflows/quality-check.yml)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green.svg)](LICENSE)
 
 A Python CLI tool for managing configuration files. Part of the subbox ecosystem for configuration management and generation.

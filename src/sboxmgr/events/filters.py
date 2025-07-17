@@ -2,7 +2,8 @@
 
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Pattern, Set
+from re import Pattern
+from typing import Any, Optional
 
 from .types import EventData, EventType
 
@@ -38,7 +39,7 @@ class TypeFilter(EventFilter):
             *event_types: Event types to match
 
         """
-        self.event_types: Set[EventType] = set(event_types)
+        self.event_types: set[EventType] = set(event_types)
 
     def matches(self, event_data: EventData) -> bool:
         """Check if event type matches filter.

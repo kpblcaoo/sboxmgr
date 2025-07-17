@@ -1,0 +1,94 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff isort black mypy pre-commit
+
+    - name: Run Ruff linter
+      run: |
+        ruff check src/ tests/ examples/ scripts/
+
+    - name: Run Ruff formatter
+      run: |
+        ruff format --check src/ tests/ examples/ scripts/
+
+    - name: Run isort
+      run: |
+        isort --check-only src/ tests/ examples/ scripts/
+
+    - name: Run MyPy type checker
+      run: |
+        mypy src/sboxmgr/ --ignore-missing-imports
+
+    - name: Check docstrings
+      run: |
+        pip install pydocstyle
+        pydocstyle src/sboxmgr/ --ignore=D100,D104,D105,D106,D107
+
+    - name: Check for security issues
+      run: |
+        pip install bandit
+        bandit -r src/sboxmgr/ -f json -o bandit-report.json || true
+
+    - name: Upload security report
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-report
+        path: bandit-report.json
+
+  documentation:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install sphinx sphinx-rtd-theme
+
+    - name: Check if docs can be built
+      run: |
+        if [ -d "docs" ]; then
+          cd docs
+          make html
+        else
+          echo "No docs directory found, skipping documentation build"
+        fi
+
+    - name: Check README formatting
+      run: |
+        if [ -f "README.md" ]; then
+          echo "README.md exists"
+        else
+          echo "Warning: README.md not found"
+        fi

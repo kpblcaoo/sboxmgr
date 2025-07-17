@@ -7,7 +7,7 @@ criteria like performance, geography, user preferences, etc.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Optional
 
 from .models import ParsedServer
 
@@ -22,11 +22,11 @@ class BaseSelector(ABC):
     @abstractmethod
     def select(
         self,
-        servers: List[ParsedServer],
-        user_routes: Optional[List[str]] = None,
-        exclusions: Optional[List[str]] = None,
+        servers: list[ParsedServer],
+        user_routes: Optional[list[str]] = None,
+        exclusions: Optional[list[str]] = None,
         mode: Optional[str] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Select servers based on the specified criteria.
 
         Args:
@@ -54,11 +54,11 @@ class DefaultSelector(BaseSelector):
 
     def select(
         self,
-        servers: List[ParsedServer],
-        user_routes: Optional[List[str]] = None,
-        exclusions: Optional[List[str]] = None,
+        servers: list[ParsedServer],
+        user_routes: Optional[list[str]] = None,
+        exclusions: Optional[list[str]] = None,
         mode: Optional[str] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Select servers using default filtering logic.
 
         Applies exclusion filtering first, then user route filtering if specified.

@@ -4,7 +4,7 @@ This module provides shared configuration models used across different VPN proto
 including TLS, stream settings, and multiplexing configurations.
 """
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -23,7 +23,7 @@ class TlsConfig(BaseModel):
 
     enabled: Optional[bool] = Field(True, description="Enable TLS for connection")
     server_name: Optional[str] = Field(None, description="SNI for TLS connection")
-    alpn: Optional[List[str]] = Field(
+    alpn: Optional[list[str]] = Field(
         None, description="ALPN protocols list (e.g., h2, http/1.1)"
     )
     min_version: Optional[Literal["1.0", "1.1", "1.2", "1.3"]] = Field(
@@ -43,7 +43,7 @@ class TlsConfig(BaseModel):
     allow_insecure: Optional[bool] = Field(
         False, description="Allow insecure connections (not recommended)"
     )
-    ech: Optional[Dict[str, Any]] = Field(
+    ech: Optional[dict[str, Any]] = Field(
         None, description="ECH settings for SNI protection"
     )
     utls: Optional[UtlsConfig] = Field(

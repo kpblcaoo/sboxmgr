@@ -8,7 +8,6 @@ from the same file sources.
 
 import threading
 from pathlib import Path
-from typing import Dict, Tuple
 
 from ..base_fetcher import BaseFetcher
 from ..models import SubscriptionSource
@@ -30,9 +29,9 @@ class FileFetcher(BaseFetcher):
 
     """
 
-    SUPPORTED_SCHEMES: Tuple[str, ...] = ("file",)
+    SUPPORTED_SCHEMES: tuple[str, ...] = ("file",)
     _cache_lock = threading.Lock()
-    _fetch_cache: Dict[Tuple[str], bytes] = {}
+    _fetch_cache: dict[tuple[str], bytes] = {}
 
     def __init__(self, source: SubscriptionSource):
         """Initialize FileFetcher.

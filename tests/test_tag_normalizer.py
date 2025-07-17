@@ -1,7 +1,5 @@
 """Tests for TagNormalizer middleware."""
 
-import pytest
-from unittest.mock import Mock
 
 from sboxmgr.subscription.middleware.tag_normalizer import TagNormalizer
 from sboxmgr.subscription.models import ParsedServer, PipelineContext

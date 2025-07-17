@@ -1,7 +1,8 @@
 """Tests for ServerListScreen."""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from sboxmgr.tui.screens.server_list import ServerListScreen
 

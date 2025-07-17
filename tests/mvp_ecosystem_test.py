@@ -17,7 +17,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -351,7 +351,7 @@ class MVPEcosystemTest:
             print(f"❌ Ecosystem integration test failed: {e}")
             return False
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all MVP tests and return results.
 
         Returns:

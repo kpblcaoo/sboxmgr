@@ -11,14 +11,14 @@ import pytest
 
 from sboxmgr.configs.models import (
     AgentConfig,
-    ExportFormat,
     ExportConfig,
+    ExportFormat,
     FilterConfig,
-    UserConfig,
     RoutingConfig,
     SubscriptionConfig,
-    UIMode,
     UIConfig,
+    UIMode,
+    UserConfig,
 )
 
 
@@ -136,7 +136,7 @@ class TestConfigExamples:
         if not config_path.exists():
             pytest.skip(f"Example config not found: {config_path}")
 
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             data = json.load(f)
 
         config = UserConfig(**data)

@@ -5,9 +5,10 @@ Provides automatic trace ID flow through call stack without manual parameter pas
 """
 
 import uuid
+from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import Generator, Optional
+from typing import Optional
 
 # Context variable for trace ID propagation
 trace_id_var: ContextVar[str] = ContextVar("trace_id", default="")

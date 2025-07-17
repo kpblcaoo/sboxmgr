@@ -5,7 +5,7 @@ import json
 import logging
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 from sboxmgr.utils.env import get_exclusion_file
 from sboxmgr.utils.file import atomic_write_json, file_exists, read_json
@@ -53,7 +53,7 @@ class ExclusionManager(ExclusionManagerInterface):
         self._exclusions: Optional[ExclusionList] = None
         self._lock = threading.RLock()
         self.logger = logger or logging.getLogger(__name__)
-        self._servers_cache: Dict[str, Any] = {}  # Cache for server data
+        self._servers_cache: dict[str, Any] = {}  # Cache for server data
 
         if auto_load:
             self._load()
@@ -149,7 +149,7 @@ class ExclusionManager(ExclusionManagerInterface):
                 self.logger.debug(f"Server {server_id} already excluded")
                 return False
 
-    def add_from_server_data(self, server_data: Dict, reason: str = None) -> bool:
+    def add_from_server_data(self, server_data: dict, reason: str = None) -> bool:
         """Add server to exclusions from server configuration data.
 
         Args:
@@ -196,7 +196,7 @@ class ExclusionManager(ExclusionManagerInterface):
         exclusions = self._load()
         return exclusions.contains(server_id)
 
-    def list_all(self) -> List[Dict]:
+    def list_all(self) -> list[dict]:
         """List all exclusions."""
         exclusions = self._load()
         return [ex.model_dump(mode="json") for ex in exclusions.exclusions]
@@ -211,7 +211,7 @@ class ExclusionManager(ExclusionManagerInterface):
                 self._save()
             return count
 
-    def filter_servers(self, servers: List[Any]) -> List[Any]:
+    def filter_servers(self, servers: list[Any]) -> list[Any]:
         """Filter servers by removing excluded ones.
 
         Args:
@@ -259,7 +259,7 @@ class ExclusionManager(ExclusionManagerInterface):
         """Check if exclusions are loaded in memory."""
         return self._exclusions is not None
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """Get exclusion statistics."""
         exclusions = self._load()
         return {
@@ -273,8 +273,8 @@ class ExclusionManager(ExclusionManagerInterface):
     # NEW: Server listing and parsing functions
     def set_servers_cache(
         self,
-        json_data: Union[Dict[str, Any], List[Dict[str, Any]]],
-        supported_protocols: List[str],
+        json_data: Union[dict[str, Any], list[dict[str, Any]]],
+        supported_protocols: list[str],
     ) -> None:
         """Cache server data for index-based operations."""
         # Handle both dict with "outbounds" key and direct list of servers
@@ -300,10 +300,10 @@ class ExclusionManager(ExclusionManagerInterface):
 
     def list_servers(
         self,
-        json_data: Optional[Dict[str, Any]] = None,
-        supported_protocols: Optional[List[str]] = None,
+        json_data: Optional[dict[str, Any]] = None,
+        supported_protocols: Optional[list[str]] = None,
         show_excluded: bool = True,
-    ) -> List[Tuple[int, Dict[str, Any], bool]]:
+    ) -> list[tuple[int, dict[str, Any], bool]]:
         """List available servers with indices and exclusion status.
 
         Returns:
@@ -320,7 +320,7 @@ class ExclusionManager(ExclusionManagerInterface):
         result = []
 
         # Use sequential numbering for display, not original indices
-        for display_idx, (original_idx, server) in enumerate(
+        for display_idx, (_original_idx, server) in enumerate(
             self._servers_cache["supported_servers"]
         ):
             server_id = generate_server_id(server)
@@ -332,7 +332,7 @@ class ExclusionManager(ExclusionManagerInterface):
         return result
 
     def format_server_info(
-        self, server: Dict[str, Any], index: int, is_excluded: bool = False
+        self, server: dict[str, Any], index: int, is_excluded: bool = False
     ) -> str:
         """Format server information for display."""
         tag = server.get("tag", "N/A")
@@ -369,11 +369,11 @@ class ExclusionManager(ExclusionManagerInterface):
 
     def add_by_index(
         self,
-        json_data: Union[Dict[str, Any], List[Dict[str, Any]]],
-        indices: List[int],
-        supported_protocols: List[str],
+        json_data: Union[dict[str, Any], list[dict[str, Any]]],
+        indices: list[int],
+        supported_protocols: list[str],
         reason: str = "Added by index",
-    ) -> List[str]:
+    ) -> list[str]:
         """Add exclusions by server indices.
 
         Args:
@@ -427,11 +427,11 @@ class ExclusionManager(ExclusionManagerInterface):
 
     def add_by_wildcard(
         self,
-        json_data: Union[Dict[str, Any], List[Dict[str, Any]]],
-        patterns: List[str],
-        supported_protocols: List[str],
+        json_data: Union[dict[str, Any], list[dict[str, Any]]],
+        patterns: list[str],
+        supported_protocols: list[str],
         reason: str = "Added by wildcard",
-    ) -> List[str]:
+    ) -> list[str]:
         """Add exclusions by wildcard patterns matching server tags.
 
         Returns:
@@ -479,10 +479,10 @@ class ExclusionManager(ExclusionManagerInterface):
     # NEW: Enhanced remove methods with index support
     def remove_by_index(
         self,
-        json_data: Union[Dict[str, Any], List[Dict[str, Any]]],
-        indices: List[int],
-        supported_protocols: List[str],
-    ) -> List[str]:
+        json_data: Union[dict[str, Any], list[dict[str, Any]]],
+        indices: list[int],
+        supported_protocols: list[str],
+    ) -> list[str]:
         """Remove exclusions by server indices.
 
         Args:
@@ -526,7 +526,7 @@ class ExclusionManager(ExclusionManagerInterface):
         return removed_ids
 
     # NEW: Bulk operations
-    def add_multiple(self, entries: List[Tuple[str, str, str]]) -> List[str]:
+    def add_multiple(self, entries: list[tuple[str, str, str]]) -> list[str]:
         """Add multiple exclusions at once.
 
         Args:
@@ -554,7 +554,7 @@ class ExclusionManager(ExclusionManagerInterface):
 
         return added_ids
 
-    def remove_multiple(self, server_ids: List[str]) -> List[str]:
+    def remove_multiple(self, server_ids: list[str]) -> list[str]:
         """Remove multiple exclusions at once.
 
         Returns:

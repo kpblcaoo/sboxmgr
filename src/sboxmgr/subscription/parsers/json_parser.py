@@ -8,7 +8,6 @@ ParsedServer objects for consistent processing.
 
 import json
 import re
-from typing import List, Tuple
 
 from sboxmgr.utils.env import get_debug_level
 
@@ -26,7 +25,7 @@ class JSONParser(BaseParser):
     subscription formats and provides robust error handling.
     """
 
-    def parse(self, raw: bytes) -> List[ParsedServer]:
+    def parse(self, raw: bytes) -> list[ParsedServer]:
         """Parse JSON subscription data into ParsedServer objects.
 
         Args:
@@ -60,7 +59,7 @@ class TolerantJSONParser(BaseParser):
     the data before parsing to improve compatibility with various sources.
     """
 
-    def parse(self, raw: bytes) -> List[ParsedServer]:
+    def parse(self, raw: bytes) -> list[ParsedServer]:
         """Parse tolerant JSON subscription data into ParsedServer objects.
 
         Args:
@@ -86,7 +85,7 @@ class TolerantJSONParser(BaseParser):
         # TODO: распарсить data в список ParsedServer (заглушка)
         return []
 
-    def _strip_comments_and_validate(self, raw_data: str) -> Tuple[str, list]:
+    def _strip_comments_and_validate(self, raw_data: str) -> tuple[str, list]:
         removed = []
         # Удаляем leading комментарии и шум до первой { или [
         lines = raw_data.splitlines()

@@ -30,7 +30,7 @@ def is_ai_lang(code):
     lang_file = i18n_dir / f"{code}.json"
     if lang_file.exists():
         try:
-            with open(lang_file, "r", encoding="utf-8") as f:
+            with open(lang_file, encoding="utf-8") as f:
                 data = json.load(f)
             return "__note__" in data and "AI-generated" in data["__note__"]
         except Exception:

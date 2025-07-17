@@ -5,19 +5,18 @@
 """
 
 from pathlib import Path
-from typing import List, Tuple
 
 
 def get_file_content(file_path: Path) -> str:
     """Читает содержимое файла."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return f.read()
     except Exception as e:
         return f"# ОШИБКА ЧТЕНИЯ ФАЙЛА: {e}\n\n"
 
 
-def collect_plans() -> List[Tuple[str, str]]:
+def collect_plans() -> list[tuple[str, str]]:
     """Собирает все файлы из папки plans."""
     plans_dir = Path("plans")
     if not plans_dir.exists():
@@ -35,7 +34,7 @@ def collect_plans() -> List[Tuple[str, str]]:
     return sorted(files)
 
 
-def collect_docs() -> List[Tuple[str, str]]:
+def collect_docs() -> list[tuple[str, str]]:
     """Собирает все файлы из папки docs."""
     docs_dir = Path("docs")
     if not docs_dir.exists():
@@ -53,7 +52,7 @@ def collect_docs() -> List[Tuple[str, str]]:
     return sorted(files)
 
 
-def collect_readme_files() -> List[Tuple[str, str]]:
+def collect_readme_files() -> list[tuple[str, str]]:
     """Собирает README файлы из корня проекта."""
     root_dir = Path(".")
     files = []
@@ -66,7 +65,7 @@ def collect_readme_files() -> List[Tuple[str, str]]:
     return sorted(files)
 
 
-def collect_schemas() -> List[Tuple[str, str]]:
+def collect_schemas() -> list[tuple[str, str]]:
     """Собирает JSON схемы."""
     schemas_dir = Path("schemas")
     if not schemas_dir.exists():

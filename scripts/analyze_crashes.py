@@ -31,7 +31,7 @@ def analyze_crashes():
 
     for crash_file in crash_files:
         try:
-            with open(crash_file, "r") as f:
+            with open(crash_file) as f:
                 crash_data = json.load(f)
 
             # Extract error message

@@ -3,10 +3,8 @@
 import json
 import os
 import tempfile
-from unittest.mock import Mock, patch
 
 import pytest
-import typer
 from typer.testing import CliRunner
 
 from sboxmgr.cli.commands.export import app

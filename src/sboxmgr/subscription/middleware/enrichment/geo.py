@@ -1,7 +1,7 @@
 """Geographic enrichment functionality for server data."""
 
 import ipaddress
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from ...models import ParsedServer, PipelineContext
 
@@ -20,7 +20,7 @@ class GeoEnricher:
             geo_database_path: Optional path to GeoIP database file
         """
         self.geo_database_path = geo_database_path
-        self._cache: Dict[str, Dict[str, Any]] = {}
+        self._cache: dict[str, dict[str, Any]] = {}
 
     def enrich(self, server: ParsedServer, context: PipelineContext) -> ParsedServer:
         """Apply geographic enrichment to a server.
@@ -56,7 +56,7 @@ class GeoEnricher:
 
         return server
 
-    def _lookup_geographic_info(self, address: str) -> Dict[str, Any]:
+    def _lookup_geographic_info(self, address: str) -> dict[str, Any]:
         """Look up geographic information for an address.
 
         Args:
@@ -87,7 +87,7 @@ class GeoEnricher:
 
         return geo_info
 
-    def _lookup_with_geoip2(self, address: str) -> Dict[str, Any]:
+    def _lookup_with_geoip2(self, address: str) -> dict[str, Any]:
         """Lookup geographic info using GeoIP2 database.
 
         Args:
@@ -125,7 +125,7 @@ class GeoEnricher:
 
         return geo_info
 
-    def _lookup_with_tld(self, address: str) -> Dict[str, Any]:
+    def _lookup_with_tld(self, address: str) -> dict[str, Any]:
         """Lookup geographic info using domain TLD.
 
         Args:

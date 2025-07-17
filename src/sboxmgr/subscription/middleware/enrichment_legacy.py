@@ -9,7 +9,7 @@ Implements Phase 3 architecture with profile integration.
 
 import hashlib
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
@@ -45,7 +45,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
     middleware_type = "enrichment"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize enrichment middleware.
 
         Args:
@@ -71,16 +71,16 @@ class EnrichmentMiddleware(TransformMiddleware):
         self.max_enrichment_time = self.config.get("max_enrichment_time", 1.0)
 
         # Initialize caches
-        self._geo_cache: Dict[str, Dict[str, Any]] = {}
-        self._performance_cache: Dict[str, Dict[str, Any]] = {}
-        self._security_cache: Dict[str, Dict[str, Any]] = {}
+        self._geo_cache: dict[str, dict[str, Any]] = {}
+        self._performance_cache: dict[str, dict[str, Any]] = {}
+        self._security_cache: dict[str, dict[str, Any]] = {}
 
     def _do_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Enrich servers with additional metadata.
 
         Args:
@@ -124,7 +124,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
     def _extract_enrichment_config(
         self, profile: Optional[FullProfile]
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Extract enrichment configuration from profile.
 
         Args:
@@ -159,7 +159,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-        enrichment_config: Optional[Dict[str, Any]] = None,
+        enrichment_config: Optional[dict[str, Any]] = None,
     ) -> ParsedServer:
         """Enrich a single server with metadata.
 
@@ -269,7 +269,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         return server
 
-    def _lookup_geographic_info(self, address: str) -> Dict[str, Any]:
+    def _lookup_geographic_info(self, address: str) -> dict[str, Any]:
         """Look up geographic information for an address.
 
         Args:
@@ -593,7 +593,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         else:
             return "system"
 
-    def _get_protocol_vulnerabilities(self, protocol_type: str) -> List[str]:
+    def _get_protocol_vulnerabilities(self, protocol_type: str) -> list[str]:
         """Get known vulnerabilities for protocol.
 
         Args:
@@ -612,7 +612,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         return vulnerabilities.get(protocol_type.lower(), [])
 
-    def _get_recommended_settings(self, server: ParsedServer) -> Dict[str, Any]:
+    def _get_recommended_settings(self, server: ParsedServer) -> dict[str, Any]:
         """Get recommended security settings for server.
 
         Args:
@@ -644,7 +644,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-        enrichment_config: Optional[Dict[str, Any]] = None,
+        enrichment_config: Optional[dict[str, Any]] = None,
     ) -> ParsedServer:
         """Apply custom enrichment based on profile configuration.
 

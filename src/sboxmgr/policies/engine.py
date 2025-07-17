@@ -5,7 +5,6 @@ a collection of policies against given contexts.
 """
 
 import logging
-from typing import List
 
 from .base import BasePolicy, PolicyContext, PolicyEvaluationResult, PolicyResult
 
@@ -24,7 +23,7 @@ class PolicyEngine:
 
     def __init__(self):
         """Initialize the policy engine."""
-        self.policies: List[BasePolicy] = []
+        self.policies: list[BasePolicy] = []
         self.logger = logging.getLogger(__name__)
 
     def register(self, policy: BasePolicy) -> None:
@@ -153,7 +152,7 @@ class PolicyEngine:
 
     def get_policies(
         self, group: str = None, enabled_only: bool = True
-    ) -> List[BasePolicy]:
+    ) -> list[BasePolicy]:
         """Get policies with optional filtering.
 
         Args:

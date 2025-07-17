@@ -1,7 +1,7 @@
 """Performance enrichment functionality for server data."""
 
 import time
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from ...models import ParsedServer, PipelineContext
 
@@ -20,7 +20,7 @@ class PerformanceEnricher:
             cache_duration: How long to cache performance data in seconds
         """
         self.cache_duration = cache_duration
-        self._cache: Dict[str, Tuple[Dict[str, Any], float]] = {}
+        self._cache: dict[str, tuple[dict[str, Any], float]] = {}
 
     def enrich(self, server: ParsedServer, context: PipelineContext) -> ParsedServer:
         """Apply performance enrichment to a server.

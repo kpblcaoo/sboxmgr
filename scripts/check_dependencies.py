@@ -7,7 +7,6 @@ and that no critical imports fail.
 
 import importlib
 import sys
-from pathlib import Path
 
 # Core dependencies that should always be available
 CORE_DEPS = [

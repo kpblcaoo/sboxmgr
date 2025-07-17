@@ -1,6 +1,6 @@
 """Core subscription manager implementation."""
 
-from typing import List, Optional
+from typing import Optional
 
 from ..base_selector import DefaultSelector
 
@@ -95,8 +95,8 @@ class SubscriptionManager:
 
     def get_servers(
         self,
-        user_routes: Optional[List[str]] = None,
-        exclusions: Optional[List[str]] = None,
+        user_routes: Optional[list[str]] = None,
+        exclusions: Optional[list[str]] = None,
         mode: Optional[str] = None,
         context: Optional[PipelineContext] = None,
         force_reload: bool = False,
@@ -156,8 +156,8 @@ class SubscriptionManager:
 
     def export_config(
         self,
-        exclusions: Optional[List[str]] = None,
-        user_routes: Optional[List[str]] = None,
+        exclusions: Optional[list[str]] = None,
+        user_routes: Optional[list[str]] = None,
         context: Optional[PipelineContext] = None,
         routing_plugin=None,
         export_manager=None,
@@ -198,8 +198,8 @@ class SubscriptionManager:
 
     def _execute_pipeline(
         self,
-        user_routes: List[str],
-        exclusions: List[str],
+        user_routes: list[str],
+        exclusions: list[str],
         mode: str,
         context: PipelineContext,
     ) -> PipelineResult:

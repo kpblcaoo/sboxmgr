@@ -5,7 +5,7 @@ into appropriate sing-box inbound configurations.
 """
 
 import logging
-from typing import List, Union
+from typing import Union
 
 # Import new sing-box models
 from sboxmgr.models.singbox import (
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 def convert_client_profile_to_inbounds(
     profile: ClientProfile,
-) -> List[
+) -> list[
     Union[
         MixedInbound,
         SocksInbound,

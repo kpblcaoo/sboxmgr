@@ -6,7 +6,7 @@ well-defined schemas.
 """
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -149,7 +149,7 @@ class ValidationResponse(AgentResponse):
 
     """
 
-    errors: List[str] = Field(default_factory=list, description="Validation errors")
+    errors: list[str] = Field(default_factory=list, description="Validation errors")
     client_detected: Optional[ClientType] = Field(
         None, description="Detected client type"
     )
@@ -183,7 +183,7 @@ class CheckResponse(AgentResponse):
 
     """
 
-    clients: Dict[str, Dict[str, Any]] = Field(
+    clients: dict[str, dict[str, Any]] = Field(
         default_factory=dict, description="Client availability status"
     )
 

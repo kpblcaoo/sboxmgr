@@ -1,8 +1,9 @@
 """Tests for refactored SubscriptionManager."""
 
-import pytest
-from unittest.mock import Mock, patch
 import base64
+from unittest.mock import Mock, patch
+
+import pytest
 
 from sboxmgr.subscription.manager import SubscriptionManager
 from sboxmgr.subscription.models import PipelineContext, SubscriptionSource

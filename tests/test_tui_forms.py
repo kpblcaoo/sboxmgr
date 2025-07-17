@@ -1,10 +1,8 @@
 """Tests for TUI form components."""
 
-import pytest
-from pathlib import Path
 from unittest.mock import Mock, patch
 
-from sboxmgr.tui.components.forms import SubscriptionForm, ConfigGenerationForm
+from sboxmgr.tui.components.forms import ConfigGenerationForm, SubscriptionForm
 
 
 class TestSubscriptionForm:

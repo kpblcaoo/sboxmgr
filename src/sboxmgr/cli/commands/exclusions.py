@@ -144,7 +144,7 @@ def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
                 rprint(f"[red]❌ {error_msg}:[/red]")
                 rprint(f"[dim]   {url}[/dim]")
                 rprint(f"[yellow]💡 {t('cli.check_url_connection')}[/yellow]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
         return json_data
     except Exception as e:
         if json_output:
@@ -152,7 +152,7 @@ def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
         else:
             rprint(f"[red]❌ {t('error.config_load_failed')}: {e}[/red]")
             rprint(f"[dim]URL: {url}[/dim]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
 
 def _cache_server_data(
@@ -171,14 +171,14 @@ def _cache_server_data(
     """
     try:
         manager.set_servers_cache(json_data, SUPPORTED_PROTOCOLS)
-    except Exception as e:
-        error_msg = f"{t('error.invalid_server_format')}: {e}"
+    except Exception:
+        error_msg = t("error.invalid_server_format")
         if json_output:
             print(json.dumps({"error": error_msg}))
         else:
             rprint(f"[red]❌ {error_msg}[/red]")
             rprint(f"[yellow]💡 {t('cli.subscription_format_hint')}[/yellow]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
 
 def _show_usage_help() -> None:
@@ -371,7 +371,7 @@ def _add_exclusions(
                 print(json.dumps({"error": error_msg}))
             else:
                 rprint(f"[red]❌ {error_msg}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
 
         servers = manager._servers_cache["servers"]
         protocols = manager._servers_cache["supported_protocols"]
@@ -390,7 +390,7 @@ def _add_exclusions(
             else:
                 for error in errors:
                     rprint(f"[red]❌ {error}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
 
         added_by_index = manager.add_by_index(servers, indices, protocols, reason)
         added_ids.extend(added_by_index)
@@ -404,7 +404,7 @@ def _add_exclusions(
                 print(json.dumps({"error": error_msg}))
             else:
                 rprint(f"[red]❌ {error_msg}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
 
         servers = manager._servers_cache["servers"]
         protocols = manager._servers_cache["supported_protocols"]
@@ -459,7 +459,7 @@ def _remove_exclusions(
                 print(json.dumps({"error": error_msg}))
             else:
                 rprint(f"[red]❌ {error_msg}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
 
         servers = manager._servers_cache["servers"]
         protocols = manager._servers_cache["supported_protocols"]
@@ -478,7 +478,7 @@ def _remove_exclusions(
             else:
                 for error in errors:
                     rprint(f"[red]❌ {error}[/red]")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
 
         removed_by_index = manager.remove_by_index(servers, indices, protocols)
         removed_ids.extend(removed_by_index)

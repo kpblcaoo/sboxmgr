@@ -57,11 +57,11 @@ def detect_service_mode() -> bool:
         # Check parent process name
         parent_cmdline_path = f"/proc/{parent_pid}/cmdline"
         if os.path.exists(parent_cmdline_path):
-            with open(parent_cmdline_path, "r") as f:
+            with open(parent_cmdline_path) as f:
                 parent_cmd = f.read().strip("\x00")
                 if "systemd" in parent_cmd or parent_cmd.endswith("init"):
                     return True
-    except (OSError, IOError):
+    except OSError:
         # Can't determine parent process, continue with other checks
         pass
 
@@ -103,11 +103,11 @@ def detect_container_environment() -> bool:
 
     # Generic container detection via cgroups
     try:
-        with open("/proc/1/cgroup", "r") as f:
+        with open("/proc/1/cgroup") as f:
             cgroup_content = f.read()
             if "docker" in cgroup_content or "containerd" in cgroup_content:
                 return True
-    except (OSError, IOError):
+    except OSError:
         pass
 
     # Check for container-specific mount points
@@ -122,7 +122,7 @@ def detect_container_environment() -> bool:
                     environ_data = f.read().decode("utf-8", errors="ignore")
                     if "container" in environ_data.lower():
                         return True
-        except (OSError, IOError):
+        except OSError:
             continue
 
     return False

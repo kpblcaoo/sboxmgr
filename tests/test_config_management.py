@@ -1,10 +1,9 @@
 """Tests for configuration management functionality."""
 
-import json
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 import toml
@@ -47,7 +46,7 @@ class TestConfigManager:
             assert type(loaded_config.export.format) == type(config.export.format)
 
             # Verify TOML contains string values, not enum representations
-            with open(toml_path, 'r') as f:
+            with open(toml_path) as f:
                 toml_content = f.read()
             assert 'format = "sing-box"' in toml_content
             assert 'ExportFormat' not in toml_content
@@ -206,8 +205,9 @@ class TestConfigCLI:
             mock_instance = mock_manager.return_value
 
             # Mock list_configs to return test configs
-            from sboxmgr.configs.manager import ConfigInfo
             from datetime import datetime
+
+            from sboxmgr.configs.manager import ConfigInfo
 
             mock_configs = [
                 ConfigInfo(
@@ -379,14 +379,15 @@ class TestConfigEnvVars:
         """Test SBOXMGR_ACTIVE_CONFIG environment variable."""
         # This would need integration with the actual export command
         # For now, we just verify the parameter exists
-        from sboxmgr.cli.commands.export.cli import export
         import inspect
+
+        from sboxmgr.cli.commands.export.cli import export
 
         sig = inspect.signature(export)
         assert 'config' in sig.parameters
 
         # Verify the parameter has the correct envvar
-        config_param = sig.parameters['config']
+        sig.parameters['config']
         # Note: This is a simplified test - full testing would require
         # actual CLI invocation with environment variables
 

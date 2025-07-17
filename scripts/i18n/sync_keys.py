@@ -96,7 +96,7 @@ def main():
     used_keys = set(filter(is_i18n_key, used_keys))
     lang_data = {p.stem: load_json(p) for p in lang_files}
 
-    missing = sorted(list(used_keys - set(lang_data.get("en", {}).keys())))
+    missing = sorted(used_keys - set(lang_data.get("en", {}).keys()))
     unused = {
         lang: sorted([k for k in d if k not in used_keys])
         for lang, d in lang_data.items()
@@ -140,7 +140,7 @@ def main():
     # --- TEMPLATE ---
     if args.template and missing:
         template_path = lang_dir / TEMPLATE_FILE
-        save_json(template_path, {k: "" for k in missing})
+        save_json(template_path, dict.fromkeys(missing, ""))
         print(f"[INFO] Template with missing keys written to {template_path}")
 
     # --- AUTOFIX ---

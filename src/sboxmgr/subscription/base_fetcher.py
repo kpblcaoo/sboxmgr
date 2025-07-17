@@ -7,7 +7,6 @@ themselves using the @register decorator for automatic discovery.
 """
 
 from abc import ABC, abstractmethod
-from typing import Tuple
 from urllib.parse import urlparse
 
 from sboxmgr.utils.env import get_fetch_size_limit
@@ -81,7 +80,7 @@ class BaseFetcher(ABC):
     """
 
     plugin_type = "fetcher"
-    SUPPORTED_SCHEMES: Tuple[str, ...] = ("http", "https", "file")
+    SUPPORTED_SCHEMES: tuple[str, ...] = ("http", "https", "file")
 
     def __init__(self, source: SubscriptionSource):
         """Initialize the fetcher with a subscription source.

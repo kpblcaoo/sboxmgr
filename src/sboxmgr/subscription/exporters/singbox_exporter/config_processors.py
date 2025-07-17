@@ -1,7 +1,7 @@
 """Configuration processors for sing-box exporter."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from sboxmgr.subscription.models import ParsedServer
 
@@ -10,7 +10,7 @@ from .constants import CONFIG_WHITELIST, PROTOCOL_NORMALIZATION, TLS_CONFIG_FIEL
 logger = logging.getLogger(__name__)
 
 
-def create_base_outbound(server: ParsedServer, protocol_type: str) -> Dict[str, Any]:
+def create_base_outbound(server: ParsedServer, protocol_type: str) -> dict[str, Any]:
     """Create base outbound structure.
 
     Args:
@@ -40,7 +40,7 @@ def normalize_protocol_type(server_type: str) -> str:
 
 
 def process_shadowsocks_config(
-    outbound: Dict[str, Any], server: ParsedServer, meta: Dict[str, Any]
+    outbound: dict[str, Any], server: ParsedServer, meta: dict[str, Any]
 ) -> bool:
     """Process Shadowsocks configuration.
 
@@ -74,7 +74,7 @@ def process_shadowsocks_config(
     return True
 
 
-def process_transport_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
+def process_transport_config(outbound: dict[str, Any], meta: dict[str, Any]) -> None:
     """Process transport configuration (ws, grpc, tcp, udp).
 
     Args:
@@ -94,7 +94,7 @@ def process_transport_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> 
 
 
 def process_tls_config(
-    outbound: Dict[str, Any], meta: Dict[str, Any], protocol_type: str
+    outbound: dict[str, Any], meta: dict[str, Any], protocol_type: str
 ) -> None:
     """Process TLS configuration.
 
@@ -126,7 +126,7 @@ def process_tls_config(
 
 
 def process_auth_and_flow_config(
-    outbound: Dict[str, Any], meta: Dict[str, Any]
+    outbound: dict[str, Any], meta: dict[str, Any]
 ) -> None:
     """Process authentication and flow configuration.
 
@@ -144,7 +144,7 @@ def process_auth_and_flow_config(
 
 
 def process_tag_config(
-    outbound: Dict[str, Any], server: ParsedServer, meta: Dict[str, Any]
+    outbound: dict[str, Any], server: ParsedServer, meta: dict[str, Any]
 ) -> None:
     """Process tag configuration.
 
@@ -162,7 +162,7 @@ def process_tag_config(
         outbound["tag"] = f"{outbound['type']}-{server.address}"
 
 
-def process_additional_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
+def process_additional_config(outbound: dict[str, Any], meta: dict[str, Any]) -> None:
     """Process additional configuration parameters.
 
     Args:
@@ -177,7 +177,7 @@ def process_additional_config(outbound: Dict[str, Any], meta: Dict[str, Any]) ->
 
 def process_standard_server(
     server: ParsedServer, protocol_type: str
-) -> Optional[Dict[str, Any]]:
+) -> Optional[dict[str, Any]]:
     """Process standard server (non-special protocol).
 
     Args:

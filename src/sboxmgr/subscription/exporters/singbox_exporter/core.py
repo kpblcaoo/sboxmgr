@@ -1,7 +1,7 @@
 """Core exporter functions for sing-box configuration."""
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from sboxmgr.subscription.models import ClientProfile, ParsedServer, PipelineContext
 
@@ -13,7 +13,7 @@ from .protocol_handlers import get_protocol_dispatcher
 logger = logging.getLogger(__name__)
 
 
-def process_single_server(server: ParsedServer) -> Optional[Dict[str, Any]]:
+def process_single_server(server: ParsedServer) -> Optional[dict[str, Any]]:
     """Process a single server and return outbound configuration.
 
     Args:
@@ -52,7 +52,7 @@ def is_supported_protocol(protocol_type: str) -> bool:
     return protocol_type in SUPPORTED_PROTOCOLS
 
 
-def create_urltest_outbound(proxy_tags: List[str]) -> Dict[str, Any]:
+def create_urltest_outbound(proxy_tags: list[str]) -> dict[str, Any]:
     """Create URLTest outbound configuration.
 
     Args:
@@ -70,7 +70,7 @@ def create_urltest_outbound(proxy_tags: List[str]) -> Dict[str, Any]:
     return urltest_config
 
 
-def create_modern_routing_rules(proxy_tags: List[str]) -> List[Dict[str, Any]]:
+def create_modern_routing_rules(proxy_tags: list[str]) -> list[dict[str, Any]]:
     """Create modern routing rules with rule actions.
 
     Args:
@@ -99,10 +99,10 @@ def create_modern_routing_rules(proxy_tags: List[str]) -> List[Dict[str, Any]]:
 
 
 def singbox_export(
-    servers: List[ParsedServer],
-    routes: Optional[List[Dict[str, Any]]] = None,
+    servers: list[ParsedServer],
+    routes: Optional[list[dict[str, Any]]] = None,
     client_profile: Optional[ClientProfile] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Export parsed servers to sing-box configuration format (modern approach).
 
     This function exports configuration using the modern sing-box 1.11.0 approach
@@ -155,11 +155,11 @@ def singbox_export(
 
 
 def singbox_export_with_middleware(
-    servers: List[ParsedServer],
-    routes: Optional[List[Dict[str, Any]]] = None,
+    servers: list[ParsedServer],
+    routes: Optional[list[dict[str, Any]]] = None,
     client_profile: Optional[ClientProfile] = None,
     context: Optional[PipelineContext] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Export parsed servers to sing-box configuration format using middleware.
 
     This function exports configuration using middleware for outbound filtering

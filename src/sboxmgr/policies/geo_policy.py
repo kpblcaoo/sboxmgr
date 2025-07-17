@@ -4,7 +4,7 @@ This module provides policies for geographic restrictions including
 country-based and ASN-based filtering.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from .base import BasePolicy, PolicyContext, PolicyResult
 from .utils import extract_metadata_field, validate_mode
@@ -23,8 +23,8 @@ class CountryPolicy(BasePolicy):
 
     def __init__(
         self,
-        allowed_countries: Optional[List[str]] = None,
-        blocked_countries: Optional[List[str]] = None,
+        allowed_countries: Optional[list[str]] = None,
+        blocked_countries: Optional[list[str]] = None,
         mode: str = "whitelist",
     ):
         """Initialize country policy.
@@ -111,8 +111,8 @@ class ASNPolicy(BasePolicy):
 
     def __init__(
         self,
-        allowed_asns: Optional[List[int]] = None,
-        blocked_asns: Optional[List[int]] = None,
+        allowed_asns: Optional[list[int]] = None,
+        blocked_asns: Optional[list[int]] = None,
         mode: str = "blacklist",
     ):
         """Initialize ASN policy.

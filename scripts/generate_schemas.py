@@ -8,7 +8,7 @@ Implements ADR-0016: Pydantic as Single Source of Truth for Validation and Schem
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -45,7 +45,7 @@ except ImportError as e:
     sys.exit(1)
 
 
-def generate_schemas() -> Dict[str, Dict[str, Any]]:
+def generate_schemas() -> dict[str, dict[str, Any]]:
     """Generate JSON schemas from Pydantic models.
 
     Returns:
@@ -77,7 +77,7 @@ def generate_schemas() -> Dict[str, Dict[str, Any]]:
     return schemas
 
 
-def save_schemas(schemas: Dict[str, Dict[str, Any]], output_dir: Path) -> None:
+def save_schemas(schemas: dict[str, dict[str, Any]], output_dir: Path) -> None:
     """Save schemas to JSON files.
 
     Args:

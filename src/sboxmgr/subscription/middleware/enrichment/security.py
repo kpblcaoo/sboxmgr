@@ -1,6 +1,6 @@
 """Security enrichment functionality for server data."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from ...models import ParsedServer, PipelineContext
 
@@ -126,7 +126,7 @@ class SecurityEnricher:
         else:
             return "unknown"
 
-    def _get_protocol_vulnerabilities(self, protocol_type: str) -> List[str]:
+    def _get_protocol_vulnerabilities(self, protocol_type: str) -> list[str]:
         """Get known vulnerabilities for protocol.
 
         Args:
@@ -149,7 +149,7 @@ class SecurityEnricher:
 
         return vulnerabilities.get(protocol_type.lower(), [])
 
-    def _get_recommended_settings(self, server: ParsedServer) -> Dict[str, Any]:
+    def _get_recommended_settings(self, server: ParsedServer) -> dict[str, Any]:
         """Get recommended security settings for server.
 
         Args:

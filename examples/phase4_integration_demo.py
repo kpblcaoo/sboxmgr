@@ -16,7 +16,7 @@ Phase 4 enhancements:
 import json
 import os
 import tempfile
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 import typer
 
@@ -177,7 +177,7 @@ def _load_profile_from_file(profile_path: str) -> Optional[FullProfile]:
         raise typer.Exit(1)
 
     try:
-        with open(profile_path, "r", encoding="utf-8") as f:
+        with open(profile_path, encoding="utf-8") as f:
             profile_data = json.load(f)
 
         # Create FullProfile from loaded data
@@ -191,7 +191,7 @@ def _load_profile_from_file(profile_path: str) -> Optional[FullProfile]:
 
 
 def _create_postprocessor_chain_from_list(
-    processors: List[str],
+    processors: list[str],
 ) -> Optional["PostProcessorChain"]:
     """Create PostProcessorChain from list of processor names.
 
@@ -225,7 +225,7 @@ def _create_postprocessor_chain_from_list(
 
 
 
-def _create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
+def _create_middleware_chain_from_list(middleware: list[str]) -> list[Any]:
     """Create middleware chain from list of middleware names.
 
     Args:
@@ -521,7 +521,7 @@ def export(
 
     # Default mode: Generate and save configuration
     # Create backup if requested
-    backup_file = _create_backup_if_needed(output, backup)
+    _create_backup_if_needed(output, backup)
 
     # Write configuration to file
     _write_config_to_file(config_data, output, output_format)

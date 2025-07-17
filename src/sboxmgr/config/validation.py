@@ -6,7 +6,7 @@ Implements CONFIG-03 validation from ADR-0009.
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 
 class ConfigValidationError(Exception):
@@ -47,7 +47,7 @@ def validate_config_file(file_path: str) -> None:
 
     # Determine file format and validate syntax
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             content = f.read().strip()
 
         # Try to parse as JSON first (most common for sing-box configs)
@@ -64,19 +64,23 @@ def validate_config_file(file_path: str) -> None:
                 toml.loads(content)
                 return  # TOML is valid
             except toml.TomlDecodeError as e:
-                raise ConfigValidationError(f"Invalid TOML syntax in {file_path}: {e}")
-            except ImportError:
+                raise ConfigValidationError(
+                    f"Invalid TOML syntax in {file_path}: {e}"
+                ) from e
+            except ImportError as err:
                 raise ConfigValidationError(
                     f"TOML parser not available for {file_path}"
-                )
+                ) from err
 
     except Exception as e:
         if "JSONDecodeError" in str(type(e)):
-            raise ConfigValidationError(f"Invalid JSON syntax in {file_path}: {e}")
+            raise ConfigValidationError(
+                f"Invalid JSON syntax in {file_path}: {e}"
+            ) from e
         else:
             raise ConfigValidationError(
                 f"Error reading configuration file {file_path}: {e}"
-            )
+            ) from e
 
 
 def validate_log_level(level: str) -> str:
@@ -103,7 +107,7 @@ def validate_log_level(level: str) -> str:
     return normalized_level
 
 
-def validate_log_sinks(sinks: List[str]) -> List[str]:
+def validate_log_sinks(sinks: list[str]) -> list[str]:
     """Validate log sink configuration.
 
     Args:
@@ -181,7 +185,7 @@ def validate_file_path_writable(file_path: str, name: str = "file") -> str:
     return file_path
 
 
-def validate_environment_variables(config_dict: Dict[str, Any]) -> Dict[str, Any]:
+def validate_environment_variables(config_dict: dict[str, Any]) -> dict[str, Any]:
     """Validate environment variable configuration.
 
     Checks that environment variables are properly formatted and accessible.
@@ -219,7 +223,7 @@ def validate_environment_variables(config_dict: Dict[str, Any]) -> Dict[str, Any
     return config_dict
 
 
-def validate_service_configuration(config_dict: Dict[str, Any]) -> Dict[str, Any]:
+def validate_service_configuration(config_dict: dict[str, Any]) -> dict[str, Any]:
     """Validate service mode configuration.
 
     Args:
@@ -251,7 +255,7 @@ def validate_service_configuration(config_dict: Dict[str, Any]) -> Dict[str, Any
     return config_dict
 
 
-def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
+def get_validation_summary(config_dict: dict[str, Any]) -> dict[str, Any]:
     """Get validation summary for configuration.
 
     Args:
@@ -261,7 +265,7 @@ def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
         Dict containing validation results and recommendations.
 
     """
-    summary: Dict[str, Any] = {
+    summary: dict[str, Any] = {
         "valid": True,
         "warnings": [],
         "recommendations": [],
@@ -269,9 +273,9 @@ def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
     }
 
     # Add explicit type annotations for lists
-    warnings: List[str] = summary["warnings"]
-    recommendations: List[str] = summary["recommendations"]
-    errors: List[str] = summary["errors"]
+    warnings: list[str] = summary["warnings"]
+    recommendations: list[str] = summary["recommendations"]
+    errors: list[str] = summary["errors"]
 
     try:
         # Run all validations
@@ -309,5 +313,7 @@ def get_validation_summary(config_dict: Dict[str, Any]) -> Dict[str, Any]:
     except ConfigValidationError as e:
         summary["valid"] = False
         errors.append(str(e))
+    except Exception as e:
+        raise ValueError(f"Validation failed: {e}") from e
 
     return summary

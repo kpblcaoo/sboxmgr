@@ -11,7 +11,7 @@ import binascii
 import json
 import logging
 import re
-from typing import List, Optional, Tuple
+from typing import Optional
 from urllib.parse import parse_qs, unquote, urlparse
 
 from sboxmgr.utils.env import get_debug_level
@@ -40,7 +40,7 @@ class URIListParser(BaseParser):
     - Better error recovery and fallback mechanisms
     """
 
-    def parse(self, raw: bytes) -> List[ParsedServer]:
+    def parse(self, raw: bytes) -> list[ParsedServer]:
         """Parse URI list subscription data into ParsedServer objects.
 
         Args:
@@ -204,7 +204,7 @@ class URIListParser(BaseParser):
             # Fallback for malformed URL encoding
             return text
 
-    def _extract_ss_components(self, uri: str, line: str) -> Tuple[str, str]:
+    def _extract_ss_components(self, uri: str, line: str) -> tuple[str, str]:
         """Extract method:password and host:port components from SS URI.
 
         Enhanced to handle:
@@ -258,7 +258,7 @@ class URIListParser(BaseParser):
                     logger.warning(f"ss:// no host in line: {line[:100]}...")
                 return "", ""
 
-    def _parse_ss_credentials(self, method_pass: str, line: str) -> Tuple[str, str]:
+    def _parse_ss_credentials(self, method_pass: str, line: str) -> tuple[str, str]:
         """Parse method and password from method:password string.
 
         Enhanced to handle:
@@ -286,7 +286,7 @@ class URIListParser(BaseParser):
 
         return method, password
 
-    def _parse_ss_endpoint(self, host_port: str, line: str) -> Tuple[str, int, str]:
+    def _parse_ss_endpoint(self, host_port: str, line: str) -> tuple[str, int, str]:
         """Parse host and port from host:port string.
 
         Enhanced to handle:

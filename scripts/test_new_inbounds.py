@@ -61,13 +61,13 @@ def test_new_inbounds():
         # Test Pydantic validation
         try:
             if protocol == "naive":
-                inbound = NaiveInbound(**config)
+                NaiveInbound(**config)
             elif protocol == "redirect":
-                inbound = RedirectInbound(**config)
+                RedirectInbound(**config)
             elif protocol == "tproxy":
-                inbound = TproxyInbound(**config)
+                TproxyInbound(**config)
             elif protocol == "tun":
-                inbound = TunInbound(**config)
+                TunInbound(**config)
             else:
                 print(f"  ❌ Unknown protocol: {protocol}")
                 continue

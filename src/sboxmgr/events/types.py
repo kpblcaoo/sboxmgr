@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import Enum, IntEnum
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 from pydantic import BaseModel, ConfigDict
 
@@ -76,7 +76,7 @@ class EventData(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     event_type: EventType
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     source: str
     timestamp: datetime
     priority: EventPriority = EventPriority.NORMAL
@@ -108,5 +108,5 @@ class EventData(BaseModel):
 
 
 # Type aliases for convenience
-EventPayload = Dict[str, Any]
+EventPayload = dict[str, Any]
 EventCallback = Union[Callable[..., Any], Any]

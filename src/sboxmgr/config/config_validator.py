@@ -6,7 +6,7 @@ preventing runtime errors from invalid configurations.
 """
 
 import json
-from typing import Any, Dict
+from typing import Any
 
 from .validation import ConfigValidationError
 
@@ -33,13 +33,13 @@ def validate_temp_config_json(config_json: str) -> None:
         # First, validate JSON syntax
         config_data = json.loads(config_json)
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON syntax: {e}")
+        raise ValueError(f"Invalid JSON syntax: {e}") from e
 
     # Validate configuration structure
     validate_singbox_config_structure(config_data)
 
 
-def validate_singbox_config_structure(config_data: Dict[str, Any]) -> None:
+def validate_singbox_config_structure(config_data: dict[str, Any]) -> None:
     """Validate sing-box configuration structure and semantics.
 
     Args:
@@ -83,7 +83,7 @@ def validate_singbox_config_structure(config_data: Dict[str, Any]) -> None:
         validate_route_config(config_data["route"])
 
 
-def validate_outbound_config(outbound: Dict[str, Any], index: int) -> None:
+def validate_outbound_config(outbound: dict[str, Any], index: int) -> None:
     """Validate individual outbound configuration.
 
     Args:
@@ -114,7 +114,7 @@ def validate_outbound_config(outbound: Dict[str, Any], index: int) -> None:
     validate_protocol_specific_fields(outbound, index)
 
 
-def validate_protocol_specific_fields(outbound: Dict[str, Any], index: int) -> None:
+def validate_protocol_specific_fields(outbound: dict[str, Any], index: int) -> None:
     """Validate protocol-specific fields for outbound.
 
     Args:
@@ -160,7 +160,7 @@ def validate_protocol_specific_fields(outbound: Dict[str, Any], index: int) -> N
         pass
 
 
-def validate_shadowsocks_fields(outbound: Dict[str, Any], index: int) -> None:
+def validate_shadowsocks_fields(outbound: dict[str, Any], index: int) -> None:
     """Validate Shadowsocks specific fields.
 
     Args:
@@ -183,7 +183,7 @@ def validate_shadowsocks_fields(outbound: Dict[str, Any], index: int) -> None:
             )
 
 
-def validate_vmess_fields(outbound: Dict[str, Any], index: int) -> None:
+def validate_vmess_fields(outbound: dict[str, Any], index: int) -> None:
     """Validate VMess specific fields.
 
     Args:
@@ -200,7 +200,7 @@ def validate_vmess_fields(outbound: Dict[str, Any], index: int) -> None:
         raise ConfigValidationError(f"VMess outbound {index} 'uuid' must be a string")
 
 
-def validate_trojan_fields(outbound: Dict[str, Any], index: int) -> None:
+def validate_trojan_fields(outbound: dict[str, Any], index: int) -> None:
     """Validate Trojan specific fields.
 
     Args:
@@ -221,7 +221,7 @@ def validate_trojan_fields(outbound: Dict[str, Any], index: int) -> None:
         )
 
 
-def validate_wireguard_fields(outbound: Dict[str, Any], index: int) -> None:
+def validate_wireguard_fields(outbound: dict[str, Any], index: int) -> None:
     """Validate WireGuard specific fields.
 
     Args:
@@ -240,7 +240,7 @@ def validate_wireguard_fields(outbound: Dict[str, Any], index: int) -> None:
             )
 
 
-def validate_hysteria2_fields(outbound: Dict[str, Any], index: int) -> None:
+def validate_hysteria2_fields(outbound: dict[str, Any], index: int) -> None:
     """Validate Hysteria2 specific fields.
 
     Args:
@@ -261,7 +261,7 @@ def validate_hysteria2_fields(outbound: Dict[str, Any], index: int) -> None:
         )
 
 
-def validate_tuic_fields(outbound: Dict[str, Any], index: int) -> None:
+def validate_tuic_fields(outbound: dict[str, Any], index: int) -> None:
     """Validate TUIC specific fields.
 
     Args:
@@ -284,7 +284,7 @@ def validate_tuic_fields(outbound: Dict[str, Any], index: int) -> None:
             )
 
 
-def validate_inbound_config(inbound: Dict[str, Any], index: int) -> None:
+def validate_inbound_config(inbound: dict[str, Any], index: int) -> None:
     """Validate individual inbound configuration.
 
     Args:
@@ -306,7 +306,7 @@ def validate_inbound_config(inbound: Dict[str, Any], index: int) -> None:
         raise ConfigValidationError(f"Inbound {index} 'type' must be a string")
 
 
-def validate_route_config(route: Dict[str, Any]) -> None:
+def validate_route_config(route: dict[str, Any]) -> None:
     """Validate routing configuration.
 
     Args:
@@ -329,7 +329,7 @@ def validate_route_config(route: Dict[str, Any]) -> None:
             validate_route_rule(rule, i)
 
 
-def validate_route_rule(rule: Dict[str, Any], index: int) -> None:
+def validate_route_rule(rule: dict[str, Any], index: int) -> None:
     """Validate individual route rule.
 
     Args:

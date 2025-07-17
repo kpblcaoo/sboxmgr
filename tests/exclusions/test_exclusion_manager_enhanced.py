@@ -516,7 +516,7 @@ class TestExclusionManagerEnhanced:
         # File should exist and be valid JSON
         assert manager.file_path.exists()
 
-        with open(manager.file_path, "r") as f:
+        with open(manager.file_path) as f:
             data = json.load(f)
 
         assert "version" in data

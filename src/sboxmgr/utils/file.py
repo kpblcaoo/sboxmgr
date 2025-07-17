@@ -129,7 +129,7 @@ def read_json(path):
         json.JSONDecodeError: If file contains invalid JSON.
 
     """
-    with open(path, "r") as f:
+    with open(path) as f:
         return json.load(f)
 
 

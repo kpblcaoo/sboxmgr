@@ -1,7 +1,7 @@
 """Data models for exclusion management."""
 
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -22,7 +22,7 @@ class ExclusionList(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    exclusions: List[ExclusionEntry] = Field(default_factory=list)
+    exclusions: list[ExclusionEntry] = Field(default_factory=list)
     last_modified: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     version: int = 1  # For future migrations
 

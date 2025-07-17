@@ -4,11 +4,12 @@ This test parses all .py files in the project, extracts all top-level imports,
 and checks that every external (non-stdlib, non-local) import is present in pyproject.toml dependencies (main or optional).
 """
 import ast
+import importlib.util
 import sys
 from pathlib import Path
-import toml
+
 import pytest
-import importlib.util
+import toml
 
 # List of known stdlib modules (Python 3.9+)
 # For full coverage, use sys.stdlib_module_names if available
@@ -16,11 +17,11 @@ try:
     STDLIB_MODULES = set(sys.stdlib_module_names)
 except AttributeError:
     # Fallback for older Python
-    import sysconfig
     import os
+    import sysconfig
     STDLIB_MODULES = set(sys.builtin_module_names)
     stdlib_path = sysconfig.get_paths()["stdlib"]
-    for root, dirs, files in os.walk(stdlib_path):
+    for _root, _dirs, files in os.walk(stdlib_path):
         for file in files:
             if file.endswith(".py"):
                 STDLIB_MODULES.add(file[:-3])
@@ -74,7 +75,7 @@ def is_external_import(module: str) -> bool:
 def find_all_imports(py_path: Path) -> set:
     """Parse a .py file and return all top-level imported module names."""
     imports = set()
-    with open(py_path, "r", encoding="utf-8") as f:
+    with open(py_path, encoding="utf-8") as f:
         try:
             tree = ast.parse(f.read(), filename=str(py_path))
         except Exception:
