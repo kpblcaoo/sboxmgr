@@ -44,6 +44,7 @@ dependencies = [
     "toml>=0.10.2",
     "textual>=0.52.0",
     "PyYAML>=6.0",
+    "rich>=13.0.0",
 ]
 
 [project.scripts]

@@ -64,6 +64,10 @@ def is_external_import(module: str) -> bool:
         return False
     if module.startswith("_"):
         return False
+    # Filter out internal modules and test artifacts
+    internal_modules = {"src", "tests", "logsetup", "sbox_common", "systemd"}
+    if module in internal_modules:
+        return False
     return True
 
 
