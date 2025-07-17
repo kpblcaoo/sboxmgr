@@ -12,15 +12,22 @@ Usage example:
 """
 
 import socket
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 try:
     from sbox_common.protocols.socket.framed_json import FramedJSONProtocol
+
+    SBOX_COMMON_AVAILABLE = True
 except ImportError:
-    raise ImportError(
-        "sbox_common package not found. Please install it with: "
-        "pip install -e ../sbox-common"
-    )
+    SBOX_COMMON_AVAILABLE = False
+
+    # Create a dummy class for when sbox-common is not available
+    class FramedJSONProtocol:
+        def __init__(self):
+            raise ImportError(
+                "sbox_common package not found. Please install it with: "
+                "pip install -e ../sbox-common or pip install sboxmgr[ipc]"
+            )
 
 
 class SocketClient:
@@ -45,7 +52,7 @@ class SocketClient:
         self.sock.settimeout(self.timeout)
         self.sock.connect(self.socket_path)
 
-    def send_message(self, message: Dict[str, Any]) -> None:
+    def send_message(self, message: dict[str, Any]) -> None:
         """Send a framed JSON message.
 
         Args:
@@ -60,7 +67,7 @@ class SocketClient:
         data = self.protocol.encode_message(message)
         self.sock.sendall(data)
 
-    def recv_message(self) -> Dict[str, Any]:
+    def recv_message(self) -> dict[str, Any]:
         """Receive a framed JSON message.
 
         Returns:
