@@ -94,6 +94,8 @@ def test_critical_modules_importable():
         "sboxmgr.cli.commands.subscription",
         "sboxmgr.cli.commands.config",
         "sboxmgr.cli.commands.policy",
+        "sboxmgr.configs.models",  # Critical for export functionality
+        "sboxmgr.export.export_manager",  # Critical for export functionality
     ]
 
     failed_imports = []
