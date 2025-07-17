@@ -68,6 +68,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["sboxmgr*", "logsetup*"]
 
 [tool.setuptools.package-dir]
 "" = "src"
