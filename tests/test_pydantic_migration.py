@@ -11,7 +11,7 @@ from src.sboxmgr.core.exclusions.models import ExclusionEntry, ExclusionList
 from src.sboxmgr.core.orchestrator import OrchestratorConfig
 from src.sboxmgr.events.core import Event
 from src.sboxmgr.events.types import EventData, EventPriority, EventType
-from src.sboxmgr.profiles.models import FullProfile, SubscriptionProfile
+from sboxmgr.configs.models import FullProfile, SubscriptionProfile
 from src.sboxmgr.subscription.errors import ErrorType, PipelineError
 from src.sboxmgr.subscription.models import (
     ParsedServer,

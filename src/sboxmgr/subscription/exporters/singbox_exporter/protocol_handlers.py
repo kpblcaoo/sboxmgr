@@ -282,11 +282,17 @@ def _get_server_tag(server: ParsedServer, protocol_type: str) -> str:
     meta = getattr(server, "meta", {}) or {}
 
     if meta.get("name"):
-        return meta["name"]
+        tag = meta["name"]
     elif hasattr(server, "tag") and server.tag:
-        return server.tag
+        tag = server.tag
     else:
-        return f"{protocol_type}-{server.address}"
+        tag = f"{protocol_type}-{server.address}"
+
+    # Limit tag length to 1000 characters
+    if len(tag) > 1000:
+        tag = tag[:997] + "..."
+
+    return tag
 
 
 def get_protocol_dispatcher() -> dict[str, callable]:

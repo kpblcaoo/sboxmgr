@@ -202,6 +202,12 @@ class TUIState:
             # Add to local state
             self.subscriptions.append(source)
             self.servers.extend(result.config)
+
+            # Set as active subscription if this is the first one
+            if not self.active_subscription:
+                self.active_subscription = url
+                logger.debug(f"[DEBUG] Set active subscription to: {url}")
+
             logger.debug(f"[DEBUG] Added {len(result.config)} servers to local state")
             logger.debug(f"[DEBUG] Total subscriptions now: {len(self.subscriptions)}")
             logger.debug(f"[DEBUG] Total servers now: {len(self.servers)}")
@@ -325,6 +331,19 @@ class TUIState:
         try:
             # Remove from local state
             self.subscriptions = [sub for sub in self.subscriptions if sub.url != url]
+
+            # Update active subscription if needed
+            if self.active_subscription == url:
+                if self.subscriptions:
+                    # Set the first remaining subscription as active
+                    self.active_subscription = self.subscriptions[0].url
+                    logger.debug(
+                        f"[DEBUG] Set new active subscription to: {self.active_subscription}"
+                    )
+                else:
+                    # No subscriptions left
+                    self.active_subscription = None
+                    logger.debug("[DEBUG] No active subscription (all removed)")
 
             # Remove from profile if available
             if self.config_manager and self.active_config:

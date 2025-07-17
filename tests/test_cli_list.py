@@ -1,4 +1,5 @@
 import os
+from unittest.mock import patch
 
 from typer.testing import CliRunner
 
@@ -31,34 +32,34 @@ def test_list_servers_excluded(tmp_path, monkeypatch):
 
             return Resp()
 
-    monkeypatch.setattr("requests.get", DummyRequests().get)
-
     monkeypatch.setenv("SBOXMGR_EXCLUSION_FILE", str(tmp_path / "exclusions.json"))
     monkeypatch.setenv("SBOXMGR_CONFIG_FILE", str(tmp_path / "config.json"))
     monkeypatch.setenv("SBOXMGR_LOG_FILE", str(tmp_path / "log.txt"))
 
-    # Exclude index 0 (the only server we have in our mock data)
-    runner.invoke(
-        app,
-        [
-            "exclusions",
-            "-u",
-            os.getenv("TEST_URL", "https://example.com/sub-link"),
-            "--add",
-            "0",
-        ],
-    )
-    result = runner.invoke(
-        app,
-        [
-            "list-servers",
-            "-u",
-            os.getenv("TEST_URL", "https://example.com/sub-link"),
-            "-d",
-            "2",
-        ],
-    )
+    # Mock HTTP requests
+    with patch("requests.get", DummyRequests().get):
+        # Exclude index 0 (the only server we have in our mock data)
+        runner.invoke(
+            app,
+            [
+                "exclusions",
+                "-u",
+                os.getenv("TEST_URL", "https://example.com/sub-link"),
+                "--add",
+                "0",
+            ],
+        )
+        result = runner.invoke(
+            app,
+            [
+                "list-servers",
+                "-u",
+                os.getenv("TEST_URL", "https://example.com/sub-link"),
+                "-d",
+                "2",
+            ],
+        )
 
-    # Note: This test demonstrates the HTTP mocking pattern but may need further
-    # refinement to properly test the exclusion functionality
-    assert result.exit_code == 0  # At least verify the command runs without crashing
+        # Note: This test demonstrates the HTTP mocking pattern but may need further
+        # refinement to properly test the exclusion functionality
+        assert result.exit_code == 0  # At least verify the command runs without crashing

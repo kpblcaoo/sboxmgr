@@ -196,9 +196,9 @@ class TestHandleTempFileAdvanced:
             try:
                 with open(path) as f:
                     json.load(f)
-                return True
+                return True  # Возвращаем True для успешной валидации
             except (json.JSONDecodeError, FileNotFoundError):
-                return False
+                return False  # Возвращаем False для неуспешной валидации
 
         result = handle_temp_file(content, str(target_path), validate_fn)
 
@@ -211,7 +211,7 @@ class TestHandleTempFileAdvanced:
         content = {"test": "data"}
 
         def validate_fn(path):
-            return False  # Always fail validation
+            return False  # Всегда проваливаем валидацию
 
         with pytest.raises(ValueError, match="Validation failed"):
             handle_temp_file(content, str(target_path), validate_fn)

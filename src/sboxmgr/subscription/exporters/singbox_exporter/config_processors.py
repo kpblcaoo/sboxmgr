@@ -155,11 +155,17 @@ def process_tag_config(
     """
     # Priority: server.tag (normalized by middleware) > meta['name'] > generated tag
     if hasattr(server, "tag") and server.tag:
-        outbound["tag"] = server.tag
+        tag = server.tag
     elif meta.get("name"):
-        outbound["tag"] = meta["name"]
+        tag = meta["name"]
     else:
-        outbound["tag"] = f"{outbound['type']}-{server.address}"
+        tag = f"{outbound['type']}-{server.address}"
+
+    # Limit tag length to 1000 characters
+    if len(tag) > 1000:
+        tag = tag[:997] + "..."
+
+    outbound["tag"] = tag
 
 
 def process_additional_config(outbound: dict[str, Any], meta: dict[str, Any]) -> None:

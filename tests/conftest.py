@@ -27,6 +27,25 @@ initialize_logging(logging_config)
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
 
+class MockResponse:
+    def __init__(self, content=b"dummy", status_code=200):
+        self.content = content
+        self.status_code = status_code
+        self.raw = type('MockRaw', (), {'read': lambda self: content})()
+        self.text = content.decode('utf-8') if isinstance(content, bytes) else str(content)
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise Exception(f"HTTP {self.status_code}")
+        return self
+
+@pytest.fixture(autouse=True)
+def mock_requests_get(monkeypatch):
+    def mock_get(url, **kwargs):
+        return MockResponse()
+    monkeypatch.setattr("requests.get", mock_get)
+
+
 def run_cli(args, env=None, cwd=None):
     """Вспомогательная функция для вызова CLI с capture_output.
     exclusions.json и selected_config.json будут создаваться в cwd (tmp_path) через env.

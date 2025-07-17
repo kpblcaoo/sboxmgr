@@ -21,11 +21,11 @@ class TestSmartExport:
         standard_data = block.model_dump()
         assert "server" in standard_data
         assert "server_port" in standard_data
-        assert "tls" in standard_data
+        # Note: tls is not in OutboundBase anymore, only in OutboundWithTls
         # Note: transport is not inherited by BlockOutbound, so it won't be in standard_data
 
         # Smart export should remove unsupported fields
-        smart_data = block.smart_dump()
+        smart_data = block.smart_dump(exclude_unset=False)
         assert "server" not in smart_data
         assert "server_port" not in smart_data
         assert "tls" not in smart_data
@@ -39,11 +39,11 @@ class TestSmartExport:
 
         # Standard export should include all fields from OutboundBase
         standard_data = direct.model_dump()
-        assert "tls" in standard_data
+        # Note: tls is not in OutboundBase anymore, only in OutboundWithTls
         # Note: transport is not inherited by DirectOutbound, so it won't be in standard_data
 
         # Smart export should remove unsupported fields
-        smart_data = direct.smart_dump()
+        smart_data = direct.smart_dump(exclude_unset=False)
         assert "tls" not in smart_data
         assert "transport" not in smart_data
         assert smart_data["type"] == "direct"
@@ -58,18 +58,18 @@ class TestSmartExport:
         standard_data = dns.model_dump()
         assert "server" in standard_data
         assert "server_port" in standard_data
-        assert "tls" in standard_data
+        # Note: tls is not in OutboundBase anymore, only in OutboundWithTls
         # Note: transport is not inherited by DnsOutbound, so it won't be in standard_data
 
         # Smart export should remove unsupported fields
-        smart_data = dns.smart_dump()
+        smart_data = dns.smart_dump(exclude_unset=False)
         assert "server" not in smart_data
         assert "transport" not in smart_data
         assert smart_data["type"] == "dns"
 
     def test_vmess_outbound_smart_export(self):
         """Test that VmessOutbound keeps supported fields."""
-        transport = TransportConfig(type="ws", ws_opts={"path": "/ws"})
+        transport = TransportConfig(type="ws", path="/ws")
         vmess = VmessOutbound(
             tag="vmess-tag",
             server="1.2.3.4",
@@ -79,10 +79,10 @@ class TestSmartExport:
         )
 
         # Smart export should keep transport (supported by VMess)
-        smart_data = vmess.smart_dump()
+        smart_data = vmess.smart_dump(exclude_unset=False)
         assert smart_data["type"] == "vmess"
         assert smart_data["transport"]["type"] == "ws"
-        assert smart_data["transport"]["ws_opts"]["path"] == "/ws"
+        assert smart_data["transport"]["path"] == "/ws"
         assert smart_data["server"] == "1.2.3.4"
         assert smart_data["server_port"] == 1080
 
@@ -95,7 +95,7 @@ class TestSmartExport:
         assert "transport" not in standard_data
 
         # Smart export should not have transport (not supported by mixed)
-        smart_data = mixed.smart_dump()
+        smart_data = mixed.smart_dump(exclude_unset=False)
         assert "transport" not in smart_data
         assert smart_data["type"] == "mixed"
         assert smart_data["listen"] == "0.0.0.0"
@@ -110,7 +110,7 @@ class TestSmartExport:
         assert "transport" not in standard_data
 
         # Smart export should not have transport (not supported by SOCKS)
-        smart_data = socks.smart_dump()
+        smart_data = socks.smart_dump(exclude_unset=False)
         assert "transport" not in smart_data
         assert smart_data["type"] == "socks"
         assert smart_data["listen"] == "0.0.0.0"
@@ -118,16 +118,16 @@ class TestSmartExport:
 
     def test_vmess_inbound_smart_export(self):
         """Test that VmessInbound keeps supported fields."""
-        transport = TransportConfig(type="ws", ws_opts={"path": "/ws"})
+        transport = TransportConfig(type="ws", path="/ws")
         vmess = VmessInbound(
             tag="vmess-tag", listen="0.0.0.0", listen_port=1080, transport=transport
         )
 
         # Smart export should keep transport (supported by VMess)
-        smart_data = vmess.smart_dump()
+        smart_data = vmess.smart_dump(exclude_unset=False)
         assert smart_data["type"] == "vmess"
         assert smart_data["transport"]["type"] == "ws"
-        assert smart_data["transport"]["ws_opts"]["path"] == "/ws"
+        assert smart_data["transport"]["path"] == "/ws"
         assert smart_data["listen"] == "0.0.0.0"
         assert smart_data["listen_port"] == 1080
 

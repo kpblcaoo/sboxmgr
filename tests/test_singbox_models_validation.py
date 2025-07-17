@@ -15,24 +15,28 @@ import pytest
 from sboxmgr.models import SingBoxConfig, create_example_config
 
 
-def check_singbox_available() -> bool:
+def check_singbox_available() -> None:
     """Check if sing-box binary is available for testing."""
     try:
         result = subprocess.run(
             ["/usr/bin/sing-box", "version"], capture_output=True, text=True, timeout=5
         )
-        return result.returncode == 0
+        assert result.returncode == 0, "sing-box binary not available"
     except (subprocess.TimeoutExpired, FileNotFoundError):
-        return False
-
-
-def validate_with_singbox(config_dict: dict) -> bool:
-    """Validate configuration with actual sing-box binary."""
-    if not check_singbox_available():
         pytest.skip("sing-box binary not available")
 
+
+def validate_with_singbox(config_dict: dict) -> None:
+    """Validate configuration with actual sing-box binary."""
+    check_singbox_available()
+
+    # Use Pydantic model for serialization with aliases
+    config = SingBoxConfig.model_validate(config_dict)
+
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-        json.dump(config_dict, f, indent=2)
+        # Serialize with aliases to match sing-box format
+        json_str = config.model_dump_json(by_alias=True, indent=2, exclude_none=True)
+        f.write(json_str)
         config_path = f.name
 
     try:
@@ -44,7 +48,7 @@ def validate_with_singbox(config_dict: dict) -> bool:
         )
         if result.returncode != 0:
             print(f"sing-box check failed: {result.stderr}")
-        return result.returncode == 0
+        assert result.returncode == 0, f"sing-box check failed: {result.stderr}"
     finally:
         Path(config_path).unlink(missing_ok=True)
 
@@ -61,7 +65,7 @@ class TestSingBoxModelsValidation:
         assert config is not None
 
         # Test sing-box binary validation
-        assert validate_with_singbox(config_dict)
+        validate_with_singbox(config_dict)
 
     def test_minimal_config_validation(self):
         """Test minimal valid configuration."""
@@ -83,7 +87,7 @@ class TestSingBoxModelsValidation:
         assert config is not None
 
         # Test sing-box binary validation
-        assert validate_with_singbox(config_dict)
+        validate_with_singbox(config_dict)
 
     def test_shadowsocks_config_validation(self):
         """Test Shadowsocks configuration validation."""
@@ -114,7 +118,7 @@ class TestSingBoxModelsValidation:
         assert config is not None
 
         # Test sing-box binary validation
-        assert validate_with_singbox(config_dict)
+        validate_with_singbox(config_dict)
 
     def test_vmess_config_validation(self):
         """Test VMess configuration validation."""
@@ -145,7 +149,7 @@ class TestSingBoxModelsValidation:
         assert config is not None
 
         # Test sing-box binary validation
-        assert validate_with_singbox(config_dict)
+        validate_with_singbox(config_dict)
 
     def test_hysteria2_config_validation(self):
         """Test Hysteria2 configuration validation."""
@@ -166,6 +170,11 @@ class TestSingBoxModelsValidation:
                     "server": "example.com",
                     "server_port": 443,
                     "password": "secret",
+                    "tls": {
+                        "enabled": True,
+                        "server_name": "example.com",
+                        "insecure": False,
+                    },
                 }
             ],
         }
@@ -175,7 +184,7 @@ class TestSingBoxModelsValidation:
         assert config is not None
 
         # Test sing-box binary validation
-        assert validate_with_singbox(config_dict)
+        validate_with_singbox(config_dict)
 
     def test_dns_config_validation(self):
         """Test DNS configuration validation."""
@@ -186,7 +195,13 @@ class TestSingBoxModelsValidation:
                     {"tag": "google", "address": "8.8.8.8"},
                     {"tag": "cloudflare", "address": "1.1.1.1"},
                 ],
-                "rules": [{"type": "default", "server": "google"}],
+                "rules": [
+                    {
+                        "type": "default",
+                        "server": "google",
+                        "domain": ["example.com"],
+                    }
+                ],
                 "final": "google",
             },
             "inbounds": [
@@ -205,7 +220,7 @@ class TestSingBoxModelsValidation:
         assert config is not None
 
         # Test sing-box binary validation
-        assert validate_with_singbox(config_dict)
+        validate_with_singbox(config_dict)
 
     def test_routing_config_validation(self):
         """Test routing configuration validation."""
@@ -243,7 +258,7 @@ class TestSingBoxModelsValidation:
         assert config is not None
 
         # Test sing-box binary validation
-        assert validate_with_singbox(config_dict)
+        validate_with_singbox(config_dict)
 
     def test_tls_config_validation(self):
         """Test TLS configuration validation."""
@@ -279,7 +294,7 @@ class TestSingBoxModelsValidation:
         assert config is not None
 
         # Test sing-box binary validation
-        assert validate_with_singbox(config_dict)
+        validate_with_singbox(config_dict)
 
     def test_transport_config_validation(self):
         """Test transport configuration validation."""
@@ -302,8 +317,9 @@ class TestSingBoxModelsValidation:
                     "uuid": "b831381d-6324-4d53-ad4f-8cda48b30811",
                     "security": "auto",
                     "transport": {
-                        "network": "ws",
-                        "ws_opts": {"path": "/ws", "headers": {"Host": "example.com"}},
+                        "type": "ws",
+                        "path": "/ws",
+                        "headers": {"Host": "example.com"},
                     },
                 }
             ],
@@ -314,7 +330,7 @@ class TestSingBoxModelsValidation:
         assert config is not None
 
         # Test sing-box binary validation
-        assert validate_with_singbox(config_dict)
+        validate_with_singbox(config_dict)
 
     def test_invalid_config_rejection(self):
         """Test that invalid configurations are properly rejected."""

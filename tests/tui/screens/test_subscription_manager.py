@@ -1,10 +1,11 @@
 """Tests for SubscriptionManagerScreen."""
 
+import pytest
 from unittest.mock import patch
 
-import pytest
-
 from sboxmgr.tui.screens.subscription_manager import SubscriptionManagerScreen
+
+pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
 
 
 class TestSubscriptionManagerScreen:

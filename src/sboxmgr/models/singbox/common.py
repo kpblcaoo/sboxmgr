@@ -74,25 +74,29 @@ class MultiplexConfig(BaseModel):
 class TransportConfig(BaseModel):
     """Transport layer settings."""
 
-    network: Optional[
-        Literal["tcp", "udp", "ws", "http", "grpc", "httpupgrade", "quic"]
-    ] = Field(default=None, description="Transport protocol.")
-    ws_opts: Optional[dict[str, Any]] = Field(
-        default=None,
-        description="WebSocket settings, e.g., {'path': '/ws', 'headers': {'Host': 'example.com'}}.",
+    type: Optional[Literal["ws", "http", "grpc", "quic", "httpupgrade"]] = Field(
+        default=None, description="Transport type (ws, http, grpc, quic, httpupgrade)."
     )
-    http_opts: Optional[dict[str, Any]] = Field(
-        default=None,
-        description="HTTP/2 settings, e.g., {'host': 'example.com', 'path': '/http2'}.",
+    # WebSocket settings (direct fields, not ws_opts)
+    path: Optional[str] = Field(
+        default=None, description="WebSocket path, e.g., '/ws'."
     )
-    grpc_opts: Optional[dict[str, Any]] = Field(
-        default=None, description="gRPC settings, e.g., {'serviceName': 'proxy'}."
+    headers: Optional[dict[str, str]] = Field(
+        default=None, description="WebSocket headers, e.g., {'Host': 'example.com'}."
     )
-    httpupgrade_opts: Optional[dict[str, Any]] = Field(
-        default=None, description="HTTPUpgrade settings."
+    # HTTP/2 settings
+    host: Optional[str] = Field(
+        default=None, description="HTTP/2 host, e.g., 'example.com'."
     )
-    quic_opts: Optional[dict[str, Any]] = Field(
-        default=None, description="QUIC settings."
+    # gRPC settings
+    service_name: Optional[str] = Field(
+        default=None, description="gRPC service name, e.g., 'proxy'."
     )
+    # HTTPUpgrade settings
+    # quic_opts: Optional[dict[str, Any]] = Field(
+    #     default=None,
+    #     alias="quic-opts",
+    #     description="QUIC settings."
+    # )
 
-    model_config = {"extra": "forbid"}
+    model_config = {"extra": "forbid", "populate_by_name": True}

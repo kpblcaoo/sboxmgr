@@ -129,10 +129,10 @@ class JSONExporter:
             self.logger.info(f"Exported {client_type} configuration to {output_path}")
             return output_path
 
-        except Exception:
+        except Exception as e:
             raise Exception(
-                f"Failed to export {client_type} configuration to file"
-            ) from None
+                f"Failed to export {client_type} configuration to file: {e}"
+            ) from e
 
     def export_multiple(
         self,

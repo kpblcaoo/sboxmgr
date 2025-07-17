@@ -46,33 +46,77 @@ class PipelineCoordinator:
         Returns:
             List of servers after policy application.
         """
+        import logging
+
+        logger = logging.getLogger("sboxmgr.subscription.manager.pipeline_coordinator")
+
+        # Check if policies should be skipped
+        if getattr(context, "skip_policies", False):
+            logger.debug(
+                "[Pipeline] Skipping policy application due to skip_policies flag"
+            )
+            return servers
+
         try:
-            from ..policies.base import get_registered_policies
+            from sboxmgr.policies import PolicyContext, policy_registry
 
-            policies = get_registered_policies()
+            policies = policy_registry.policies
+            logger.debug(
+                f"[Pipeline] Applying {len(policies)} policies to {len(servers)} servers"
+            )
 
-            for policy_name, policy_class in policies.items():
+            fail_tolerant = getattr(context, "fail_tolerant", False)
+
+            for policy in policies:
                 try:
-                    policy_instance = policy_class()
-                    servers = policy_instance.apply(servers, context)
+                    logger.debug(f"[Pipeline] Applying policy: {policy.name}")
+                    # Apply policy to each server individually
+                    filtered_servers = []
+                    for server in servers:
+                        pol_ctx = PolicyContext(
+                            server=server,
+                            profile=getattr(context, "profile", None),
+                            user=getattr(context, "user", None),
+                            env=getattr(context, "env", {}),
+                        )
+                        result = policy.evaluate(pol_ctx)
+                        logger.debug(
+                            f"[Pipeline] Server {getattr(server, 'address', 'unknown')}: {result.allowed} - {result.reason}"
+                        )
+                        if result.allowed:
+                            filtered_servers.append(server)
+                    servers = filtered_servers
+                    logger.debug(
+                        f"[Pipeline] After policy {policy.name}: {len(servers)} servers remain"
+                    )
                 except Exception as e:
-                    # Log policy error but continue processing
+                    logger.error(f"[Pipeline] Policy {policy.name} error: {e}")
                     err = self.error_handler.create_internal_error(
-                        f"policy_{policy_name}",
+                        f"policy_{policy.name}",
                         str(e),
-                        {"policy": policy_name, "server_count": len(servers)},
+                        {"policy": policy.name, "server_count": len(servers)},
                     )
                     self.error_handler.add_error_to_context(context, err)
-
+                    if fail_tolerant:
+                        context.metadata["policy_error"] = str(e)
+                        if not hasattr(context, "flags"):
+                            context.flags = []
+                        context.flags.append("policy_error")
+                        return servers
+                    else:
+                        raise
             return servers
-
         except Exception as e:
-            # If policy system fails, return servers unchanged
-            err = self.error_handler.create_internal_error(
-                "apply_policies", str(e), {"server_count": len(servers)}
-            )
-            self.error_handler.add_error_to_context(context, err)
-            return servers
+            logger.critical(f"[Pipeline] Policy application failed: {e}")
+            fail_tolerant = getattr(context, "fail_tolerant", False)
+            if fail_tolerant:
+                context.metadata["policy_error"] = str(e)
+                if not hasattr(context, "flags"):
+                    context.flags = []
+                context.flags.append("policy_error")
+                return servers
+            else:
+                raise
 
     def process_middleware(
         self, servers: list[Any], context: PipelineContext
@@ -161,7 +205,7 @@ class PipelineCoordinator:
         errors = (
             context.metadata.get("errors", []) if hasattr(context, "metadata") else []
         )
-
+        print(f"[DEBUG] create_pipeline_result: errors={errors}")
         return PipelineResult(
             config=servers, context=context, errors=errors, success=success
         )

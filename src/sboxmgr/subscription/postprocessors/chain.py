@@ -253,17 +253,17 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                             }
                         )
 
-                except Exception:
+                except Exception as e:
                     self._execution_metadata["processors_failed"].append(
                         {
                             "index": i,
                             "name": processor.__class__.__name__,
-                            "error": "error",
+                            "error": str(e),
                         }
                     )
 
                     if self.error_strategy == "fail_fast":
-                        raise Exception("Postprocessor chain failed") from None
+                        raise Exception("Postprocessor chain failed") from e
 
             # Merge results (simple concatenation, could be more sophisticated)
             if all_results:

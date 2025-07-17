@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 sys.modules["src.sboxmgr.logging.core"] = MagicMock()
 
 
-from src.sboxmgr.profiles.loader import (
+from sboxmgr.configs.loader import (
     SECTION_VALIDATORS,
     ExportSectionValidator,
     FilterSectionValidator,

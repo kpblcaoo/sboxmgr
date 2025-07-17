@@ -19,7 +19,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 
-from sboxmgr.profiles.models import FilterProfile, FullProfile
+from sboxmgr.configs.models import FilterProfile, FullProfile
 from sboxmgr.subscription.models import ParsedServer, PipelineContext
 from sboxmgr.subscription.postprocessors import (
     GeoFilterPostProcessor,

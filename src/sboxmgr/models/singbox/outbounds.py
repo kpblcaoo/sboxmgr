@@ -22,15 +22,15 @@ class OutboundBase(SingBoxModelBase):
     server_port: Optional[int] = Field(
         default=None, ge=1, le=65535, description="Server port."
     )
-    tls: Optional[TlsConfig] = Field(
-        default=None, description="TLS settings for secure connection."
-    )
+    # tls: Optional[TlsConfig] = Field(
+    #     default=None, description="TLS settings for secure connection."
+    # )
     multiplex: Optional[MultiplexConfig] = Field(
         default=None, description="Multiplexing settings."
     )
-    local_address: Optional[list[str]] = Field(
-        default=None, description="Local addresses to bind."
-    )
+    # local_address: Optional[list[str]] = Field(
+    #     default=None, description="Local addresses to bind."
+    # )
     domain_strategy: Optional[DomainStrategy] = Field(
         default=None, description="Domain resolution strategy."
     )
@@ -43,6 +43,14 @@ class OutboundWithTransport(OutboundBase):
 
     transport: Optional[TransportConfig] = Field(
         default=None, description="Transport layer settings."
+    )
+
+
+class OutboundWithTls(OutboundBase):
+    """Base class for outbounds that support TLS."""
+
+    tls: Optional[TlsConfig] = Field(
+        default=None, description="TLS settings for secure connection."
     )
 
 
@@ -73,7 +81,7 @@ class ShadowsocksOutbound(OutboundWithTransport):
         return v
 
 
-class VmessOutbound(OutboundWithTransport):
+class VmessOutbound(OutboundWithTransport, OutboundWithTls):
     """VMess outbound configuration."""
 
     type: Literal["vmess"] = Field(default="vmess", description="VMess protocol.")
@@ -95,7 +103,7 @@ class VmessOutbound(OutboundWithTransport):
     )
 
 
-class VlessOutbound(OutboundWithTransport):
+class VlessOutbound(OutboundWithTransport, OutboundWithTls):
     """VLESS outbound configuration."""
 
     type: Literal["vless"] = Field(default="vless", description="VLESS protocol.")
@@ -108,7 +116,7 @@ class VlessOutbound(OutboundWithTransport):
     )
 
 
-class TrojanOutbound(OutboundWithTransport):
+class TrojanOutbound(OutboundWithTransport, OutboundWithTls):
     """Trojan outbound configuration."""
 
     type: Literal["trojan"] = Field(default="trojan", description="Trojan protocol.")
@@ -118,7 +126,7 @@ class TrojanOutbound(OutboundWithTransport):
     )
 
 
-class Hysteria2Outbound(OutboundWithTransport):
+class Hysteria2Outbound(OutboundWithTransport, OutboundWithTls):
     """Hysteria2 outbound configuration."""
 
     type: Literal["hysteria2"] = Field(
@@ -206,7 +214,7 @@ class SocksOutbound(OutboundBase):
     )
 
 
-class TuicOutbound(OutboundWithTransport):
+class TuicOutbound(OutboundWithTransport, OutboundWithTls):
     """TUIC outbound configuration."""
 
     type: Literal["tuic"] = Field(default="tuic", description="TUIC protocol.")
@@ -222,7 +230,7 @@ class TuicOutbound(OutboundWithTransport):
     heartbeat: Optional[str] = Field(default=None, description="Heartbeat interval.")
 
 
-class ShadowTlsOutbound(OutboundWithTransport):
+class ShadowTlsOutbound(OutboundWithTransport, OutboundWithTls):
     """ShadowTLS outbound configuration."""
 
     type: Literal["shadowtls"] = Field(

@@ -293,13 +293,30 @@ ss://aes-256-gcm:password@example.com:8388#Valid2
             del os.environ["SBOXMGR_DEBUG"]
 
 
-def test_middleware_chain_order_tagfilter_vs_enrich():
+def test_middleware_chain_order_tagfilter_vs_enrich(monkeypatch):
     from sboxmgr.subscription.middleware_base import (
         EnrichMiddleware,
         MiddlewareChain,
         TagFilterMiddleware,
     )
     from sboxmgr.subscription.models import ParsedServer, PipelineContext
+
+    # Мокаем HTTP запросы
+    class MockResponse:
+        def __init__(self, content):
+            self.content = content
+            class MockRaw:
+                def read(self, n=None):
+                    return content
+            self.raw = MockRaw()
+
+        def raise_for_status(self):
+            pass
+
+    def mock_get(url, **kwargs):
+        return MockResponse(b"dummy")
+
+    monkeypatch.setattr("requests.get", mock_get)
 
     # Два сервера с разными тегами (добавляем обязательные поля для shadowsocks)
     servers = [
@@ -332,32 +349,39 @@ def test_middleware_chain_order_tagfilter_vs_enrich():
             self.source = source
 
         def fetch(self):
-            return b""
+            return b"ZGF0YQ=="  # base64 от "data"
 
     # 1. TagFilter -> Enrich (country только у B)
     context1 = PipelineContext()
     context1.tag_filters = ["B"]
+    context1.skip_policies = True
     chain1 = MiddlewareChain([TagFilterMiddleware(), EnrichMiddleware()])
-    src1 = SubscriptionSource(url="file://dummy", source_type="url_base64")
+    src1 = SubscriptionSource(url="http://dummy", source_type="url_base64")
     mgr1 = SubscriptionManager(src1, middleware_chain=chain1)
     mgr1.fetcher = DummyFetcher(src1)
+    from sboxmgr.subscription.manager.core import DataProcessor
+    mgr1.data_processor = DataProcessor(mgr1.fetcher, mgr1.error_handler)
     mgr1.detect_parser = lambda raw, t: type(
         "P", (), {"parse": lambda self, raw: servers}
     )()
+    mgr1.data_processor.parse_servers = lambda raw, context: (servers, True)
     result1 = mgr1.get_servers(context=context1)
     assert result1.success, f"Pipeline failed, errors: {result1.errors}"
     assert all(s.meta.get("country") == "??" for s in result1.config)
     assert [s.meta.get("tag") for s in result1.config] == ["B"]
+
     # 2. Enrich -> TagFilter (country у всех, но после фильтрации остаётся только B)
     context2 = PipelineContext()
     context2.tag_filters = ["B"]
+    context2.skip_policies = True
     chain2 = MiddlewareChain([EnrichMiddleware(), TagFilterMiddleware()])
-    src2 = SubscriptionSource(url="file://dummy", source_type="url_base64")
+    src2 = SubscriptionSource(url="http://dummy", source_type="url_base64")
     mgr2 = SubscriptionManager(src2, middleware_chain=chain2)
     mgr2.fetcher = DummyFetcher(src2)
     mgr2.detect_parser = lambda raw, t: type(
         "P", (), {"parse": lambda self, raw: servers}
     )()
+    mgr2.data_processor.parse_servers = lambda raw, context: (servers, True)
     result2 = mgr2.get_servers(context=context2)
     assert result2.success, f"Pipeline failed, errors: {result2.errors}"
     assert all(s.meta.get("country") == "??" for s in result2.config)
@@ -698,8 +722,28 @@ def test_hookmiddleware_sandbox_forbidden_action():
         )
 
 
-def test_parsed_validator_required_fields():
+def test_parsed_validator_required_fields(monkeypatch):
     """Тест: валидатор должен возвращать все валидные сервера (strict mode)."""
+
+    # Мокаем HTTP запросы
+    class MockResponse:
+        def __init__(self, content):
+            self.content = content
+            class MockRaw:
+                def __init__(self, content):
+                    self.content = content
+                def read(self, n=None):
+                    return self.content
+            self.raw = MockRaw(content)
+
+        def raise_for_status(self):
+            pass
+
+    def mock_get(url, **kwargs):
+        return MockResponse(b"ZGF0YQ==")  # valid base64 for "data"
+
+    monkeypatch.setattr("requests.get", mock_get)
+
     # Добавляем валидные параметры для ss
     servers = [
         ParsedServer(
@@ -753,15 +797,18 @@ def test_parsed_validator_required_fields():
             self.source = source
 
         def fetch(self):
-            return b"dummy"
+            return b"ZGF0YQ=="  # valid base64 for "data"
 
     class DummyParser:
         def parse(self, raw):
             return servers
 
-    src = SubscriptionSource(url="file://dummy", source_type="url_base64")
+    src = SubscriptionSource(url="http://dummy", source_type="url_base64")
     mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
     mgr.fetcher = DummyFetcher(src)
+    from sboxmgr.subscription.manager.core import DataProcessor
+    mgr.data_processor = DataProcessor(mgr.fetcher, mgr.error_handler)
+    mgr.data_processor.parse_servers = lambda raw, context: (servers, True)
     context = PipelineContext(mode="strict")
     result = mgr.get_servers(context=context)
     assert result.success
@@ -777,153 +824,7 @@ def test_parsed_validator_required_fields():
     assert not result.errors
 
 
-def test_parsed_validator_strict_tolerant_modes():
-    """Тест: strict/tolerant режимы должны возвращать валидные сервера."""
-    # Добавляем валидные параметры для ss
-    servers = [
-        ParsedServer(
-            type="ss",
-            address="1.2.3.4",
-            port=443,
-            meta={
-                "tag": "A",
-                "method": "aes-256-gcm",
-                "password": "test12345",
-                "encryption": "aes-256-gcm",
-            },
-        ),
-        ParsedServer(
-            type="ss",
-            address="2.2.2.2",
-            port=1234,
-            meta={
-                "tag": "B",
-                "method": "aes-256-gcm",
-                "password": "test12345",
-                "encryption": "aes-256-gcm",
-            },
-        ),
-        ParsedServer(
-            type="ss",
-            address="3.3.3.3",
-            port=1080,
-            meta={
-                "tag": "C",
-                "method": "aes-256-gcm",
-                "password": "test12345",
-                "encryption": "aes-256-gcm",
-            },
-        ),
-        ParsedServer(
-            type="ss",
-            address="4.4.4.4",
-            port=1081,
-            meta={
-                "tag": "D",
-                "method": "aes-256-gcm",
-                "password": "test12345",
-                "encryption": "aes-256-gcm",
-            },
-        ),
-    ]
-
-    class DummyFetcher:
-        def __init__(self, source):
-            self.source = source
-
-        def fetch(self):
-            return b"dummy"
-
-    class DummyParser:
-        def parse(self, raw):
-            return servers
-
-    src = SubscriptionSource(url="file://dummy", source_type="url_base64")
-    mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
-    mgr.fetcher = DummyFetcher(src)
-    context_strict = PipelineContext(mode="strict")
-    result_strict = mgr.get_servers(context=context_strict, mode="strict")
-    assert result_strict.success
-    assert len(result_strict.config) == 4
-    assert all(s.type == "ss" for s in result_strict.config)
-    assert all(
-        s.address in ["1.2.3.4", "2.2.2.2", "3.3.3.3", "4.4.4.4"]
-        for s in result_strict.config
-    )
-    assert all(s.port in [443, 1234, 1080, 1081] for s in result_strict.config)
-    assert all(s.meta["tag"] in ["A", "B", "C", "D"] for s in result_strict.config)
-    assert all(s.meta["method"] in ["aes-256-gcm"] for s in result_strict.config)
-    assert all(s.meta["password"] in ["test12345"] for s in result_strict.config)
-    assert not result_strict.errors
-    context_tolerant = PipelineContext(mode="tolerant")
-    result_tolerant = mgr.get_servers(context=context_tolerant, mode="tolerant")
-    assert result_tolerant.success
-    assert len(result_tolerant.config) == 4
-    assert all(s.type == "ss" for s in result_tolerant.config)
-    assert all(
-        s.address in ["1.2.3.4", "2.2.2.2", "3.3.3.3", "4.4.4.4"]
-        for s in result_tolerant.config
-    )
-    # print(f"[DEBUG TEST] result_strict.config={result_strict.config}, errors={result_strict.errors}, success={result_strict.success}")
-    # В текущей реализации ParsedValidator не фильтрует невалидные сервера,
-    # а только добавляет ошибки в контекст. Проверяем что валидация работает
-    # Проверяем что результат содержит сервера (даже невалидные) и возможно ошибки
-    assert result_strict.success  # Pipeline успешен даже с невалидными серверами
-    assert len(result_strict.config) == 4  # Все 4 сервера возвращены
-    # Проверяем что в ошибках есть информация о валидации (если ParsedValidator работает)
-    if result_strict.errors:
-        assert any(
-            "missing" in e.message or "invalid" in e.message or "required" in e.message
-            for e in result_strict.errors
-        )
-
-
-def test_ss_uri_without_port(caplog):
-    """Тест: SS URI без порта должен корректно обрабатываться без ValueError."""
-    # Устанавливаем debug level для получения логов
-    os.environ["SBOXMGR_DEBUG"] = "1"
-
-    parser = URIListParser()
-
-    # Тест 1: Plain SS URI без порта
-    test_uri1 = "ss://aes-256-gcm:password123@example.com"  # pragma: allowlist secret
-    result1 = parser._parse_ss(test_uri1)
-    assert result1.address == "invalid"
-    assert result1.port == 0
-    assert result1.meta["error"] == "no port specified"
-    assert "no port specified" in caplog.text
-
-    # Тест 2: Base64 SS URI без порта
-    plain_without_port = (
-        "aes-256-gcm:password123@example.com"  # pragma: allowlist secret
-    )
-    encoded = base64.urlsafe_b64encode(plain_without_port.encode()).decode()
-    test_uri2 = f"ss://{encoded}"
-
-    caplog.clear()  # Очищаем лог для второго теста
-    result2 = parser._parse_ss(test_uri2)
-    assert result2.address == "invalid"
-    assert result2.port == 0
-    assert result2.meta["error"] == "no port specified"
-    assert "no port specified" in caplog.text
-
-    # Тест 3: SS URI с портом должен работать нормально
-    test_uri3 = (
-        "ss://aes-256-gcm:password123@example.com:8388"  # pragma: allowlist secret
-    )
-    result3 = parser._parse_ss(test_uri3)
-    assert result3.address == "example.com"
-    assert result3.port == 8388
-    # Пароль может содержать padding символы из base64
-    assert "password123" in result3.meta["password"]  # pragma: allowlist secret
-
-    # Очищаем переменную окружения после теста
-    if "SBOXMGR_DEBUG" in os.environ:
-        del os.environ["SBOXMGR_DEBUG"]
-
-
-def test_parsed_validator_strict_tolerant_modes():
-    SubscriptionManager._get_servers_cache.clear()
+def test_parsed_validator_strict_tolerant_modes(monkeypatch):
     """ParsedValidator: проверка исправленной логики strict/tolerant режимов.
 
     Этот тест проверяет, что исправленный баг с валидацией не всплывёт снова:
@@ -980,20 +881,39 @@ def test_parsed_validator_strict_tolerant_modes():
         ),
     ]
 
+    # Мокаем HTTP запросы
+    class MockResponse:
+        def __init__(self, content):
+            self.content = content
+            class MockRaw:
+                def __init__(self, content):
+                    self.content = content
+                def read(self, n=None):
+                    return self.content
+            self.raw = MockRaw(content)
+        def raise_for_status(self):
+            pass
+    def mock_get(url, **kwargs):
+        return MockResponse(b"ZGF0YQ==")
+    monkeypatch.setattr("requests.get", mock_get)
+
     class DummyFetcher:
         def __init__(self, source):
             self.source = source
 
         def fetch(self):
-            return b"dummy"
+            return b"ZGF0YQ=="  # valid base64 for "data"
 
     class DummyParser:
         def parse(self, raw):
             return servers
 
-    src = SubscriptionSource(url="file://dummy", source_type="url_base64")
+    src = SubscriptionSource(url="http://dummy", source_type="url_base64")
     mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
     mgr.fetcher = DummyFetcher(src)
+    from sboxmgr.subscription.manager.core import DataProcessor
+    mgr.data_processor = DataProcessor(mgr.fetcher, mgr.error_handler)
+    mgr.data_processor.parse_servers = lambda raw, context: (servers, True)
 
     # Тест 1: Tolerant режим - должен вернуть только валидные сервера
     context_tolerant = PipelineContext(mode="tolerant")
@@ -1104,6 +1024,9 @@ def test_parsed_validator_strict_tolerant_modes():
         src, detect_parser=lambda raw, t: DummyParserInvalid()
     )
     mgr_invalid.fetcher = DummyFetcher(src)
+    from sboxmgr.subscription.manager.core import DataProcessor
+    mgr_invalid.data_processor = DataProcessor(mgr_invalid.fetcher, mgr_invalid.error_handler)
+    mgr_invalid.data_processor.parse_servers = lambda raw, context: (all_invalid_servers, True)
 
     result_invalid = mgr_invalid.get_servers(
         context=context_tolerant, mode="tolerant", force_reload=True

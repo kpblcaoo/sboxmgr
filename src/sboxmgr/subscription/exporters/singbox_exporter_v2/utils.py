@@ -55,24 +55,20 @@ def convert_transport_config(server: ParsedServer) -> Optional[TransportConfig]:
 
     network = server.meta.get("network")
     if network in ["ws", "grpc", "http", "httpupgrade", "quic", "tcp", "udp"]:
-        transport_data["network"] = network
+        transport_data["type"] = network
 
         if network == "ws":
             if server.meta.get("ws_path"):
-                transport_data["ws_opts"] = {"path": server.meta["ws_path"]}
+                transport_data["path"] = server.meta["ws_path"]
             if server.meta.get("ws_headers"):
-                transport_data["ws_opts"] = transport_data.get("ws_opts", {})
-                transport_data["ws_opts"]["headers"] = server.meta["ws_headers"]
+                transport_data["headers"] = server.meta["ws_headers"]
         elif network == "grpc":
             if server.meta.get("grpc_service_name"):
-                transport_data["grpc_opts"] = {
-                    "serviceName": server.meta["grpc_service_name"]
-                }
+                transport_data["service_name"] = server.meta["grpc_service_name"]
         elif network == "http":
             if server.meta.get("http_path"):
-                transport_data["http_opts"] = {"path": server.meta["http_path"]}
+                transport_data["path"] = server.meta["http_path"]
             if server.meta.get("http_host"):
-                transport_data["http_opts"] = transport_data.get("http_opts", {})
-                transport_data["http_opts"]["host"] = server.meta["http_host"]
+                transport_data["host"] = server.meta["http_host"]
 
     return TransportConfig(**transport_data) if transport_data else None

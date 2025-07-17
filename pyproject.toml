@@ -57,6 +57,7 @@ dev = [
     "black",
     "pre-commit",
     "detect-secrets",
+    "hypothesis",
 ]
 # ipc = [
 #     "sbox-common @ file:///home/kpblc/projects/subbox/sbox-common",

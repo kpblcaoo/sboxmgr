@@ -40,7 +40,11 @@ def create_example_config() -> dict:
             ],
             "final": "google",
         },
-        "ntp": {"enabled": True, "server": "pool.ntp.org", "server_port": 123},
+        "ntp": {
+            "enabled": True,
+            "server": "pool.ntp.org",
+            "server_port": 123,
+        },  # interval убран
         "inbounds": [
             {
                 "type": "mixed",

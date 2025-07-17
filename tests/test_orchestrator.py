@@ -99,8 +99,9 @@ class MockExclusionManager(ExclusionManagerInterface):
 
     def add(self, server_id: str, name=None, reason=None):
         """Mock add method."""
+        was_present = server_id in self.exclusions
         self.exclusions.add(server_id)
-        return True
+        return not was_present  # Возвращаем True если сервер был добавлен, False если уже был
 
     def remove(self, server_id: str):
         """Mock remove method."""

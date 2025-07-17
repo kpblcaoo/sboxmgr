@@ -25,7 +25,7 @@ try:
     from sboxmgr.models.singbox.main import SingBoxConfig
 
     # New profile models (ADR-0017)
-    from sboxmgr.profiles.models import (
+    from sboxmgr.configs.models import (
         AgentProfile,
         ExportProfile,
         FilterProfile,

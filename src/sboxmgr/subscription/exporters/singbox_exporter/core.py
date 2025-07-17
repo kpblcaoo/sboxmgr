@@ -81,13 +81,11 @@ def create_modern_routing_rules(proxy_tags: list[str]) -> list[dict[str, Any]]:
     """
     rules = []
 
-    # Private IP ranges - direct
-    rules.append(
-        {
-            "ip_cidr": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8"],
-            "outbound": "direct",
-        }
-    )
+    # DNS hijack rule (highest priority)
+    rules.append({"protocol": "dns", "action": "hijack-dns"})
+
+    # Private IP ranges - auto
+    rules.append({"ip_is_private": True, "action": "auto"})
 
     # Russian sites - direct
     rules.append({"rule_set": ["geoip-ru"], "outbound": "direct"})
@@ -120,8 +118,21 @@ def singbox_export(
     outbounds = []
     proxy_tags = []
 
+    # Filter servers based on exclude_outbounds if client_profile is provided
+    filtered_servers = servers
+    if (
+        client_profile
+        and hasattr(client_profile, "exclude_outbounds")
+        and client_profile.exclude_outbounds
+    ):
+        filtered_servers = [
+            server
+            for server in servers
+            if server.type not in client_profile.exclude_outbounds
+        ]
+
     # Process each server
-    for server in servers:
+    for server in filtered_servers:
         outbound = process_single_server(server)
         if outbound:
             outbounds.append(outbound)
@@ -132,6 +143,14 @@ def singbox_export(
         urltest_outbound = create_urltest_outbound(proxy_tags)
         outbounds.insert(0, urltest_outbound)
 
+    # Add standard outbounds (always present)
+    standard_outbounds = [
+        {"type": "direct", "tag": "direct"},
+        {"type": "block", "tag": "block"},
+        {"type": "dns", "tag": "dns-out"},
+    ]
+    outbounds.extend(standard_outbounds)
+
     # Use provided routing rules or create modern defaults
     if routes:
         routing_rules = routes
@@ -140,6 +159,11 @@ def singbox_export(
 
     # Determine final action
     final_action = "auto" if proxy_tags else "direct"
+
+    # Override final action from client_profile if provided
+    if client_profile and hasattr(client_profile, "routing") and client_profile.routing:
+        if "final" in client_profile.routing:
+            final_action = client_profile.routing["final"]
 
     # Build final configuration
     config = {
@@ -189,6 +213,14 @@ def singbox_export_with_middleware(
     if proxy_tags:
         urltest_outbound = create_urltest_outbound(proxy_tags)
         outbounds.insert(0, urltest_outbound)
+
+    # Add standard outbounds (always present)
+    standard_outbounds = [
+        {"type": "direct", "tag": "direct"},
+        {"type": "block", "tag": "block"},
+        {"type": "dns", "tag": "dns-out"},
+    ]
+    outbounds.extend(standard_outbounds)
 
     # Use provided routing rules or create modern defaults
     if routes:

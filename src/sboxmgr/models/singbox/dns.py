@@ -1,8 +1,8 @@
 """DNS models for sing-box configuration."""
 
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 from .enums import DomainStrategy
 
@@ -23,12 +23,12 @@ class DnsServer(BaseModel):
     strategy: Optional[DomainStrategy] = Field(
         default=None, description="Domain resolution strategy."
     )
-    detours: Optional[list[str]] = Field(
-        default=None, description="List of detour outbound tags."
-    )
-    client_ip: Optional[str] = Field(
-        default=None, description="Client IP for DNS queries."
-    )
+    # detours: Optional[list[str]] = Field(
+    #     default=None, description="List of detour outbound tags."
+    # )
+    # client_ip: Optional[str] = Field(
+    #     default=None, description="Client IP for DNS queries."
+    # )
 
     model_config = {"extra": "forbid"}
 
@@ -124,18 +124,18 @@ class DnsConfig(BaseModel):
         default=None,
         description="FakeIP settings, e.g., {'enabled': true, 'inet4_range': '198.18.0.0/15'}.",
     )
-    hosts: Optional[dict[str, Union[str, list[str]]]] = Field(
-        default=None, description="Host mappings, e.g., {'example.com': '1.2.3.4'}."
-    )
+    # hosts: Optional[dict[str, Union[str, list[str]]]] = Field(
+    #     default=None, description="Host mappings, e.g., {'example.com': '1.2.3.4'}."
+    # )
     client_subnet: Optional[str] = Field(
         default=None, description="Client subnet for DNS queries, e.g., '1.2.3.0/24'."
     )
 
-    @field_validator("hosts", mode="before")
-    def normalize_hosts(cls, v):
-        """Normalize hosts to list of strings."""
-        if v:
-            return {k: v if isinstance(v, list) else [v] for k, v in v.items()}
-        return v
+    # @field_validator("hosts", mode="before")
+    # def normalize_hosts(cls, v):
+    #     """Normalize hosts to list of strings."""
+    #     if v:
+    #         return {k: v if isinstance(v, list) else [v] for k, v in v.items()}
+    #     return v
 
     model_config = {"extra": "forbid"}

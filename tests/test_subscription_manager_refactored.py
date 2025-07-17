@@ -56,13 +56,18 @@ class TestSubscriptionManagerRefactoring:
 
                         # Test the refactored manager
                         mgr = SubscriptionManager(mock_source)
-                        result = mgr.get_servers(context=mock_context)
 
-                        # Verify basic success
-                        assert result.success
-                        assert result.config is not None
-                        assert len(result.config) == 1
-                        assert result.config[0].type == "ss"
+                        # Mock policy engine to prevent filtering
+                        with patch("sboxmgr.subscription.manager.pipeline_coordinator.PipelineCoordinator.apply_policies") as mock_policies:
+                            mock_policies.return_value = [mock_server]
+
+                            result = mgr.get_servers(context=mock_context)
+
+                            # Verify basic success
+                            assert result.success
+                            assert result.config is not None
+                            assert len(result.config) == 1
+                            assert result.config[0].type == "ss"
 
     def test_get_servers_validation_error_strict_mode(self, mock_source, mock_context):
         """Test validation error handling in strict mode.

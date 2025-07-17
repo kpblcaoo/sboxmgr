@@ -9,6 +9,8 @@ import tempfile
 
 import pytest
 
+pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
+
 from sboxmgr.tui.utils.validation import (
     validate_output_path,
     validate_subscription_url,

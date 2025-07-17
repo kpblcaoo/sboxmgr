@@ -29,7 +29,7 @@ from sboxmgr.subscription.models import SubscriptionSource
 
 # Import Phase 3 components
 try:
-    from sboxmgr.profiles.models import FullProfile
+    from sboxmgr.configs.models import FullProfile
     from sboxmgr.subscription.middleware import EnrichmentMiddleware, LoggingMiddleware
     from sboxmgr.subscription.postprocessors import (
         GeoFilterPostProcessor,

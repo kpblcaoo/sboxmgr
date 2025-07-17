@@ -66,7 +66,7 @@ def is_external_import(module: str) -> bool:
     if module.startswith("_"):
         return False
     # Filter out internal modules and test artifacts
-    internal_modules = {"src", "tests", "logsetup", "sbox_common", "systemd"}
+    internal_modules = {"src", "tests", "logsetup", "sbox_common", "systemd", "cli", "conftest", "export", "utils"}
     if module in internal_modules:
         return False
     return True
@@ -106,6 +106,7 @@ def test_external_imports_covered_by_dependencies():
                 missing.add(module)
     if missing:
         pytest.fail(f"External imports not covered by pyproject.toml dependencies (main or optional): {sorted(missing)}")
+    # Успех — ничего не делать, не возвращать True/False
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

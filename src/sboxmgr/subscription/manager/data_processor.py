@@ -85,6 +85,31 @@ class DataProcessor:
 
             # Parse servers
             servers = parser.parse(raw_data)
+            print(f"[DEBUG] servers after parse: {servers}")
+
+            # Если servers пустой — считаем парсинг неуспешным
+            if not servers:
+                err = self.error_handler.create_parse_error(
+                    "No servers parsed (parse error)",
+                    {"source_type": self.fetcher.source.source_type},
+                )
+                self.error_handler.add_error_to_context(context, err)
+                print(
+                    f"[DEBUG] context.metadata['errors'] after add: {context.metadata.get('errors')}"
+                )
+                return [], False
+
+            # Если все servers невалидны (address == 'invalid'), считаем парсинг неуспешным
+            if all(getattr(s, "address", None) == "invalid" for s in servers):
+                err = self.error_handler.create_parse_error(
+                    "All parsed servers are invalid (parse error)",
+                    {"source_type": self.fetcher.source.source_type},
+                )
+                self.error_handler.add_error_to_context(context, err)
+                print(
+                    f"[DEBUG] context.metadata['errors'] after add: {context.metadata.get('errors')}"
+                )
+                return [], False
 
             # Debug logging
             self._log_parse_result(context, servers, parser)

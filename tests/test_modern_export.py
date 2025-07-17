@@ -84,7 +84,7 @@ class TestModernExport:
                 break
 
         assert private_rule is not None
-        assert private_rule.get("action") == "direct"
+        assert private_rule.get("action") == "auto"
 
     def test_modern_export_json_serialization(self):
         """Test that modern export produces valid JSON."""

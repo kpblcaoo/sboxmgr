@@ -14,6 +14,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+import pytest
 from sboxmgr.agent.event_sender import EventSender, ping_agent, send_event
 from sboxmgr.agent.ipc.socket_client import SocketClient
 from sboxmgr.logging import get_logger
@@ -21,6 +22,7 @@ from sboxmgr.logging import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.skip(reason="Requires running sboxagent - skip in CI")
 def test_socket_connection():
     """Test basic socket connection to sboxagent."""
     print("🔌 Testing socket connection...")
@@ -28,12 +30,13 @@ def test_socket_connection():
     result = ping_agent()
     if result:
         print("✅ Socket connection successful")
-        return True
+        assert True
     else:
         print("❌ Socket connection failed")
-        return False
+        assert False, "Socket connection failed"
 
 
+@pytest.mark.skip(reason="Requires running sboxagent - skip in CI")
 def test_event_sending():
     """Test sending events to sboxagent."""
     print("📡 Testing event sending...")
@@ -67,9 +70,10 @@ def test_event_sending():
             print(f"❌ Event '{event_type}' failed with error: {e}")
 
     print(f"📊 Event sending: {success_count}/{len(test_events)} successful")
-    return success_count == len(test_events)
+    assert success_count == len(test_events), f"Only {success_count}/{len(test_events)} events sent successfully"
 
 
+@pytest.mark.skip(reason="Requires running sboxagent - skip in CI")
 def test_heartbeat():
     """Test heartbeat functionality."""
     print("💓 Testing heartbeat...")
@@ -81,17 +85,18 @@ def test_heartbeat():
         )
         if result:
             print("✅ Heartbeat successful")
-            return True
+            assert True
         else:
             print("❌ Heartbeat failed")
-            return False
+            assert False, "Heartbeat failed"
     except Exception as e:
         print(f"❌ Heartbeat failed with error: {e}")
-        return False
+        assert False, f"Heartbeat failed with error: {e}"
     finally:
         sender.disconnect()
 
 
+@pytest.mark.skip(reason="Requires running sboxagent - skip in CI")
 def test_command_execution():
     """Test command execution via socket."""
     print("⚡ Testing command execution...")
@@ -108,20 +113,21 @@ def test_command_execution():
             if status:
                 print("✅ Status command successful")
                 print(f"   Agent status: {status}")
-                return True
+                assert True
             else:
                 print("❌ Status command failed")
-                return False
+                assert False, "Status command failed"
         else:
             print("❌ Ping command failed")
-            return False
+            assert False, "Ping command failed"
     except Exception as e:
         print(f"❌ Command execution failed with error: {e}")
-        return False
+        assert False, f"Command execution failed with error: {e}"
     finally:
         sender.disconnect()
 
 
+@pytest.mark.skip(reason="Requires running sboxagent - skip in CI")
 def test_framed_json_protocol():
     """Test framed JSON protocol directly."""
     print("📋 Testing framed JSON protocol...")
@@ -147,11 +153,11 @@ def test_framed_json_protocol():
         print(f"✅ Response received: {response.get('type')}")
 
         client.close()
-        return True
+        assert True
 
     except Exception as e:
         print(f"❌ Framed JSON protocol test failed: {e}")
-        return False
+        assert False, f"Framed JSON protocol test failed: {e}"
 
 
 def main():
@@ -175,11 +181,11 @@ def main():
         print("-" * 30)
 
         try:
-            if test_func():
-                passed += 1
-                print(f"✅ {test_name}: PASSED")
-            else:
-                print(f"❌ {test_name}: FAILED")
+            test_func()
+            passed += 1
+            print(f"✅ {test_name}: PASSED")
+        except AssertionError as e:
+            print(f"❌ {test_name}: FAILED - {e}")
         except Exception as e:
             print(f"❌ {test_name}: ERROR - {e}")
 
