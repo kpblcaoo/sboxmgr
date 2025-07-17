@@ -30,3 +30,5 @@ jobs:
         run: pytest tests/test_dependencies.py -v
       - name: Check all imports are covered by dependencies
         run: pytest tests/test_imports_vs_dependencies.py -v
+      - name: Run wheel install/import integration test
+        run: pytest tests/test_wheel_install.py -v
