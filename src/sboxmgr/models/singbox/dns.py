@@ -1,6 +1,6 @@
 """DNS models for sing-box configuration."""
 
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -29,6 +29,24 @@ class DnsServer(BaseModel):
     # client_ip: Optional[str] = Field(
     #     default=None, description="Client IP for DNS queries."
     # )
+
+    model_config = {"extra": "forbid"}
+
+
+class DnsHostsServer(BaseModel):
+    """DNS hosts server configuration (sing-box 1.12.0+)."""
+
+    type: Literal["hosts"] = Field(default="hosts", description="Server type.")
+    tag: Optional[str] = Field(
+        default=None, description="Unique tag for the hosts server."
+    )
+    path: Optional[list[str]] = Field(
+        default=None, description="List of paths to hosts files."
+    )
+    predefined: Optional[dict[str, Union[str, list[str]]]] = Field(
+        default=None,
+        description="Predefined host mappings, e.g., {'example.com': '1.2.3.4'}.",
+    )
 
     model_config = {"extra": "forbid"}
 
@@ -98,8 +116,8 @@ class DnsRule(BaseModel):
 class DnsConfig(BaseModel):
     """DNS configuration for sing-box."""
 
-    servers: Optional[list[DnsServer]] = Field(
-        default=None, description="List of DNS servers."
+    servers: Optional[list[Union[DnsServer, DnsHostsServer]]] = Field(
+        default=None, description="List of DNS servers (including hosts servers)."
     )
     rules: Optional[list[DnsRule]] = Field(
         default=None, description="DNS routing rules."
