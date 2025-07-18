@@ -221,6 +221,141 @@ class TestSingBoxModelsValidation:
         # Test sing-box binary validation
         validate_with_singbox(config_dict)
 
+    def test_dns_hosts_server_validation(self):
+        """Test DNS hosts server configuration validation (sing-box 1.12.0+)."""
+        # Skip test for sing-box versions < 1.12.0
+        try:
+            result = subprocess.run(
+                ["/usr/bin/sing-box", "version"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                version_output = result.stdout.strip()
+                if "sing-box version" in version_output:
+                    version_str = version_output.split("sing-box version ")[1].split()[0]
+                    if version_str < "1.12.0":
+                        pytest.skip(f"Hosts DNS server requires sing-box 1.12.0+, got {version_str}")
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pytest.skip("sing-box binary not available")
+        config_dict = {
+            "log": {"level": "info"},
+            "dns": {
+                "servers": [
+                    {
+                        "type": "hosts",
+                        "tag": "hosts",
+                        "predefined": {
+                            "example.com": "1.2.3.4",
+                            "localhost": ["127.0.0.1", "::1"],
+                            "test.local": "192.168.1.100"
+                        }
+                    },
+                    {"tag": "google", "address": "8.8.8.8"},
+                ],
+                "rules": [
+                    {
+                        "type": "default",
+                        "server": "hosts"
+                    },
+                    {
+                        "type": "default",
+                        "server": "google"
+                    }
+                ],
+                "final": "google",
+            },
+            "inbounds": [
+                {
+                    "type": "mixed",
+                    "tag": "mixed-in",
+                    "listen": "127.0.0.1",
+                    "listen_port": 1080,
+                }
+            ],
+            "outbounds": [{"type": "direct", "tag": "direct"}],
+        }
+
+        # Test Pydantic validation
+        config = SingBoxConfig.model_validate(config_dict)
+        assert config is not None
+        assert config.dns is not None
+        assert config.dns.servers is not None
+        assert len(config.dns.servers) == 2
+
+        # Check hosts server
+        hosts_server = config.dns.servers[0]
+        assert hosts_server.type == "hosts"
+        assert hosts_server.tag == "hosts"
+        assert hosts_server.predefined is not None
+        assert hosts_server.predefined["example.com"] == "1.2.3.4"
+        assert hosts_server.predefined["localhost"] == ["127.0.0.1", "::1"]
+
+        # Test sing-box binary validation
+        validate_with_singbox(config_dict)
+
+    def test_dns_hosts_server_with_paths(self):
+        """Test DNS hosts server with file paths."""
+        # Skip test for sing-box versions < 1.12.0
+        try:
+            result = subprocess.run(
+                ["/usr/bin/sing-box", "version"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                version_output = result.stdout.strip()
+                if "sing-box version" in version_output:
+                    version_str = version_output.split("sing-box version ")[1].split()[0]
+                    if version_str < "1.12.0":
+                        pytest.skip(f"Hosts DNS server requires sing-box 1.12.0+, got {version_str}")
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pytest.skip("sing-box binary not available")
+        config_dict = {
+            "log": {"level": "info"},
+            "dns": {
+                "servers": [
+                    {
+                        "type": "hosts",
+                        "tag": "hosts",
+                        "path": ["/etc/hosts", "/custom/hosts"],
+                        "predefined": {
+                            "example.com": "1.2.3.4"
+                        }
+                    }
+                ],
+                "final": "hosts",
+            },
+            "inbounds": [
+                {
+                    "type": "mixed",
+                    "tag": "mixed-in",
+                    "listen": "127.0.0.1",
+                    "listen_port": 1080,
+                }
+            ],
+            "outbounds": [{"type": "direct", "tag": "direct"}],
+        }
+
+        # Test Pydantic validation
+        config = SingBoxConfig.model_validate(config_dict)
+        assert config is not None
+        assert config.dns is not None
+        assert config.dns.servers is not None
+        assert len(config.dns.servers) == 1
+
+        # Check hosts server with paths
+        hosts_server = config.dns.servers[0]
+        assert hosts_server.type == "hosts"
+        assert hosts_server.path == ["/etc/hosts", "/custom/hosts"]
+        assert hosts_server.predefined is not None
+        assert hosts_server.predefined["example.com"] == "1.2.3.4"
+
+        # Test sing-box binary validation
+        validate_with_singbox(config_dict)
+
     def test_routing_config_validation(self):
         """Test routing configuration validation."""
         config_dict = {
