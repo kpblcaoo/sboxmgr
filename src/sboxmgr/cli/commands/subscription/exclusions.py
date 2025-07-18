@@ -15,7 +15,6 @@ from rich.table import Table
 from sboxmgr.config.fetch import fetch_json
 from sboxmgr.core.exclusions import ExclusionManager
 from sboxmgr.i18n.t import t
-from sboxmgr.utils.id import generate_server_id
 
 # SUPPORTED_PROTOCOLS defined locally
 SUPPORTED_PROTOCOLS = ["vless", "shadowsocks", "vmess", "trojan", "tuic", "hysteria2"]
@@ -173,7 +172,7 @@ def exclusions_add(
     json_data = _fetch_and_validate_subscription(url, json_output)
     _cache_server_data(manager, json_data, json_output)
 
-    # Parse server list
+    # EXACT COPY from old _add_exclusions function
     items = [x.strip() for x in servers.split(",") if x.strip()]
 
     indices = []
@@ -191,40 +190,70 @@ def exclusions_add(
 
     # Add by indices
     if indices:
-        try:
-            added_ids.extend(
-                manager.add_by_index(json_data, indices, SUPPORTED_PROTOCOLS, reason)
-            )
-        except Exception as e:
-            errors.append(f"Failed to add by indices: {e}")
+        # Use cached servers data instead of re-caching
+        if not manager._servers_cache:
+            error_msg = "Server cache not available"
+            if json_output:
+                print(json.dumps({"error": error_msg}))
+            else:
+                rprint(f"[red]❌ {error_msg}[/red]")
+            raise typer.Exit(1) from None
 
-    # Add by wildcards
-    if patterns:
-        try:
-            added_ids.extend(
-                manager.add_by_wildcard(
-                    json_data, patterns, SUPPORTED_PROTOCOLS, reason
+        servers = manager._servers_cache["servers"]
+        protocols = manager._servers_cache["supported_protocols"]
+        supported_servers = manager._servers_cache["supported_servers"]
+
+        # Check for invalid indices before adding
+        for index in indices:
+            if index < 0 or index >= len(supported_servers):
+                errors.append(
+                    f"Invalid server index: {index} (max: {len(supported_servers) - 1})"
                 )
-            )
-        except Exception as e:
-            errors.append(f"Failed to add by patterns: {e}")
+
+        if errors:
+            if json_output:
+                print(json.dumps({"error": "; ".join(errors)}))
+            else:
+                for error in errors:
+                    rprint(f"[red]❌ {error}[/red]")
+            raise typer.Exit(1) from None
+
+        added_by_index = manager.add_by_index(servers, indices, protocols, reason)
+        added_ids.extend(added_by_index)
+
+    # Add by wildcard patterns
+    if patterns:
+        # Use cached servers data instead of re-caching
+        if not manager._servers_cache:
+            error_msg = "Server cache not available"
+            if json_output:
+                print(json.dumps({"error": error_msg}))
+            else:
+                rprint(f"[red]❌ {error_msg}[/red]")
+            raise typer.Exit(1) from None
+
+        servers = manager._servers_cache["servers"]
+        protocols = manager._servers_cache["supported_protocols"]
+        added_by_pattern = manager.add_by_wildcard(servers, patterns, protocols, reason)
+        added_ids.extend(added_by_pattern)
 
     if json_output:
-        result = {
-            "action": "add",
-            "added_count": len(added_ids),
-            "added_ids": added_ids,
-            "total_requested": len(items),
-        }
-        if errors:
-            result["errors"] = errors
-        print(json.dumps(result, indent=2))
+        print(
+            json.dumps(
+                {
+                    "action": "add",
+                    "added_count": len(added_ids),
+                    "added_ids": added_ids,
+                    "reason": reason,
+                }
+            )
+        )
+    elif added_ids:
+        rprint(f"[green]✅ Added {len(added_ids)} exclusions.[/green]")
     else:
-        if added_ids:
-            rprint(f"[green]✅ Added {len(added_ids)} servers to exclusions[/green]")
-        if errors:
-            for error in errors:
-                rprint(f"[red]❌ {error}[/red]")
+        rprint(
+            "[yellow]⚠️ No new exclusions added (already excluded or not found).[/yellow]"
+        )
 
 
 @app.command("remove")
@@ -256,66 +285,74 @@ def exclusions_remove(
     json_data = _fetch_and_validate_subscription(url, json_output)
     _cache_server_data(manager, json_data, json_output)
 
-    # Parse server list
+    # EXACT COPY from old _remove_exclusions function
     items = [x.strip() for x in servers.split(",") if x.strip()]
 
     indices = []
-    patterns = []
+    server_ids = []
 
-    # Separate indices from patterns
+    # Separate indices from server IDs
     for item in items:
         if item.isdigit():
             indices.append(int(item))
         else:
-            patterns.append(item)
+            server_ids.append(item)
 
     removed_ids = []
     errors = []
 
     # Remove by indices
     if indices:
-        try:
-            removed_ids.extend(
-                manager.remove_by_index(json_data, indices, SUPPORTED_PROTOCOLS)
-            )
-        except Exception as e:
-            errors.append(f"Failed to remove by indices: {e}")
+        # Use cached servers data instead of re-caching
+        if not manager._servers_cache:
+            error_msg = "Server cache not available"
+            if json_output:
+                print(json.dumps({"error": error_msg}))
+            else:
+                rprint(f"[red]❌ {error_msg}[/red]")
+            raise typer.Exit(1) from None
 
-    # Remove by patterns (convert to server IDs)
-    if patterns:
-        try:
-            # Get all servers and filter by patterns
-            all_servers = manager.list_servers(json_data, SUPPORTED_PROTOCOLS)
-            for pattern in patterns:
-                for _index, server, is_excluded in all_servers:
-                    if is_excluded and any(
-                        pattern.lower() in str(server.get("tag", "")).lower()
-                        or pattern.lower() in str(server.get("server", "")).lower()
-                    ):
-                        server_id = generate_server_id(server)
-                        if manager.remove(server_id):
-                            removed_ids.append(server_id)
-        except Exception as e:
-            errors.append(f"Failed to remove by patterns: {e}")
+        servers = manager._servers_cache["servers"]
+        protocols = manager._servers_cache["supported_protocols"]
+        supported_servers = manager._servers_cache["supported_servers"]
+
+        # Check for invalid indices before removing
+        for index in indices:
+            if index < 0 or index >= len(supported_servers):
+                errors.append(
+                    f"Invalid server index: {index} (max: {len(supported_servers) - 1})"
+                )
+
+        if errors:
+            if json_output:
+                print(json.dumps({"error": "; ".join(errors)}))
+            else:
+                for error in errors:
+                    rprint(f"[red]❌ {error}[/red]")
+            raise typer.Exit(1) from None
+
+        removed_by_index = manager.remove_by_index(servers, indices, protocols)
+        removed_ids.extend(removed_by_index)
+
+    # Remove by server IDs
+    for server_id in server_ids:
+        if manager.remove(server_id):
+            removed_ids.append(server_id)
 
     if json_output:
-        result = {
-            "action": "remove",
-            "removed_count": len(removed_ids),
-            "removed_ids": removed_ids,
-            "total_requested": len(items),
-        }
-        if errors:
-            result["errors"] = errors
-        print(json.dumps(result, indent=2))
-    else:
-        if removed_ids:
-            rprint(
-                f"[green]✅ Removed {len(removed_ids)} servers from exclusions[/green]"
+        print(
+            json.dumps(
+                {
+                    "action": "remove",
+                    "removed_count": len(removed_ids),
+                    "removed_ids": removed_ids,
+                }
             )
-        if errors:
-            for error in errors:
-                rprint(f"[red]❌ {error}[/red]")
+        )
+    elif removed_ids:
+        rprint(f"[green]✅ Removed {len(removed_ids)} exclusions.[/green]")
+    else:
+        rprint("[yellow]⚠️ No exclusions removed (not found).[/yellow]")
 
 
 @app.command("clear")
@@ -448,34 +485,54 @@ def exclusions_main(
         json_data = _fetch_and_validate_subscription(url, json_output)
         _cache_server_data(manager, json_data, json_output)
 
-    # Handle operations that require server data
+        # Handle operations that require server data
     if list_servers:
-        # Use manager's list_servers functionality
-        servers = manager.list_servers(json_data, SUPPORTED_PROTOCOLS, show_excluded)
+        # EXACT COPY from old _list_servers function
+        servers_info = manager.list_servers(show_excluded=show_excluded)
 
         if json_output:
-            server_data = []
-            for index, server, is_excluded in servers:
-                server_info = {
-                    "index": index,
-                    "tag": server.get("tag", ""),
-                    "type": server.get("type", ""),
-                    "server": server.get("server", ""),
-                    "port": server.get("server_port", ""),
-                    "excluded": is_excluded,
-                }
-                server_data.append(server_info)
-
-            result = {
-                "total_servers": len(servers),
-                "servers": server_data,
+            data = {
+                "total": len(servers_info),
+                "servers": [
+                    {
+                        "index": idx,
+                        "id": manager._get_server_id(server),
+                        "tag": server.get("tag", "N/A"),
+                        "type": server.get("type", "N/A"),
+                        "server": server.get("server", "N/A"),
+                        "server_port": server.get("server_port", "N/A"),
+                        "is_excluded": is_excluded,
+                    }
+                    for idx, server, is_excluded in servers_info
+                ],
             }
-            print(json.dumps(result, indent=2))
-        else:
-            for index, server, is_excluded in servers:
-                status = "🚫" if is_excluded else "✅"
-                server_info = manager.format_server_info(server, index, is_excluded)
-                rprint(f"{status} {server_info}")
+            print(json.dumps(data, indent=2))
+            return
+
+        if not servers_info:
+            rprint("[dim]📡 No servers found.[/dim]")
+            return
+
+        table = Table(title=f"📡 Available Servers ({len(servers_info)})")
+        table.add_column("Index", style="cyan", justify="right")
+        table.add_column("Tag", style="white")
+        table.add_column("Type", style="blue")
+        table.add_column("Server:Port", style="green")
+        table.add_column("Status", style="bold")
+
+        for idx, server, is_excluded in servers_info:
+            status = "🚫 EXCLUDED" if is_excluded else "✅ Available"
+            status_style = "red" if is_excluded else "green"
+
+            table.add_row(
+                str(idx),
+                server.get("tag", "N/A"),
+                server.get("type", "N/A"),
+                f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}",
+                f"[{status_style}]{status}[/{status_style}]",
+            )
+
+        console.print(table)
         return
 
     if interactive:
