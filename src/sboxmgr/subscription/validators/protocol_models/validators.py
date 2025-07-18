@@ -55,7 +55,10 @@ def validate_protocol_config(config: dict[str, Any], protocol: str) -> ProtocolC
         raise ValueError(f"Unsupported protocol: {protocol}")
 
     config_class = protocol_map[protocol]
-    return config_class(**config)
+    # Type cast to ensure mypy understands the return type
+    from typing import cast
+
+    return cast(ProtocolConfig, config_class(**config))
 
 
 def generate_protocol_schema(protocol: str) -> dict[str, Any]:
