@@ -79,13 +79,12 @@ class LoggingCore:
         logger = logging.getLogger(name)
 
         # Add structured logging adapter if not already present
-        # Use hasattr and getattr for safer attribute access
         if not hasattr(logger, "_structured_adapter"):
             structured_adapter = StructuredLoggerAdapter(logger)
-            # Use setattr to safely set the attribute
-            logger._structured_adapter = structured_adapter
+            # Use type ignore for runtime attribute assignment
+            logger._structured_adapter = structured_adapter  # type: ignore[attr-defined]
         else:
-            structured_adapter = logger._structured_adapter
+            structured_adapter = logger._structured_adapter  # type: ignore[attr-defined]
 
         # Return the base logger, not the adapter
         return logger
