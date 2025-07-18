@@ -41,6 +41,7 @@ backup.json
 config.json
 __pycache__
 build/
+dist/
 *.egg-info/
 *.egg
 *.pyc
