@@ -57,13 +57,17 @@ def test_deprecated_aliases_exist(runner):
 
 def test_deprecated_aliases_show_warning(runner):
     """Test that deprecated aliases show warning messages."""
-    # This test would need a mock URL to work properly
-    # For now, just test that the commands exist
-    result = runner.invoke(app, ["list-servers", "--help"])
-    assert result.exit_code == 0
+    # Test that deprecated commands show warnings when used
+    # We'll use a mock URL to trigger the warning
+    result = runner.invoke(app, ["list-servers", "--url", "https://example.com", "--debug", "0"])
+    # Should show deprecation warning (exit code 1 due to invalid URL, but warning should appear)
+    assert "Warning: 'list-servers' is deprecated" in result.stdout
+    # Note: exit code may vary depending on URL processing
 
-    result = runner.invoke(app, ["exclusions", "--help"])
-    assert result.exit_code == 0
+    result = runner.invoke(app, ["exclusions", "--url", "https://example.com", "--view"])
+    # Should show deprecation warning
+    assert "Warning: 'exclusions' is deprecated" in result.stdout
+    # Note: exit code may vary depending on URL processing
 
 
 def test_global_flags_in_context(runner):

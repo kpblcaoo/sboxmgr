@@ -224,16 +224,10 @@ def lang_cmd(
 
 app.command("plugin-template")(plugin_template.plugin_template)
 
-# Register subscription commands
-app.command("list-servers", help=t("cli.list_servers.help"))(subscription_list_servers)
 
-# Register exclusions command
-app.command("exclusions")(exclusions)
-
-
-# Aliases for deprecated commands (for backward compatibility)
+# Register deprecated commands as aliases (for backward compatibility)
 # Note: These are hidden aliases that will be removed in future versions
-@app.command("list-servers", hidden=True)
+@app.command("list-servers", hidden=True, help=t("cli.list_servers.help"))
 def list_servers_alias(
     url: str = typer.Option(
         ...,
@@ -278,7 +272,11 @@ def list_servers_alias(
     )
 
 
-@app.command("exclusions", hidden=True)
+@app.command(
+    "exclusions",
+    hidden=True,
+    help="Manage server exclusions for subscription-based proxy configurations",
+)
 def exclusions_alias(
     url: str = typer.Option(
         ...,
