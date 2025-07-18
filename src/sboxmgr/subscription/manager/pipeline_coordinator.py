@@ -205,7 +205,6 @@ class PipelineCoordinator:
         errors = (
             context.metadata.get("errors", []) if hasattr(context, "metadata") else []
         )
-        print(f"[DEBUG] create_pipeline_result: errors={errors}")
         return PipelineResult(
             config=servers, context=context, errors=errors, success=success
         )

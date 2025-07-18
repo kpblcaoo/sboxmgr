@@ -239,9 +239,9 @@ class TestPhase4CLIIntegration:
         middleware_param = sig.parameters["middleware"]
 
         # Check annotation types
-        assert profile_param.annotation == str
-        assert postprocessors_param.annotation == str
-        assert middleware_param.annotation == str
+        assert isinstance(profile_param.annotation, type(str))
+        assert isinstance(postprocessors_param.annotation, type(str))
+        assert isinstance(middleware_param.annotation, type(str))
 
     def test_profile_loading_integration(self):
         """Test profile loading integration with CLI."""

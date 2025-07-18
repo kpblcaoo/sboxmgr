@@ -21,9 +21,6 @@ try:
         ServiceConfig,
     )
 
-    # Sing-box configuration model
-    from sboxmgr.models.singbox.main import SingBoxConfig
-
     # New profile models (ADR-0017)
     from sboxmgr.configs.models import (
         AgentProfile,
@@ -35,6 +32,11 @@ try:
         SubscriptionProfile,
         UIProfile,
     )
+
+    # Sing-box configuration model
+    from sboxmgr.models.singbox.main import SingBoxConfig
+
+    # Subscription models
     from sboxmgr.subscription.models import ClientProfile, InboundProfile
 
     # Note: ExclusionList and ExclusionRule are dataclasses, not Pydantic models

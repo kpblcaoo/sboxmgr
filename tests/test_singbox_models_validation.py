@@ -1,11 +1,5 @@
-"""
-Test sing-box Pydantic models against actual sing-box validation.
+"""Test sing-box model validation against actual sing-box binary."""
 
-This test suite validates that our Pydantic models produce configurations
-that are accepted by the actual sing-box binary.
-"""
-
-import json
 import subprocess
 import tempfile
 from pathlib import Path

@@ -1,14 +1,12 @@
-"""Tests for ServerListScreen."""
+"""Test server list screen."""
 
 from unittest.mock import Mock, patch
 
 import pytest
 
-pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
-
-import pytest
-
 from sboxmgr.tui.screens.server_list import ServerListScreen
+
+pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
 
 
 class TestServerListScreen:

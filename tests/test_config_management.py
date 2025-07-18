@@ -43,7 +43,7 @@ class TestConfigManager:
 
             # Verify enum values are preserved
             assert loaded_config.export.format == config.export.format
-            assert type(loaded_config.export.format) == type(config.export.format)
+            assert isinstance(loaded_config.export.format, type(config.export.format))
 
             # Verify TOML contains string values, not enum representations
             with open(toml_path) as f:

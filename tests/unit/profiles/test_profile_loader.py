@@ -1,9 +1,4 @@
-"""Unit tests for ProfileLoader."""
-
-import sys
-from unittest.mock import MagicMock
-
-sys.modules["src.sboxmgr.logging.core"] = MagicMock()
+"""Test profile loader functionality."""
 
 
 from sboxmgr.configs.loader import (

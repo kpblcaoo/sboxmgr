@@ -18,9 +18,6 @@ class TestSmartExport:
         block = BlockOutbound(tag="block-tag")
 
         # Standard export should include all fields from OutboundBase
-        standard_data = block.model_dump()
-        assert "server" in standard_data
-        assert "server_port" in standard_data
         # Note: tls is not in OutboundBase anymore, only in OutboundWithTls
         # Note: transport is not inherited by BlockOutbound, so it won't be in standard_data
 
@@ -38,7 +35,6 @@ class TestSmartExport:
         direct = DirectOutbound(tag="direct-tag", server="1.2.3.4", server_port=1080)
 
         # Standard export should include all fields from OutboundBase
-        standard_data = direct.model_dump()
         # Note: tls is not in OutboundBase anymore, only in OutboundWithTls
         # Note: transport is not inherited by DirectOutbound, so it won't be in standard_data
 

@@ -15,7 +15,7 @@ class TestIsAiLang:
         i18n_dir.mkdir()
 
         # Create language file with AI marker
-        {
+        language_data = {
             "cli": {"help": "Hilfe"},
             "__note__": "AI-generated translations - needs review",
         }
@@ -30,6 +30,8 @@ class TestIsAiLang:
             ):
                 result = is_ai_lang("de")
                 assert result is True
+                # Verify the language data structure matches what we expect
+                assert language_data["__note__"] == "AI-generated translations - needs review"
 
     def test_is_ai_lang_false(self, tmp_path):
         """Test is_ai_lang returns False for human-reviewed language."""

@@ -125,9 +125,6 @@ class ErrorHandler:
             context.metadata["errors"] = []
 
         context.metadata["errors"].append(error)
-        print(
-            f"[DEBUG] add_error_to_context: added {error}, now errors={context.metadata['errors']}"
-        )
 
     def has_errors(self, context) -> bool:
         """Check if context has any errors.

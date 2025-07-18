@@ -5,13 +5,14 @@ This script waits for CI checks to complete and monitors for bot comments
 on the latest commit. Useful for automated monitoring after pushing changes.
 """
 
+import json
 import os
 import sys
 import time
-import json
-import requests
 from datetime import datetime, timedelta
-from typing import Optional, List, Dict, Any
+from typing import Any, Optional
+
+import requests
 
 
 class GitHubMonitor:
@@ -57,7 +58,7 @@ class GitHubMonitor:
             print(f"Error getting latest commit: {e}")
             return None
 
-    def get_commit_checks(self, commit_sha: str) -> List[Dict[str, Any]]:
+    def get_commit_checks(self, commit_sha: str) -> list[dict[str, Any]]:
         """Get CI checks for a commit.
 
         Args:
@@ -76,7 +77,7 @@ class GitHubMonitor:
             print(f"Error getting commit checks: {e}")
             return []
 
-    def get_commit_comments(self, commit_sha: str) -> List[Dict[str, Any]]:
+    def get_commit_comments(self, commit_sha: str) -> list[dict[str, Any]]:
         """Get comments on a commit.
 
         Args:
@@ -95,70 +96,127 @@ class GitHubMonitor:
             print(f"Error getting commit comments: {e}")
             return []
 
+    def get_check_run_logs_url(self, check_run: dict) -> Optional[str]:
+        """Get the logs URL for a check run (if available)."""
+        # For GitHub Actions, logs_url is available
+        if "logs_url" in check_run:
+            return check_run["logs_url"]
+        # For other checks, details_url is the best we can do
+        return check_run.get("details_url")
+
+    def print_failed_check_logs(self, check_runs: list[dict[str, Any]]):
+        """Print logs for all failed/neutral check runs (if possible)."""
+        for check in check_runs:
+            name = check.get("name", "Unknown")
+            status = check.get("status", "unknown")
+            conclusion = check.get("conclusion")
+            if conclusion not in ("success", None):
+                print(f"\n🔴 CI check failed or not green: {name} (status={status}, conclusion={conclusion})")
+                logs_url = self.get_check_run_logs_url(check)
+                if logs_url:
+                    print(f"  📄 Logs/details: {logs_url}")
+                    # Try to fetch logs if it's a raw logs_url (GitHub Actions)
+                    if logs_url.endswith("/logs"):
+                        try:
+                            resp = requests.get(logs_url, headers=self.headers)
+                            if resp.status_code == 200:
+                                print("  --- CI LOG START ---")
+                                print(resp.text[:5000])  # Print first 5000 chars
+                                if len(resp.text) > 5000:
+                                    print("  ... (truncated) ...")
+                                print("  --- CI LOG END ---")
+                            else:
+                                print(f"  (Could not fetch raw log, status {resp.status_code})")
+                        except Exception as e:
+                            print(f"  (Error fetching log: {e})")
+                else:
+                    print("  (No logs_url/details_url available)")
+
+    def print_bot_comments(self, commit_sha: str, bot_names=("bugbot", "cursor-bugbot", "Cursor BugBot")):
+        """Print comments from BugBot or other bots on a commit."""
+        comments = self.get_commit_comments(commit_sha)
+        found = False
+        for comment in comments:
+            user = comment.get("user", {}).get("login", "").lower()
+            if any(bot in user for bot in bot_names) or any(bot in comment.get("user", {}).get("login", "") for bot in bot_names):
+                found = True
+                print(f"\n🤖 Bot comment by {comment.get('user', {}).get('login', 'Unknown')}:\n{'-'*40}")
+                print(comment.get("body", "")[:2000])
+                if len(comment.get("body", "")) > 2000:
+                    print("... (truncated) ...")
+                print("\nLink: " + comment.get("html_url", "(no url)"))
+        if not found:
+            print("(No bot comments found)")
+
     def wait_for_ci_completion(self, commit_sha: str, timeout_minutes: int = 10) -> bool:
-        """Wait for CI checks to complete.
-
-        Args:
-            commit_sha: Commit SHA to monitor
-            timeout_minutes: Maximum time to wait in minutes
-
-        Returns:
-            True if all checks completed, False if timeout
-        """
+        """Wait for CI checks to complete. Also print logs for failed/neutral checks."""
         print(f"🔍 Monitoring CI checks for commit {commit_sha[:8]}...")
 
         start_time = datetime.now()
         timeout = timedelta(minutes=timeout_minutes)
 
+        last_check_runs = []
         while datetime.now() - start_time < timeout:
             checks = self.get_commit_checks(commit_sha)
-
+            last_check_runs = checks
             if not checks:
                 print("⏳ No CI checks found yet, waiting...")
                 time.sleep(30)
                 continue
 
-            # Check status of all checks
             completed = 0
             failed = 0
             pending = 0
-
+            non_green = 0
+            bugbot_status = None
             for check in checks:
                 status = check.get("status", "unknown")
                 conclusion = check.get("conclusion")
                 name = check.get("name", "Unknown")
-
+                if name.lower().startswith("cursor bugbot"):
+                    bugbot_status = conclusion
                 if status == "completed":
                     completed += 1
                     if conclusion == "failure":
                         failed += 1
+                        non_green += 1
                         print(f"❌ {name}: FAILED")
                     elif conclusion == "success":
                         print(f"✅ {name}: PASSED")
+                    elif conclusion == "neutral":
+                        non_green += 1
+                        print(f"⚠️  {name}: NEUTRAL")
                     else:
+                        non_green += 1
                         print(f"⚠️  {name}: {conclusion}")
                 else:
                     pending += 1
                     print(f"⏳ {name}: {status}")
-
-            print(f"📊 Status: {completed} completed, {pending} pending, {failed} failed")
-
+            print(f"📊 Status: {completed} completed, {pending} pending, {failed} failed, {non_green} non-green")
             # If all checks completed
             if pending == 0:
-                if failed == 0:
+                if non_green == 0:
                     print("🎉 All CI checks passed!")
                     return True
                 else:
-                    print("💥 Some CI checks failed!")
+                    print("💥 Some CI checks failed or are not green!")
+                    # Print logs for failed/neutral checks
+                    self.print_failed_check_logs(last_check_runs)
+                    # Print BugBot comments if BugBot is not green
+                    if bugbot_status and bugbot_status != "success":
+                        print("\n--- BugBot status is not green, reading comments ---")
+                        self.print_bot_comments(commit_sha)
                     return False
-
-            # Wait before next check
             time.sleep(30)
-
         print(f"⏰ Timeout after {timeout_minutes} minutes")
+        # On timeout, print logs/comments if any non-green
+        self.print_failed_check_logs(last_check_runs)
+        if bugbot_status and bugbot_status != "success":
+            print("\n--- BugBot status is not green, reading comments ---")
+            self.print_bot_comments(commit_sha)
         return False
 
-    def monitor_bot_comments(self, commit_sha: str, timeout_minutes: int = 5) -> List[Dict[str, Any]]:
+    def monitor_bot_comments(self, commit_sha: str, timeout_minutes: int = 5) -> list[dict[str, Any]]:
         """Monitor for bot comments on a commit.
 
         Args:

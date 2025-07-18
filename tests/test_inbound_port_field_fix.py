@@ -5,12 +5,11 @@ both 'listen_port' and 'port' fields in inbound configurations, ensuring
 backward compatibility with existing configurations.
 """
 
-import pytest
 
+from sboxmgr.models.singbox.inbounds import MixedInbound
 from sboxmgr.subscription.exporters.singbox_exporter_v2.inbound_converter import (
     _convert_single_inbound,
 )
-from sboxmgr.models.singbox.inbounds import MixedInbound
 
 
 def test_inbound_port_field_backward_compatibility():

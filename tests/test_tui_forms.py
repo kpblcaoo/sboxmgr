@@ -1,12 +1,12 @@
-"""Tests for TUI form components."""
+"""Test TUI forms and validation."""
 
 from unittest.mock import Mock, patch
 
 import pytest
 
-pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
-
 from sboxmgr.tui.components.forms import ConfigGenerationForm, SubscriptionForm
+
+pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
 
 
 class TestSubscriptionForm:

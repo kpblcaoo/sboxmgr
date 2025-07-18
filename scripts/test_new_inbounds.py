@@ -61,12 +61,16 @@ def test_new_inbounds():
         # Test Pydantic validation
         try:
             if protocol == "naive":
+                from sboxmgr.models.singbox.inbound import NaiveInbound
                 NaiveInbound(**config)
             elif protocol == "redirect":
+                from sboxmgr.models.singbox.inbound import RedirectInbound
                 RedirectInbound(**config)
             elif protocol == "tproxy":
+                from sboxmgr.models.singbox.inbound import TproxyInbound
                 TproxyInbound(**config)
             elif protocol == "tun":
+                from sboxmgr.models.singbox.inbound import TunInbound
                 TunInbound(**config)
             else:
                 print(f"  ❌ Unknown protocol: {protocol}")

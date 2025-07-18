@@ -23,7 +23,7 @@ for name, cls in PLUGIN_REGISTRY.items():
 
 rows = ["| Тип | Класс | Docstring | Файл |", "|------|--------|-----------|------|"]
 for plugin_type, items in sorted(plugins_by_type.items()):
-    for name, cls in items:
+    for _name, cls in items:
         doc = inspect.getdoc(cls) or ""
         try:
             file = inspect.getfile(cls)

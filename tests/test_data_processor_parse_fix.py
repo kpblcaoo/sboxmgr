@@ -5,7 +5,6 @@ empty server lists and invalid servers without raising parse errors,
 and that debug logging is properly controlled.
 """
 
-import pytest
 from unittest.mock import Mock, patch
 
 from sboxmgr.subscription.manager.data_processor import DataProcessor

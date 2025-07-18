@@ -123,7 +123,8 @@ def compare_with_existing_models(schema):
     sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
     try:
-        from sboxmgr.models import SingBoxConfig
+        # Note: SingBoxConfig is not used in this script, but kept for reference
+        # from sboxmgr.models import SingBoxConfig
 
         # Get existing outbound types
 

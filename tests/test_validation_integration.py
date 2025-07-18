@@ -163,7 +163,7 @@ def test_uri_list_parser_with_real_data(test_subscription_url, require_external_
                 try:
                     decoded_data = base64.b64decode(raw_data)
                     decoded_data.decode("utf-8")
-                except:
+                except (ValueError, UnicodeDecodeError):
                     raw_data.decode("utf-8", errors="ignore")
 
             parser = URIListParser()
