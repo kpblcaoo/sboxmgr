@@ -73,7 +73,8 @@ def run_cli(args, env=None, cwd=None):
     env["SBOXMGR_LOG_FILE"] = str(Path(cwd) / "test.log")
     result = subprocess.run(
         [sys.executable, "src/sboxmgr/cli/main.py"] + args,
-        check=False, capture_output=True,
+        check=False,
+        capture_output=True,
         text=True,
         env=env,
         cwd=PROJECT_ROOT,

@@ -13,7 +13,11 @@ def check_singbox_available() -> None:
     """Check if sing-box binary is available for testing."""
     try:
         result = subprocess.run(
-            ["/usr/bin/sing-box", "version"], check=False, capture_output=True, text=True, timeout=5
+            ["/usr/bin/sing-box", "version"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         assert result.returncode == 0, "sing-box binary not available"
     except (subprocess.TimeoutExpired, FileNotFoundError):
@@ -36,7 +40,8 @@ def validate_with_singbox(config_dict: dict) -> None:
     try:
         result = subprocess.run(
             ["/usr/bin/sing-box", "check", "-c", config_path],
-            check=False, capture_output=True,
+            check=False,
+            capture_output=True,
             text=True,
             timeout=10,
         )

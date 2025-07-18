@@ -80,7 +80,10 @@ def test_wheel_install_and_all_imports(tmp_path):
                 "    raise\n"
             )
             result = subprocess.run(
-                [str(python_bin), "-c", code], check=False, capture_output=True, text=True
+                [str(python_bin), "-c", code],
+                check=False,
+                capture_output=True,
+                text=True,
             )
             if result.returncode == 10:
                 skipped.append(module)

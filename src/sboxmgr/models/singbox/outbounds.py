@@ -86,9 +86,9 @@ class VmessOutbound(OutboundWithTransport, OutboundWithTls):
 
     type: Literal["vmess"] = Field(default="vmess", description="VMess protocol.")
     uuid: str = Field(..., description="User UUID for authentication.")
-    security: Optional[
-        Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]
-    ] = Field(default="auto", description="Encryption method.")
+    security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = (
+        Field(default="auto", description="Encryption method.")
+    )
     alter_id: Optional[int] = Field(
         default=0, description="Alternative ID count (0-65535)."
     )

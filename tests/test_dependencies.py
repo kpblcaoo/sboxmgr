@@ -158,7 +158,8 @@ def test_package_builds():
         # Just check that build command works (without --dry-run)
         result = subprocess.run(
             [sys.executable, "-m", "build", "--help"],
-            check=False, capture_output=True,
+            check=False,
+            capture_output=True,
             text=True,
             cwd=Path.cwd(),
         )

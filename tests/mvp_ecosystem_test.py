@@ -76,7 +76,8 @@ class MVPEcosystemTest:
             # Test help command
             result = subprocess.run(
                 [sys.executable, "-m", "sboxmgr.cli.main", "--help"],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
                 timeout=10,
             )
@@ -87,7 +88,8 @@ class MVPEcosystemTest:
                 # Test that CLI can start without errors
                 result = subprocess.run(
                     [sys.executable, "-m", "sboxmgr.cli.main"],
-                    check=False, capture_output=True,
+                    check=False,
+                    capture_output=True,
                     text=True,
                     timeout=10,
                 )

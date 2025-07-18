@@ -38,7 +38,9 @@ def test_cli_export_with_real_url(
         "json",
     ]
 
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+    result = subprocess.run(
+        cmd, check=False, capture_output=True, text=True, timeout=60
+    )
 
     # Check if command completed
     if result.returncode == 0:
@@ -87,7 +89,9 @@ def test_cli_dry_run_with_real_url(
         "--dry-run",
     ]
 
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+    result = subprocess.run(
+        cmd, check=False, capture_output=True, text=True, timeout=60
+    )
 
     # Should complete (either success or meaningful failure)
     assert result.returncode in [0, 1]
@@ -127,7 +131,9 @@ def test_cli_list_servers_with_real_url(
         "table",
     ]
 
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+    result = subprocess.run(
+        cmd, check=False, capture_output=True, text=True, timeout=60
+    )
 
     # Should complete
     assert result.returncode in [0, 1]
@@ -171,7 +177,9 @@ def test_cli_with_different_formats(
             format_name,
         ]
 
-        result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+        result = subprocess.run(
+            cmd, check=False, capture_output=True, text=True, timeout=60
+        )
 
         if result.returncode == 0:
             # Verify output file was created
@@ -214,7 +222,9 @@ def test_cli_with_user_agent(test_subscription_url, require_external_tests, tmp_
         "test_config.json",
     ]
 
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+    result = subprocess.run(
+        cmd, check=False, capture_output=True, text=True, timeout=60
+    )
 
     # Should complete
     assert result.returncode in [0, 1]
@@ -246,7 +256,9 @@ def test_cli_with_debug_output(test_subscription_url, require_external_tests, tm
         "test_config.json",
     ]
 
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+    result = subprocess.run(
+        cmd, check=False, capture_output=True, text=True, timeout=60
+    )
 
     # Should complete
     assert result.returncode in [0, 1]
@@ -321,7 +333,9 @@ def test_cli_with_exclusions(test_subscription_url, require_external_tests, tmp_
         "json",
     ]
 
-    result_list = subprocess.run(list_cmd, check=False, capture_output=True, text=True, timeout=60)
+    result_list = subprocess.run(
+        list_cmd, check=False, capture_output=True, text=True, timeout=60
+    )
 
     if result_list.returncode == 0:
         # Try to add an exclusion (this might fail if no servers found)
@@ -379,7 +393,9 @@ def test_cli_performance(test_subscription_url, require_external_tests, tmp_path
     ]
 
     start_time = time.time()
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+    result = subprocess.run(
+        cmd, check=False, capture_output=True, text=True, timeout=60
+    )
     execution_time = time.time() - start_time
 
     # Should complete within reasonable time
@@ -419,7 +435,9 @@ def test_cli_with_backup(test_subscription_url, require_external_tests, tmp_path
         "--backup",
     ]
 
-    result = subprocess.run(cmd, check=False, capture_output=True, text=True, timeout=60)
+    result = subprocess.run(
+        cmd, check=False, capture_output=True, text=True, timeout=60
+    )
 
     # Should complete
     assert result.returncode in [0, 1]

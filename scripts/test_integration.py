@@ -63,7 +63,8 @@ def test_integration():
     try:
         result = subprocess.run(
             ["/usr/bin/sing-box", "check", "-c", config_file],
-            check=False, capture_output=True,
+            check=False,
+            capture_output=True,
             text=True,
             timeout=10,
         )

@@ -110,7 +110,8 @@ def test_protocol_support():
         try:
             result = subprocess.run(
                 ["sing-box", "check", "-c", config_path],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
                 timeout=5,
             )
@@ -181,7 +182,8 @@ def test_protocol_support():
         try:
             result = subprocess.run(
                 ["sing-box", "check", "-c", config_path],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
                 timeout=5,
             )
