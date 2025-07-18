@@ -125,10 +125,14 @@ def _convert_single_inbound(
             "type": inbound_type,
             "tag": inbound_dict.get("tag", f"{inbound_type}-in"),
             "listen": inbound_dict.get("listen", "127.0.0.1"),
-            "listen_port": inbound_dict.get(
-                "port", 7890
-            ),  # Use 'port' from InboundProfile
         }
+
+        # Handle port field with proper fallback logic
+        listen_port = inbound_dict.get("listen_port")
+        if listen_port is None:
+            port_value = inbound_dict.get("port")
+            listen_port = 7890 if port_value is None else port_value
+        base_config["listen_port"] = listen_port
 
         # Add optional fields if present
         if "sniff" in inbound_dict:
