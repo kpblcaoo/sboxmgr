@@ -92,7 +92,7 @@ def main_callback(
 ):
     """Root callback to handle global options like --version, --yes, --verbose."""
     # Initialize context object for global flags
-    if ctx:
+    if ctx is not None:
         ctx.ensure_object(dict)
         ctx.obj["yes"] = yes
         ctx.obj["verbose"] = verbose

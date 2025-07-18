@@ -59,8 +59,8 @@ def exclusions(
     wildcard patterns, and JSON export capabilities.
     """
     # Get global flags from context
-    global_yes = ctx.obj.get("yes", False) if ctx.obj else False
-    verbose = ctx.obj.get("verbose", False) if ctx.obj else False
+    global_yes = ctx.obj.get("yes", False) if ctx is not None and ctx.obj else False
+    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
 
     # Combine local and global yes flags
     final_yes = yes or global_yes
@@ -69,7 +69,7 @@ def exclusions(
         typer.echo("🔧 Managing exclusions...")
         if url:
             typer.echo(f"   URL: {url}")
-        # Explicitly track action parameters
+        # Track action parameters only when verbose is enabled
         actions = {
             "add": add,
             "remove": remove,
@@ -78,9 +78,8 @@ def exclusions(
             "list_servers": list_servers,
             "interactive": interactive,
         }
-        typer.echo(
-            f"   Actions: {', '.join(action for action, enabled in actions.items() if enabled)}"
-        )
+        active_actions = [action for action, enabled in actions.items() if enabled]
+        typer.echo(f"   Actions: {', '.join(active_actions)}")
         typer.echo(f"   Skip confirmations: {final_yes}")
 
     # Validate conflicting options

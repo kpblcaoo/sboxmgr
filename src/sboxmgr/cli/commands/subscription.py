@@ -124,7 +124,7 @@ def list_servers(
 
     """
     # Get global flags from context
-    verbose = ctx.obj.get("verbose", False) if ctx.obj else False
+    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
 
     if verbose:
         typer.echo("🔍 Loading subscription...")

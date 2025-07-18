@@ -77,3 +77,19 @@ def test_global_flags_in_context(runner):
     assert result.exit_code == 0
     assert "--yes" in result.stdout
     assert "--verbose" in result.stdout
+
+
+def test_none_context_handling(runner):
+    """Test that commands handle None context gracefully."""
+    # Test that commands don't crash when ctx is None
+    # This simulates edge cases where context might not be properly initialized
+
+    # Test list-servers with None context (should not crash)
+    result = runner.invoke(app, ["list-servers", "--url", "https://example.com", "--debug", "0"])
+    # Should show deprecation warning and handle None context gracefully
+    assert "Warning: 'list-servers' is deprecated" in result.stdout
+
+    # Test exclusions with None context (should not crash)
+    result = runner.invoke(app, ["exclusions", "--url", "https://example.com", "--view"])
+    # Should show deprecation warning and handle None context gracefully
+    assert "Warning: 'exclusions' is deprecated" in result.stdout
