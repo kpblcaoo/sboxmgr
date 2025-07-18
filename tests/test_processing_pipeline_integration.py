@@ -245,8 +245,9 @@ class TestPhase4CLIIntegration:
 
     def test_profile_loading_integration(self):
         """Test profile loading integration with CLI."""
-        from sboxmgr.cli.commands.export.cli import export
         import inspect
+
+        from sboxmgr.cli.commands.export.cli import export
 
         # Check that export function has Phase 4 parameters
         sig = inspect.signature(export)

@@ -20,9 +20,20 @@ from rich.table import Table
 
 from ..logging.core import get_logger
 from .loader import ProfileLoader
-from .manager import ProfileManager
+from .manager import ConfigManager as ProfileManager
 
-logger = get_logger(__name__)
+
+# Lazy logger initialization to avoid import-time logging setup requirement
+def _get_logger():
+    try:
+        return get_logger(__name__)
+    except RuntimeError:
+        # Fallback to basic logging if not initialized
+        import logging
+
+        return logging.getLogger(__name__)
+
+
 console = Console()
 
 app = typer.Typer()
@@ -93,7 +104,7 @@ def apply_profile(profile_path: str, dry_run: bool = False) -> None:
         raise typer.Exit(1) from FileNotFoundError
     except Exception as e:
         console.print(f"[red]Failed to apply profile: {e}[/red]")
-        logger.error(f"Failed to apply profile {profile_path}: {e}")
+        _get_logger().error(f"Failed to apply profile {profile_path}: {e}")
         raise typer.Exit(1) from e
 
 
@@ -324,7 +335,7 @@ def diff_profiles(profile1_path: str, profile2_path: str) -> None:
         raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Failed to compare profiles: {e}[/red]")
-        logger.error(f"Failed to compare profiles: {e}")
+        _get_logger().error(f"Failed to compare profiles: {e}")
         raise typer.Exit(1) from e
 
 
@@ -376,7 +387,7 @@ def list_profiles(profiles_dir: Optional[str] = None) -> None:
 
     except Exception as e:
         console.print(f"[red]Failed to list profiles: {e}[/red]")
-        logger.error(f"Failed to list profiles: {e}")
+        _get_logger().error(f"Failed to list profiles: {e}")
         raise typer.Exit(1) from e
 
 
@@ -433,7 +444,7 @@ def switch_profile(profile_id: str, profiles_dir: Optional[str] = None) -> None:
 
     except Exception as e:
         console.print(f"[red]Failed to switch profile: {e}[/red]")
-        logger.error(f"Failed to switch profile: {e}")
+        _get_logger().error(f"Failed to switch profile: {e}")
         raise typer.Exit(1) from e
 
 

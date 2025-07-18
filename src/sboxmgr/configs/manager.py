@@ -13,13 +13,18 @@ from pydantic import ValidationError
 
 from .models import UserConfig
 
-# Optional logging - only if initialized
-try:
-    from ..logging.core import get_logger
 
-    logger = get_logger(__name__)
-except RuntimeError:
-    logger = None
+# Lazy logger initialization to avoid import-time logging setup requirement
+def _get_logger():
+    try:
+        from ..logging.core import get_logger
+
+        return get_logger(__name__)
+    except RuntimeError:
+        # Fallback to basic logging if not initialized
+        import logging
+
+        return logging.getLogger(__name__)
 
 
 class ConfigInfo:
@@ -119,6 +124,7 @@ class ConfigManager:
         self.config_cache: dict[str, UserConfig] = {}
         self.active_config_file = self.configs_dir / ".active_config"
 
+        logger = _get_logger()
         if logger:
             logger.info(
                 f"ConfigManager initialized with configs directory: {self.configs_dir}"
@@ -140,6 +146,7 @@ class ConfigManager:
             ValidationError: If config data is invalid
 
         """
+        logger = _get_logger()
         try:
             config = UserConfig(**config_data)
             if logger:
@@ -179,6 +186,7 @@ class ConfigManager:
         """
         self.active_config = config
         self._save_active_config_to_file(config.id)
+        logger = _get_logger()
         if logger:
             logger.info(f"Set active config: {config.id}")
 
@@ -221,12 +229,14 @@ class ConfigManager:
             return True
 
         except Exception as e:
+            logger = _get_logger()
             if logger:
                 logger.error(f"Failed to switch to config '{config_name}': {e}")
             raise
 
     def _load_active_config_from_file(self) -> None:
         """Load active config from persistent file."""
+        logger = _get_logger()
         if not self.active_config_file.exists():
             # Try to set default config if available
             self._set_default_active_config()
@@ -279,16 +289,20 @@ class ConfigManager:
             with open(self.active_config_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
 
+            logger = _get_logger()
             if logger:
                 logger.debug(f"Saved active config to file: {config_name}")
 
         except Exception as e:
+            logger = _get_logger()
             if logger:
                 logger.error(f"Failed to save active config to file: {e}")
 
     def _set_default_active_config(self) -> None:
         """Set default active config if available."""
         import traceback
+
+        logger = _get_logger()
 
         if logger:
             logger.warning("[WARNING] _set_default_active_config called")
@@ -318,6 +332,8 @@ class ConfigManager:
     def _create_default_config(self) -> None:
         """Create default configuration file if none exists."""
         import traceback
+
+        logger = _get_logger()
 
         if logger:
             logger.warning(
@@ -408,6 +424,7 @@ class ConfigManager:
             List[ConfigInfo]: List of config information
 
         """
+        logger = _get_logger()
         configs = []
 
         if not self.configs_dir.exists():
@@ -452,5 +469,6 @@ class ConfigManager:
     def clear_cache(self) -> None:
         """Clear the config cache."""
         self.config_cache.clear()
+        logger = _get_logger()
         if logger:
             logger.debug("Config cache cleared")

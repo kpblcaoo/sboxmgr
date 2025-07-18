@@ -14,6 +14,7 @@ from sboxmgr.core.orchestrator import Orchestrator, OrchestratorConfig
 
 
 @pytest.mark.integration
+@pytest.mark.integration
 @pytest.mark.external
 def test_orchestrator_with_real_subscription(
     test_subscription_url, require_external_tests

@@ -97,7 +97,7 @@ SINGBOX_INVALID = """
 def test_parsers_edge_cases(parser_cls, raw, should_fail, expect_ss):
     parser = parser_cls()
     if should_fail:
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, json.JSONDecodeError)):
             parser.parse(raw)
     else:
         servers = parser.parse(raw)

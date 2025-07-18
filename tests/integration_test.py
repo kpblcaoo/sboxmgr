@@ -15,6 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 import pytest
+
 from sboxmgr.agent.event_sender import EventSender, ping_agent, send_event
 from sboxmgr.agent.ipc.socket_client import SocketClient
 from sboxmgr.logging import get_logger
@@ -33,7 +34,7 @@ def test_socket_connection():
         assert True
     else:
         print("❌ Socket connection failed")
-        assert False, "Socket connection failed"
+        raise AssertionError("Socket connection failed")
 
 
 @pytest.mark.skip(reason="Requires running sboxagent - skip in CI")
@@ -88,10 +89,10 @@ def test_heartbeat():
             assert True
         else:
             print("❌ Heartbeat failed")
-            assert False, "Heartbeat failed"
+            raise AssertionError("Heartbeat failed")
     except Exception as e:
         print(f"❌ Heartbeat failed with error: {e}")
-        assert False, f"Heartbeat failed with error: {e}"
+        raise AssertionError(f"Heartbeat failed with error: {e}")
     finally:
         sender.disconnect()
 
@@ -116,13 +117,13 @@ def test_command_execution():
                 assert True
             else:
                 print("❌ Status command failed")
-                assert False, "Status command failed"
+                raise AssertionError("Status command failed")
         else:
             print("❌ Ping command failed")
-            assert False, "Ping command failed"
+            raise AssertionError("Ping command failed")
     except Exception as e:
         print(f"❌ Command execution failed with error: {e}")
-        assert False, f"Command execution failed with error: {e}"
+        raise AssertionError(f"Command execution failed with error: {e}")
     finally:
         sender.disconnect()
 
@@ -157,7 +158,7 @@ def test_framed_json_protocol():
 
     except Exception as e:
         print(f"❌ Framed JSON protocol test failed: {e}")
-        assert False, f"Framed JSON protocol test failed: {e}"
+        raise AssertionError(f"Framed JSON protocol test failed: {e}")
 
 
 def main():

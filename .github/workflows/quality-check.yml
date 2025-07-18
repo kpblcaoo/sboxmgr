@@ -53,7 +53,7 @@ jobs:
         bandit -r src/sboxmgr/ -f json -o bandit-report.json || true
 
     - name: Upload security report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-report
         path: bandit-report.json
@@ -79,8 +79,25 @@ jobs:
     - name: Check if docs can be built
       run: |
         if [ -d "docs" ]; then
-          cd docs
-          make html
+          if [ -f "docs/Makefile" ] && [ -f "docs/conf.py" ]; then
+            cd docs
+            make html
+          else
+            echo "Docs directory exists but no Sphinx configuration found, checking Markdown files instead"
+            # Check if there are Markdown files in docs
+            if find docs -name "*.md" | head -1 | grep -q .; then
+              echo "Found Markdown documentation files"
+              # Basic syntax check for Markdown files
+              for file in $(find docs -name "*.md"); do
+                echo "Checking $file"
+                if ! head -1 "$file" | grep -q "^#"; then
+                  echo "Warning: $file doesn't start with a heading"
+                fi
+              done
+            else
+              echo "No Markdown files found in docs directory"
+            fi
+          fi
         else
           echo "No docs directory found, skipping documentation build"
         fi

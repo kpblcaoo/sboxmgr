@@ -358,7 +358,7 @@ class TestSingBoxModelsValidation:
         }
 
         # Should raise validation error
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, TypeError)):
             SingBoxConfig.model_validate(invalid_config)
 
     def test_model_serialization(self):

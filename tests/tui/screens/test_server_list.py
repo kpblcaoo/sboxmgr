@@ -1,7 +1,8 @@
 """Tests for ServerListScreen."""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
 

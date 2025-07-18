@@ -103,7 +103,7 @@ def test_validate_single_protocol_config():
         # Missing password
     }
 
-    with pytest.raises(Exception):
+    with pytest.raises((ValueError, TypeError)):
         validate_single_protocol_config(invalid_config, "shadowsocks")
 
 

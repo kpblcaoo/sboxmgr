@@ -16,7 +16,16 @@ from pydantic import ValidationError
 from ..logging.core import get_logger
 from .models import FullProfile
 
-logger = get_logger(__name__)
+
+# Lazy logger initialization to avoid import-time logging setup requirement
+def _get_logger():
+    try:
+        return get_logger(__name__)
+    except RuntimeError:
+        # Fallback to basic logging if not initialized
+        import logging
+
+        return logging.getLogger(__name__)
 
 
 class ProfileSectionValidator(ABC):
@@ -135,6 +144,7 @@ class ProfileLoader:
     def __init__(self):
         """Initialize the ProfileLoader."""
         self.supported_formats = [".json", ".yaml", ".yml"]
+        logger = _get_logger()
         logger.debug("ProfileLoader initialized")
 
     def load_from_file(self, file_path: str) -> FullProfile:
@@ -214,13 +224,17 @@ class ProfileLoader:
             # Create profile
             profile = FullProfile(**profile_data)
 
+            logger = _get_logger()
             logger.info("Successfully loaded profile from JSON string")
             return profile
 
         except json.JSONDecodeError as e:
+            logger = _get_logger()
             logger.error(f"Invalid JSON: {e}")
             raise ValueError(f"Invalid JSON: {e}") from e
         except Exception as e:
+            logger = _get_logger()
+            logger.error(f"Failed to load profile from JSON: {e}")
             raise ValueError(f"Failed to load profile from JSON: {e}") from e
 
     def load_from_dict(self, profile_data: dict[str, Any]) -> FullProfile:
@@ -247,10 +261,12 @@ class ProfileLoader:
             # Create profile
             profile = FullProfile(**profile_data)
 
+            logger = _get_logger()
             logger.info("Successfully loaded profile from dictionary")
             return profile
 
         except Exception as e:
+            logger = _get_logger()
             logger.error(f"Failed to load profile from dictionary: {e}")
             raise
 
@@ -320,6 +336,7 @@ class ProfileLoader:
             if section not in known_sections:
                 warnings.append(f"Unknown section '{section}' - will be ignored")
 
+        logger = _get_logger()
         logger.debug(
             f"Structure validation: {len(errors)} errors, {len(warnings)} warnings"
         )
@@ -380,6 +397,7 @@ class ProfileLoader:
             return info
 
         except Exception as e:
+            logger = _get_logger()
             logger.error(f"Failed to get profile info for {file_path}: {e}")
             raise
 

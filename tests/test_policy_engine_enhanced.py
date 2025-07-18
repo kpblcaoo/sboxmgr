@@ -299,8 +299,9 @@ class TestIntegrationWithSubscriptionManager:
 
     def test_apply_policies_with_evaluate_all(self):
         """Test that policy application works with real policies (integration test)."""
-        from sboxmgr.subscription.models import PipelineContext, ParsedServer
-        from sboxmgr.policies import policy_registry, BasePolicy, PolicyResult, PolicyContext as PolCtx
+        from sboxmgr.policies import BasePolicy, PolicyResult, policy_registry
+        from sboxmgr.policies import PolicyContext as PolCtx
+        from sboxmgr.subscription.models import ParsedServer, PipelineContext
 
         # Create a real test policy
         class DummyPolicy(BasePolicy):
@@ -360,8 +361,9 @@ class TestIntegrationWithSubscriptionManager:
 
     def test_apply_policies_fail_tolerant(self):
         """Test that pipeline does not crash in fail-tolerant mode and error is recorded."""
-        from sboxmgr.subscription.models import PipelineContext, ParsedServer
-        from sboxmgr.policies import policy_registry, BasePolicy, PolicyResult, PolicyContext as PolCtx
+        from sboxmgr.policies import BasePolicy, PolicyResult, policy_registry
+        from sboxmgr.policies import PolicyContext as PolCtx
+        from sboxmgr.subscription.models import ParsedServer, PipelineContext
 
         class FailingPolicy(BasePolicy):
             name = "FailingPolicy"
@@ -388,8 +390,9 @@ class TestIntegrationWithSubscriptionManager:
 
     def test_apply_policies_strict_mode_crash(self):
         """Test that pipeline crashes in strict mode if policy fails."""
-        from sboxmgr.subscription.models import PipelineContext, ParsedServer
-        from sboxmgr.policies import policy_registry, BasePolicy, PolicyResult, PolicyContext as PolCtx
+        from sboxmgr.policies import BasePolicy, PolicyResult, policy_registry
+        from sboxmgr.policies import PolicyContext as PolCtx
+        from sboxmgr.subscription.models import ParsedServer, PipelineContext
 
         class FailingPolicy(BasePolicy):
             name = "FailingPolicy"
