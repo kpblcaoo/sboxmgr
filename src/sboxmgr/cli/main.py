@@ -8,6 +8,7 @@ point for the `sboxctl` console script defined in pyproject.toml.
 import locale
 import os
 from pathlib import Path
+from typing import Optional
 
 import typer
 from dotenv import load_dotenv
@@ -75,8 +76,27 @@ def main_callback(
         help="Show version and exit",
         is_eager=True,
     ),
+    yes: bool = typer.Option(
+        False,
+        "--yes",
+        "-y",
+        help="Skip confirmation prompts and use default values",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Verbose output with additional details",
+    ),
+    ctx: typer.Context = None,
 ):
-    """Root callback to handle global options like --version."""
+    """Root callback to handle global options like --version, --yes, --verbose."""
+    # Initialize context object for global flags
+    if ctx is not None:
+        ctx.ensure_object(dict)
+        ctx.obj["yes"] = yes
+        ctx.obj["verbose"] = verbose
+
     if version:
         try:
             from importlib.metadata import version as _version
@@ -204,11 +224,105 @@ def lang_cmd(
 
 app.command("plugin-template")(plugin_template.plugin_template)
 
-# Регистрируем команды из commands/subscription.py
-app.command("list-servers", help=t("cli.list_servers.help"))(subscription_list_servers)
 
-# Регистрируем exclusions (импортированную из commands/exclusions.py)
-app.command("exclusions")(exclusions)
+# Register deprecated commands as aliases (for backward compatibility)
+# Note: These are hidden aliases that will be removed in future versions
+@app.command("list-servers", hidden=True, help=t("cli.list_servers.help"))
+def list_servers_alias(
+    url: str = typer.Option(
+        ...,
+        "-u",
+        "--url",
+        help=t("cli.url.help"),
+        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
+    ),
+    debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
+    user_agent: Optional[str] = typer.Option(
+        None,
+        "--user-agent",
+        help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)",
+    ),
+    no_user_agent: bool = typer.Option(
+        False, "--no-user-agent", help="Do not send User-Agent header at all"
+    ),
+    format: Optional[str] = typer.Option(
+        None,
+        "--format",
+        help="Force specific format: auto, base64, json, uri_list, clash",
+    ),
+    policy_details: bool = typer.Option(
+        False,
+        "-P",
+        "--policy-details",
+        help="Show policy evaluation details for each server",
+    ),
+    ctx: typer.Context = None,
+):
+    """Alias for sboxctl subscription list (deprecated)."""
+    typer.echo(t("cli.deprecated.list_servers"))
+    # Call the original function with all parameters including context
+    subscription_list_servers(
+        url=url,
+        debug=debug,
+        user_agent=user_agent,
+        no_user_agent=no_user_agent,
+        format=format,
+        policy_details=policy_details,
+        ctx=ctx,
+    )
+
+
+@app.command(
+    "exclusions",
+    hidden=True,
+    help="Manage server exclusions for subscription-based proxy configurations",
+)
+def exclusions_alias(
+    url: str = typer.Option(
+        ...,
+        "-u",
+        "--url",
+        help=t("cli.url.help"),
+        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
+    ),
+    add: Optional[str] = typer.Option(None, "--add", help=t("cli.add.help")),
+    remove: Optional[str] = typer.Option(None, "--remove", help=t("cli.remove.help")),
+    view: bool = typer.Option(False, "--view", help=t("cli.view.help")),
+    clear: bool = typer.Option(False, "--clear", help=t("cli.clear_exclusions.help")),
+    list_servers: bool = typer.Option(
+        False, "--list-servers", help=t("cli.list_servers.help")
+    ),
+    interactive: bool = typer.Option(
+        False, "-i", "--interactive", help=t("cli.interactive.help")
+    ),
+    reason: str = typer.Option("CLI operation", "--reason", help=t("cli.reason.help")),
+    json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
+    show_excluded: bool = typer.Option(
+        True, "--show-excluded/--hide-excluded", help=t("cli.show_excluded.help")
+    ),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompts"),
+    debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
+    ctx: typer.Context = None,
+):
+    """Alias for sboxctl subscription exclusions (deprecated)."""
+    typer.echo(t("cli.deprecated.exclusions"))
+    # Call the original function with all parameters including context
+    exclusions(
+        url=url,
+        add=add,
+        remove=remove,
+        view=view,
+        clear=clear,
+        list_servers=list_servers,
+        interactive=interactive,
+        reason=reason,
+        json_output=json_output,
+        show_excluded=show_excluded,
+        yes=yes,
+        debug=debug,
+        ctx=ctx,
+    )
+
 
 # Регистрируем config команды
 app.add_typer(new_config_app, name="config")

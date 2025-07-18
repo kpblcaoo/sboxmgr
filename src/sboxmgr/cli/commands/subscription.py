@@ -101,6 +101,7 @@ def list_servers(
         "--policy-details",
         help="Show policy evaluation details for each server",
     ),
+    ctx: typer.Context = None,
 ):
     """List all available servers from subscription.
 
@@ -116,11 +117,21 @@ def list_servers(
         no_user_agent: Disable User-Agent header completely.
         format: Force specific format detection (auto, base64, json, uri_list, clash).
         policy_details: Show policy evaluation details for each server.
+        ctx: Typer context containing global flags.
 
     Raises:
         typer.Exit: On subscription fetch failure or parsing errors.
 
     """
+    # Get global flags from context
+    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
+
+    if verbose:
+        typer.echo("🔍 Loading subscription...")
+        typer.echo(f"   URL: {url}")
+        typer.echo(f"   Format: {format or 'auto'}")
+        typer.echo(f"   Debug level: {debug}")
+
     try:
         if no_user_agent:
             ua = ""
