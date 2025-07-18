@@ -5,7 +5,6 @@ import os
 from typing import Optional
 
 import typer
-
 from sboxmgr.i18n.t import t
 from sboxmgr.subscription.models import ClientProfile, InboundProfile
 

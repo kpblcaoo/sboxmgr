@@ -8,7 +8,6 @@ JSON profile creation while maintaining architectural integrity.
 from typing import Optional, Union
 
 import typer
-
 from sboxmgr.subscription.models import ClientProfile, InboundProfile
 
 

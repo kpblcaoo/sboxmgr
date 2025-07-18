@@ -14,7 +14,6 @@ from rich import print as rprint
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
-
 from sboxmgr.config.fetch import fetch_json
 from sboxmgr.core.exclusions import ExclusionManager
 from sboxmgr.i18n.t import t
@@ -500,9 +499,7 @@ def _remove_exclusions(
     elif removed_ids:
         rprint(f"[green]✅ Removed {len(removed_ids)} exclusions.[/green]")
     else:
-        rprint(
-            "[yellow]⚠️ No exclusions removed (not found or not excluded).[/yellow]"
-        )
+        rprint("[yellow]⚠️ No exclusions removed (not found or not excluded).[/yellow]")
 
 
 # Helper method for getting server ID (should be added to manager)

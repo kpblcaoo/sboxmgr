@@ -9,7 +9,6 @@ variables and the i18n system.
 from pathlib import Path
 
 import typer
-
 from sboxmgr.cli.utils import detect_lang_source, is_ai_lang
 from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t

@@ -76,9 +76,9 @@ class VmessUser(BaseModel):
     alterId: int = Field(
         0, ge=0, le=65535, description="Number of alternative IDs (0-65535)"
     )
-    security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = (
-        Field("auto", description="Encryption method")
-    )
+    security: Optional[
+        Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]
+    ] = Field("auto", description="Encryption method")
     level: int = Field(0, ge=0, description="User level for access policy")
     email: Optional[str] = Field(None, description="Email for log identification")
 

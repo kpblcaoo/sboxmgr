@@ -4,7 +4,6 @@ import re
 from typing import Optional
 
 import typer
-
 from sboxmgr.i18n.t import t
 
 from .constants import (

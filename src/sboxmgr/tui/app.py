@@ -6,13 +6,12 @@ the entire TUI experience, including screen management and state handling.
 
 from typing import Optional
 
-from textual import on
-from textual.app import App
-from textual.binding import Binding
-
 from sboxmgr.tui.screens.main import MainScreen
 from sboxmgr.tui.screens.welcome import WelcomeScreen
 from sboxmgr.tui.state.tui_state import TUIState
+from textual import on
+from textual.app import App
+from textual.binding import Binding
 
 
 class SboxmgrTUI(App):

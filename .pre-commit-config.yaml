@@ -36,19 +36,6 @@ repos:
               tests/.*
           )$
 
-  # 2. ISORT - Import sorting
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: [--profile=black, --line-length=88]
-        exclude: |
-          (?x)^(
-              archive/.*|
-              examples/.*|
-              scripts/.*|
-              tests/.*
-          )$
 
   # 3. DETECT-SECRETS - Security scanning
   - repo: https://github.com/Yelp/detect-secrets

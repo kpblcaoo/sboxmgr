@@ -9,7 +9,6 @@ the subscription processing pipeline.
 import logging
 
 import typer
-
 from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.utils.id import generate_server_id
 

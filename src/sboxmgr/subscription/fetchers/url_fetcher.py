@@ -11,7 +11,6 @@ import threading
 from typing import Optional
 
 import requests
-
 from sboxmgr.utils.env import get_fetch_timeout
 
 from ..base_fetcher import BaseFetcher

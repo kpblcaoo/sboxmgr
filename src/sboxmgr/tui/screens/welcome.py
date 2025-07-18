@@ -4,14 +4,13 @@ This module implements the welcome screen that is shown to users
 who don't have any subscriptions configured yet.
 """
 
+from sboxmgr.tui.components.forms import SubscriptionForm
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Center, Middle, Vertical
 from textual.message import Message
 from textual.screen import Screen
 from textual.widgets import Button, Static
-
-from sboxmgr.tui.components.forms import SubscriptionForm
 
 
 class WelcomeScreen(Screen):

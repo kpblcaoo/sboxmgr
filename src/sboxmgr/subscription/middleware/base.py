@@ -278,7 +278,13 @@ class ConditionalMiddleware(ChainableMiddleware):
                 return False
 
         # Check execution mode
-        if self.execution_mode == "never" or self.execution_mode == "profile_only" and not profile or self.execution_mode == "debug_only" and context.debug_level == 0:
+        if (
+            self.execution_mode == "never"
+            or self.execution_mode == "profile_only"
+            and not profile
+            or self.execution_mode == "debug_only"
+            and context.debug_level == 0
+        ):
             return False
 
         return True

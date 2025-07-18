@@ -6,7 +6,6 @@ command in this module after the CLI reorganization.
 """
 
 import typer
-
 from sboxmgr.i18n.t import t
 from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.subscription.manager import SubscriptionManager

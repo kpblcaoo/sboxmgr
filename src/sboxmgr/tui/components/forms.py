@@ -8,17 +8,16 @@ import logging
 import subprocess
 from pathlib import Path
 
-from textual import on
-from textual.app import ComposeResult
-from textual.containers import Center, Horizontal, Vertical
-from textual.screen import ModalScreen
-from textual.widgets import Button, Input, Label, Static
-
 from sboxmgr.tui.utils.validation import (
     validate_output_path,
     validate_subscription_url,
     validate_tags,
 )
+from textual import on
+from textual.app import ComposeResult
+from textual.containers import Center, Horizontal, Vertical
+from textual.screen import ModalScreen
+from textual.widgets import Button, Input, Label, Static
 
 
 # Setup logging
@@ -199,7 +198,8 @@ class SubscriptionForm(ModalScreen[bool | str]):
             try:
                 result = subprocess.run(
                     ["xclip", "-selection", "clipboard", "-o"],
-                    check=False, capture_output=True,
+                    check=False,
+                    capture_output=True,
                     text=True,
                     timeout=2,
                 )
@@ -213,7 +213,8 @@ class SubscriptionForm(ModalScreen[bool | str]):
                 try:
                     result = subprocess.run(
                         ["xsel", "--clipboard", "--output"],
-                        check=False, capture_output=True,
+                        check=False,
+                        capture_output=True,
                         text=True,
                         timeout=2,
                     )
@@ -226,7 +227,11 @@ class SubscriptionForm(ModalScreen[bool | str]):
             if not clipboard_content:
                 try:
                     result = subprocess.run(
-                        ["wl-paste"], check=False, capture_output=True, text=True, timeout=2
+                        ["wl-paste"],
+                        check=False,
+                        capture_output=True,
+                        text=True,
+                        timeout=2,
                     )
                     if result.returncode == 0:
                         clipboard_content = result.stdout.strip()

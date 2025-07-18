@@ -6,13 +6,12 @@ servers with checkboxes for inclusion/exclusion management.
 
 from typing import Optional
 
+from sboxmgr.tui.utils.formatting import format_server_info
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Button, Checkbox, Footer, Header, Static
-
-from sboxmgr.tui.utils.formatting import format_server_info
 
 
 class ServerListScreen(Screen):
@@ -516,7 +515,12 @@ class ServerListScreen(Screen):
         if server_container:
             # Удаляем старые виджеты серверов
             for child in server_container.children:
-                if hasattr(child, "classes") and "server-list-scroll" in child.classes or hasattr(child, "classes") and "empty-state" in child.classes:
+                if (
+                    hasattr(child, "classes")
+                    and "server-list-scroll" in child.classes
+                    or hasattr(child, "classes")
+                    and "empty-state" in child.classes
+                ):
                     child.remove()
 
             # Добавляем новый контент

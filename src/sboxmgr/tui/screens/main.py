@@ -5,13 +5,12 @@ who have subscriptions configured. It provides the main navigation
 menu with context-aware options.
 """
 
+from sboxmgr.tui.components.forms import ConfigGenerationForm
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Static
-
-from sboxmgr.tui.components.forms import ConfigGenerationForm
 
 
 class MainScreen(Screen):
