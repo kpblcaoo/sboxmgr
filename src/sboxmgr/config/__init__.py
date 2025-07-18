@@ -1,14 +1,10 @@
-"""Configuration system for sboxmgr.
+"""Configuration management package for SBoxMgr.
 
-This module provides hierarchical configuration management using Pydantic BaseSettings.
-Configuration sources are resolved in order: CLI args > env vars > config file > defaults.
-
-Key features:
-- Type-safe configuration with validation
-- Service mode auto-detection
-- Environment variable support with nested delimiter
-- JSON schema generation for documentation
+This package handles application configuration and settings.
 """
+
+# This file indicates that the package supports type checking
+# See PEP 561 for more details
 
 from .detection import (
     detect_container_environment,

@@ -5,6 +5,7 @@ a collection of policies against given contexts.
 """
 
 import logging
+from typing import Optional
 
 from .base import BasePolicy, PolicyContext, PolicyEvaluationResult, PolicyResult
 
@@ -151,7 +152,7 @@ class PolicyEngine:
         return evaluation_result
 
     def get_policies(
-        self, group: str = None, enabled_only: bool = True
+        self, group: Optional[str] = None, enabled_only: bool = True
     ) -> list[BasePolicy]:
         """Get policies with optional filtering.
 
@@ -172,7 +173,7 @@ class PolicyEngine:
             result.append(policy)
         return result
 
-    def get_policy(self, name: str) -> BasePolicy:
+    def get_policy(self, name: str) -> Optional[BasePolicy]:
         """Get a specific policy by name.
 
         Args:

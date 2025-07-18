@@ -55,7 +55,12 @@ class OrchestratorError(Exception):
     errors with context preservation and error chaining support.
     """
 
-    def __init__(self, message: str, operation: str = None, cause: Exception = None):
+    def __init__(
+        self,
+        message: str,
+        operation: Optional[str] = None,
+        cause: Optional[Exception] = None,
+    ):
         """Initialize orchestrator error.
 
         Args:

@@ -1,6 +1,6 @@
 """Inbound models for sing-box configuration."""
 
-from typing import Annotated, Any, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from pydantic import Field, field_validator
 
@@ -48,14 +48,36 @@ class InboundWithUsers(InboundBase):
     )
 
 
+class InboundWithGenericUsers(InboundBase):
+    """Base class for inbounds that support generic user authentication."""
+
+    users: Optional[list[dict[str, Any]]] = Field(
+        default=None, description="Users for authentication."
+    )
+
+
 class InboundWithTls(InboundWithUsers):
     """Base class for inbounds that support TLS."""
 
     tls: Optional[TlsConfig] = Field(default=None, description="TLS settings.")
 
 
+class InboundWithTlsGenericUsers(InboundWithGenericUsers):
+    """Base class for inbounds that support TLS with generic users."""
+
+    tls: Optional[TlsConfig] = Field(default=None, description="TLS settings.")
+
+
 class InboundWithTransport(InboundWithTls):
     """Base class for inbounds that support transport layer."""
+
+    transport: Optional[TransportConfig] = Field(
+        default=None, description="Transport layer settings."
+    )
+
+
+class InboundWithTransportGenericUsers(InboundWithTlsGenericUsers):
+    """Base class for inbounds that support transport layer with generic users."""
 
     transport: Optional[TransportConfig] = Field(
         default=None, description="Transport layer settings."
@@ -141,27 +163,19 @@ class HttpInbound(InboundWithTls):
     path: Optional[str] = Field(default=None, description="HTTP path for requests.")
 
 
-class TrojanInbound(InboundWithTls):
+class TrojanInbound(InboundWithTlsGenericUsers):
     """Trojan inbound configuration."""
 
     type: Literal["trojan"] = Field(default="trojan", description="Trojan protocol.")
-    users: Optional[list[dict[str, Any]]] = Field(
-        default=None,
-        description="Users with password, e.g., [{'password': 'secret'}].",  # pragma: allowlist secret
-    )
     fallback: Optional[dict[str, Any]] = Field(
         default=None, description="Fallback settings, e.g., {'dest': '80'}."
     )
 
 
-class TuicInbound(InboundWithTls):
+class TuicInbound(InboundWithTlsGenericUsers):
     """TUIC inbound configuration."""
 
     type: Literal["tuic"] = Field(default="tuic", description="TUIC protocol.")
-    users: Optional[list[dict[str, Any]]] = Field(
-        default=None,
-        description="Users with uuid, password, e.g., [{'uuid': 'uuid', 'password': 'secret'}].",  # pragma: allowlist secret
-    )
     congestion_control: Optional[Literal["bbr", "cubic", "new_reno"]] = Field(
         default=None, description="Congestion control algorithm."
     )
@@ -171,24 +185,16 @@ class TuicInbound(InboundWithTls):
 
 
 # TLS + Transport inbounds
-class VmessInbound(InboundWithTransport):
+class VmessInbound(InboundWithTransportGenericUsers):
     """VMess inbound configuration."""
 
     type: Literal["vmess"] = Field(default="vmess", description="VMess protocol.")
-    users: Optional[list[dict[str, Any]]] = Field(
-        default=None,
-        description="Users with id, alterId, security, e.g., [{'id': 'uuid', 'alterId': 0}].",
-    )
 
 
-class VlessInbound(InboundWithTransport):
+class VlessInbound(InboundWithTransportGenericUsers):
     """VLESS inbound configuration."""
 
     type: Literal["vless"] = Field(default="vless", description="VLESS protocol.")
-    users: Optional[list[dict[str, Any]]] = Field(
-        default=None,
-        description="Users with id, flow, e.g., [{'id': 'uuid', 'flow': 'xtls-rprx-vision'}].",
-    )
 
 
 # Special inbounds
@@ -218,7 +224,7 @@ class WireGuardInbound(InboundBase):
     )
 
 
-class ShadowTlsInbound(InboundWithTls):
+class ShadowTlsInbound(InboundWithTlsGenericUsers):
     """ShadowTLS inbound configuration."""
 
     type: Literal["shadowtls"] = Field(
@@ -229,9 +235,6 @@ class ShadowTlsInbound(InboundWithTls):
     )
     password: Optional[str] = Field(
         default=None, description="Password for authentication."
-    )
-    users: Optional[list[dict[str, Any]]] = Field(
-        default=None, description="Users for authentication."
     )
     handshake: Optional[dict[str, Any]] = Field(
         default=None,
@@ -253,7 +256,7 @@ class DirectInbound(InboundBase):
     )
 
 
-class AnyTlsInbound(InboundWithTls):
+class AnyTlsInbound(InboundWithTlsGenericUsers):
     """AnyTLS inbound configuration."""
 
     type: Literal["anytls"] = Field(default="anytls", description="AnyTLS protocol.")
@@ -265,7 +268,7 @@ class AnyTlsInbound(InboundWithTls):
     )
 
 
-class NaiveInbound(InboundWithTls):
+class NaiveInbound(InboundWithTlsGenericUsers):
     """Naive inbound configuration."""
 
     type: Literal["naive"] = Field(default="naive", description="Naive protocol.")
@@ -380,25 +383,23 @@ class TunInbound(InboundBase):
     )
 
 
-Inbound = Annotated[
-    Union[
-        MixedInbound,
-        SocksInbound,
-        HttpInbound,
-        ShadowsocksInbound,
-        VmessInbound,
-        VlessInbound,
-        TrojanInbound,
-        Hysteria2Inbound,
-        WireGuardInbound,
-        TuicInbound,
-        ShadowTlsInbound,
-        DirectInbound,
-        AnyTlsInbound,
-        NaiveInbound,
-        RedirectInbound,
-        TproxyInbound,
-        TunInbound,
-    ],
-    Field(discriminator="type"),
+# Union type for all inbound configurations
+Inbound = Union[
+    MixedInbound,
+    SocksInbound,
+    HttpInbound,
+    ShadowsocksInbound,
+    VmessInbound,
+    VlessInbound,
+    TrojanInbound,
+    Hysteria2Inbound,
+    WireGuardInbound,
+    TuicInbound,
+    ShadowTlsInbound,
+    DirectInbound,
+    AnyTlsInbound,
+    NaiveInbound,
+    RedirectInbound,
+    TproxyInbound,
+    TunInbound,
 ]

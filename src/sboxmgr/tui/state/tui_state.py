@@ -663,8 +663,8 @@ class TUIState:
                 return False
 
             # Save configuration
-            output_path = Path(output_path)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path_obj = Path(output_path)
+            output_path_obj.parent.mkdir(parents=True, exist_ok=True)
 
             with open(output_path, "w", encoding="utf-8") as f:
                 import json

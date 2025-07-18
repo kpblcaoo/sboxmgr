@@ -1,8 +1,11 @@
-"""SBoxMgr - A powerful tool for managing sing-box configurations with subscription support."""
+"""SBoxMgr - Subscription Box Manager.
 
-try:
-    from importlib.metadata import version as _version
+A comprehensive tool for managing and exporting proxy configurations.
+"""
 
-    __version__ = _version("sboxmgr")
-except Exception:
-    __version__ = "unknown"
+__version__ = "0.52.0"
+__author__ = "SBoxMgr Team"
+__email__ = "support@sboxmgr.org"
+
+# This file indicates that the package supports type checking
+# See PEP 561 for more details

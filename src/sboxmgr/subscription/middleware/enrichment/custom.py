@@ -1,6 +1,6 @@
 """Custom enrichment functionality for server data."""
 
-from typing import Optional
+from typing import Any, Optional
 
 from ....configs.models import FullProfile
 from ...models import ParsedServer, PipelineContext
@@ -164,7 +164,7 @@ class CustomEnricher:
             context: Pipeline context
             profile: Full profile configuration
         """
-        compatibility = {"compatible": True, "issues": []}
+        compatibility: dict[str, Any] = {"compatible": True, "issues": []}
 
         if not hasattr(profile, "export") or not profile.export:
             server.meta["compatibility"] = compatibility

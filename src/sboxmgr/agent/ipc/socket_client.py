@@ -28,7 +28,7 @@ except ImportError:
                 "sbox_common package not found. Please install it with: "
                 "pip install -e ../sbox-common or pip install sboxmgr[ipc]"
             )
-    
+
     # Alias for compatibility
     FramedJSONProtocol = _DummyFramedJSONProtocol
 
@@ -117,7 +117,7 @@ class SocketClient:
         """
         if not self.sock:
             raise RuntimeError("Socket is not connected")
-        
+
         buf = b""
         while len(buf) < n:
             chunk = self.sock.recv(n - len(buf))

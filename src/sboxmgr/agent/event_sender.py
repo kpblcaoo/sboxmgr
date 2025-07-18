@@ -161,6 +161,8 @@ class EventSender:
 
         try:
             # Send message
+            if self._client is None:
+                raise EventSenderError("Client not connected")
             self._client.send_message(message)
 
             # Wait for acknowledgment
@@ -228,6 +230,8 @@ class EventSender:
 
         try:
             # Send heartbeat
+            if self._client is None:
+                raise EventSenderError("Client not connected")
             self._client.send_message(message)
 
             # Wait for heartbeat response
@@ -278,6 +282,8 @@ class EventSender:
 
         try:
             # Send command
+            if self._client is None:
+                raise EventSenderError("Client not connected")
             self._client.send_message(message)
 
             # Wait for response

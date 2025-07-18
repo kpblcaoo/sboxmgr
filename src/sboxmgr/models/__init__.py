@@ -1,10 +1,10 @@
-"""Configuration models for various proxy protocols.
+"""Models package for SBoxMgr.
 
-This module contains Pydantic models for different proxy configuration formats:
-- sing-box: Complete sing-box configuration models
-- xray: Xray/V2Ray configuration models (planned)
-- clash: Clash/Mihomo configuration models (planned)
+This package contains all Pydantic models used throughout the application.
 """
+
+# This file indicates that the package supports type checking
+# See PEP 561 for more details
 
 # Sing-box models
 from .singbox import (  # Main config; Enums; Common; DNS; Auth; NTP; Inbounds; Outbounds; Routing; Experimental; Observatory

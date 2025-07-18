@@ -365,7 +365,10 @@ class EnrichmentMiddleware(TransformMiddleware):
         # Check cache first
         if server_key in self._performance_cache:
             cached_data, timestamp = self._performance_cache[server_key]
-            if time.time() - timestamp < self.performance_cache_duration:
+            if (
+                isinstance(timestamp, (int, float))
+                and time.time() - timestamp < self.performance_cache_duration
+            ):
                 server.meta["performance"] = cached_data
                 return server
 

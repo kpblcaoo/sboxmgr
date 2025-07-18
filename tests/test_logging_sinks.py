@@ -99,7 +99,7 @@ class TestJournaldDetection:
 
         assert result is True
         mock_run.assert_called_once_with(
-            ["systemd-cat", "--version"], capture_output=True, timeout=2
+            ["systemd-cat", "--version"], check=False, capture_output=True, timeout=2
         )
 
     @patch("sboxmgr.logging.sinks.detect_systemd_environment")
