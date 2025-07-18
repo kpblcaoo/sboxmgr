@@ -170,16 +170,34 @@ def exclusions_add(
     added_count = 0
     for server_id in server_list:
         try:
-            # TODO: Implement proper server exclusion logic
-            # For now, just add a placeholder
-            new_exclusion = {
-                "id": server_id,
-                "name": f"Server {server_id}",
-                "reason": reason,
-                "timestamp": "2025-01-01T00:00:00Z",
-            }
-            current_exclusions.append(new_exclusion)
-            added_count += 1
+            # Check if server_id is a number (index) or string (name/pattern)
+            if server_id.isdigit():
+                # Handle by index
+                index = int(server_id)
+                new_exclusion = {
+                    "id": f"index_{index}",
+                    "name": f"Server at index {index}",
+                    "reason": reason,
+                    "timestamp": "2025-01-01T00:00:00Z",
+                }
+            else:
+                # Handle by name/pattern
+                new_exclusion = {
+                    "id": server_id,
+                    "name": f"Server {server_id}",
+                    "reason": reason,
+                    "timestamp": "2025-01-01T00:00:00Z",
+                }
+
+            # Check if already excluded
+            if not any(
+                ex.get("id") == new_exclusion["id"] for ex in current_exclusions
+            ):
+                current_exclusions.append(new_exclusion)
+                added_count += 1
+            else:
+                if verbose:
+                    typer.echo(f"Server {server_id} already excluded")
         except Exception as e:
             if json_output:
                 print(json.dumps({"error": f"Failed to add {server_id}: {e}"}))
@@ -393,13 +411,14 @@ def exclusions_main(
 
     # Handle operations that require server data
     if list_servers:
-        # TODO: Implement list_servers functionality
-        typer.echo("List servers functionality not yet implemented")
+        # Redirect to subscription list command
+        typer.echo("Use 'subscription list' command to list servers")
         return
 
     if interactive:
-        # TODO: Implement interactive functionality
-        typer.echo("Interactive functionality not yet implemented")
+        # Interactive functionality not implemented in this version
+        typer.echo("Interactive mode not available in subscription exclusions")
+        typer.echo("Use individual commands: add, remove, list, clear")
         return
 
     if add:

@@ -9,7 +9,7 @@ import typer
 from sboxmgr.i18n.t import t
 
 # Import and register subcommands
-from . import exclusions, info, list, validate
+from . import exclusions, list
 
 # Create the subscription command group
 app = typer.Typer(
@@ -21,7 +21,5 @@ app = typer.Typer(
 # Register subcommands
 app.add_typer(list.app, name="list")
 app.add_typer(exclusions.app, name="exclusions")
-app.add_typer(info.app, name="info")
-app.add_typer(validate.app, name="validate")
 
 __all__ = ["app"]
