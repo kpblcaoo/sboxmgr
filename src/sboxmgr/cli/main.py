@@ -17,6 +17,7 @@ from sboxmgr.cli import plugin_template
 from sboxmgr.cli.commands.config import app as new_config_app
 from sboxmgr.cli.commands.export import export
 from sboxmgr.cli.commands.policy import app as policy_app
+from sboxmgr.cli.commands.subscription import app as subscription_app
 from sboxmgr.cli.commands.subscription.exclusions import exclusions_main as exclusions
 
 # Import commands for registration
@@ -328,6 +329,9 @@ def exclusions_alias(
 
 # Регистрируем config команды
 app.add_typer(new_config_app, name="config")
+
+# Регистрируем subscription команды
+app.add_typer(subscription_app, name="subscription")
 
 # Регистрируем команду экспорта
 app.command("export", help="Export configurations in standardized formats")(export)
