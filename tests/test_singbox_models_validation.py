@@ -229,14 +229,18 @@ class TestSingBoxModelsValidation:
                 ["/usr/bin/sing-box", "version"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 version_output = result.stdout.strip()
                 if "sing-box version" in version_output:
-                    version_str = version_output.split("sing-box version ")[1].split()[0]
+                    version_str = version_output.split("sing-box version ")[1].split()[
+                        0
+                    ]
                     if version_str < "1.12.0":
-                        pytest.skip(f"Hosts DNS server requires sing-box 1.12.0+, got {version_str}")
+                        pytest.skip(
+                            f"Hosts DNS server requires sing-box 1.12.0+, got {version_str}"
+                        )
         except (subprocess.TimeoutExpired, FileNotFoundError):
             pytest.skip("sing-box binary not available")
         config_dict = {
@@ -249,20 +253,14 @@ class TestSingBoxModelsValidation:
                         "predefined": {
                             "example.com": "1.2.3.4",
                             "localhost": ["127.0.0.1", "::1"],
-                            "test.local": "192.168.1.100"
-                        }
+                            "test.local": "192.168.1.100",
+                        },
                     },
                     {"tag": "google", "address": "8.8.8.8"},
                 ],
                 "rules": [
-                    {
-                        "type": "default",
-                        "server": "hosts"
-                    },
-                    {
-                        "type": "default",
-                        "server": "google"
-                    }
+                    {"type": "default", "server": "hosts"},
+                    {"type": "default", "server": "google"},
                 ],
                 "final": "google",
             },
@@ -303,14 +301,18 @@ class TestSingBoxModelsValidation:
                 ["/usr/bin/sing-box", "version"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 version_output = result.stdout.strip()
                 if "sing-box version" in version_output:
-                    version_str = version_output.split("sing-box version ")[1].split()[0]
+                    version_str = version_output.split("sing-box version ")[1].split()[
+                        0
+                    ]
                     if version_str < "1.12.0":
-                        pytest.skip(f"Hosts DNS server requires sing-box 1.12.0+, got {version_str}")
+                        pytest.skip(
+                            f"Hosts DNS server requires sing-box 1.12.0+, got {version_str}"
+                        )
         except (subprocess.TimeoutExpired, FileNotFoundError):
             pytest.skip("sing-box binary not available")
         config_dict = {
@@ -321,9 +323,7 @@ class TestSingBoxModelsValidation:
                         "type": "hosts",
                         "tag": "hosts",
                         "path": ["/etc/hosts", "/custom/hosts"],
-                        "predefined": {
-                            "example.com": "1.2.3.4"
-                        }
+                        "predefined": {"example.com": "1.2.3.4"},
                     }
                 ],
                 "final": "hosts",
