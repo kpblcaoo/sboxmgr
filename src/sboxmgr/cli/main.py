@@ -15,12 +15,14 @@ from dotenv import load_dotenv
 
 from sboxmgr.cli import plugin_template
 from sboxmgr.cli.commands.config import app as new_config_app
-from sboxmgr.cli.commands.exclusions import exclusions
 from sboxmgr.cli.commands.export import export
 from sboxmgr.cli.commands.policy import app as policy_app
+from sboxmgr.cli.commands.subscription.exclusions import exclusions_main as exclusions
 
 # Import commands for registration
-from sboxmgr.cli.commands.subscription import list_servers as subscription_list_servers
+from sboxmgr.cli.commands.subscription.list import (
+    list_servers as subscription_list_servers,
+)
 from sboxmgr.config.models import LoggingConfig
 from sboxmgr.i18n.loader import LanguageLoader
 from sboxmgr.i18n.t import t
