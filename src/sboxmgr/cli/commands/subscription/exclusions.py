@@ -13,11 +13,9 @@ from rich.prompt import Confirm
 from rich.table import Table
 
 from sboxmgr.config.fetch import fetch_json
+from sboxmgr.constants import SUPPORTED_PROTOCOLS
 from sboxmgr.core.exclusions import ExclusionManager
 from sboxmgr.i18n.t import t
-
-# SUPPORTED_PROTOCOLS defined locally
-SUPPORTED_PROTOCOLS = ["vless", "shadowsocks", "vmess", "trojan", "tuic", "hysteria2"]
 
 console = Console()
 
@@ -140,36 +138,18 @@ def exclusions_list(
     console.print(table)
 
 
-@app.command("add")
-def exclusions_add(
-    servers: str = typer.Option(
-        ..., "--servers", help="Server indices or names to exclude"
-    ),
-    reason: str = typer.Option("CLI operation", "--reason", help=t("cli.reason.help")),
-    url: str = typer.Option(
-        ...,
-        "-u",
-        "--url",
-        help=t("cli.url.help"),
-        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
-    ),
-    json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
-    ctx: typer.Context = None,
-):
-    """Add servers to exclusions."""
-    # Get global flags from context
-    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
-
+def _exclusions_add_logic(
+    manager: ExclusionManager,
+    servers: str,
+    reason: str,
+    json_output: bool,
+    verbose: bool = False,
+) -> None:
+    """Internal logic for adding exclusions."""
     if verbose:
         typer.echo("➕ Adding exclusions...")
         typer.echo(f"   Servers: {servers}")
         typer.echo(f"   Reason: {reason}")
-
-    manager = ExclusionManager.default()
-
-    # Fetch and cache server data
-    json_data = _fetch_and_validate_subscription(url, json_output)
-    _cache_server_data(manager, json_data, json_output)
 
     # EXACT COPY from old _add_exclusions function
     items = [x.strip() for x in servers.split(",") if x.strip()]
@@ -198,7 +178,7 @@ def exclusions_add(
                 console.print(f"[red]❌ {error_msg}[/red]")
             raise typer.Exit(1) from None
 
-        servers = manager._servers_cache["servers"]
+        servers_data = manager._servers_cache["servers"]
         protocols = manager._servers_cache["supported_protocols"]
         supported_servers = manager._servers_cache["supported_servers"]
 
@@ -217,7 +197,7 @@ def exclusions_add(
                     console.print(f"[red]❌ {error}[/red]")
             raise typer.Exit(1) from None
 
-        added_by_index = manager.add_by_index(servers, indices, protocols, reason)
+        added_by_index = manager.add_by_index(servers_data, indices, protocols, reason)
         added_ids.extend(added_by_index)
 
     # Add by wildcard patterns
@@ -231,9 +211,11 @@ def exclusions_add(
                 console.print(f"[red]❌ {error_msg}[/red]")
             raise typer.Exit(1) from None
 
-        servers = manager._servers_cache["servers"]
+        servers_data = manager._servers_cache["servers"]
         protocols = manager._servers_cache["supported_protocols"]
-        added_by_pattern = manager.add_by_wildcard(servers, patterns, protocols, reason)
+        added_by_pattern = manager.add_by_wildcard(
+            servers_data, patterns, protocols, reason
+        )
         added_ids.extend(added_by_pattern)
 
     if json_output:
@@ -253,6 +235,35 @@ def exclusions_add(
         console.print(
             "[yellow]⚠️ No new exclusions added (already excluded or not found).[/yellow]"
         )
+
+
+@app.command("add")
+def exclusions_add(
+    servers: str = typer.Option(
+        ..., "--servers", help="Server indices or names to exclude"
+    ),
+    reason: str = typer.Option("CLI operation", "--reason", help=t("cli.reason.help")),
+    url: str = typer.Option(
+        ...,
+        "-u",
+        "--url",
+        help=t("cli.url.help"),
+        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
+    ),
+    json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
+    ctx: typer.Context = None,
+):
+    """Add servers to exclusions."""
+    # Get global flags from context
+    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
+
+    manager = ExclusionManager.default()
+
+    # Fetch and cache server data
+    json_data = _fetch_and_validate_subscription(url, json_output)
+    _cache_server_data(manager, json_data, json_output)
+
+    _exclusions_add_logic(manager, servers, reason, json_output, verbose)
 
 
 @app.command("remove")
@@ -495,7 +506,8 @@ def exclusions_main(
                     "servers": [
                         {
                             "index": idx,
-                            "id": manager._get_server_id(server),
+                            "id": server.get("id")
+                            or f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}",
                             "tag": server.get("tag", "N/A"),
                             "type": server.get("type", "N/A"),
                             "server": server.get("server", "N/A"),
@@ -535,15 +547,18 @@ def exclusions_main(
             return
 
     if interactive:
-        # Interactive functionality not implemented in this version
-        typer.echo("Interactive mode not available in subscription exclusions")
-        typer.echo("Use individual commands: add, remove, list, clear")
-        return
+        # NOTE: Interactive mode is intentionally disabled for v2.
+        # Use explicit sub-commands (list/add/remove) instead.
+        typer.echo("❌ Interactive mode is not available in subscription exclusions v2")
+        typer.echo("💡 Use individual commands instead:")
+        typer.echo("   sboxctl subscription exclusions list")
+        typer.echo("   sboxctl subscription exclusions add --servers 0,1,2")
+        typer.echo("   sboxctl subscription exclusions remove --servers 0,1,2")
+        typer.echo("   sboxctl subscription exclusions clear")
+        raise typer.Exit(1)
 
     if add:
-        exclusions_add(
-            servers=add, reason=reason, url=url, json_output=json_output, ctx=ctx
-        )
+        _exclusions_add_logic(manager, add, reason, json_output, verbose)
 
     if remove:
         exclusions_remove(servers=remove, url=url, json_output=json_output, ctx=ctx)

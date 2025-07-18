@@ -8,6 +8,7 @@ from typing import Optional
 
 import typer
 
+from sboxmgr.constants import DEFAULT_USER_AGENT
 from sboxmgr.i18n.t import t
 from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.subscription.manager import SubscriptionManager
@@ -153,7 +154,7 @@ def list_servers(
         if no_user_agent:
             ua = ""
         else:
-            ua = user_agent or "ClashMeta/1.0"  # Default User-Agent if None
+            ua = user_agent or DEFAULT_USER_AGENT  # Default User-Agent if None
 
         # Определяем source_type на основе формата
         if format == "base64":
