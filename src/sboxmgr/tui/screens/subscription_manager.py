@@ -4,13 +4,14 @@ This module implements the subscription management screen that allows
 users to add, remove, and manage their subscription sources.
 """
 
-from sboxmgr.tui.components.forms import SubscriptionForm
-from sboxmgr.tui.utils.formatting import format_subscription_info
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, DataTable, Footer, Header, Static
+
+from sboxmgr.tui.components.forms import SubscriptionForm
+from sboxmgr.tui.utils.formatting import format_subscription_info
 
 
 class SubscriptionManagerScreen(Screen):

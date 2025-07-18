@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+
 from sboxmgr.i18n.t import t
 from sboxmgr.utils.env import get_backup_file
 

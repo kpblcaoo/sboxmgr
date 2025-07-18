@@ -4,6 +4,7 @@ import json
 from typing import Optional
 
 import typer
+
 from sboxmgr.export.export_manager import ExportManager
 from sboxmgr.i18n.t import t
 from sboxmgr.subscription.manager import SubscriptionManager

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+
 from sboxmgr.agent import AgentBridge, AgentNotAvailableError, ClientType
 from sboxmgr.config.validation import validate_config_file
 from sboxmgr.i18n.t import t

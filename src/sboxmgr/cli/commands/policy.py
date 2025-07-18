@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+
 from sboxmgr.i18n.t import t
 from sboxmgr.policies import PolicyContext, policy_registry
 

@@ -8,16 +8,17 @@ import logging
 import subprocess
 from pathlib import Path
 
-from sboxmgr.tui.utils.validation import (
-    validate_output_path,
-    validate_subscription_url,
-    validate_tags,
-)
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Center, Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label, Static
+
+from sboxmgr.tui.utils.validation import (
+    validate_output_path,
+    validate_subscription_url,
+    validate_tags,
+)
 
 
 # Setup logging

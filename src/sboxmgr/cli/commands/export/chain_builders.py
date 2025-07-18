@@ -3,6 +3,7 @@
 from typing import Any, Optional
 
 import typer
+
 from sboxmgr.i18n.t import t
 
 from .validators import validate_middleware, validate_postprocessors

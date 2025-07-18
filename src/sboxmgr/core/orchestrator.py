@@ -10,6 +10,7 @@ import logging
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict
+
 from sboxmgr.subscription.models import (
     PipelineContext,
     PipelineResult,

@@ -12,6 +12,7 @@ import json
 import logging
 
 import typer
+
 from sboxmgr.utils.env import get_exclusion_file
 from sboxmgr.utils.file import atomic_remove, atomic_write_json, file_exists, read_json
 from sboxmgr.utils.id import generate_server_id

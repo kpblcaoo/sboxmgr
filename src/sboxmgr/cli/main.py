@@ -11,6 +11,7 @@ from pathlib import Path
 
 import typer
 from dotenv import load_dotenv
+
 from sboxmgr.cli import plugin_template
 from sboxmgr.cli.commands.config import app as new_config_app
 from sboxmgr.cli.commands.exclusions import exclusions

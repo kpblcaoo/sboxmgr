@@ -10,6 +10,7 @@ import json
 from logging import error
 
 import requests
+
 from sboxmgr.server.exclusions import load_exclusions
 from sboxmgr.utils.id import generate_server_id
 

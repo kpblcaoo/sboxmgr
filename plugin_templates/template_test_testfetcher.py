@@ -1,5 +1,6 @@
 # This is a template file - copy to your test directory and modify as needed
 import pytest
+
 from sboxmgr.subscription.fetchers.testfetcher import TestFetcher
 
 

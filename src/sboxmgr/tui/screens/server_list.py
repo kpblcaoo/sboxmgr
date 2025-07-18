@@ -6,12 +6,13 @@ servers with checkboxes for inclusion/exclusion management.
 
 from typing import Optional
 
-from sboxmgr.tui.utils.formatting import format_server_info
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import Button, Checkbox, Footer, Header, Static
+
+from sboxmgr.tui.utils.formatting import format_server_info
 
 
 class ServerListScreen(Screen):

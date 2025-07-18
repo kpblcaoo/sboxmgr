@@ -14,6 +14,7 @@ from rich import print as rprint
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
+
 from sboxmgr.config.fetch import fetch_json
 from sboxmgr.core.exclusions import ExclusionManager
 from sboxmgr.i18n.t import t
