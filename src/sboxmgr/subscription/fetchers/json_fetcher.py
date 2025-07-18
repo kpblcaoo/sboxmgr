@@ -35,7 +35,8 @@ class JSONFetcher(BaseFetcher):
         """Загружает подписку в формате JSON с поддержкой лимита размера и in-memory кешированием.
 
         Args:
-            force_reload (bool, optional): Принудительно сбросить кеш и заново получить результат.
+            force_reload (bool, optional): Принудительно сбросить кеш и заново получить
+                результат.
 
         Returns:
             bytes: Сырые данные подписки.

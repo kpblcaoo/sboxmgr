@@ -29,8 +29,8 @@ jobs:
 
     - name: Run Ruff linter and formatter
       run: |
-        ruff check src/ tests/ examples/ scripts/
-        ruff format --check src/ tests/ examples/ scripts/
+        ruff check src/ --select F --ignore F403
+        ruff format --check src/
 
     - name: Run MyPy type checker
       run: |

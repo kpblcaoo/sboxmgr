@@ -6,8 +6,8 @@ All parser classes are registered via the `sboxmgr.subscription.registry`
 `@register` decorator so they can be discovered dynamically.
 """
 
-from .base64_parser import *
-from .clash_parser import *
-from .json_parser import *
-from .sfiparser import *
-from .uri_list_parser import *
+from .base64_parser import *  # noqa: F403
+from .clash_parser import *  # noqa: F403
+from .json_parser import *  # noqa: F403
+from .sfiparser import *  # noqa: F403
+from .uri_list_parser import *  # noqa: F403
