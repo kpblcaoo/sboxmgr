@@ -79,7 +79,7 @@ def exclusions(
             "interactive": interactive,
         }
         typer.echo(
-            f"   Actions: {[action for action, enabled in actions.items() if enabled]}"
+            f"   Actions: {', '.join(action for action, enabled in actions.items() if enabled)}"
         )
         typer.echo(f"   Skip confirmations: {final_yes}")
 

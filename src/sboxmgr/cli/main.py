@@ -8,6 +8,7 @@ point for the `sboxctl` console script defined in pyproject.toml.
 import locale
 import os
 from pathlib import Path
+from typing import Optional
 
 import typer
 from dotenv import load_dotenv
@@ -232,6 +233,7 @@ app.command("exclusions")(exclusions)
 
 # Aliases for deprecated commands (for backward compatibility)
 # Note: These are hidden aliases that will be removed in future versions
+@app.command("list-servers", hidden=True)
 def list_servers_alias(
     url: str = typer.Option(
         ...,
@@ -241,7 +243,7 @@ def list_servers_alias(
         envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
     ),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
-    user_agent: str = typer.Option(
+    user_agent: Optional[str] = typer.Option(
         None,
         "--user-agent",
         help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)",
@@ -249,7 +251,7 @@ def list_servers_alias(
     no_user_agent: bool = typer.Option(
         False, "--no-user-agent", help="Do not send User-Agent header at all"
     ),
-    format: str = typer.Option(
+    format: Optional[str] = typer.Option(
         None,
         "--format",
         help="Force specific format: auto, base64, json, uri_list, clash",
@@ -263,7 +265,7 @@ def list_servers_alias(
     ctx: typer.Context = None,
 ):
     """Alias for sboxctl subscription list (deprecated)."""
-    typer.echo("⚠️  Warning: 'list-servers' is deprecated, use 'subscription list'")
+    typer.echo(t("cli.deprecated.list_servers"))
     # Call the original function with all parameters including context
     subscription_list_servers(
         url=url,
@@ -276,6 +278,7 @@ def list_servers_alias(
     )
 
 
+@app.command("exclusions", hidden=True)
 def exclusions_alias(
     url: str = typer.Option(
         ...,
@@ -284,8 +287,8 @@ def exclusions_alias(
         help=t("cli.url.help"),
         envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
     ),
-    add: str = typer.Option(None, "--add", help=t("cli.add.help")),
-    remove: str = typer.Option(None, "--remove", help=t("cli.remove.help")),
+    add: Optional[str] = typer.Option(None, "--add", help=t("cli.add.help")),
+    remove: Optional[str] = typer.Option(None, "--remove", help=t("cli.remove.help")),
     view: bool = typer.Option(False, "--view", help=t("cli.view.help")),
     clear: bool = typer.Option(False, "--clear", help=t("cli.clear_exclusions.help")),
     list_servers: bool = typer.Option(
@@ -304,7 +307,7 @@ def exclusions_alias(
     ctx: typer.Context = None,
 ):
     """Alias for sboxctl subscription exclusions (deprecated)."""
-    typer.echo("⚠️  Warning: 'exclusions' is deprecated, use 'subscription exclusions'")
+    typer.echo(t("cli.deprecated.exclusions"))
     # Call the original function with all parameters including context
     exclusions(
         url=url,

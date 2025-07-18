@@ -6,6 +6,9 @@ from typer.testing import CliRunner
 
 from sboxmgr.cli.main import app
 
+# Semantic version pattern for testing
+SEMVER_PATTERN = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-?[\w\.-]+)?(?:\+[\w\.-]+)?$"
+
 
 @pytest.fixture
 def runner():
@@ -38,9 +41,7 @@ def test_global_version_flag(runner):
     # Should output version or "unknown"
     version_output = result.stdout.strip()
     # Validate version output against semantic versioning or "unknown"
-    # Support formats like: 1.2.3, 1.2.3-rc1, 1.2.3+build, 0.1.0rc1
-    semver_pattern = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-?[\w\.-]+)?(?:\+[\w\.-]+)?$"
-    assert version_output == "unknown" or re.match(semver_pattern, version_output) is not None
+    assert version_output == "unknown" or re.match(SEMVER_PATTERN, version_output)
 
 
 def test_deprecated_aliases_exist(runner):
