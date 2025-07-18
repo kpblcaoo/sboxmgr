@@ -81,38 +81,34 @@ class URIListParser(BaseParser):
                     ss = self._parse_ss(line)
                     if ss and ss.address != "invalid":
                         servers.append(ss)
-                    else:
-                        if debug_level > 0:
-                            logger.warning(
-                                f"Failed to parse ss:// line {line_num}: {line[:100]}..."
-                            )
+                    elif debug_level > 0:
+                        logger.warning(
+                            f"Failed to parse ss:// line {line_num}: {line[:100]}..."
+                        )
                 elif line.startswith("vless://"):
                     vless = self._parse_vless(line)
                     if vless:
                         servers.append(vless)
-                    else:
-                        if debug_level > 0:
-                            logger.warning(
-                                f"Failed to parse vless:// line {line_num}: {line[:100]}..."
-                            )
+                    elif debug_level > 0:
+                        logger.warning(
+                            f"Failed to parse vless:// line {line_num}: {line[:100]}..."
+                        )
                 elif line.startswith("vmess://"):
                     vmess = self._parse_vmess(line)
                     if vmess and vmess.address != "invalid":
                         servers.append(vmess)
-                    else:
-                        if debug_level > 0:
-                            logger.warning(
-                                f"Failed to parse vmess:// line {line_num}: {line[:100]}..."
-                            )
+                    elif debug_level > 0:
+                        logger.warning(
+                            f"Failed to parse vmess:// line {line_num}: {line[:100]}..."
+                        )
                 elif line.startswith("trojan://"):
                     trojan = self._parse_trojan(line)
                     if trojan:
                         servers.append(trojan)
-                    else:
-                        if debug_level > 0:
-                            logger.warning(
-                                f"Failed to parse trojan:// line {line_num}: {line[:100]}..."
-                            )
+                    elif debug_level > 0:
+                        logger.warning(
+                            f"Failed to parse trojan:// line {line_num}: {line[:100]}..."
+                        )
                 else:
                     if debug_level > 0:
                         logger.warning(

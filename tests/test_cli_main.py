@@ -91,7 +91,7 @@ class TestSupportedProtocols:
             "tuic",
             "hysteria2",
         }
-        assert SUPPORTED_PROTOCOLS == expected_protocols
+        assert expected_protocols == SUPPORTED_PROTOCOLS
         assert len(SUPPORTED_PROTOCOLS) == 6
         assert isinstance(SUPPORTED_PROTOCOLS, set)
 

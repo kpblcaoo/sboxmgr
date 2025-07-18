@@ -74,7 +74,7 @@ def test_imports(python_path, required_imports, optional_imports=None):
             # Use subprocess to test import in the venv
             result = subprocess.run(
                 [str(python_path), "-c", f"import {module_name}"],
-                capture_output=True,
+                check=False, capture_output=True,
                 text=True,
             )
 
@@ -96,7 +96,7 @@ def test_imports(python_path, required_imports, optional_imports=None):
             try:
                 result = subprocess.run(
                     [str(python_path), "-c", f"import {module_name}"],
-                    capture_output=True,
+                    check=False, capture_output=True,
                     text=True,
                 )
 

@@ -255,9 +255,7 @@ class {class_name}({base}):
     template = f"{imports}\n\n\n{class_template}"
 
     # Build test template with correct import path
-    if type == "validator":
-        test_import_path = f"from sboxmgr.subscription.validators.{class_name.lower()} import {class_name}"
-    elif type == "parsed_validator":
+    if type == "validator" or type == "parsed_validator":
         test_import_path = f"from sboxmgr.subscription.validators.{class_name.lower()} import {class_name}"
     else:
         test_import_path = f"from sboxmgr.subscription.{type}s.{class_name.lower()} import {class_name}"

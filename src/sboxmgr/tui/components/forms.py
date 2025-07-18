@@ -199,7 +199,7 @@ class SubscriptionForm(ModalScreen[bool | str]):
             try:
                 result = subprocess.run(
                     ["xclip", "-selection", "clipboard", "-o"],
-                    capture_output=True,
+                    check=False, capture_output=True,
                     text=True,
                     timeout=2,
                 )
@@ -213,7 +213,7 @@ class SubscriptionForm(ModalScreen[bool | str]):
                 try:
                     result = subprocess.run(
                         ["xsel", "--clipboard", "--output"],
-                        capture_output=True,
+                        check=False, capture_output=True,
                         text=True,
                         timeout=2,
                     )
@@ -226,7 +226,7 @@ class SubscriptionForm(ModalScreen[bool | str]):
             if not clipboard_content:
                 try:
                     result = subprocess.run(
-                        ["wl-paste"], capture_output=True, text=True, timeout=2
+                        ["wl-paste"], check=False, capture_output=True, text=True, timeout=2
                     )
                     if result.returncode == 0:
                         clipboard_content = result.stdout.strip()

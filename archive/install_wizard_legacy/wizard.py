@@ -94,7 +94,7 @@ def create_virtualenv(path):
 def activate_virtualenv(venv_path):
     activate_script = os.path.join(venv_path, "bin", "activate")
     activate_command = f"source {activate_script}"
-    subprocess.run(activate_command, shell=True, executable="/bin/bash")
+    subprocess.run(activate_command, check=False, shell=True, executable="/bin/bash")
 
 
 def get_file_hash(file_path):

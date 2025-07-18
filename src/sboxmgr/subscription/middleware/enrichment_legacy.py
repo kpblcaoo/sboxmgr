@@ -312,13 +312,12 @@ class EnrichmentMiddleware(TransformMiddleware):
                             "timezone": response.location.time_zone,
                         }
                     )
-            else:
-                # Fallback: try to extract country from domain TLD
-                if "." in address and not address.replace(".", "").isdigit():
-                    tld = address.split(".")[-1].upper()
-                    if len(tld) == 2:
-                        geo_info["country"] = tld
-                        geo_info["source"] = "tld"
+            # Fallback: try to extract country from domain TLD
+            elif "." in address and not address.replace(".", "").isdigit():
+                tld = address.split(".")[-1].upper()
+                if len(tld) == 2:
+                    geo_info["country"] = tld
+                    geo_info["source"] = "tld"
 
         except Exception:
             # If all methods fail, mark as unknown

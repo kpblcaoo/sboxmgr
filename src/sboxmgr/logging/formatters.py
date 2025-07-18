@@ -82,9 +82,7 @@ class StructuredFormatter(logging.Formatter):
 
         """
         parts = logger_name.split(".")
-        if len(parts) >= 3:  # sboxmgr.module.operation
-            return parts[-1]
-        elif len(parts) == 2:  # sboxmgr.operation
+        if len(parts) >= 3 or len(parts) == 2:  # sboxmgr.module.operation
             return parts[-1]
         else:
             return "unknown"

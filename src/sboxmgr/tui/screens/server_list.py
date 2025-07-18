@@ -516,9 +516,7 @@ class ServerListScreen(Screen):
         if server_container:
             # Удаляем старые виджеты серверов
             for child in server_container.children:
-                if hasattr(child, "classes") and "server-list-scroll" in child.classes:
-                    child.remove()
-                elif hasattr(child, "classes") and "empty-state" in child.classes:
+                if hasattr(child, "classes") and "server-list-scroll" in child.classes or hasattr(child, "classes") and "empty-state" in child.classes:
                     child.remove()
 
             # Добавляем новый контент

@@ -422,13 +422,12 @@ def _add_exclusions(
                 }
             )
         )
+    elif added_ids:
+        rprint(f"[green]✅ Added {len(added_ids)} exclusions.[/green]")
     else:
-        if added_ids:
-            rprint(f"[green]✅ Added {len(added_ids)} exclusions.[/green]")
-        else:
-            rprint(
-                "[yellow]⚠️ No new exclusions added (already excluded or not found).[/yellow]"
-            )
+        rprint(
+            "[yellow]⚠️ No new exclusions added (already excluded or not found).[/yellow]"
+        )
 
 
 def _remove_exclusions(
@@ -498,13 +497,12 @@ def _remove_exclusions(
                 }
             )
         )
+    elif removed_ids:
+        rprint(f"[green]✅ Removed {len(removed_ids)} exclusions.[/green]")
     else:
-        if removed_ids:
-            rprint(f"[green]✅ Removed {len(removed_ids)} exclusions.[/green]")
-        else:
-            rprint(
-                "[yellow]⚠️ No exclusions removed (not found or not excluded).[/yellow]"
-            )
+        rprint(
+            "[yellow]⚠️ No exclusions removed (not found or not excluded).[/yellow]"
+        )
 
 
 # Helper method for getting server ID (should be added to manager)

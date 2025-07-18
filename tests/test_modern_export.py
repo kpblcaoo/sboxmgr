@@ -187,7 +187,7 @@ class TestModernExport:
             # Run sing-box check
             result = subprocess.run(
                 [singbox_path, "check", "-c", config_file],
-                capture_output=True,
+                check=False, capture_output=True,
                 text=True,
                 timeout=10,
             )

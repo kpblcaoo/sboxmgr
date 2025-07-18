@@ -151,7 +151,7 @@ def detect_systemd_environment() -> bool:
         import subprocess
 
         result = subprocess.run(
-            ["systemctl", "--version"], capture_output=True, timeout=2
+            ["systemctl", "--version"], check=False, capture_output=True, timeout=2
         )
         return result.returncode == 0
     except (subprocess.SubprocessError, FileNotFoundError, subprocess.TimeoutExpired):

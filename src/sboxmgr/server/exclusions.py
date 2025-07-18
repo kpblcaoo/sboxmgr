@@ -69,10 +69,9 @@ def exclude_servers(json_data, exclude_list, supported_protocols, debug_level=0)
                     if debug_level >= 0:
                         logging.info(f"Excluding server by index {index}: {name}")
                         typer.echo(f"Excluding server by index {index}: {name}")
-                else:
-                    if debug_level >= 0:
-                        logging.info(f"[Info] Server already excluded: {name}")
-                        typer.echo(f"already excluded: {name}")
+                elif debug_level >= 0:
+                    logging.info(f"[Info] Server already excluded: {name}")
+                    typer.echo(f"already excluded: {name}")
         else:
             for _, server in supported_servers:
                 if fnmatch.fnmatch(server.get("tag", ""), item):
@@ -84,10 +83,9 @@ def exclude_servers(json_data, exclude_list, supported_protocols, debug_level=0)
                         if debug_level >= 0:
                             logging.info(f"Excluding server by name {name}")
                             typer.echo(f"Excluding server by name {name}")
-                    else:
-                        if debug_level >= 0:
-                            logging.info(f"[Info] Server already excluded: {name}")
-                            typer.echo(f"already excluded: {name}")
+                    elif debug_level >= 0:
+                        logging.info(f"[Info] Server already excluded: {name}")
+                        typer.echo(f"already excluded: {name}")
     exclusions["exclusions"].extend(new_exclusions)
     save_exclusions(exclusions)
 

@@ -130,7 +130,7 @@ def test_cli_matrix(
     env["SBOXMGR_LOG_FILE"] = str(tmp_path / "log.txt")
     env["SBOXMGR_TEST_MODE"] = "1"
     result = subprocess.run(
-        cmd, capture_output=True, text=True, cwd=project_root, env=env
+        cmd, check=False, capture_output=True, text=True, cwd=project_root, env=env
     )
     log_text = ""
     log_path = tmp_path / "log.txt"

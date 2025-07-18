@@ -603,11 +603,10 @@ class TUIState:
                         logger.debug(
                             f"[DEBUG] Added {len(servers_result.config)} servers from {subscription.url}"
                         )
-                else:
-                    if self.debug >= 2:
-                        logger.debug(
-                            f"[DEBUG] Failed to get servers from {subscription.url}: {servers_result.errors}"
-                        )
+                elif self.debug >= 2:
+                    logger.debug(
+                        f"[DEBUG] Failed to get servers from {subscription.url}: {servers_result.errors}"
+                    )
 
             if not all_servers:
                 logger.error("Error: No servers available from any subscription")

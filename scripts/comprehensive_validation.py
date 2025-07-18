@@ -41,7 +41,7 @@ class ComprehensiveValidator:
         for path in possible_paths:
             try:
                 result = subprocess.run(
-                    [path, "version"], capture_output=True, text=True, timeout=5
+                    [path, "version"], check=False, capture_output=True, text=True, timeout=5
                 )
                 if result.returncode == 0:
                     print(f"✅ Найден sing-box: {path}")
@@ -93,7 +93,7 @@ class ComprehensiveValidator:
             # Запускаем sing-box check
             result = subprocess.run(
                 [self.singbox_path, "check", "-c", str(temp_config)],
-                capture_output=True,
+                check=False, capture_output=True,
                 text=True,
                 timeout=30,
             )

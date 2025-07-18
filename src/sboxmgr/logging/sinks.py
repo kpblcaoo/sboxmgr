@@ -141,7 +141,7 @@ def _is_journald_available() -> bool:
     # Check if systemd-cat is available (indicates journald support)
     try:
         result = subprocess.run(
-            ["systemd-cat", "--version"], capture_output=True, timeout=2
+            ["systemd-cat", "--version"], check=False, capture_output=True, timeout=2
         )
         return result.returncode == 0
     except (subprocess.SubprocessError, FileNotFoundError, subprocess.TimeoutExpired):

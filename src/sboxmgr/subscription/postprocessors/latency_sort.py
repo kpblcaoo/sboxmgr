@@ -250,7 +250,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
 
             time.time()
             result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=timeout_sec
+                cmd, check=False, capture_output=True, text=True, timeout=timeout_sec
             )
 
             if result.returncode == 0:
