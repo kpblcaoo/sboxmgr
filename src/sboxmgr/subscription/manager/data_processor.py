@@ -85,31 +85,27 @@ class DataProcessor:
 
             # Parse servers
             servers = parser.parse(raw_data)
-            print(f"[DEBUG] servers after parse: {servers}")
 
-            # Если servers пустой — считаем парсинг неуспешным
+            # Debug logging for parse result
+            debug_level = getattr(context, "debug_level", 0)
+            if debug_level >= 2:
+                print(f"[DEBUG] servers after parse: {servers}")
+
+            # Empty servers list is valid - just return empty list
             if not servers:
-                err = self.error_handler.create_parse_error(
-                    "No servers parsed (parse error)",
-                    {"source_type": self.fetcher.source.source_type},
-                )
-                self.error_handler.add_error_to_context(context, err)
-                print(
-                    f"[DEBUG] context.metadata['errors'] after add: {context.metadata.get('errors')}"
-                )
-                return [], False
+                if debug_level >= 1:
+                    print(
+                        "[DEBUG] No servers parsed - this is normal for empty subscriptions"
+                    )
+                return [], True
 
-            # Если все servers невалидны (address == 'invalid'), считаем парсинг неуспешным
+            # All invalid servers is also valid - return them for further processing
             if all(getattr(s, "address", None) == "invalid" for s in servers):
-                err = self.error_handler.create_parse_error(
-                    "All parsed servers are invalid (parse error)",
-                    {"source_type": self.fetcher.source.source_type},
-                )
-                self.error_handler.add_error_to_context(context, err)
-                print(
-                    f"[DEBUG] context.metadata['errors'] after add: {context.metadata.get('errors')}"
-                )
-                return [], False
+                if debug_level >= 1:
+                    print(
+                        f"[DEBUG] All {len(servers)} servers have invalid addresses - continuing with processing"
+                    )
+                return servers, True
 
             # Debug logging
             self._log_parse_result(context, servers, parser)
