@@ -8,7 +8,7 @@ Integrated with the profile system for persistent storage.
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from sboxmgr.core.orchestrator import Orchestrator
 from sboxmgr.subscription.models import ParsedServer, SubscriptionSource
@@ -28,7 +28,7 @@ except ImportError:
 
 # Setup logging for TUI debugging
 def setup_tui_logging():
-    """Setup logging for TUI debugging."""
+    """Set up logging for TUI debugging."""
     log_file = Path.home() / ".sboxmgr" / "tui_debug.log"
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -76,6 +76,7 @@ class TUIState:
         selected_servers: List of selected server IDs for operations
         current_screen: Current screen identifier
         show_advanced: Whether to show advanced options
+
     """
 
     debug: int = 0
@@ -87,13 +88,13 @@ class TUIState:
     active_config: Optional[UserConfig] = None
 
     # Subscription state
-    subscriptions: List[SubscriptionSource] = field(default_factory=list)
+    subscriptions: list[SubscriptionSource] = field(default_factory=list)
     active_subscription: Optional[str] = None
 
     # Server state
-    servers: List[ParsedServer] = field(default_factory=list)
-    excluded_servers: List[str] = field(default_factory=list)
-    selected_servers: List[str] = field(default_factory=list)
+    servers: list[ParsedServer] = field(default_factory=list)
+    excluded_servers: list[str] = field(default_factory=list)
+    selected_servers: list[str] = field(default_factory=list)
 
     # UI state
     current_screen: str = "welcome"
@@ -163,6 +164,7 @@ class TUIState:
 
         Returns:
             bool: True if subscription was added successfully
+
         """
         logger.debug(f"[DEBUG] Starting add_subscription for URL: {url}")
         logger.debug(f"[DEBUG] Enabled: {enabled}")
@@ -202,6 +204,12 @@ class TUIState:
             # Add to local state
             self.subscriptions.append(source)
             self.servers.extend(result.config)
+
+            # Set as active subscription if this is the first one
+            if not self.active_subscription:
+                self.active_subscription = url
+                logger.debug(f"[DEBUG] Set active subscription to: {url}")
+
             logger.debug(f"[DEBUG] Added {len(result.config)} servers to local state")
             logger.debug(f"[DEBUG] Total subscriptions now: {len(self.subscriptions)}")
             logger.debug(f"[DEBUG] Total servers now: {len(self.servers)}")
@@ -232,6 +240,7 @@ class TUIState:
         Args:
             url: Subscription URL
             enabled: Whether subscription is enabled
+
         """
         if self.debug >= 2:
             logger.debug(
@@ -321,10 +330,24 @@ class TUIState:
 
         Returns:
             bool: True if subscription was removed successfully
+
         """
         try:
             # Remove from local state
             self.subscriptions = [sub for sub in self.subscriptions if sub.url != url]
+
+            # Update active subscription if needed
+            if self.active_subscription == url:
+                if self.subscriptions:
+                    # Set the first remaining subscription as active
+                    self.active_subscription = self.subscriptions[0].url
+                    logger.debug(
+                        f"[DEBUG] Set new active subscription to: {self.active_subscription}"
+                    )
+                else:
+                    # No subscriptions left
+                    self.active_subscription = None
+                    logger.debug("[DEBUG] No active subscription (all removed)")
 
             # Remove from profile if available
             if self.config_manager and self.active_config:
@@ -343,6 +366,7 @@ class TUIState:
 
         Args:
             url: Subscription URL to remove
+
         """
         if not self.active_config:
             return
@@ -439,6 +463,7 @@ class TUIState:
 
         Returns:
             True if user has at least one subscription
+
         """
         return len(self.subscriptions) > 0
 
@@ -447,6 +472,7 @@ class TUIState:
 
         Returns:
             Number of subscriptions
+
         """
         return len(self.subscriptions)
 
@@ -455,6 +481,7 @@ class TUIState:
 
         Returns:
             Number of servers
+
         """
         return len(self.servers)
 
@@ -463,6 +490,7 @@ class TUIState:
 
         Returns:
             Number of excluded servers
+
         """
         return len(self.excluded_servers)
 
@@ -474,6 +502,7 @@ class TUIState:
 
         Returns:
             True if server is now excluded, False if included
+
         """
         if server_id in self.excluded_servers:
             self.excluded_servers.remove(server_id)
@@ -490,6 +519,7 @@ class TUIState:
 
         Returns:
             True if server is excluded
+
         """
         return server_id in self.excluded_servers
 
@@ -497,11 +527,12 @@ class TUIState:
         """Clear all server exclusions."""
         self.excluded_servers.clear()
 
-    def set_exclusions(self, exclusions: List[str]) -> None:
+    def set_exclusions(self, exclusions: list[str]) -> None:
         """Set server exclusions and save to profile.
 
         Args:
             exclusions: List of server IDs to exclude
+
         """
         self.excluded_servers = exclusions.copy()
         if self.debug >= 2:
@@ -522,6 +553,7 @@ class TUIState:
 
         Args:
             enabled: Whether to show advanced options
+
         """
         self.show_advanced = enabled
 
@@ -533,6 +565,7 @@ class TUIState:
 
         Returns:
             bool: True if configuration was generated successfully
+
         """
         if self.debug >= 2:
             logger.debug(
@@ -584,11 +617,10 @@ class TUIState:
                         logger.debug(
                             f"[DEBUG] Added {len(servers_result.config)} servers from {subscription.url}"
                         )
-                else:
-                    if self.debug >= 2:
-                        logger.debug(
-                            f"[DEBUG] Failed to get servers from {subscription.url}: {servers_result.errors}"
-                        )
+                elif self.debug >= 2:
+                    logger.debug(
+                        f"[DEBUG] Failed to get servers from {subscription.url}: {servers_result.errors}"
+                    )
 
             if not all_servers:
                 logger.error("Error: No servers available from any subscription")
@@ -645,8 +677,8 @@ class TUIState:
                 return False
 
             # Save configuration
-            output_path = Path(output_path)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path_obj = Path(output_path)
+            output_path_obj.parent.mkdir(parents=True, exist_ok=True)
 
             with open(output_path, "w", encoding="utf-8") as f:
                 import json
@@ -675,6 +707,7 @@ class TUIState:
 
         Returns:
             FullProfile or None if conversion failed
+
         """
         if self.debug >= 2:
             logger.debug("[DEBUG] _convert_to_full_profile called")
@@ -722,6 +755,7 @@ class TUIState:
 
         Returns:
             str: Name of active profile or 'default' if none
+
         """
         if self.active_config:
             return self.active_config.id
@@ -732,6 +766,7 @@ class TUIState:
 
         Returns:
             dict: Export settings
+
         """
         if self.active_config and self.active_config.export:
             return {

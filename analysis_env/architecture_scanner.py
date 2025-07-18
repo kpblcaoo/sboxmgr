@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""
-Продвинутый архитектурный анализатор для sboxmgr
-Использует AST, networkx и другие инструменты для глубокого анализа структуры
+"""Продвинутый архитектурный анализатор для sboxmgr.
+
+Использует AST, networkx и другие инструменты для глубокого анализа структуры.
 """
 
 import ast
@@ -9,13 +9,12 @@ import json
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List
 
 import networkx as nx
 
 
 class ArchitecturalAnalyzer:
-    """Глубокий анализатор архитектуры проекта"""
+    """Глубокий анализатор архитектуры проекта."""
 
     def __init__(self, project_root: str):
         self.project_root = Path(project_root)
@@ -33,7 +32,7 @@ class ArchitecturalAnalyzer:
         self.di_patterns = []  # паттерны dependency injection
 
     def analyze(self):
-        """Запуск полного анализа"""
+        """Запуск полного анализа."""
         print("🔍 Начинаю глубокий архитектурный анализ...")
 
         # Собираем все Python файлы
@@ -56,9 +55,9 @@ class ArchitecturalAnalyzer:
         print("✅ Анализ завершен!")
 
     def _analyze_file(self, file_path: Path):
-        """Анализ одного файла через AST"""
+        """Анализ одного файла через AST."""
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 tree = ast.parse(f.read(), filename=str(file_path))
 
             relative_path = file_path.relative_to(self.project_root)
@@ -69,20 +68,20 @@ class ArchitecturalAnalyzer:
             print(f"🚨 AST ошибка в {file_path}: {e}")
 
     def _build_dependency_graph(self):
-        """Построение графа зависимостей между модулями"""
+        """Построение графа зависимостей между модулями."""
         for file_path, imports in self.imports.items():
             for imported in imports:
                 # Добавляем ребро: file -> imported module
                 self.dependencies.add_edge(file_path, imported, type="import")
 
     def _detect_patterns(self):
-        """Детектирование архитектурных паттернов"""
+        """Детектирование архитектурных паттернов."""
         self._detect_singletons()
         self._detect_factories()
         self._detect_di_patterns()
 
     def _detect_singletons(self):
-        """Поиск паттерна Singleton"""
+        """Поиск паттерна Singleton."""
         for class_name, class_info in self.classes.items():
             methods = class_info.get("methods", [])
             # Ищем признаки синглтона
@@ -103,7 +102,7 @@ class ArchitecturalAnalyzer:
                 )
 
     def _detect_factories(self):
-        """Поиск фабричных паттернов"""
+        """Поиск фабричных паттернов."""
         for class_name, class_info in self.classes.items():
             methods = class_info.get("methods", [])
             # Ищем фабричные методы
@@ -123,7 +122,7 @@ class ArchitecturalAnalyzer:
                 )
 
     def _detect_di_patterns(self):
-        """Поиск паттернов Dependency Injection"""
+        """Поиск паттернов Dependency Injection."""
         for class_name, class_info in self.classes.items():
             # Ищем в конструкторах параметры с типами
             init_info = class_info.get("init_params", [])
@@ -144,8 +143,8 @@ class ArchitecturalAnalyzer:
                         }
                     )
 
-    def get_orchestrator_candidates(self) -> List[Dict]:
-        """Поиск кандидатов на роль Orchestrator"""
+    def get_orchestrator_candidates(self) -> list[dict]:
+        """Поиск кандидатов на роль Orchestrator."""
         candidates = []
 
         for class_name, class_info in self.classes.items():
@@ -197,8 +196,8 @@ class ArchitecturalAnalyzer:
 
         return sorted(candidates, key=lambda x: x["score"], reverse=True)
 
-    def get_missing_components(self, target_schema: Dict) -> Dict:
-        """Сравнение с целевой схемой"""
+    def get_missing_components(self, target_schema: dict) -> dict:
+        """Сравнение с целевой схемой."""
         missing = {"classes": [], "interfaces": [], "patterns": []}
 
         # Список ожидаемых компонентов из схемы
@@ -237,8 +236,8 @@ class ArchitecturalAnalyzer:
 
         return missing
 
-    def generate_report(self) -> Dict:
-        """Генерация полного отчета"""
+    def generate_report(self) -> dict:
+        """Генерация полного отчета."""
         orchestrator_candidates = self.get_orchestrator_candidates()
         missing_components = self.get_missing_components({})
 
@@ -284,7 +283,7 @@ class ArchitecturalAnalyzer:
 
 
 class FileVisitor(ast.NodeVisitor):
-    """AST visitor для анализа файла"""
+    """AST visitor для анализа файла."""
 
     def __init__(self, file_path: str, analyzer: ArchitecturalAnalyzer):
         self.file_path = file_path
@@ -292,13 +291,13 @@ class FileVisitor(ast.NodeVisitor):
         self.current_class = None
 
     def visit_Import(self, node):
-        """Обработка import statements"""
+        """Обработка import statements."""
         for alias in node.names:
             self.analyzer.imports[self.file_path].add(alias.name)
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
-        """Обработка from X import Y statements"""
+        """Обработка from X import Y statements."""
         if node.module:
             self.analyzer.imports[self.file_path].add(node.module)
             for alias in node.names:
@@ -306,7 +305,7 @@ class FileVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_ClassDef(self, node):
-        """Обработка определений классов"""
+        """Обработка определений классов."""
         class_name = node.name
 
         # Собираем информацию о классе
@@ -348,7 +347,7 @@ class FileVisitor(ast.NodeVisitor):
         self.current_class = None
 
     def visit_FunctionDef(self, node):
-        """Обработка определений функций"""
+        """Обработка определений функций."""
         func_name = node.name
 
         # Если это метод класса, уже обработан в visit_ClassDef
@@ -375,7 +374,7 @@ class FileVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
     def _get_name(self, node):
-        """Извлечение имени из AST node"""
+        """Извлечение имени из AST node."""
         if isinstance(node, ast.Name):
             return node.id
         elif isinstance(node, ast.Attribute):
@@ -384,7 +383,7 @@ class FileVisitor(ast.NodeVisitor):
             return str(node)
 
     def _get_decorator_name(self, node):
-        """Извлечение имени декоратора"""
+        """Извлечение имени декоратора."""
         if isinstance(node, ast.Name):
             return node.id
         elif isinstance(node, ast.Call):
@@ -395,7 +394,7 @@ class FileVisitor(ast.NodeVisitor):
             return str(node)
 
     def _analyze_function_args(self, node):
-        """Анализ аргументов функции"""
+        """Анализ аргументов функции."""
         args_info = []
 
         # Позиционные аргументы
@@ -419,7 +418,7 @@ class FileVisitor(ast.NodeVisitor):
 
 
 def main():
-    """Основная функция анализа"""
+    """Основная функция анализа."""
     if len(sys.argv) < 2:
         print("Usage: python architecture_scanner.py <project_root>")
         sys.exit(1)

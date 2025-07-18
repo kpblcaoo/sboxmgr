@@ -4,7 +4,7 @@ This module provides outbound configuration models for sing-box export format
 including all supported protocols and their specific configurations.
 """
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -23,9 +23,11 @@ class OutboundBase(BaseModel):
     multiplex: Optional[MultiplexConfig] = Field(
         None, description="Multiplexing configuration"
     )
-    local_address: Optional[List[str]] = Field(None, description="Local address list")
+    local_address: Optional[list[str]] = Field(None, description="Local address list")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
 
@@ -37,7 +39,7 @@ class ShadowsocksOutbound(OutboundBase):
     method: str = Field(..., description="Encryption method")
     password: str = Field(..., description="Authentication password")
     plugin: Optional[str] = Field(None, description="Obfuscation plugin")
-    plugin_opts: Optional[Dict[str, Any]] = Field(None, description="Plugin options")
+    plugin_opts: Optional[dict[str, Any]] = Field(None, description="Plugin options")
 
 
 class VmessOutbound(OutboundBase):
@@ -45,9 +47,9 @@ class VmessOutbound(OutboundBase):
 
     type: Literal["vmess"] = "vmess"
     uuid: str = Field(..., description="User UUID")
-    security: Optional[
-        Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]
-    ] = Field("auto", description="Encryption method")
+    security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = (
+        Field("auto", description="Encryption method")
+    )
     packet_encoding: Optional[Literal["packet", "xudp"]] = Field(
         None, description="Packet encoding method"
     )
@@ -71,7 +73,7 @@ class TrojanOutbound(OutboundBase):
 
     type: Literal["trojan"] = "trojan"
     password: str = Field(..., description="Authentication password")
-    fallback: Optional[Dict[str, Any]] = Field(
+    fallback: Optional[dict[str, Any]] = Field(
         None, description="Fallback configuration"
     )
 
@@ -84,8 +86,8 @@ class WireguardOutbound(OutboundBase):
     peer_public_key: str = Field(..., description="Peer public key")
     mtu: Optional[int] = Field(0, ge=0, description="Maximum packet size")
     keepalive: Optional[bool] = Field(False, description="Enable keepalive")
-    peers: Optional[List[Dict[str, Any]]] = Field(None, description="Additional peers")
-    reserved: Optional[List[int]] = Field(None, description="Reserved bytes")
+    peers: Optional[list[dict[str, Any]]] = Field(None, description="Additional peers")
+    reserved: Optional[list[int]] = Field(None, description="Reserved bytes")
 
 
 class HysteriaOutbound(OutboundBase):
@@ -177,4 +179,6 @@ class OutboundConfig(BaseModel):
     outbound: OutboundModel = Field(..., discriminator="type")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"

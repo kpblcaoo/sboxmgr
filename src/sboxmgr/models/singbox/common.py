@@ -1,6 +1,6 @@
 """Common models for sing-box configuration."""
 
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -20,7 +20,7 @@ class TlsConfig(BaseModel):
     insecure: Optional[bool] = Field(
         default=False, description="Allow insecure connections (not recommended)."
     )
-    alpn: Optional[List[str]] = Field(
+    alpn: Optional[list[str]] = Field(
         default=None, description="List of ALPN protocols (e.g., h2, http/1.1)."
     )
     min_version: Optional[Literal["1.0", "1.1", "1.2", "1.3"]] = Field(
@@ -37,10 +37,10 @@ class TlsConfig(BaseModel):
         default=None, description="Certificate content in PEM format."
     )
     key: Optional[str] = Field(default=None, description="Key content in PEM format.")
-    ech: Optional[Dict[str, Any]] = Field(
+    ech: Optional[dict[str, Any]] = Field(
         default=None, description="Encrypted Client Hello settings."
     )
-    utls: Optional[Dict[str, Any]] = Field(
+    utls: Optional[dict[str, Any]] = Field(
         default=None,
         description="uTLS settings for client fingerprinting, e.g., {'fingerprint': 'chrome'}.",
     )
@@ -74,25 +74,29 @@ class MultiplexConfig(BaseModel):
 class TransportConfig(BaseModel):
     """Transport layer settings."""
 
-    network: Optional[
-        Literal["tcp", "udp", "ws", "http", "grpc", "httpupgrade", "quic"]
-    ] = Field(default=None, description="Transport protocol.")
-    ws_opts: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="WebSocket settings, e.g., {'path': '/ws', 'headers': {'Host': 'example.com'}}.",
+    type: Optional[Literal["ws", "http", "grpc", "quic", "httpupgrade"]] = Field(
+        default=None, description="Transport type (ws, http, grpc, quic, httpupgrade)."
     )
-    http_opts: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="HTTP/2 settings, e.g., {'host': 'example.com', 'path': '/http2'}.",
+    # WebSocket settings (direct fields, not ws_opts)
+    path: Optional[str] = Field(
+        default=None, description="WebSocket path, e.g., '/ws'."
     )
-    grpc_opts: Optional[Dict[str, Any]] = Field(
-        default=None, description="gRPC settings, e.g., {'serviceName': 'proxy'}."
+    headers: Optional[dict[str, str]] = Field(
+        default=None, description="WebSocket headers, e.g., {'Host': 'example.com'}."
     )
-    httpupgrade_opts: Optional[Dict[str, Any]] = Field(
-        default=None, description="HTTPUpgrade settings."
+    # HTTP/2 settings
+    host: Optional[str] = Field(
+        default=None, description="HTTP/2 host, e.g., 'example.com'."
     )
-    quic_opts: Optional[Dict[str, Any]] = Field(
-        default=None, description="QUIC settings."
+    # gRPC settings
+    service_name: Optional[str] = Field(
+        default=None, description="gRPC service name, e.g., 'proxy'."
     )
+    # HTTPUpgrade settings
+    # quic_opts: Optional[dict[str, Any]] = Field(
+    #     default=None,
+    #     alias="quic-opts",
+    #     description="QUIC settings."
+    # )
 
-    model_config = {"extra": "forbid"}
+    model_config = {"extra": "forbid", "populate_by_name": True}

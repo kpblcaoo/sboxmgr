@@ -6,7 +6,7 @@ to sboxagent via Unix socket using the framed JSON protocol.
 
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from sboxmgr.logging import get_logger
 
@@ -117,7 +117,7 @@ class EventSender:
     def send_event(
         self,
         event_type: str,
-        event_data: Dict[str, Any],
+        event_data: dict[str, Any],
         source: str = "sboxmgr",
         priority: str = "normal",
         correlation_id: Optional[str] = None,
@@ -161,6 +161,8 @@ class EventSender:
 
         try:
             # Send message
+            if self._client is None:
+                raise EventSenderError("Client not connected")
             self._client.send_message(message)
 
             # Wait for acknowledgment
@@ -228,6 +230,8 @@ class EventSender:
 
         try:
             # Send heartbeat
+            if self._client is None:
+                raise EventSenderError("Client not connected")
             self._client.send_message(message)
 
             # Wait for heartbeat response
@@ -254,8 +258,8 @@ class EventSender:
             return False
 
     def send_command(
-        self, command: str, params: Dict[str, Any], correlation_id: Optional[str] = None
-    ) -> Optional[Dict[str, Any]]:
+        self, command: str, params: dict[str, Any], correlation_id: Optional[str] = None
+    ) -> Optional[dict[str, Any]]:
         """Send a command to sboxagent and wait for response.
 
         Args:
@@ -278,6 +282,8 @@ class EventSender:
 
         try:
             # Send command
+            if self._client is None:
+                raise EventSenderError("Client not connected")
             self._client.send_message(message)
 
             # Wait for response
@@ -322,7 +328,7 @@ class EventSender:
         response = self.send_command("ping", {})
         return response is not None and response.get("pong") is True
 
-    def get_agent_status(self) -> Optional[Dict[str, Any]]:
+    def get_agent_status(self) -> Optional[dict[str, Any]]:
         """Get sboxagent status.
 
         Returns:
@@ -334,11 +340,11 @@ class EventSender:
     def _create_event_message(
         self,
         event_type: str,
-        event_data: Dict[str, Any],
+        event_data: dict[str, Any],
         source: str,
         priority: str,
         correlation_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create an event message."""
         message = {
             "id": str(uuid.uuid4()),
@@ -361,8 +367,8 @@ class EventSender:
         return message
 
     def _create_command_message(
-        self, command: str, params: Dict[str, Any], correlation_id: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, command: str, params: dict[str, Any], correlation_id: Optional[str] = None
+    ) -> dict[str, Any]:
         """Create a command message."""
         message = {
             "id": str(uuid.uuid4()),
@@ -381,9 +387,9 @@ class EventSender:
 
     def _create_heartbeat_message(
         self, agent_id: str, status: str, version: Optional[str] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create a heartbeat message."""
-        message: Dict[str, Any] = {
+        message: dict[str, Any] = {
             "id": str(uuid.uuid4()),
             "type": "heartbeat",
             "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[
@@ -418,7 +424,7 @@ def get_event_sender() -> EventSender:
 
 def send_event(
     event_type: str,
-    event_data: Dict[str, Any],
+    event_data: dict[str, Any],
     source: str = "sboxmgr",
     priority: str = "normal",
 ) -> bool:

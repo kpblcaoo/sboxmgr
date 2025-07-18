@@ -1,6 +1,6 @@
 """Outbound models for sing-box configuration."""
 
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Literal, Optional, Union
 
 from pydantic import Field, field_validator
 
@@ -22,15 +22,15 @@ class OutboundBase(SingBoxModelBase):
     server_port: Optional[int] = Field(
         default=None, ge=1, le=65535, description="Server port."
     )
-    tls: Optional[TlsConfig] = Field(
-        default=None, description="TLS settings for secure connection."
-    )
+    # tls: Optional[TlsConfig] = Field(
+    #     default=None, description="TLS settings for secure connection."
+    # )
     multiplex: Optional[MultiplexConfig] = Field(
         default=None, description="Multiplexing settings."
     )
-    local_address: Optional[List[str]] = Field(
-        default=None, description="Local addresses to bind."
-    )
+    # local_address: Optional[list[str]] = Field(
+    #     default=None, description="Local addresses to bind."
+    # )
     domain_strategy: Optional[DomainStrategy] = Field(
         default=None, description="Domain resolution strategy."
     )
@@ -46,6 +46,14 @@ class OutboundWithTransport(OutboundBase):
     )
 
 
+class OutboundWithTls(OutboundBase):
+    """Base class for outbounds that support TLS."""
+
+    tls: Optional[TlsConfig] = Field(
+        default=None, description="TLS settings for secure connection."
+    )
+
+
 class ShadowsocksOutbound(OutboundWithTransport):
     """Shadowsocks outbound configuration."""
 
@@ -57,7 +65,7 @@ class ShadowsocksOutbound(OutboundWithTransport):
     plugin: Optional[str] = Field(
         default=None, description="Obfuscation plugin, e.g., 'v2ray-plugin'."
     )
-    plugin_opts: Optional[Dict[str, Any]] = Field(
+    plugin_opts: Optional[dict[str, Any]] = Field(
         default=None, description="Plugin options, e.g., {'mode': 'websocket'}."
     )
     udp_over_tcp: Optional[bool] = Field(
@@ -73,14 +81,14 @@ class ShadowsocksOutbound(OutboundWithTransport):
         return v
 
 
-class VmessOutbound(OutboundWithTransport):
+class VmessOutbound(OutboundWithTransport, OutboundWithTls):
     """VMess outbound configuration."""
 
     type: Literal["vmess"] = Field(default="vmess", description="VMess protocol.")
     uuid: str = Field(..., description="User UUID for authentication.")
-    security: Optional[
-        Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]
-    ] = Field(default="auto", description="Encryption method.")
+    security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = (
+        Field(default="auto", description="Encryption method.")
+    )
     alter_id: Optional[int] = Field(
         default=0, description="Alternative ID count (0-65535)."
     )
@@ -95,7 +103,7 @@ class VmessOutbound(OutboundWithTransport):
     )
 
 
-class VlessOutbound(OutboundWithTransport):
+class VlessOutbound(OutboundWithTransport, OutboundWithTls):
     """VLESS outbound configuration."""
 
     type: Literal["vless"] = Field(default="vless", description="VLESS protocol.")
@@ -108,17 +116,17 @@ class VlessOutbound(OutboundWithTransport):
     )
 
 
-class TrojanOutbound(OutboundWithTransport):
+class TrojanOutbound(OutboundWithTransport, OutboundWithTls):
     """Trojan outbound configuration."""
 
     type: Literal["trojan"] = Field(default="trojan", description="Trojan protocol.")
     password: str = Field(..., description="Password for authentication.")
-    fallback: Optional[Dict[str, Any]] = Field(
+    fallback: Optional[dict[str, Any]] = Field(
         default=None, description="Fallback settings, e.g., {'dest': '80'}."
     )
 
 
-class Hysteria2Outbound(OutboundWithTransport):
+class Hysteria2Outbound(OutboundWithTransport, OutboundWithTls):
     """Hysteria2 outbound configuration."""
 
     type: Literal["hysteria2"] = Field(
@@ -158,14 +166,14 @@ class WireGuardOutbound(OutboundBase):
     keepalive: Optional[str] = Field(
         default=None, description="Persistent keepalive interval, e.g., '25s'."
     )
-    peers: Optional[List[Dict[str, Any]]] = Field(
+    peers: Optional[list[dict[str, Any]]] = Field(
         default=None,
         description="List of peer configurations, e.g., [{'public_key': 'xyz', 'allowed_ips': ['0.0.0.0/0']}].",
     )
-    reserved: Optional[List[int]] = Field(
+    reserved: Optional[list[int]] = Field(
         default=None, description="Reserved bits for compatibility."
     )
-    local_address: Optional[List[str]] = Field(
+    local_address: Optional[list[str]] = Field(
         default=None, description="Local addresses to bind."
     )
     system_interface: Optional[bool] = Field(
@@ -206,7 +214,7 @@ class SocksOutbound(OutboundBase):
     )
 
 
-class TuicOutbound(OutboundWithTransport):
+class TuicOutbound(OutboundWithTransport, OutboundWithTls):
     """TUIC outbound configuration."""
 
     type: Literal["tuic"] = Field(default="tuic", description="TUIC protocol.")
@@ -222,7 +230,7 @@ class TuicOutbound(OutboundWithTransport):
     heartbeat: Optional[str] = Field(default=None, description="Heartbeat interval.")
 
 
-class ShadowTlsOutbound(OutboundWithTransport):
+class ShadowTlsOutbound(OutboundWithTransport, OutboundWithTls):
     """ShadowTLS outbound configuration."""
 
     type: Literal["shadowtls"] = Field(
@@ -234,11 +242,11 @@ class ShadowTlsOutbound(OutboundWithTransport):
     password: Optional[str] = Field(
         default=None, description="Password for authentication."
     )
-    handshake: Optional[Dict[str, Any]] = Field(
+    handshake: Optional[dict[str, Any]] = Field(
         default=None,
         description="Handshake settings, e.g., {'server': 'example.com', 'port': 443}.",
     )
-    handshake_for_internal: Optional[Dict[str, Any]] = Field(
+    handshake_for_internal: Optional[dict[str, Any]] = Field(
         default=None, description="Internal handshake settings."
     )
 
@@ -278,7 +286,7 @@ class SelectorOutbound(OutboundBase):
     type: Literal["selector"] = Field(
         default="selector", description="Selector for outbound switching."
     )
-    outbounds: List[str] = Field(
+    outbounds: list[str] = Field(
         ..., description="List of outbound tags to select from."
     )
     default: Optional[str] = Field(default=None, description="Default outbound tag.")
@@ -290,7 +298,7 @@ class UrlTestOutbound(OutboundBase):
     type: Literal["urltest"] = Field(
         default="urltest", description="URLTest for automatic outbound selection."
     )
-    outbounds: List[str] = Field(..., description="List of outbound tags to test.")
+    outbounds: list[str] = Field(..., description="List of outbound tags to test.")
     url: str = Field(
         ...,
         description="URL for latency testing, e.g., 'http://www.google.com/generate_204'.",
@@ -358,8 +366,8 @@ class SshOutbound(OutboundBase):
     private_key_passphrase: Optional[str] = Field(
         None, description="Private key passphrase."
     )
-    host_key: Optional[List[str]] = Field(None, description="Host key list.")
-    host_key_algorithms: Optional[List[str]] = Field(
+    host_key: Optional[list[str]] = Field(None, description="Host key list.")
+    host_key_algorithms: Optional[list[str]] = Field(
         None, description="Host key algorithms."
     )
     client_version: Optional[str] = Field(None, description="Client version string.")
@@ -370,11 +378,11 @@ class TorOutbound(OutboundBase):
 
     type: Literal["tor"] = Field(default="tor", description="Tor protocol.")
     executable_path: Optional[str] = Field(None, description="Path to Tor executable.")
-    extra_args: Optional[List[str]] = Field(
+    extra_args: Optional[list[str]] = Field(
         None, description="Extra arguments for Tor."
     )
     data_directory: Optional[str] = Field(None, description="Tor data directory.")
-    torrc: Optional[Dict[str, Any]] = Field(
+    torrc: Optional[dict[str, Any]] = Field(
         None, description="Tor configuration options."
     )
 

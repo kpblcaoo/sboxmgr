@@ -15,7 +15,7 @@ class TestIsAiLang:
         i18n_dir.mkdir()
 
         # Create language file with AI marker
-        {
+        language_data = {
             "cli": {"help": "Hilfe"},
             "__note__": "AI-generated translations - needs review",
         }
@@ -30,6 +30,11 @@ class TestIsAiLang:
             ):
                 result = is_ai_lang("de")
                 assert result is True
+                # Verify the language data structure matches what we expect
+                assert (
+                    language_data["__note__"]
+                    == "AI-generated translations - needs review"
+                )
 
     def test_is_ai_lang_false(self, tmp_path):
         """Test is_ai_lang returns False for human-reviewed language."""
@@ -60,9 +65,7 @@ class TestIsAiLang:
             # Mock the path construction
             mock_lang_file = MagicMock()
             mock_lang_file.exists.return_value = False
-            mock_path.return_value.parent.parent.__truediv__.return_value.__truediv__.return_value = (
-                mock_lang_file
-            )
+            mock_path.return_value.parent.parent.__truediv__.return_value.__truediv__.return_value = mock_lang_file
             result = is_ai_lang("nonexistent")
             assert result is False
 
@@ -88,7 +91,7 @@ class TestSupportedProtocols:
             "tuic",
             "hysteria2",
         }
-        assert SUPPORTED_PROTOCOLS == expected_protocols
+        assert expected_protocols == SUPPORTED_PROTOCOLS
         assert len(SUPPORTED_PROTOCOLS) == 6
         assert isinstance(SUPPORTED_PROTOCOLS, set)
 
@@ -106,7 +109,7 @@ class TestMainModuleIntegration:
         """Test is_ai_lang handles file read errors."""
         with patch("sboxmgr.cli.main.Path") as mock_path:
             mock_path.return_value.parent.parent = tmp_path
-            with patch("builtins.open", side_effect=IOError("Permission denied")):
+            with patch("builtins.open", side_effect=OSError("Permission denied")):
                 result = is_ai_lang("de")
                 assert result is False
 

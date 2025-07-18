@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""
-Test which protocols are actually supported by our sing-box version.
-"""
+"""Test which protocols are actually supported by our sing-box version."""
+
 import json
 import subprocess
 import tempfile
@@ -10,7 +9,6 @@ from pathlib import Path
 
 def test_protocol_support():
     """Test which protocols are supported by sing-box."""
-
     # Known protocols from documentation
     outbound_protocols = [
         "vless",
@@ -70,15 +68,7 @@ def test_protocol_support():
         }
 
         # Add required fields for specific protocols
-        if protocol == "vless":
-            config["outbounds"][0].update(
-                {
-                    "server": "127.0.0.1",
-                    "server_port": 443,
-                    "uuid": "00000000-0000-0000-0000-000000000000",
-                }
-            )
-        elif protocol == "vmess":
+        if protocol == "vless" or protocol == "vmess":
             config["outbounds"][0].update(
                 {
                     "server": "127.0.0.1",
@@ -117,6 +107,7 @@ def test_protocol_support():
         try:
             result = subprocess.run(
                 ["sing-box", "check", "-c", config_path],
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=5,
@@ -125,16 +116,15 @@ def test_protocol_support():
             if result.returncode == 0:
                 print(f"  ✅ {protocol}")
                 supported_outbounds.append(protocol)
+            # Check if it's just missing required fields or unsupported
+            elif (
+                "unknown" in result.stderr.lower()
+                or "unsupported" in result.stderr.lower()
+            ):
+                print(f"  ❌ {protocol} (unsupported)")
             else:
-                # Check if it's just missing required fields or unsupported
-                if (
-                    "unknown" in result.stderr.lower()
-                    or "unsupported" in result.stderr.lower()
-                ):
-                    print(f"  ❌ {protocol} (unsupported)")
-                else:
-                    print(f"  ⚠️  {protocol} (missing fields)")
-                    supported_outbounds.append(protocol)
+                print(f"  ⚠️  {protocol} (missing fields)")
+                supported_outbounds.append(protocol)
 
         except subprocess.TimeoutExpired:
             print(f"  ⏰ {protocol} (timeout)")
@@ -165,15 +155,7 @@ def test_protocol_support():
                     "password": "test",
                 }
             )
-        elif protocol == "vmess":
-            config["inbounds"][0].update(
-                {
-                    "listen": "127.0.0.1",
-                    "listen_port": 8080,
-                    "users": [{"uuid": "00000000-0000-0000-0000-000000000000"}],
-                }
-            )
-        elif protocol == "vless":
+        elif protocol == "vmess" or protocol == "vless":
             config["inbounds"][0].update(
                 {
                     "listen": "127.0.0.1",
@@ -197,6 +179,7 @@ def test_protocol_support():
         try:
             result = subprocess.run(
                 ["sing-box", "check", "-c", config_path],
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=5,
@@ -205,16 +188,15 @@ def test_protocol_support():
             if result.returncode == 0:
                 print(f"  ✅ {protocol}")
                 supported_inbounds.append(protocol)
+            # Check if it's just missing required fields or unsupported
+            elif (
+                "unknown" in result.stderr.lower()
+                or "unsupported" in result.stderr.lower()
+            ):
+                print(f"  ❌ {protocol} (unsupported)")
             else:
-                # Check if it's just missing required fields or unsupported
-                if (
-                    "unknown" in result.stderr.lower()
-                    or "unsupported" in result.stderr.lower()
-                ):
-                    print(f"  ❌ {protocol} (unsupported)")
-                else:
-                    print(f"  ⚠️  {protocol} (missing fields)")
-                    supported_inbounds.append(protocol)
+                print(f"  ⚠️  {protocol} (missing fields)")
+                supported_inbounds.append(protocol)
 
         except subprocess.TimeoutExpired:
             print(f"  ⏰ {protocol} (timeout)")

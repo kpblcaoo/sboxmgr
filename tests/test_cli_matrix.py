@@ -114,8 +114,8 @@ def add_output_args(args, tmp_path):
 def test_cli_matrix(
     args, description, expected_exit, expected_files, expected_stdout_contains, tmp_path
 ):
-    """
-    CLI matrix: tolerant-поиск сообщений, не трогает exclusions.json вне tmp_path.
+    """CLI matrix: tolerant-поиск сообщений, не трогает exclusions.json вне tmp_path.
+
     Если тест падает — выводит stdout, stderr и лог для диагностики.
     """
     project_root = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -130,7 +130,7 @@ def test_cli_matrix(
     env["SBOXMGR_LOG_FILE"] = str(tmp_path / "log.txt")
     env["SBOXMGR_TEST_MODE"] = "1"
     result = subprocess.run(
-        cmd, capture_output=True, text=True, cwd=project_root, env=env
+        cmd, check=False, capture_output=True, text=True, cwd=project_root, env=env
     )
     log_text = ""
     log_path = tmp_path / "log.txt"
@@ -139,9 +139,9 @@ def test_cli_matrix(
     output = result.stdout + result.stderr + log_text
     text = expected_stdout_contains[0] if expected_stdout_contains else ""
     try:
-        assert (
-            result.returncode == expected_exit
-        ), f"{description}: неверный код возврата"
+        assert result.returncode == expected_exit, (
+            f"{description}: неверный код возврата"
+        )
         for fname in expected_files:
             if fname == "exclusions.json":
                 if not (tmp_path / fname).exists():
@@ -166,9 +166,9 @@ def test_cli_matrix(
             print(f"OUTPUT repr:\n{repr(output)}")
             print(f"TYPES: text={type(text)}, output={type(output)}")
             print("===============================\n")
-            assert (
-                False
-            ), f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе"
+            raise AssertionError(
+                f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе"
+            )
     except AssertionError:
         print("\n==== CLI MATRIX DIAGNOSTICS ====\nArgs:", args)
         print(f"Return code: {result.returncode}")
@@ -178,6 +178,6 @@ def test_cli_matrix(
         print(f"OUTPUT repr:\n{repr(output)}")
         print(f"TYPES: text={type(text)}, output={type(output)}")
         print("===============================\n")
-        assert (
-            False
-        ), f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе"
+        raise AssertionError(
+            f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе"
+        )

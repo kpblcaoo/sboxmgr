@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Автоматическая генерация docs/plugins/index.md по зарегистрированным плагинам.
+"""Автоматическая генерация docs/plugins/index.md по зарегистрированным плагинам.
 
 Usage:
     python scripts/generate_plugin_index.py
@@ -8,6 +7,7 @@ Usage:
 Собирает все плагины из PLUGIN_REGISTRY, группирует по plugin_type, формирует markdown-таблицу с именем класса, типом, docstring и путём к файлу.
 SEC: Импортируются только известные модули из src/sboxmgr/subscription/*, сторонние/неизвестные модули не импортируются.
 """
+
 import inspect
 import os
 
@@ -23,7 +23,7 @@ for name, cls in PLUGIN_REGISTRY.items():
 
 rows = ["| Тип | Класс | Docstring | Файл |", "|------|--------|-----------|------|"]
 for plugin_type, items in sorted(plugins_by_type.items()):
-    for name, cls in items:
+    for _name, cls in items:
         doc = inspect.getdoc(cls) or ""
         try:
             file = inspect.getfile(cls)

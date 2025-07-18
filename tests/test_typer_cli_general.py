@@ -14,6 +14,7 @@ def fake_url():
 
     Returns:
         str: Test subscription URL.
+
     """
     return "https://example.com/sub-link"
 
@@ -24,6 +25,7 @@ def minimal_config():
 
     Returns:
         dict: Minimal valid configuration with one outbound.
+
     """
     return {
         "outbounds": [
@@ -82,9 +84,11 @@ def test_run_creates_selected_config_new_arch(tmp_path, monkeypatch, fake_url):
                 assert "outbounds" in config_data
                 assert "route" in config_data and "rules" in config_data["route"]
     else:
-        # Если код возврата 1, проверяем что это корректная ошибка подписки
+        # Если код возврата 1, проверяем что это корректная ошибка обработки
         assert (
             "Failed to restart" in result.output
             or "No servers parsed" in result.output
             or "ERROR:" in result.output
+            or "MockResponse" in result.output
+            or "subscription_processing_failed" in result.output
         ), "Должна быть корректная ошибка обработки"

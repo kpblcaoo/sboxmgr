@@ -29,11 +29,14 @@ class TestListServers:
         }
         supported_protocols = ["shadowsocks", "vmess"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_gen_id.side_effect = ["id1", "id2"]
 
             list_servers(json_data, supported_protocols)
@@ -68,11 +71,11 @@ class TestListServers:
         supported_protocols = ["shadowsocks", "vmess"]
         exclusions = {"exclusions": [{"id": "excluded_id1"}]}
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value=exclusions
-        ), patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch("sboxmgr.server.selection.load_exclusions", return_value=exclusions),
+            patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_gen_id.side_effect = ["excluded_id1", "id2"]
 
             list_servers(json_data, supported_protocols)
@@ -102,13 +105,14 @@ class TestListServers:
         }
         supported_protocols = ["shadowsocks", "vmess"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch(
-            "sboxmgr.server.selection.generate_server_id", return_value="id1"
-        ), patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("sboxmgr.server.selection.generate_server_id", return_value="id1"),
+            patch("typer.echo") as mock_echo,
+        ):
             list_servers(json_data, supported_protocols)
 
             # Only supported protocol should be shown
@@ -137,13 +141,14 @@ class TestListServers:
         }
         supported_protocols = ["shadowsocks", "vmess"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch(
-            "sboxmgr.server.selection.generate_server_id", return_value="id1"
-        ), patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("sboxmgr.server.selection.generate_server_id", return_value="id1"),
+            patch("typer.echo") as mock_echo,
+        ):
             list_servers(json_data, supported_protocols)
 
             # Should handle missing fields with N/A
@@ -168,13 +173,14 @@ class TestListServers:
         }
         supported_protocols = ["shadowsocks"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch(
-            "sboxmgr.server.selection.generate_server_id", return_value="id1"
-        ), patch(
-            "logging.info"
-        ) as mock_log:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("sboxmgr.server.selection.generate_server_id", return_value="id1"),
+            patch("logging.info") as mock_log,
+        ):
             list_servers(json_data, supported_protocols, debug_level=1)
 
             # Check logging output
@@ -197,13 +203,14 @@ class TestListServers:
         }
         supported_protocols = ["shadowsocks"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch(
-            "sboxmgr.server.selection.generate_server_id", return_value="id1"
-        ), patch(
-            "logging.info"
-        ) as mock_log:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("sboxmgr.server.selection.generate_server_id", return_value="id1"),
+            patch("logging.info") as mock_log,
+        ):
             list_servers(json_data, supported_protocols, debug_level=-1)
 
             # Should not log when debug_level < 0
@@ -224,13 +231,11 @@ class TestListServers:
         }
         supported_protocols = ["shadowsocks"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions"
-        ) as mock_load_exclusions, patch(
-            "sboxmgr.server.selection.generate_server_id", return_value="id1"
-        ), patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch("sboxmgr.server.selection.load_exclusions") as mock_load_exclusions,
+            patch("sboxmgr.server.selection.generate_server_id", return_value="id1"),
+            patch("typer.echo") as mock_echo,
+        ):
             mock_load_exclusions.return_value = {"exclusions": []}
 
             list_servers(json_data, supported_protocols, dry_run=True)
@@ -244,9 +249,13 @@ class TestListServers:
         json_data = {"outbounds": []}
         supported_protocols = ["shadowsocks", "vmess"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch("typer.echo") as mock_echo:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("typer.echo") as mock_echo,
+        ):
             list_servers(json_data, supported_protocols)
 
             # Should still show header
@@ -275,9 +284,13 @@ class TestListServers:
         ]
         supported_protocols = ["shadowsocks"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.server.selection.generate_server_id", return_value="id1"):
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("sboxmgr.server.selection.generate_server_id", return_value="id1"),
+        ):
             # This should fail because list_servers expects dict with "outbounds" key
             with pytest.raises(AttributeError):
                 list_servers(json_data, supported_protocols)
@@ -310,11 +323,11 @@ class TestListServers:
         supported_protocols = ["shadowsocks", "vmess", "trojan"]
         exclusions = {"exclusions": [{"id": "excluded_id1"}, {"id": "excluded_id3"}]}
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value=exclusions
-        ), patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch("sboxmgr.server.selection.load_exclusions", return_value=exclusions),
+            patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_gen_id.side_effect = ["excluded_id1", "id2", "excluded_id3"]
 
             list_servers(json_data, supported_protocols)
@@ -339,9 +352,11 @@ class TestListServers:
         }
         supported_protocols = ["shadowsocks"]
 
-        with patch("sboxmgr.server.selection.load_exclusions", return_value={}), patch(
-            "sboxmgr.server.selection.generate_server_id", return_value="id1"
-        ), patch("typer.echo") as mock_echo:
+        with (
+            patch("sboxmgr.server.selection.load_exclusions", return_value={}),
+            patch("sboxmgr.server.selection.generate_server_id", return_value="id1"),
+            patch("typer.echo") as mock_echo,
+        ):
             list_servers(json_data, supported_protocols)
 
             # Should handle missing exclusions key gracefully
@@ -366,13 +381,14 @@ class TestListServersEdgeCases:
         }
         supported_protocols = ["shadowsocks"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch(
-            "sboxmgr.server.selection.generate_server_id", return_value="id1"
-        ), patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("sboxmgr.server.selection.generate_server_id", return_value="id1"),
+            patch("typer.echo") as mock_echo,
+        ):
             list_servers(json_data, supported_protocols)
 
             # Should handle None values by displaying them as "None"
@@ -393,9 +409,13 @@ class TestListServersEdgeCases:
         }
         supported_protocols = []
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch("typer.echo") as mock_echo:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("typer.echo") as mock_echo,
+        ):
             list_servers(json_data, supported_protocols)
 
             # Should show header but no servers
@@ -426,13 +446,14 @@ class TestListServersEdgeCases:
         }
         supported_protocols = ["shadowsocks"]
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch(
-            "sboxmgr.server.selection.generate_server_id", return_value="id1"
-        ), patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("sboxmgr.server.selection.generate_server_id", return_value="id1"),
+            patch("typer.echo") as mock_echo,
+        ):
             list_servers(json_data, supported_protocols)
 
             # Should handle mixed types gracefully
@@ -480,11 +501,11 @@ class TestListServersIntegration:
         supported_protocols = ["shadowsocks", "vmess", "trojan"]
         exclusions = {"exclusions": [{"id": "uk_server_id"}]}
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value=exclusions
-        ), patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch("sboxmgr.server.selection.load_exclusions", return_value=exclusions),
+            patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_gen_id.side_effect = [
                 "us_server_id",
                 "uk_server_id",
@@ -504,11 +525,14 @@ class TestListServersIntegration:
             assert not any("Unsupported-Server" in call for call in echo_calls)
             assert not any("http" in call for call in echo_calls)
 
-        with patch(
-            "sboxmgr.server.selection.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id, patch(
-            "logging.info"
-        ) as mock_log:
+        with (
+            patch(
+                "sboxmgr.server.selection.load_exclusions",
+                return_value={"exclusions": []},
+            ),
+            patch("sboxmgr.server.selection.generate_server_id") as mock_gen_id,
+            patch("logging.info") as mock_log,
+        ):
             # Test with empty exclusions
             list_servers(json_data, supported_protocols)
 

@@ -9,7 +9,7 @@ Implements Phase 3 architecture with profile integration.
 """
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
@@ -49,8 +49,8 @@ class PostProcessorChain(ProfileAwarePostProcessor):
 
     def __init__(
         self,
-        processors: List[BasePostProcessor],
-        config: Optional[Dict[str, Any]] = None,
+        processors: list[BasePostProcessor],
+        config: Optional[dict[str, Any]] = None,
     ):
         """Initialize postprocessor chain.
 
@@ -68,14 +68,14 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         self.parallel_workers = self.config.get("parallel_workers", 4)
         self.collect_metadata = self.config.get("collect_metadata", True)
         self.timeout_seconds = self.config.get("timeout_seconds", 300)
-        self._execution_metadata: Dict[str, Any] = {}
+        self._execution_metadata: dict[str, Any] = {}
 
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Execute postprocessor chain on servers.
 
         Args:
@@ -134,10 +134,10 @@ class PostProcessorChain(ProfileAwarePostProcessor):
 
     def _execute_sequential(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Execute processors sequentially.
 
         Args:
@@ -193,17 +193,17 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                 )
 
                 if self.error_strategy == "fail_fast":
-                    raise
+                    raise e
                 # Continue with next processor on error
 
         return current_servers
 
     def _execute_parallel(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Execute processors in parallel (each on original servers).
 
         Args:
@@ -263,7 +263,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                     )
 
                     if self.error_strategy == "fail_fast":
-                        raise
+                        raise Exception("Postprocessor chain failed") from e
 
             # Merge results (simple concatenation, could be more sophisticated)
             if all_results:
@@ -274,10 +274,10 @@ class PostProcessorChain(ProfileAwarePostProcessor):
 
     def _execute_conditional(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Execute processors conditionally based on results.
 
         Args:
@@ -337,14 +337,14 @@ class PostProcessorChain(ProfileAwarePostProcessor):
                 )
 
                 if self.error_strategy == "fail_fast":
-                    raise
+                    raise e
 
         return current_servers
 
     def _should_execute_processor(
         self,
         processor: BasePostProcessor,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
     ) -> bool:
@@ -375,10 +375,10 @@ class PostProcessorChain(ProfileAwarePostProcessor):
     def _execute_with_retry(
         self,
         processor: BasePostProcessor,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Execute processor with retry logic.
 
         Args:
@@ -411,7 +411,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
         raise last_exception
 
     def can_process(
-        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+        self, servers: list[ParsedServer], context: Optional[PipelineContext] = None
     ) -> bool:
         """Check if chain can process servers.
 
@@ -433,7 +433,7 @@ class PostProcessorChain(ProfileAwarePostProcessor):
 
         return False
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get metadata about chain execution.
 
         Returns:

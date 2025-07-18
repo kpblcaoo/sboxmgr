@@ -8,7 +8,6 @@ from the same file sources.
 
 import threading
 from pathlib import Path
-from typing import Dict, Tuple
 
 from ..base_fetcher import BaseFetcher
 from ..models import SubscriptionSource
@@ -30,15 +29,16 @@ class FileFetcher(BaseFetcher):
 
     """
 
-    SUPPORTED_SCHEMES: Tuple[str, ...] = ("file",)
+    SUPPORTED_SCHEMES: tuple[str, ...] = ("file",)
     _cache_lock = threading.Lock()
-    _fetch_cache: Dict[Tuple[str], bytes] = {}
+    _fetch_cache: dict[tuple[str], bytes] = {}
 
     def __init__(self, source: SubscriptionSource):
         """Initialize FileFetcher.
 
         Args:
             source: Subscription source configuration.
+
         """
         super().__init__(source)
 
@@ -46,7 +46,8 @@ class FileFetcher(BaseFetcher):
         """Загружает данные из локального файла с кешированием и проверкой размера.
 
         Args:
-            force_reload (bool, optional): Принудительно сбросить кеш и заново получить результат.
+            force_reload (bool, optional): Принудительно сбросить кеш и заново получить
+                результат.
 
         Returns:
             bytes: Содержимое файла.

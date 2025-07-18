@@ -10,7 +10,7 @@ import locale
 import os
 import re
 from pathlib import Path
-from typing import Dict
+from typing import Optional
 
 
 class LanguageLoader:
@@ -28,7 +28,7 @@ class LanguageLoader:
 
     """
 
-    def __init__(self, lang: str = None, base_dir: Path = None):
+    def __init__(self, lang: Optional[str] = None, base_dir: Optional[Path] = None):
         """Initialize the language loader.
 
         Args:
@@ -44,8 +44,8 @@ class LanguageLoader:
             lang, _ = self.get_preferred_lang_with_source()
 
         self.lang = lang or "en"
-        self.translations: Dict[str, str] = {}
-        self.en_translations: Dict[str, str] = {}
+        self.translations: dict[str, str] = {}
+        self.en_translations: dict[str, str] = {}
 
         self.load()
 
@@ -62,7 +62,7 @@ class LanguageLoader:
         # Load current language
         if file.exists():
             try:
-                with open(file, "r", encoding="utf-8") as f:
+                with open(file, encoding="utf-8") as f:
                     raw_translations = json.load(f)
                     self.translations = self.sanitize(raw_translations)
             except (json.JSONDecodeError, OSError):
@@ -73,7 +73,7 @@ class LanguageLoader:
         # Load English fallback
         if en_file.exists():
             try:
-                with open(en_file, "r", encoding="utf-8") as f:
+                with open(en_file, encoding="utf-8") as f:
                     raw_en = json.load(f)
                     self.en_translations = self.sanitize(raw_en)
             except (json.JSONDecodeError, OSError):

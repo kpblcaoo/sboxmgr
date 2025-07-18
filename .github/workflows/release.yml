@@ -1,0 +1,239 @@
+name: Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.1.0)'
+        required: true
+        type: string
+
+jobs:
+  release-checks:
+    name: Release Quality Checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine pytest pytest-cov
+
+    - name: Install package (editable)
+      run: pip install -e .[dev]
+
+    - name: Test sboxctl CLI
+      run: |
+        sboxctl --help
+        sboxctl --version
+        # Verify version is not "unknown"
+        VERSION=$(sboxctl --version 2>&1)
+        if [[ "$VERSION" == *"unknown"* ]]; then
+          echo "❌ sboxctl --version returned 'unknown'"
+          exit 1
+        fi
+        echo "✅ sboxctl version: $VERSION"
+
+    - name: Run tests
+      run: |
+        pytest --cov=sboxmgr --cov-report=xml --cov-report=term-missing
+
+    - name: Clean build artifacts
+      run: |
+        rm -rf dist/ build/ *.egg-info/
+
+    - name: Build wheel and source distribution
+      run: |
+        python -m build
+
+    - name: Check wheel integrity
+      run: |
+        python .hooks/check_build_contents.py
+
+    - name: Validate package with twine
+      run: |
+        twine check dist/*
+
+    - name: Test wheel installation
+      run: |
+        # Find the wheel file
+        WHEEL_FILE=$(find dist -name "*.whl" | head -n 1)
+        echo "Testing wheel: $WHEEL_FILE"
+
+        # Create temporary directory for testing
+        TEMP_DIR=$(mktemp -d)
+        cd "$TEMP_DIR"
+
+        # Create virtual environment
+        python -m venv test_env
+        source test_env/bin/activate
+
+        # Install wheel
+        pip install "$WHEEL_FILE"
+
+        # Test CLI
+        sboxctl --help
+        sboxctl --version
+
+        # Test imports
+        python -c "
+        import sboxmgr.cli.main
+        import sboxmgr.configs.models
+        import sboxmgr.configs.manager
+        import sboxmgr.export.export_manager
+        import sboxmgr.subscription.manager.core
+        import sboxmgr.core.orchestrator
+        import logsetup.setup
+        print('✅ All critical modules imported successfully')
+        "
+
+        # Cleanup
+        deactivate
+        cd /
+        rm -rf "$TEMP_DIR"
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: release-checks
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Bandit security scan
+      run: |
+        pip install bandit
+        bandit -r src/sboxmgr/ -f json -o bandit-report.json || true
+
+    - name: Run Safety check
+      run: |
+        pip install safety
+        safety check --json --output safety-report.json || true
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    runs-on: ubuntu-latest
+    needs: [release-checks, security-scan]
+    if: |
+      startsWith(github.ref, 'refs/tags/v') &&
+      (contains(github.ref, 'dev') ||
+       contains(github.ref, 'rc') ||
+       contains(github.ref, 'alpha') ||
+       contains(github.ref, 'beta'))
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Clean build artifacts
+      run: |
+        rm -rf dist/ build/ *.egg-info/
+
+    - name: Build package
+      run: python -m build
+
+    - name: Publish to TestPyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.TESTPYPI_API_TOKEN }}
+      run: |
+        twine upload --repository testpypi dist/*
+
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: [release-checks, security-scan]
+    if: |
+      startsWith(github.ref, 'refs/tags/v') &&
+      !contains(github.ref, 'dev') &&
+      !contains(github.ref, 'rc') &&
+      !contains(github.ref, 'alpha') &&
+      !contains(github.ref, 'beta')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Clean build artifacts
+      run: |
+        rm -rf dist/ build/ *.egg-info/
+
+    - name: Build package
+      run: python -m build
+
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        twine upload dist/*
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/*
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

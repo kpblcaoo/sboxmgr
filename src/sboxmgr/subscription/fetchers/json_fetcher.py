@@ -6,7 +6,7 @@ caching mechanisms for improved performance and reduced API load.
 """
 
 import threading
-from typing import Dict, Optional, Tuple
+from typing import Optional
 
 import requests
 
@@ -29,13 +29,14 @@ class JSONFetcher(BaseFetcher):
     """
 
     _cache_lock = threading.Lock()
-    _fetch_cache: Dict[Tuple[str, Optional[str], str], bytes] = {}
+    _fetch_cache: dict[tuple[str, Optional[str], str], bytes] = {}
 
     def fetch(self, force_reload: bool = False) -> bytes:
         """Загружает подписку в формате JSON с поддержкой лимита размера и in-memory кешированием.
 
         Args:
-            force_reload (bool, optional): Принудительно сбросить кеш и заново получить результат.
+            force_reload (bool, optional): Принудительно сбросить кеш и заново получить
+                результат.
 
         Returns:
             bytes: Сырые данные подписки.

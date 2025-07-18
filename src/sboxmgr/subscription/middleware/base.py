@@ -9,7 +9,7 @@ Implements Phase 3 architecture with profile integration and advanced features.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
@@ -28,7 +28,7 @@ class BaseMiddleware(ABC):
 
     middleware_type = "middleware"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize middleware with optional configuration.
 
         Args:
@@ -41,10 +41,10 @@ class BaseMiddleware(ABC):
     @abstractmethod
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Process servers through middleware transformation.
 
         Args:
@@ -63,7 +63,7 @@ class BaseMiddleware(ABC):
 
     def can_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> bool:
@@ -80,7 +80,7 @@ class BaseMiddleware(ABC):
         """
         return self.enabled and len(servers) > 0
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get metadata about this middleware.
 
         Returns:
@@ -104,7 +104,7 @@ class ProfileAwareMiddleware(BaseMiddleware):
 
     def extract_middleware_config(
         self, profile: Optional[FullProfile]
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Extract middleware configuration from profile.
 
         Args:
@@ -152,11 +152,11 @@ class ChainableMiddleware(ProfileAwareMiddleware):
 
     def pre_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> None:
-        """Called before main processing. Override for setup logic.
+        """Call before main processing. Override for setup logic.
 
         Args:
             servers: List of servers to be processed
@@ -168,11 +168,11 @@ class ChainableMiddleware(ProfileAwareMiddleware):
 
     def post_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> None:
-        """Called after main processing. Override for cleanup logic.
+        """Call after main processing. Override for cleanup logic.
 
         Args:
             servers: List of processed servers
@@ -184,10 +184,10 @@ class ChainableMiddleware(ProfileAwareMiddleware):
 
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Process servers with pre/post hooks.
 
         Args:
@@ -207,11 +207,11 @@ class ChainableMiddleware(ProfileAwareMiddleware):
     @abstractmethod
     def _do_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
-        """Main processing logic. Override this method.
+    ) -> list[ParsedServer]:
+        """Execute main processing logic. Override this method.
 
         Args:
             servers: List of servers to process
@@ -233,7 +233,7 @@ class ConditionalMiddleware(ChainableMiddleware):
     context state, etc.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize conditional middleware.
 
         Args:
@@ -249,7 +249,7 @@ class ConditionalMiddleware(ChainableMiddleware):
 
     def can_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> bool:
@@ -278,11 +278,13 @@ class ConditionalMiddleware(ChainableMiddleware):
                 return False
 
         # Check execution mode
-        if self.execution_mode == "never":
-            return False
-        elif self.execution_mode == "profile_only" and not profile:
-            return False
-        elif self.execution_mode == "debug_only" and context.debug_level == 0:
+        if (
+            self.execution_mode == "never"
+            or self.execution_mode == "profile_only"
+            and not profile
+            or self.execution_mode == "debug_only"
+            and context.debug_level == 0
+        ):
             return False
 
         return True
@@ -295,7 +297,7 @@ class TransformMiddleware(ConditionalMiddleware):
     field mapping, value conversion, and metadata enrichment.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize transform middleware.
 
         Args:
@@ -367,7 +369,7 @@ class TransformMiddleware(ConditionalMiddleware):
     def _apply_metadata_enricher(
         self,
         server: ParsedServer,
-        enricher_config: Dict[str, Any],
+        enricher_config: dict[str, Any],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> None:

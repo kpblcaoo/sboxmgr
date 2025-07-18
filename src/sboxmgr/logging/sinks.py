@@ -11,7 +11,7 @@ import subprocess
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from ..config.detection import detect_systemd_environment
 
@@ -30,7 +30,7 @@ class LogSink(Enum):
     FILE = "file"
 
 
-def detect_available_sinks() -> List[LogSink]:
+def detect_available_sinks() -> list[LogSink]:
     """Detect available logging sinks in order of preference.
 
     Implements the fallback chain: journald → syslog → stdout
@@ -124,7 +124,7 @@ def create_handler(
             )
             return _create_stdout_handler(config, level)
         else:
-            raise RuntimeError(f"Failed to create fallback stdout handler: {e}")
+            raise RuntimeError(f"Failed to create fallback stdout handler: {e}") from e
 
 
 def _is_journald_available() -> bool:
@@ -141,7 +141,7 @@ def _is_journald_available() -> bool:
     # Check if systemd-cat is available (indicates journald support)
     try:
         result = subprocess.run(
-            ["systemd-cat", "--version"], capture_output=True, timeout=2
+            ["systemd-cat", "--version"], check=False, capture_output=True, timeout=2
         )
         return result.returncode == 0
     except (subprocess.SubprocessError, FileNotFoundError, subprocess.TimeoutExpired):
@@ -224,8 +224,8 @@ def _create_journald_handler(
                 except (BrokenPipeError, OSError, AttributeError):
                     # systemd-cat died or stdin is None, cleanup and reset
                     self._cleanup_process()
-                except (IOError, ValueError) as e:
-                    # Other I/O or formatting errors, cleanup and reset
+                except ValueError as e:
+                    # Other formatting errors, cleanup and reset
                     logging.debug(f"SystemdCat handler error: {e}")
                     self._cleanup_process()
 
@@ -273,7 +273,7 @@ def _create_syslog_handler(
 
     """
     # Try different syslog addresses
-    addresses: List[Union[str, Tuple[str, int]]] = ["/dev/log", ("localhost", 514)]
+    addresses: list[Union[str, tuple[str, int]]] = ["/dev/log", ("localhost", 514)]
 
     for address in addresses:
         try:

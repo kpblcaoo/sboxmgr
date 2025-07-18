@@ -1,7 +1,7 @@
 """Core enrichment middleware implementation."""
 
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ....configs.models import FullProfile
 from ...models import ParsedServer, PipelineContext
@@ -40,15 +40,17 @@ class EnrichmentMiddleware(TransformMiddleware):
             'geo_database_path': '/path/to/geoip.db'
         })
         enriched_servers = middleware.process(servers, context, profile)
+
     """
 
     middleware_type = "enrichment"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize enrichment middleware.
 
         Args:
             config: Configuration dictionary for enrichment options
+
         """
         super().__init__(config)
 
@@ -79,10 +81,10 @@ class EnrichmentMiddleware(TransformMiddleware):
 
     def _do_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Enrich servers with additional metadata.
 
         Args:
@@ -92,6 +94,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         Returns:
             List of enriched servers
+
         """
         if not servers:
             return servers
@@ -125,7 +128,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
     def _extract_enrichment_config(
         self, profile: Optional[FullProfile]
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Extract enrichment configuration from profile.
 
         Args:
@@ -133,6 +136,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         Returns:
             Dictionary with enrichment configuration
+
         """
         enrichment_config = {
             "enable_geo_enrichment": self.enable_geo_enrichment,
@@ -163,7 +167,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-        enrichment_config: Optional[Dict[str, Any]] = None,
+        enrichment_config: Optional[dict[str, Any]] = None,
     ) -> ParsedServer:
         """Enrich a single server with metadata.
 
@@ -175,6 +179,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         Returns:
             Enriched server
+
         """
         if not enrichment_config:
             enrichment_config = self._extract_enrichment_config(profile)

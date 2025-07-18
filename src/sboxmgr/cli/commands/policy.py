@@ -63,13 +63,13 @@ def test(
     if server:
         try:
             if Path(server).exists():
-                with open(server, "r") as f:
+                with open(server) as f:
                     server_obj = json.load(f)
             else:
                 server_obj = json.loads(server)
         except Exception as e:
             typer.echo(f"Error parsing server: {e}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
 
     context = PolicyContext(
         profile=profile, server=server_obj, user=user, env={}, metadata={"test": True}
@@ -80,7 +80,7 @@ def test(
         evaluation_result = policy_registry.evaluate_all(context)
     except Exception as e:
         typer.echo(f"Error during policy evaluation: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
     # Display results
     typer.echo(t("Policy evaluation results:"))
@@ -165,7 +165,7 @@ def audit(
     servers = []
     if server_file:
         try:
-            with open(server_file, "r") as f:
+            with open(server_file) as f:
                 if server_file.endswith(".json"):
                     servers = json.load(f)
                 else:
@@ -180,7 +180,7 @@ def audit(
                                 servers.append({"address": line, "type": "unknown"})
         except Exception as e:
             typer.echo(f"Error loading servers: {e}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     else:
         # Use example servers
         servers = [

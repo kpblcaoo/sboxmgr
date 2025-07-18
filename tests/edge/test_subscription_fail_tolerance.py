@@ -9,13 +9,13 @@ class DummyFetcher:
         self.source = source
 
     def fetch(self):
-        if self.source.url.endswith("fail_404"):
+        if "fail_404" in self.source.url:
             raise Exception("404 Not Found")
-        if self.source.url.endswith("fail_badformat"):
+        if "fail_badformat" in self.source.url:
             return b"not a valid config"
-        if self.source.url.endswith("fail_empty"):
+        if "fail_empty" in self.source.url:
             return b""
-        if self.source.url.endswith("fail_crash"):
+        if "fail_crash" in self.source.url:
             raise RuntimeError("Parser crashed")
         # valid JSON config with one server
         return b'{"outbounds": [{"type": "vmess", "tag": "ok", "server_port": 443}]}'
@@ -32,10 +32,6 @@ class DummyParser:
 
 @pytest.fixture
 def patch_registry(monkeypatch):
-    # Патчим registry для fetcher
-    monkeypatch.setattr(
-        "src.sboxmgr.subscription.manager.get_plugin", lambda t: DummyFetcher
-    )
     # Гарантированно патчим detect_parser через sys.modules
     import src.sboxmgr.subscription.manager as manager_mod
 
@@ -43,21 +39,47 @@ def patch_registry(monkeypatch):
 
 
 def test_fail_tolerant_pipeline(monkeypatch):
-    monkeypatch.setattr(
-        "src.sboxmgr.subscription.manager.get_plugin", lambda t: DummyFetcher
-    )
+    # Мокаем HTTP запросы
+    class MockResponse:
+        def __init__(self, content):
+            self.content = content
+
+            class MockRaw:
+                def __init__(self, content):
+                    self.content = content
+
+                def read(self, n=None):
+                    return self.content
+
+            self.raw = MockRaw(content)
+
+        def raise_for_status(self):
+            pass
+
+    def mock_get(url, **kwargs):
+        return MockResponse(b"ZGF0YQ==")  # valid base64 for "data"
+
+    monkeypatch.setattr("requests.get", mock_get)
+
     sources = [
-        SubscriptionSource(url="file://fail_404", source_type="url_base64"),
-        SubscriptionSource(url="file://fail_badformat", source_type="url_base64"),
-        SubscriptionSource(url="file://fail_empty", source_type="url_base64"),
-        SubscriptionSource(url="file://ok_good", source_type="url_base64"),
-        SubscriptionSource(url="file://fail_crash", source_type="url_base64"),
+        SubscriptionSource(url="http://fail_404", source_type="url_base64"),
+        SubscriptionSource(url="http://fail_badformat", source_type="url_base64"),
+        SubscriptionSource(url="http://fail_empty", source_type="url_base64"),
+        SubscriptionSource(url="http://ok_good", source_type="url_base64"),
+        SubscriptionSource(url="http://fail_crash", source_type="url_base64"),
     ]
     results = []
     for src in sources:
         try:
             mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
             mgr.fetcher = DummyFetcher(src)
+            from sboxmgr.subscription.manager.core import DataProcessor
+
+            mgr.data_processor = DataProcessor(mgr.fetcher, mgr.error_handler)
+            mgr.data_processor.parse_servers = lambda raw, context: (
+                DummyParser().parse(raw),
+                True,
+            )
             servers = mgr.get_servers()
             print(
                 f"SRC: {src.url} | success: {getattr(servers, 'success', None)} | config: {getattr(servers, 'config', None)} | errors: {getattr(servers, 'errors', None)}"

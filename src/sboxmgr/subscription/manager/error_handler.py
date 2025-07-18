@@ -1,7 +1,7 @@
 """Error handling functionality for subscription manager."""
 
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from ..errors import ErrorType, PipelineError
 
@@ -22,7 +22,7 @@ class ErrorHandler:
         error_type: ErrorType,
         stage: str,
         message: str,
-        context_data: Optional[Dict[str, Any]] = None,
+        context_data: Optional[dict[str, Any]] = None,
     ) -> PipelineError:
         """Create standardized pipeline error.
 
@@ -37,6 +37,7 @@ class ErrorHandler:
 
         Returns:
             Formatted PipelineError object.
+
         """
         return PipelineError(
             type=error_type,
@@ -47,7 +48,7 @@ class ErrorHandler:
         )
 
     def create_fetch_error(
-        self, message: str, context_data: Optional[Dict[str, Any]] = None
+        self, message: str, context_data: Optional[dict[str, Any]] = None
     ) -> PipelineError:
         """Create fetch stage error.
 
@@ -57,13 +58,14 @@ class ErrorHandler:
 
         Returns:
             Fetch error object.
+
         """
         return self.create_pipeline_error(
             ErrorType.FETCH, "fetch", message, context_data
         )
 
     def create_validation_error(
-        self, stage: str, message: str, context_data: Optional[Dict[str, Any]] = None
+        self, stage: str, message: str, context_data: Optional[dict[str, Any]] = None
     ) -> PipelineError:
         """Create validation stage error.
 
@@ -74,13 +76,14 @@ class ErrorHandler:
 
         Returns:
             Validation error object.
+
         """
         return self.create_pipeline_error(
             ErrorType.VALIDATION, stage, message, context_data
         )
 
     def create_parse_error(
-        self, message: str, context_data: Optional[Dict[str, Any]] = None
+        self, message: str, context_data: Optional[dict[str, Any]] = None
     ) -> PipelineError:
         """Create parse stage error.
 
@@ -90,13 +93,14 @@ class ErrorHandler:
 
         Returns:
             Parse error object.
+
         """
         return self.create_pipeline_error(
             ErrorType.PARSE, "parse", message, context_data
         )
 
     def create_internal_error(
-        self, stage: str, message: str, context_data: Optional[Dict[str, Any]] = None
+        self, stage: str, message: str, context_data: Optional[dict[str, Any]] = None
     ) -> PipelineError:
         """Create internal stage error.
 
@@ -107,6 +111,7 @@ class ErrorHandler:
 
         Returns:
             Internal error object.
+
         """
         return self.create_pipeline_error(
             ErrorType.INTERNAL, stage, message, context_data
@@ -118,6 +123,7 @@ class ErrorHandler:
         Args:
             context: Pipeline context to add error to.
             error: Error to add.
+
         """
         if not hasattr(context, "metadata"):
             context.metadata = {}
@@ -134,6 +140,7 @@ class ErrorHandler:
 
         Returns:
             True if context has errors, False otherwise.
+
         """
         return (
             hasattr(context, "metadata")
@@ -149,6 +156,7 @@ class ErrorHandler:
 
         Returns:
             Number of errors in context.
+
         """
         if not self.has_errors(context):
             return 0

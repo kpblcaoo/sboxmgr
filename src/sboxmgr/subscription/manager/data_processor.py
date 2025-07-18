@@ -1,6 +1,6 @@
 """Data processing functionality for subscription manager."""
 
-from typing import Any, List, Tuple
+from typing import Any
 
 from ..models import PipelineContext
 from .error_handler import ErrorHandler
@@ -20,11 +20,12 @@ class DataProcessor:
         Args:
             fetcher: Subscription data fetcher instance.
             error_handler: Optional error handler (creates default if None).
+
         """
         self.fetcher = fetcher
         self.error_handler = error_handler or ErrorHandler()
 
-    def fetch_and_validate_raw(self, context: PipelineContext) -> Tuple[bytes, bool]:
+    def fetch_and_validate_raw(self, context: PipelineContext) -> tuple[bytes, bool]:
         """Fetch and validate raw subscription data.
 
         Handles the initial data fetching and raw validation stages
@@ -36,6 +37,7 @@ class DataProcessor:
         Returns:
             Tuple of (raw_data, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
+
         """
         try:
             # Log User-Agent if debug enabled
@@ -59,7 +61,7 @@ class DataProcessor:
 
     def parse_servers(
         self, raw_data: bytes, context: PipelineContext
-    ) -> Tuple[List[Any], bool]:
+    ) -> tuple[list[Any], bool]:
         """Parse raw subscription data into server objects.
 
         Detects appropriate parser and converts raw data into
@@ -71,6 +73,7 @@ class DataProcessor:
 
         Returns:
             Tuple of (parsed_servers, success_flag).
+
         """
         try:
             # Detect and get parser
@@ -86,6 +89,27 @@ class DataProcessor:
             # Parse servers
             servers = parser.parse(raw_data)
 
+            # Debug logging for parse result
+            debug_level = getattr(context, "debug_level", 0)
+            if debug_level >= 2:
+                print(f"[DEBUG] servers after parse: {servers}")
+
+            # Empty servers list is valid - just return empty list
+            if not servers:
+                if debug_level >= 1:
+                    print(
+                        "[DEBUG] No servers parsed - this is normal for empty subscriptions"
+                    )
+                return [], True
+
+            # All invalid servers is also valid - return them for further processing
+            if all(getattr(s, "address", None) == "invalid" for s in servers):
+                if debug_level >= 1:
+                    print(
+                        f"[DEBUG] All {len(servers)} servers have invalid addresses - continuing with processing"
+                    )
+                return servers, True
+
             # Debug logging
             self._log_parse_result(context, servers, parser)
 
@@ -99,8 +123,8 @@ class DataProcessor:
             return [], False
 
     def validate_parsed_servers(
-        self, servers: List[Any], context: PipelineContext
-    ) -> Tuple[List[Any], bool]:
+        self, servers: list[Any], context: PipelineContext
+    ) -> tuple[list[Any], bool]:
         """Validate parsed server configurations.
 
         Applies parsed validation rules to ensure server configurations
@@ -112,6 +136,7 @@ class DataProcessor:
 
         Returns:
             Tuple of (validated_servers, success_flag).
+
         """
         try:
             debug_level = getattr(context, "debug_level", 0)
@@ -159,7 +184,7 @@ class DataProcessor:
             print(f"[debug] Fetched {len(raw)} bytes. First 200 bytes: {raw[:200]!r}")
 
     def _log_parse_result(
-        self, context: PipelineContext, servers: List[Any], parser
+        self, context: PipelineContext, servers: list[Any], parser
     ) -> None:
         """Log parse result if debug enabled."""
         debug_level = getattr(context, "debug_level", 0)
@@ -170,7 +195,7 @@ class DataProcessor:
 
     def _validate_raw_data(
         self, raw: bytes, context: PipelineContext
-    ) -> Tuple[bytes, bool]:
+    ) -> tuple[bytes, bool]:
         """Validate raw subscription data."""
         # Raw validation
         from ..validators.base import RAW_VALIDATOR_REGISTRY
@@ -203,8 +228,8 @@ class DataProcessor:
         return parsed_validator_cls()
 
     def _handle_validation_results(
-        self, servers: List[Any], parsed_result, context: PipelineContext
-    ) -> Tuple[List[Any], bool]:
+        self, servers: list[Any], parsed_result, context: PipelineContext
+    ) -> tuple[list[Any], bool]:
         """Handle validation results based on pipeline mode."""
         # Add validation errors to context
         for error in parsed_result.errors:

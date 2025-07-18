@@ -1,8 +1,9 @@
 """Tests for refactored SubscriptionManager."""
 
-import pytest
-from unittest.mock import Mock, patch
 import base64
+from unittest.mock import Mock, patch
+
+import pytest
 
 from sboxmgr.subscription.manager import SubscriptionManager
 from sboxmgr.subscription.models import PipelineContext, SubscriptionSource
@@ -29,7 +30,9 @@ class TestSubscriptionManagerRefactoring:
             mock_fetcher.source = mock_source
             mock_get_plugin.return_value = Mock(return_value=mock_fetcher)
 
-            with patch("sboxmgr.subscription.manager.parser_detector.detect_parser") as mock_detect:
+            with patch(
+                "sboxmgr.subscription.manager.parser_detector.detect_parser"
+            ) as mock_detect:
                 # Mock parser
                 mock_parser = Mock()
                 mock_parser.parse.return_value = [mock_server]
@@ -39,8 +42,12 @@ class TestSubscriptionManagerRefactoring:
                     "sboxmgr.subscription.validators.base.RAW_VALIDATOR_REGISTRY"
                 ) as mock_raw_val:
                     mock_raw_validator = Mock()
-                    mock_raw_validator.validate.return_value = Mock(valid=True, errors=[])
-                    mock_raw_val.get.return_value = Mock(return_value=mock_raw_validator)
+                    mock_raw_validator.validate.return_value = Mock(
+                        valid=True, errors=[]
+                    )
+                    mock_raw_val.get.return_value = Mock(
+                        return_value=mock_raw_validator
+                    )
 
                     with patch(
                         "sboxmgr.subscription.validators.base.PARSED_VALIDATOR_REGISTRY"
@@ -55,13 +62,20 @@ class TestSubscriptionManagerRefactoring:
 
                         # Test the refactored manager
                         mgr = SubscriptionManager(mock_source)
-                        result = mgr.get_servers(context=mock_context)
 
-                        # Verify basic success
-                        assert result.success
-                        assert result.config is not None
-                        assert len(result.config) == 1
-                        assert result.config[0].type == "ss"
+                        # Mock policy engine to prevent filtering
+                        with patch(
+                            "sboxmgr.subscription.manager.pipeline_coordinator.PipelineCoordinator.apply_policies"
+                        ) as mock_policies:
+                            mock_policies.return_value = [mock_server]
+
+                            result = mgr.get_servers(context=mock_context)
+
+                            # Verify basic success
+                            assert result.success
+                            assert result.config is not None
+                            assert len(result.config) == 1
+                            assert result.config[0].type == "ss"
 
     def test_get_servers_validation_error_strict_mode(self, mock_source, mock_context):
         """Test validation error handling in strict mode.
@@ -78,7 +92,9 @@ class TestSubscriptionManagerRefactoring:
             mock_fetcher.source = mock_source
             mock_get_plugin.return_value = Mock(return_value=mock_fetcher)
 
-            with patch("sboxmgr.subscription.manager.parser_detector.detect_parser") as mock_detect:
+            with patch(
+                "sboxmgr.subscription.manager.parser_detector.detect_parser"
+            ) as mock_detect:
                 # Mock parser that returns invalid data
                 mock_parser = Mock()
                 mock_parser.parse.return_value = [Mock(type="invalid")]
@@ -138,7 +154,9 @@ class TestSubscriptionManagerRefactoring:
             mock_fetcher.source = mock_source
             mock_get_plugin.return_value = Mock(return_value=mock_fetcher)
 
-            with patch("sboxmgr.subscription.manager.parser_detector.detect_parser") as mock_detect:
+            with patch(
+                "sboxmgr.subscription.manager.parser_detector.detect_parser"
+            ) as mock_detect:
                 mock_parser = Mock()
                 mock_parser.parse.return_value = [mock_server]
                 mock_detect.return_value = mock_parser
@@ -147,8 +165,12 @@ class TestSubscriptionManagerRefactoring:
                     "sboxmgr.subscription.validators.base.RAW_VALIDATOR_REGISTRY"
                 ) as mock_raw_val:
                     mock_raw_validator = Mock()
-                    mock_raw_validator.validate.return_value = Mock(valid=True, errors=[])
-                    mock_raw_val.get.return_value = Mock(return_value=mock_raw_validator)
+                    mock_raw_validator.validate.return_value = Mock(
+                        valid=True, errors=[]
+                    )
+                    mock_raw_val.get.return_value = Mock(
+                        return_value=mock_raw_validator
+                    )
 
                     with patch(
                         "sboxmgr.subscription.validators.base.PARSED_VALIDATOR_REGISTRY"
@@ -162,7 +184,9 @@ class TestSubscriptionManagerRefactoring:
                         )
 
                         # Test with middleware
-                        mgr = SubscriptionManager(mock_source, detect_parser=mock_detect)
+                        mgr = SubscriptionManager(
+                            mock_source, detect_parser=mock_detect
+                        )
                         result = mgr.get_servers(context=mock_context)
 
                         # Should process through middleware successfully
@@ -185,7 +209,9 @@ class TestSubscriptionManagerRefactoring:
             mock_fetcher.source = mock_source
             mock_get_plugin.return_value = Mock(return_value=mock_fetcher)
 
-            with patch("sboxmgr.subscription.manager.parser_detector.detect_parser") as mock_detect:
+            with patch(
+                "sboxmgr.subscription.manager.parser_detector.detect_parser"
+            ) as mock_detect:
                 mock_parser = Mock()
                 mock_parser.parse.return_value = [mock_server]
                 mock_detect.return_value = mock_parser
@@ -194,8 +220,12 @@ class TestSubscriptionManagerRefactoring:
                     "sboxmgr.subscription.validators.base.RAW_VALIDATOR_REGISTRY"
                 ) as mock_raw_val:
                     mock_raw_validator = Mock()
-                    mock_raw_validator.validate.return_value = Mock(valid=True, errors=[])
-                    mock_raw_val.get.return_value = Mock(return_value=mock_raw_validator)
+                    mock_raw_validator.validate.return_value = Mock(
+                        valid=True, errors=[]
+                    )
+                    mock_raw_val.get.return_value = Mock(
+                        return_value=mock_raw_validator
+                    )
 
                     with patch(
                         "sboxmgr.subscription.validators.base.PARSED_VALIDATOR_REGISTRY"
@@ -208,7 +238,9 @@ class TestSubscriptionManagerRefactoring:
                             return_value=mock_parsed_validator
                         )
 
-                        mgr = SubscriptionManager(mock_source, detect_parser=mock_detect)
+                        mgr = SubscriptionManager(
+                            mock_source, detect_parser=mock_detect
+                        )
                         # First request - should call parser
                         result1 = mgr.get_servers(context=mock_context)
                         # Second request - should use cache

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.sboxmgr.profiles.models import FullProfile
+from sboxmgr.configs.models import FullProfile
 from src.sboxmgr.subscription.exporters.singbox_exporter import (
     singbox_export_with_middleware,
 )

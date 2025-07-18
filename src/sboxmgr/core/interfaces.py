@@ -6,7 +6,7 @@ dependency injection, testing, and architectural separation.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from sboxmgr.subscription.models import PipelineContext, PipelineResult
 
@@ -21,8 +21,8 @@ class SubscriptionManagerInterface(ABC):
     @abstractmethod
     def get_servers(
         self,
-        user_routes: Optional[List[str]] = None,
-        exclusions: Optional[List[str]] = None,
+        user_routes: Optional[list[str]] = None,
+        exclusions: Optional[list[str]] = None,
         mode: Optional[str] = None,
         context: Optional[PipelineContext] = None,
         force_reload: bool = False,
@@ -45,8 +45,8 @@ class SubscriptionManagerInterface(ABC):
     @abstractmethod
     def export_config(
         self,
-        exclusions: Optional[List[str]] = None,
-        user_routes: Optional[List[str]] = None,
+        exclusions: Optional[list[str]] = None,
+        user_routes: Optional[list[str]] = None,
         context: Optional[PipelineContext] = None,
         routing_plugin: Optional[Any] = None,
         export_manager: Optional[Any] = None,
@@ -77,12 +77,13 @@ class ExportManagerInterface(ABC):
     @abstractmethod
     def export(
         self,
-        servers: List[Any],
-        exclusions: Optional[List[str]] = None,
-        user_routes: Optional[List[Dict]] = None,
-        context: Optional[Dict[str, Any]] = None,
+        servers: list[Any],
+        exclusions: Optional[list[str]] = None,
+        user_routes: Optional[list[dict]] = None,
+        context: Optional[dict[str, Any]] = None,
         client_profile: Optional[Any] = None,
-    ) -> Dict:
+        profile: Optional[Any] = None,
+    ) -> dict:
         """Export servers to client configuration format.
 
         Args:
@@ -91,6 +92,7 @@ class ExportManagerInterface(ABC):
             user_routes: Optional list of custom routing rules.
             context: Optional context dictionary for export customization.
             client_profile: Optional client profile override.
+            profile: Optional profile for processing.
 
         Returns:
             Dictionary containing the final client configuration.
@@ -150,7 +152,7 @@ class ExclusionManagerInterface(ABC):
         pass
 
     @abstractmethod
-    def list_all(self) -> List[Dict]:
+    def list_all(self) -> list[dict]:
         """List all exclusions.
 
         Returns:
@@ -170,7 +172,7 @@ class ExclusionManagerInterface(ABC):
         pass
 
     @abstractmethod
-    def filter_servers(self, servers: List[Any]) -> List[Any]:
+    def filter_servers(self, servers: list[Any]) -> list[Any]:
         """Filter servers by removing excluded ones.
 
         Args:

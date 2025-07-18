@@ -50,7 +50,7 @@ from sboxmgr.subscription.validators.protocol_models import validate_protocol_co
 config_dict = {
     "server": "example.com",
     "server_port": 8388,
-    "password": "my_password",
+    "password": "my_password",  # pragma: allowlist secret
     "method": "aes-256-gcm"
 }
 
@@ -81,7 +81,7 @@ outbound_config = {
     "server": "example.com",
     "server_port": 8388,
     "method": "aes-256-gcm",
-    "password": "my_password"
+    "password": "my_password"  # pragma: allowlist secret
 }
 
 outbound = validate_outbound_config(outbound_config)

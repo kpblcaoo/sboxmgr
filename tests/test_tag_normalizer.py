@@ -1,8 +1,5 @@
 """Tests for TagNormalizer middleware."""
 
-import pytest
-from unittest.mock import Mock
-
 from sboxmgr.subscription.middleware.tag_normalizer import TagNormalizer
 from sboxmgr.subscription.models import ParsedServer, PipelineContext
 
@@ -22,7 +19,7 @@ class TestTagNormalizer:
             address="192.168.1.1",
             port=443,
             tag="old-tag",
-            meta={"name": "🇳🇱 Netherlands Server", "tag": "nl-server"}
+            meta={"name": "🇳🇱 Netherlands Server", "tag": "nl-server"},
         )
 
         result = self.normalizer._normalize_tag(server)
@@ -35,7 +32,7 @@ class TestTagNormalizer:
             address="192.168.1.1",
             port=443,
             tag="old-tag",
-            meta={"tag": "nl-server"}
+            meta={"tag": "nl-server"},
         )
 
         result = self.normalizer._normalize_tag(server)
@@ -48,7 +45,7 @@ class TestTagNormalizer:
             address="192.168.1.1",
             port=443,
             tag="old-tag",
-            meta={"label": "🇨🇦 Canada Server"}
+            meta={"label": "🇨🇦 Canada Server"},
         )
 
         result = self.normalizer._normalize_tag(server)
@@ -57,11 +54,7 @@ class TestTagNormalizer:
     def test_priority_3_existing_tag(self):
         """Test that existing tag has third priority."""
         server = ParsedServer(
-            type="vless",
-            address="192.168.1.1",
-            port=443,
-            tag="existing-tag",
-            meta={}
+            type="vless", address="192.168.1.1", port=443, tag="existing-tag", meta={}
         )
 
         result = self.normalizer._normalize_tag(server)
@@ -70,11 +63,7 @@ class TestTagNormalizer:
     def test_priority_4_address_fallback(self):
         """Test that address fallback has fourth priority."""
         server = ParsedServer(
-            type="vless",
-            address="192.168.1.1",
-            port=443,
-            tag="",
-            meta={}
+            type="vless", address="192.168.1.1", port=443, tag="", meta={}
         )
 
         result = self.normalizer._normalize_tag(server)
@@ -82,13 +71,7 @@ class TestTagNormalizer:
 
     def test_priority_5_protocol_fallback(self):
         """Test that protocol fallback has lowest priority."""
-        server = ParsedServer(
-            type="vless",
-            address="",
-            port=443,
-            tag="",
-            meta={}
-        )
+        server = ParsedServer(type="vless", address="", port=443, tag="", meta={})
 
         result = self.normalizer._normalize_tag(server)
         assert result.startswith("vless-")
@@ -130,21 +113,17 @@ class TestTagNormalizer:
                 address="192.168.1.1",
                 port=443,
                 tag="old-tag",
-                meta={"name": "🇳🇱 Netherlands Server"}
+                meta={"name": "🇳🇱 Netherlands Server"},
             ),
             ParsedServer(
                 type="vless",
                 address="192.168.1.2",
                 port=443,
                 tag="old-tag",
-                meta={"name": "🇳🇱 Netherlands Server"}  # Duplicate name
+                meta={"name": "🇳🇱 Netherlands Server"},  # Duplicate name
             ),
             ParsedServer(
-                type="vless",
-                address="192.168.1.3",
-                port=443,
-                tag="unique-tag",
-                meta={}
+                type="vless", address="192.168.1.3", port=443, tag="unique-tag", meta={}
             ),
         ]
 
@@ -170,7 +149,7 @@ class TestTagNormalizer:
             address="192.168.1.1",
             port=443,
             tag="test-tag",
-            meta={}  # Empty dict instead of None
+            meta={},  # Empty dict instead of None
         )
 
         result = self.normalizer.process([server], self.context)
@@ -185,7 +164,7 @@ class TestTagNormalizer:
             address="192.142.18.243",
             port=443,
             tag="vless-192.142.18.243",
-            meta={"name": "🇳🇱 kpblcaoo Nederland-3"}
+            meta={"name": "🇳🇱 kpblcaoo Nederland-3"},
         )
 
         # Simulate SFI format (IP-based tag)
@@ -194,7 +173,7 @@ class TestTagNormalizer:
             address="192.142.18.243",
             port=443,
             tag="vless-192.142.18.243",
-            meta={}
+            meta={},
         )
 
         # Process separately to avoid unique tag conflicts
@@ -243,7 +222,7 @@ class TestTagNormalizer:
                 address=f"192.168.1.{i}",
                 port=443,
                 tag=f"server-{i % 10}",  # Some duplicates
-                meta={"name": f"Server {i}"} if i % 2 == 0 else {}
+                meta={"name": f"Server {i}"} if i % 2 == 0 else {},
             )
             servers.append(server)
 
@@ -263,19 +242,19 @@ class TestTagNormalizer:
                 type="vless",
                 address="1.1.1.1",
                 port=443,
-                meta={"name": "🇺🇸 United States"}
+                meta={"name": "🇺🇸 United States"},
             ),
             ParsedServer(
                 type="vless",
                 address="2.2.2.2",
                 port=443,
-                meta={"name": "🇯🇵 日本サーバー"}
+                meta={"name": "🇯🇵 日本サーバー"},
             ),
             ParsedServer(
                 type="vless",
                 address="3.3.3.3",
                 port=443,
-                meta={"name": "🇷🇺 Российский сервер"}
+                meta={"name": "🇷🇺 Российский сервер"},
             ),
         ]
 
@@ -299,4 +278,6 @@ class TestTagNormalizer:
 
         for flag_emoji in test_cases:
             sanitized = self.normalizer._sanitize_tag(flag_emoji)
-            assert sanitized == flag_emoji, f"Flag emoji '{flag_emoji}' was modified: '{sanitized}'"
+            assert sanitized == flag_emoji, (
+                f"Flag emoji '{flag_emoji}' was modified: '{sanitized}'"
+            )

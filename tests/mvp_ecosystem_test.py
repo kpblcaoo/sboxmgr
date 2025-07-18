@@ -17,7 +17,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -52,6 +52,7 @@ class MVPEcosystemTest:
         Args:
             test_name: Name of the test
             test_func: Test function to execute
+
         """
         self.total_tests += 1
         print(f"\n🧪 Running: {test_name}")
@@ -76,6 +77,7 @@ class MVPEcosystemTest:
             # Test help command
             result = subprocess.run(
                 [sys.executable, "-m", "sboxmgr.cli.main", "--help"],
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -87,6 +89,7 @@ class MVPEcosystemTest:
                 # Test that CLI can start without errors
                 result = subprocess.run(
                     [sys.executable, "-m", "sboxmgr.cli.main"],
+                    check=False,
                     capture_output=True,
                     text=True,
                     timeout=10,
@@ -245,9 +248,7 @@ class MVPEcosystemTest:
                             if "$schema" in schema or "type" in schema:
                                 print(f"✅ Schema {schema_file.name} is valid JSON")
                             else:
-                                print(
-                                    f"⚠️  Schema {schema_file.name} may be incomplete"
-                                )
+                                print(f"⚠️  Schema {schema_file.name} may be incomplete")
                         except json.JSONDecodeError as e:
                             print(f"❌ Schema {schema_file.name} is invalid JSON: {e}")
                             return False
@@ -351,11 +352,12 @@ class MVPEcosystemTest:
             print(f"❌ Ecosystem integration test failed: {e}")
             return False
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all MVP tests and return results.
 
         Returns:
             Dictionary with test results and summary.
+
         """
         print("🚀 Starting MVP Ecosystem Test Suite")
         print("=" * 60)

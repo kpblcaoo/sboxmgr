@@ -83,6 +83,7 @@ def convert_parsed_server_to_outbound(
 
     Returns:
         Appropriate outbound model instance or None if conversion fails
+
     """
     try:
         # Normalize protocol type

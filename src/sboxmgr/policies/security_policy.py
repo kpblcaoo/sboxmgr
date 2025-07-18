@@ -4,7 +4,7 @@ This module provides policies for security validation including
 protocol security, encryption requirements, and authentication checks.
 """
 
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from .base import BasePolicy, PolicyContext, PolicyResult
 from .utils import extract_metadata_field, validate_mode
@@ -23,8 +23,8 @@ class ProtocolPolicy(BasePolicy):
 
     def __init__(
         self,
-        allowed_protocols: Optional[List[str]] = None,
-        blocked_protocols: Optional[List[str]] = None,
+        allowed_protocols: Optional[list[str]] = None,
+        blocked_protocols: Optional[list[str]] = None,
         mode: str = "whitelist",
     ):
         """Initialize protocol policy.
@@ -121,8 +121,8 @@ class EncryptionPolicy(BasePolicy):
 
     def __init__(
         self,
-        strong_encryption: Optional[List[str]] = None,
-        weak_encryption: Optional[List[str]] = None,
+        strong_encryption: Optional[list[str]] = None,
+        weak_encryption: Optional[list[str]] = None,
         require_encryption: bool = True,
     ):
         """Initialize encryption policy.
@@ -242,7 +242,7 @@ class AuthenticationPolicy(BasePolicy):
     def __init__(
         self,
         required_auth: bool = True,
-        allowed_auth_methods: Optional[List[str]] = None,
+        allowed_auth_methods: Optional[list[str]] = None,
         min_password_length: int = 8,
     ):
         """Initialize authentication policy.

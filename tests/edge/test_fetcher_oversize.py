@@ -16,7 +16,7 @@ def test_fetcher_unsupported_protocols():
         try:
             mgr = SubscriptionManager(source)
             mgr.get_servers()
-            assert False, f"Fetcher must not support scheme: {url}"
+            raise AssertionError(f"Fetcher must not support scheme: {url}")
         except Exception as e:
             assert (
                 "unsupported" in str(e).lower()

@@ -1,0 +1,1 @@
+{"log":{"level":"info"},"dns":{"servers":[{"tag":"google","address":"8.8.8.8","detours":["direct"]}],"rules":[{"type":"default","domain":["example.com"],"server":"google"}],"final":"google"},"inbounds":[{"type":"mixed","tag":"mixed-in","listen":"127.0.0.1","listen_port":1080}],"outbounds":[{"type":"direct","tag":"direct"}]}

@@ -9,7 +9,7 @@ Implements Phase 3 architecture with profile integration.
 """
 
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ...logging.core import get_logger
@@ -46,7 +46,7 @@ class LoggingMiddleware(ChainableMiddleware):
 
     middleware_type = "logging"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize logging middleware.
 
         Args:
@@ -67,7 +67,7 @@ class LoggingMiddleware(ChainableMiddleware):
 
     def pre_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> None:
@@ -110,7 +110,7 @@ class LoggingMiddleware(ChainableMiddleware):
 
     def post_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> None:
@@ -162,11 +162,11 @@ class LoggingMiddleware(ChainableMiddleware):
 
     def _do_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
-        """Main processing logic - pass through with logging.
+    ) -> list[ParsedServer]:
+        """Execute main processing logic - pass through with logging.
 
         Args:
             servers: List of servers to process
@@ -186,7 +186,7 @@ class LoggingMiddleware(ChainableMiddleware):
         # Pass through servers unchanged
         return servers
 
-    def _extract_log_config(self, profile: Optional[FullProfile]) -> Dict[str, Any]:
+    def _extract_log_config(self, profile: Optional[FullProfile]) -> dict[str, Any]:
         """Extract logging configuration from profile.
 
         Args:
@@ -223,7 +223,7 @@ class LoggingMiddleware(ChainableMiddleware):
         return log_config
 
     def _log_server_details(
-        self, servers: List[ParsedServer], context: PipelineContext, stage: str
+        self, servers: list[ParsedServer], context: PipelineContext, stage: str
     ) -> None:
         """Log details about servers.
 
@@ -266,7 +266,7 @@ class LoggingMiddleware(ChainableMiddleware):
             )
 
     def _log_performance_metrics(
-        self, servers: List[ParsedServer], context: PipelineContext, duration: float
+        self, servers: list[ParsedServer], context: PipelineContext, duration: float
     ) -> None:
         """Log performance metrics.
 
@@ -276,7 +276,7 @@ class LoggingMiddleware(ChainableMiddleware):
             duration: Processing duration in seconds
 
         """
-        metrics = {
+        metrics: dict[str, Any] = {
             "total_servers": len(servers),
             "duration_seconds": round(duration, 3),
             "servers_per_second": (
@@ -287,7 +287,7 @@ class LoggingMiddleware(ChainableMiddleware):
         }
 
         # Count servers by type
-        server_types = {}
+        server_types: dict[str, int] = {}
         for server in servers:
             server_types[server.type] = server_types.get(server.type, 0) + 1
         metrics["server_types"] = server_types
@@ -305,7 +305,7 @@ class LoggingMiddleware(ChainableMiddleware):
             )
 
     def _log_server_errors(
-        self, servers: List[ParsedServer], context: PipelineContext
+        self, servers: list[ParsedServer], context: PipelineContext
     ) -> None:
         """Log any errors found in server data.
 
@@ -374,7 +374,7 @@ class LoggingMiddleware(ChainableMiddleware):
 
     def can_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> bool:
@@ -400,7 +400,7 @@ class LoggingMiddleware(ChainableMiddleware):
 
         return True
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get metadata about logging middleware.
 
         Returns:

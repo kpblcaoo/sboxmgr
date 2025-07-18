@@ -8,7 +8,7 @@ Implements Phase 3 architecture with profile integration.
 """
 
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
@@ -43,7 +43,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
 
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize latency sort processor with configuration.
 
         Args:
@@ -58,16 +58,16 @@ class LatencySortPostProcessor(ChainablePostProcessor):
         self.cache_duration_seconds = self.config.get("cache_duration_seconds", 300)
         self.fallback_latency = self.config.get("fallback_latency", 999999)
         self.remove_unreachable = self.config.get("remove_unreachable", False)
-        self._latency_cache: Dict[
-            str, Tuple[float, float]
+        self._latency_cache: dict[
+            str, tuple[float, float]
         ] = {}  # server_key -> (latency, timestamp)
 
     def _do_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Sort servers based on latency measurements.
 
         Args:
@@ -117,7 +117,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
 
         return sorted_servers
 
-    def _extract_latency_config(self, profile: Optional[FullProfile]) -> Dict[str, Any]:
+    def _extract_latency_config(self, profile: Optional[FullProfile]) -> dict[str, Any]:
         """Extract latency configuration from profile.
 
         Args:
@@ -156,7 +156,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
     def _get_server_latency(
         self,
         server: ParsedServer,
-        latency_config: Dict[str, Any],
+        latency_config: dict[str, Any],
         context: Optional[PipelineContext] = None,
     ) -> float:
         """Get latency measurement for a server.
@@ -218,7 +218,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
         return latency
 
     def _measure_ping_latency(
-        self, server: ParsedServer, config: Dict[str, Any]
+        self, server: ParsedServer, config: dict[str, Any]
     ) -> float:
         """Measure latency using ICMP ping.
 
@@ -250,7 +250,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
 
             time.time()
             result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=timeout_sec
+                cmd, check=False, capture_output=True, text=True, timeout=timeout_sec
             )
 
             if result.returncode == 0:
@@ -267,7 +267,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             return config["fallback_latency"]
 
     def _measure_tcp_latency(
-        self, server: ParsedServer, config: Dict[str, Any]
+        self, server: ParsedServer, config: dict[str, Any]
     ) -> float:
         """Measure latency using TCP connection.
 
@@ -299,7 +299,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             return config["fallback_latency"]
 
     def _measure_http_latency(
-        self, server: ParsedServer, config: Dict[str, Any]
+        self, server: ParsedServer, config: dict[str, Any]
     ) -> float:
         """Measure latency using HTTP request.
 
@@ -331,11 +331,11 @@ class LatencySortPostProcessor(ChainablePostProcessor):
 
     def pre_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
     ) -> None:
-        """Setup before latency measurements.
+        """Set up before latency measurements.
 
         Args:
             servers: List of servers to be processed
@@ -354,7 +354,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
             del self._latency_cache[key]
 
     def can_process(
-        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+        self, servers: list[ParsedServer], context: Optional[PipelineContext] = None
     ) -> bool:
         """Check if latency sorting can be applied.
 
@@ -368,7 +368,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
         """
         return len(servers) > 1  # Only useful if there are multiple servers to sort
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get metadata about this postprocessor.
 
         Returns:

@@ -4,7 +4,7 @@ import asyncio
 import threading
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -88,8 +88,8 @@ class Event(BaseModel):
     data: EventData
     cancelled: bool = False
     processed: bool = False
-    results: List[Any] = Field(default_factory=list)
-    errors: List[Exception] = Field(default_factory=list)
+    results: list[Any] = Field(default_factory=list)
+    errors: list[Exception] = Field(default_factory=list)
 
     def cancel(self) -> None:
         """Cancel event processing."""
@@ -147,11 +147,11 @@ class EventManager:
             max_handlers: Maximum number of handlers to register
 
         """
-        self._handlers: List[EventHandler] = []
+        self._handlers: list[EventHandler] = []
         self._max_handlers = max_handlers
         self._lock = threading.RLock()
         self._enabled = True
-        self._event_history: List[Event] = []
+        self._event_history: list[Event] = []
         self._max_history = 1000
 
     def register_handler(self, handler: EventHandler) -> None:
@@ -280,7 +280,7 @@ class EventManager:
 
     def get_handlers(
         self, event_type: Optional[EventType] = None
-    ) -> List[EventHandler]:
+    ) -> list[EventHandler]:
         """Get registered handlers, optionally filtered by event type.
 
         Args:
@@ -317,7 +317,7 @@ class EventManager:
         with self._lock:
             self._handlers.clear()
 
-    def get_event_history(self, limit: Optional[int] = None) -> List[Event]:
+    def get_event_history(self, limit: Optional[int] = None) -> list[Event]:
         """Get event processing history.
 
         Args:
@@ -397,7 +397,7 @@ class EventManager:
         except Exception as e:
             return e
 
-    def _get_applicable_handlers(self, event_data: EventData) -> List[EventHandler]:
+    def _get_applicable_handlers(self, event_data: EventData) -> list[EventHandler]:
         """Get handlers that can process the given event."""
         with self._lock:
             return [h for h in self._handlers if h.can_handle(event_data)]

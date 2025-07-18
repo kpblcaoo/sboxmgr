@@ -27,8 +27,41 @@ initialize_logging(logging_config)
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
 
+class MockResponse:
+    def __init__(self, content=b"dummy", status_code=200):
+        self.content = content
+        self.status_code = status_code
+        self.raw = type(
+            "MockRaw", (), {"read": lambda self, *args, **kwargs: content}
+        )()
+        self.text = (
+            content.decode("utf-8") if isinstance(content, bytes) else str(content)
+        )
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise Exception(f"HTTP {self.status_code}")
+        return self
+
+
+@pytest.fixture(autouse=True)
+def mock_requests_get(monkeypatch):
+    def mock_get(url, **kwargs):
+        # Return mock subscription data for test URLs
+        if "mock-subscription.example.com" in url or "example.com" in url:
+            # Mock base64 encoded subscription data
+            mock_data = (
+                "dm1lc3M6Ly9leGFtcGxlLXV1aWQxQGV4YW1wbGUuY29tOjQ0MyNFeGFtcGxlIFZNZXNz"
+            )
+            return MockResponse(content=mock_data.encode("utf-8"), status_code=200)
+        return MockResponse()
+
+    monkeypatch.setattr("requests.get", mock_get)
+
+
 def run_cli(args, env=None, cwd=None):
     """Вспомогательная функция для вызова CLI с capture_output.
+
     exclusions.json и selected_config.json будут создаваться в cwd (tmp_path) через env.
     """
     if env is None:
@@ -41,6 +74,7 @@ def run_cli(args, env=None, cwd=None):
     env["SBOXMGR_LOG_FILE"] = str(Path(cwd) / "test.log")
     result = subprocess.run(
         [sys.executable, "src/sboxmgr/cli/main.py"] + args,
+        check=False,
         capture_output=True,
         text=True,
         env=env,
@@ -79,9 +113,10 @@ def cleanup_files(tmp_path, monkeypatch):
 @pytest.fixture(autouse=True)
 def mock_logging_setup():
     """Mock sboxmgr logging setup to prevent initialization errors during test collection."""
-    with patch("sboxmgr.logging.core.initialize_logging") as mock_init, patch(
-        "sboxmgr.logging.core.get_logger"
-    ) as mock_get_logger:
+    with (
+        patch("sboxmgr.logging.core.initialize_logging") as mock_init,
+        patch("sboxmgr.logging.core.get_logger") as mock_get_logger,
+    ):
         mock_init.return_value = None
         mock_get_logger.return_value = MagicMock()
         yield
@@ -119,12 +154,14 @@ def test_subscription_url():
 
     Returns:
         str: Real subscription URL if TEST_URL is set, otherwise mock URL.
+
     """
     url = os.getenv("TEST_URL")
     if url and not os.getenv("SKIP_EXTERNAL_TESTS"):
         return url
     else:
-        return "mock://test-data"
+        # Return a URL that will be handled by the mock_requests_get fixture
+        return "https://mock-subscription.example.com/test"
 
 
 @pytest.fixture
@@ -133,6 +170,7 @@ def real_subscription_available():
 
     Returns:
         bool: True if TEST_URL is set and external tests are enabled.
+
     """
     return bool(os.getenv("TEST_URL") and not os.getenv("SKIP_EXTERNAL_TESTS"))
 
@@ -143,6 +181,7 @@ def sample_parsed_servers():
 
     Returns:
         list: List of ParsedServer objects with realistic test data.
+
     """
     return [
         ParsedServer(
@@ -180,6 +219,7 @@ def mock_pipeline_result_success(sample_parsed_servers):
 
     Returns:
         PipelineResult: Mock successful result with sample servers.
+
     """
     return PipelineResult(
         config=sample_parsed_servers,
@@ -195,6 +235,7 @@ def mock_pipeline_result_failure():
 
     Returns:
         PipelineResult: Mock failed result.
+
     """
     return PipelineResult(
         config=None,

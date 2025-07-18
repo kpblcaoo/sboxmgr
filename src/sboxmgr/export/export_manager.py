@@ -12,7 +12,7 @@ Phase 4 enhancements:
 - Backward compatibility with existing export workflows
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from sboxmgr.configs.models import FullProfile
 from sboxmgr.logging import get_logger
@@ -68,7 +68,7 @@ class ExportManager:
         export_format="singbox",
         client_profile: Optional[ClientProfile] = None,
         postprocessor_chain: Optional["PostProcessorChain"] = None,
-        middleware_chain: Optional[List["BaseMiddleware"]] = None,
+        middleware_chain: Optional[list["BaseMiddleware"]] = None,
         profile: Optional[FullProfile] = None,
     ):
         """Initialize export manager with configuration and middleware components.
@@ -100,13 +100,13 @@ class ExportManager:
 
     def export(
         self,
-        servers: List[ParsedServer],
-        exclusions: Optional[List[str]] = None,
-        user_routes: Optional[List[Dict]] = None,
-        context: Union[Dict[str, Any], PipelineContext] = None,
+        servers: list[ParsedServer],
+        exclusions: Optional[list[str]] = None,
+        user_routes: Optional[list[dict]] = None,
+        context: Union[dict[str, Any], PipelineContext] = None,
         client_profile: Optional[ClientProfile] = None,
         profile: Optional[FullProfile] = None,
-    ) -> Dict:
+    ) -> dict:
         """Export servers to configuration format with optional middleware processing.
 
         Args:
@@ -215,13 +215,13 @@ class ExportManager:
 
     def export_to_singbox(
         self,
-        servers: List[ParsedServer],
-        routes: Optional[List[Dict]] = None,
+        servers: list[ParsedServer],
+        routes: Optional[list[dict]] = None,
         client_profile: Optional[ClientProfile] = None,
         apply_phase3_processing: bool = True,
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> Dict:
+    ) -> dict:
         """Simplified method for exporting to sing-box format with middleware support.
 
         Provides a direct interface for sing-box export with optional middleware
@@ -287,7 +287,6 @@ class ExportManager:
             New ExportManager instance configured from profile.
 
         """
-
         # Configure PostProcessorChain from profile
         postprocessor_chain = None
         if hasattr(profile, "filter") and profile.filter:
@@ -316,7 +315,7 @@ class ExportManager:
 
     def _extract_postprocessor_config(
         self, profile: FullProfile
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[dict[str, Any]]:
         """Extract postprocessor configuration from profile.
 
         Args:
@@ -353,7 +352,7 @@ class ExportManager:
         return config if config else None
 
     def _create_postprocessor_chain(
-        self, config: Dict[str, Any]
+        self, config: dict[str, Any]
     ) -> Optional["PostProcessorChain"]:
         """Create PostProcessorChain from configuration.
 
@@ -364,7 +363,6 @@ class ExportManager:
             Configured PostProcessorChain or None.
 
         """
-
         from sboxmgr.subscription.postprocessors import (
             GeoFilterPostProcessor,
             LatencySortPostProcessor,
@@ -394,8 +392,8 @@ class ExportManager:
         return None
 
     def _create_middleware_chain(
-        self, config: Dict[str, Any]
-    ) -> List["BaseMiddleware"]:
+        self, config: dict[str, Any]
+    ) -> list["BaseMiddleware"]:
         """Create middleware chain from configuration.
 
         Args:
@@ -405,7 +403,6 @@ class ExportManager:
             List of configured middleware components.
 
         """
-
         middleware_chain = []
 
         # Add tag normalizer middleware (always enabled for consistent behavior)
@@ -448,7 +445,7 @@ class ExportManager:
         """
         return self.postprocessor_chain is not None or len(self.middleware_chain) > 0
 
-    def get_processing_metadata(self) -> Dict[str, Any]:
+    def get_processing_metadata(self) -> dict[str, Any]:
         """Get metadata about configured processing components.
 
         Returns:
@@ -486,7 +483,6 @@ class ExportManager:
             client_profile: Client profile with configuration
 
         """
-
         try:
             from sboxmgr.subscription.middleware import (
                 OutboundFilterMiddleware,
@@ -528,7 +524,6 @@ class ExportManager:
         TagNormalizer is always added to provide consistent server naming
         across different User-Agent types and parsers.
         """
-
         try:
             from sboxmgr.subscription.middleware import TagNormalizer
 

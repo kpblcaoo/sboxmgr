@@ -9,7 +9,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.sboxmgr.profiles.models import FilterProfile, FullProfile
+from sboxmgr.configs.models import FilterProfile, FullProfile
 from src.sboxmgr.subscription.models import ParsedServer, PipelineContext
 from src.sboxmgr.subscription.postprocessors import (
     BasePostProcessor,

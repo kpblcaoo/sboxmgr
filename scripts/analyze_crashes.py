@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""
-Analyze collected crashes from fuzz testing to identify patterns and issues.
-"""
+"""Analyze collected crashes from fuzz testing to identify patterns and issues."""
+
 import json
 import re
 from collections import Counter, defaultdict
@@ -31,7 +30,7 @@ def analyze_crashes():
 
     for crash_file in crash_files:
         try:
-            with open(crash_file, "r") as f:
+            with open(crash_file) as f:
                 crash_data = json.load(f)
 
             # Extract error message

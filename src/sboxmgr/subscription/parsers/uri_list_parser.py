@@ -11,7 +11,7 @@ import binascii
 import json
 import logging
 import re
-from typing import List, Optional, Tuple
+from typing import Optional
 from urllib.parse import parse_qs, unquote, urlparse
 
 from sboxmgr.utils.env import get_debug_level
@@ -40,7 +40,7 @@ class URIListParser(BaseParser):
     - Better error recovery and fallback mechanisms
     """
 
-    def parse(self, raw: bytes) -> List[ParsedServer]:
+    def parse(self, raw: bytes) -> list[ParsedServer]:
         """Parse URI list subscription data into ParsedServer objects.
 
         Args:
@@ -81,38 +81,34 @@ class URIListParser(BaseParser):
                     ss = self._parse_ss(line)
                     if ss and ss.address != "invalid":
                         servers.append(ss)
-                    else:
-                        if debug_level > 0:
-                            logger.warning(
-                                f"Failed to parse ss:// line {line_num}: {line[:100]}..."
-                            )
+                    elif debug_level > 0:
+                        logger.warning(
+                            f"Failed to parse ss:// line {line_num}: {line[:100]}..."
+                        )
                 elif line.startswith("vless://"):
                     vless = self._parse_vless(line)
                     if vless:
                         servers.append(vless)
-                    else:
-                        if debug_level > 0:
-                            logger.warning(
-                                f"Failed to parse vless:// line {line_num}: {line[:100]}..."
-                            )
+                    elif debug_level > 0:
+                        logger.warning(
+                            f"Failed to parse vless:// line {line_num}: {line[:100]}..."
+                        )
                 elif line.startswith("vmess://"):
                     vmess = self._parse_vmess(line)
                     if vmess and vmess.address != "invalid":
                         servers.append(vmess)
-                    else:
-                        if debug_level > 0:
-                            logger.warning(
-                                f"Failed to parse vmess:// line {line_num}: {line[:100]}..."
-                            )
+                    elif debug_level > 0:
+                        logger.warning(
+                            f"Failed to parse vmess:// line {line_num}: {line[:100]}..."
+                        )
                 elif line.startswith("trojan://"):
                     trojan = self._parse_trojan(line)
                     if trojan:
                         servers.append(trojan)
-                    else:
-                        if debug_level > 0:
-                            logger.warning(
-                                f"Failed to parse trojan:// line {line_num}: {line[:100]}..."
-                            )
+                    elif debug_level > 0:
+                        logger.warning(
+                            f"Failed to parse trojan:// line {line_num}: {line[:100]}..."
+                        )
                 else:
                     if debug_level > 0:
                         logger.warning(
@@ -204,7 +200,7 @@ class URIListParser(BaseParser):
             # Fallback for malformed URL encoding
             return text
 
-    def _extract_ss_components(self, uri: str, line: str) -> Tuple[str, str]:
+    def _extract_ss_components(self, uri: str, line: str) -> tuple[str, str]:
         """Extract method:password and host:port components from SS URI.
 
         Enhanced to handle:
@@ -258,7 +254,7 @@ class URIListParser(BaseParser):
                     logger.warning(f"ss:// no host in line: {line[:100]}...")
                 return "", ""
 
-    def _parse_ss_credentials(self, method_pass: str, line: str) -> Tuple[str, str]:
+    def _parse_ss_credentials(self, method_pass: str, line: str) -> tuple[str, str]:
         """Parse method and password from method:password string.
 
         Enhanced to handle:
@@ -286,7 +282,7 @@ class URIListParser(BaseParser):
 
         return method, password
 
-    def _parse_ss_endpoint(self, host_port: str, line: str) -> Tuple[str, int, str]:
+    def _parse_ss_endpoint(self, host_port: str, line: str) -> tuple[str, int, str]:
         """Parse host and port from host:port string.
 
         Enhanced to handle:

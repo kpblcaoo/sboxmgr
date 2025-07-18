@@ -88,6 +88,7 @@ class MainScreen(Screen):
 
         Returns:
             The composed result containing the main screen widgets
+
         """
         yield Header()
 
@@ -137,6 +138,7 @@ class MainScreen(Screen):
 
         Returns:
             Static widget with current status information
+
         """
         app_state = self.app.state
 
@@ -181,6 +183,7 @@ class MainScreen(Screen):
 
         Returns:
             True if advanced options should be displayed
+
         """
         app_state = self.app.state
         return (
@@ -247,7 +250,7 @@ class MainScreen(Screen):
     def on_key(self, event) -> None:
         """Handle arrow key navigation for menu buttons."""
         # Собираем все кнопки меню
-        buttons = [w for w in self.query(".menu-buttons Button")]
+        buttons = list(self.query(".menu-buttons Button"))
         if not buttons:
             return
         focused = self.focused

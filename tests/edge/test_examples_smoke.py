@@ -15,7 +15,7 @@ def detect_source_type(filename):
         return "url_json"
     if filename.endswith(".txt"):
         # Простейшая эвристика: если есть vless://, vmess://, ss:// — uri_list
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(filename, encoding="utf-8") as f:
             data = f.read(2048)
             if any(
                 proto in data

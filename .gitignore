@@ -41,6 +41,7 @@ backup.json
 config.json
 __pycache__
 build/
+dist/
 *.egg-info/
 *.egg
 *.pyc
@@ -65,7 +66,8 @@ struct_src_index.json
 test_subscription.json
 
 # User configs (profiles → configs migration)
-configs/
+# Ignore user configs in project root, but not package code
+/configs/
 *.toml
 !config.template.toml
 !pyproject.toml

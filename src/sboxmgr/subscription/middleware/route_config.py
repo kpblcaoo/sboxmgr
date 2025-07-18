@@ -7,7 +7,7 @@ final route actions and other routing parameters.
 Implements Phase 3 architecture with profile integration.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ..models import ClientProfile, ParsedServer, PipelineContext
@@ -37,7 +37,7 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
 
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize route config with configuration.
 
         Args:
@@ -51,10 +51,10 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
 
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Configure routing parameters based on profile.
 
         Args:
@@ -96,7 +96,7 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
 
         return servers
 
-    def _extract_route_config(self, profile: Optional[FullProfile]) -> Dict[str, Any]:
+    def _extract_route_config(self, profile: Optional[FullProfile]) -> dict[str, Any]:
         """Extract routing configuration from profile.
 
         Args:
@@ -159,13 +159,17 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
         return route_config
 
     def can_process(
-        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+        self,
+        servers: list[ParsedServer],
+        context: PipelineContext,
+        profile: Optional[FullProfile] = None,
     ) -> bool:
         """Check if route configuration can be applied.
 
         Args:
             servers: List of servers
             context: Pipeline context
+            profile: Full profile configuration
 
         Returns:
             bool: True if route configuration is applicable
@@ -174,7 +178,7 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
         # This middleware can always process (it just configures context)
         return True
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get middleware metadata.
 
         Returns:

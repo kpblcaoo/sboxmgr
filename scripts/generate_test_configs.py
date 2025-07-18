@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Генерация тестовых конфигураций для всех протоколов sing-box.
-"""
+"""Генерация тестовых конфигураций для всех протоколов sing-box."""
 
 import json
 import os
@@ -9,7 +7,7 @@ import random
 import string
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Добавляем путь к проекту
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -37,7 +35,7 @@ class TestConfigGenerator:
         """Генерирует случайный IP адрес."""
         return f"192.168.{random.randint(1, 254)}.{random.randint(1, 254)}"
 
-    def generate_shadowsocks_config(self) -> Dict[str, Any]:
+    def generate_shadowsocks_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию Shadowsocks."""
         return {
             "type": "shadowsocks",
@@ -48,7 +46,7 @@ class TestConfigGenerator:
             "password": self.generate_random_string(16),
         }
 
-    def generate_vmess_config(self) -> Dict[str, Any]:
+    def generate_vmess_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию VMess."""
         return {
             "type": "vmess",
@@ -62,7 +60,7 @@ class TestConfigGenerator:
             "authenticated_length": True,
         }
 
-    def generate_vless_config(self) -> Dict[str, Any]:
+    def generate_vless_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию VLESS."""
         return {
             "type": "vless",
@@ -73,7 +71,7 @@ class TestConfigGenerator:
             "flow": "",
         }
 
-    def generate_trojan_config(self) -> Dict[str, Any]:
+    def generate_trojan_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию Trojan."""
         return {
             "type": "trojan",
@@ -84,7 +82,7 @@ class TestConfigGenerator:
             "tls": {"enabled": True, "server_name": "example.com", "insecure": True},
         }
 
-    def generate_hysteria2_config(self) -> Dict[str, Any]:
+    def generate_hysteria2_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию Hysteria2."""
         return {
             "type": "hysteria2",
@@ -95,7 +93,7 @@ class TestConfigGenerator:
             "tls": {"enabled": True, "server_name": "example.com", "insecure": True},
         }
 
-    def generate_wireguard_config(self) -> Dict[str, Any]:
+    def generate_wireguard_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию WireGuard."""
         return {
             "type": "wireguard",
@@ -108,7 +106,7 @@ class TestConfigGenerator:
             "mtu": 1408,
         }
 
-    def generate_tuic_config(self) -> Dict[str, Any]:
+    def generate_tuic_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию TUIC."""
         return {
             "type": "tuic",
@@ -124,7 +122,7 @@ class TestConfigGenerator:
             "tls": {"enabled": True, "server_name": "example.com", "insecure": True},
         }
 
-    def generate_http_config(self) -> Dict[str, Any]:
+    def generate_http_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию HTTP."""
         return {
             "type": "http",
@@ -135,7 +133,7 @@ class TestConfigGenerator:
             "password": self.generate_random_string(16),
         }
 
-    def generate_socks_config(self) -> Dict[str, Any]:
+    def generate_socks_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию SOCKS."""
         return {
             "type": "socks",
@@ -146,7 +144,7 @@ class TestConfigGenerator:
             "password": self.generate_random_string(16),
         }
 
-    def generate_mixed_config(self) -> Dict[str, Any]:
+    def generate_mixed_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию Mixed."""
         return {
             "type": "mixed",
@@ -161,19 +159,19 @@ class TestConfigGenerator:
             ],
         }
 
-    def generate_direct_config(self) -> Dict[str, Any]:
+    def generate_direct_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию Direct."""
         return {"type": "direct", "tag": f"direct-{self.generate_random_string()}"}
 
-    def generate_dns_config(self) -> Dict[str, Any]:
+    def generate_dns_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию DNS."""
         return {"type": "dns", "tag": f"dns-{self.generate_random_string()}"}
 
-    def generate_block_config(self) -> Dict[str, Any]:
+    def generate_block_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию Block."""
         return {"type": "block", "tag": f"block-{self.generate_random_string()}"}
 
-    def generate_selector_config(self) -> Dict[str, Any]:
+    def generate_selector_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию Selector."""
         return {
             "type": "selector",
@@ -182,7 +180,7 @@ class TestConfigGenerator:
             "default": "direct",
         }
 
-    def generate_urltest_config(self) -> Dict[str, Any]:
+    def generate_urltest_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию URLTest."""
         return {
             "type": "urltest",
@@ -193,7 +191,7 @@ class TestConfigGenerator:
             "tolerance": 50,
         }
 
-    def generate_anytls_config(self) -> Dict[str, Any]:
+    def generate_anytls_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию AnyTLS."""
         return {
             "type": "anytls",
@@ -204,7 +202,7 @@ class TestConfigGenerator:
             "tls": {"enabled": True, "server_name": "example.com", "insecure": True},
         }
 
-    def generate_ssh_config(self) -> Dict[str, Any]:
+    def generate_ssh_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию SSH."""
         return {
             "type": "ssh",
@@ -215,7 +213,7 @@ class TestConfigGenerator:
             "password": "admin",
         }
 
-    def generate_tor_config(self) -> Dict[str, Any]:
+    def generate_tor_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию Tor."""
         return {
             "type": "tor",
@@ -224,7 +222,7 @@ class TestConfigGenerator:
             "data_directory": "/tmp/tor-data",
         }
 
-    def generate_hysteria_config(self) -> Dict[str, Any]:
+    def generate_hysteria_config(self) -> dict[str, Any]:
         """Генерирует тестовую конфигурацию Hysteria (старая версия)."""
         return {
             "type": "hysteria",
@@ -237,7 +235,7 @@ class TestConfigGenerator:
             "tls": {"enabled": True, "server_name": "example.com", "insecure": True},
         }
 
-    def generate_full_config(self, protocol: str) -> Dict[str, Any]:
+    def generate_full_config(self, protocol: str) -> dict[str, Any]:
         """Генерирует полную конфигурацию sing-box для протокола."""
         # Генерируем outbound конфигурацию
         outbound_generators = {
@@ -290,7 +288,7 @@ class TestConfigGenerator:
 
         return config
 
-    def generate_all_configs(self) -> Dict[str, Dict[str, Any]]:
+    def generate_all_configs(self) -> dict[str, dict[str, Any]]:
         """Генерирует конфигурации для всех протоколов."""
         protocols = [
             "shadowsocks",

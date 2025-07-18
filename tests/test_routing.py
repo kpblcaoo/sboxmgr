@@ -114,7 +114,7 @@ def test_default_router_complete_rule_set():
         )
     ]
     exclusions = ["192.168.1.1", "example.com"]
-    user_routes = [{"domain": ["google.com"], "outbound": "direct"}]
+    user_routes = [{"domain": ["google.com"], "outbound": "auto"}]
 
     routes = router.generate_routes(
         servers, exclusions, user_routes, context={"debug_level": 0}
@@ -143,7 +143,7 @@ def test_default_router_complete_rule_set():
     assert any(
         "domain" in rule
         and "google.com" in rule["domain"]
-        and rule["outbound"] == "direct"
+        and rule["outbound"] == "auto"
         for rule in routes
     )
 

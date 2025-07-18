@@ -4,13 +4,13 @@ import base64
 import json
 import logging
 import re
-from typing import Any, List, Optional, Protocol
+from typing import Any, Optional, Protocol
 
 
 class ParserProtocol(Protocol):
     """Protocol for parser objects that can parse subscription data."""
 
-    def parse(self, raw: bytes) -> List[Any]:
+    def parse(self, raw: bytes) -> list[Any]:
         """Parse raw subscription data into server configurations."""
         ...
 
@@ -24,6 +24,7 @@ def detect_parser(raw: bytes, source_type: str) -> Optional[ParserProtocol]:
 
     Returns:
         Parser instance or None if detection fails.
+
     """
     # Декодируем данные
     text = raw.decode("utf-8", errors="ignore")
@@ -45,6 +46,7 @@ def _get_explicit_parser(source_type: str) -> Optional[ParserProtocol]:
 
     Returns:
         Parser instance or None if type not recognized.
+
     """
     if source_type in ("url_json", "file_json"):
         from ..parsers.singbox_parser import SingBoxParser
@@ -70,6 +72,7 @@ def _auto_detect_parser(text: str) -> ParserProtocol:
 
     Returns:
         Parser instance (fallback to Base64Parser if detection fails).
+
     """
     # 1. Пробуем JSON (SingBox)
     json_parser = _try_json_parser(text)
@@ -105,6 +108,7 @@ def _try_json_parser(text: str) -> Optional[ParserProtocol]:
 
     Returns:
         SingBoxParser if JSON detected, None otherwise.
+
     """
     try:
         from ..parsers.singbox_parser import SingBoxParser
@@ -126,6 +130,7 @@ def _try_clash_parser(text: str) -> Optional[ParserProtocol]:
 
     Returns:
         ClashParser if Clash format detected, None otherwise.
+
     """
     # Check for Clash YAML indicators
     clash_indicators = [
@@ -154,6 +159,7 @@ def _try_base64_parser(text: str) -> Optional[ParserProtocol]:
 
     Returns:
         Base64Parser if base64 detected, None otherwise.
+
     """
     # Check if text looks like base64
     b64_re = re.compile(r"^[A-Za-z0-9+/=\s]+$")
@@ -184,6 +190,7 @@ def _try_uri_list_parser(text: str) -> Optional[ParserProtocol]:
 
     Returns:
         URIListParser if URI list detected, None otherwise.
+
     """
     lines = text.splitlines()
     proxy_protocols = ("vless://", "vmess://", "trojan://", "ss://")

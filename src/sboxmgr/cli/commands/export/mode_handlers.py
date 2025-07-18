@@ -40,6 +40,7 @@ def run_agent_check(config_file: str, agent_check: bool) -> bool:
 
     Returns:
         True if check passed or skipped, False if failed
+
     """
     if not agent_check:
         return True
@@ -90,6 +91,7 @@ def handle_profile_generation(
 
     Raises:
         typer.Exit: Always exits with code 0
+
     """
     postprocessors_list = (
         [p.strip() for p in postprocessors.split(",") if p.strip()]
@@ -111,6 +113,7 @@ def handle_validate_only_mode(output: str) -> None:
 
     Raises:
         typer.Exit: On validation failure or success
+
     """
     config_file = output
     if not os.path.exists(config_file):
@@ -165,6 +168,7 @@ def process_export_mode(
 
     Raises:
         typer.Exit: On processing failure
+
     """
     # Create backup if needed
     backup_file = None
@@ -259,6 +263,7 @@ def handle_legacy_modes(
 
     Raises:
         typer.Exit: On processing failure or success
+
     """
     # Generate configuration from subscription
     config_data = generate_config_from_subscription(

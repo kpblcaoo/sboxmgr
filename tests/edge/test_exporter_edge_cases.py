@@ -87,8 +87,8 @@ def test_failtolerance_skip_unsupported_type(caplog):
     ]
     config = singbox_export(servers, routes=[])
     tags = [o["tag"] for o in config["outbounds"]]
-    assert "ok.com" in tags
-    assert "ok2.com" in tags
+    assert "vmess-ok.com" in tags
+    assert "shadowsocks-ok2.com" in tags
     # wireguard не должен попасть
     for outbound in config["outbounds"]:
         assert outbound["type"] != "wireguard"
@@ -261,11 +261,9 @@ def test_inbounds_valid_profile():
 
 def test_inbounds_invalid_bind():
     """Тест: SEC — bind-to-all (0.0.0.0) должен вызывать ошибку валидации для неразрешенных типов."""
-    # socks разрешен для 0.0.0.0, поэтому не должен вызывать ошибку
-    inbound = InboundProfile(type="socks", listen="0.0.0.0", port=10808)
-    assert inbound.listen == "0.0.0.0"
-
-    # dns НЕ разрешен для 0.0.0.0, должен вызывать ошибку
+    # socks и dns НЕ разрешены для 0.0.0.0, должны вызывать ошибку
+    with pytest.raises(ValueError):
+        InboundProfile(type="socks", listen="0.0.0.0", port=10808)
     with pytest.raises(ValueError):
         InboundProfile(type="dns", listen="0.0.0.0", port=53)
 

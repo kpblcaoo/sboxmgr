@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""
-Build complete sing-box schema by analyzing documentation and existing models.
-"""
+"""Build complete sing-box schema by analyzing documentation and existing models."""
+
 import json
 import re
 from pathlib import Path
@@ -12,7 +11,7 @@ def extract_protocol_fields(doc_path):
     if not doc_path.exists():
         return {}
 
-    with open(doc_path, "r", encoding="utf-8") as f:
+    with open(doc_path, encoding="utf-8") as f:
         content = f.read()
 
     fields = {}
@@ -123,11 +122,10 @@ def compare_with_existing_models(schema):
     sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
     try:
-        from sboxmgr.models import SingBoxConfig
+        # Note: SingBoxConfig is not used in this script, but kept for reference
+        # from sboxmgr.models import SingBoxConfig
 
         # Get existing outbound types
-        existing_outbounds = set()
-        existing_inbounds = set()
 
         # This is a simplified check - in reality we'd need to inspect the models more thoroughly
         print("📋 Existing models found:")

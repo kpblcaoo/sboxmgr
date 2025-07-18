@@ -6,7 +6,7 @@ lists and user preferences into client-specific routing configurations.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class BaseRoutingPlugin(ABC):
@@ -21,11 +21,11 @@ class BaseRoutingPlugin(ABC):
     @abstractmethod
     def generate_routes(
         self,
-        servers: List[Any],  # ParsedServer
-        exclusions: List[str],
-        user_routes: List[Dict],
-        context: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict]:
+        servers: list[Any],  # ParsedServer
+        exclusions: list[str],
+        user_routes: list[dict],
+        context: Optional[dict[str, Any]] = None,
+    ) -> list[dict]:
         """Generate routing rules for the given servers and configuration.
 
         Args:

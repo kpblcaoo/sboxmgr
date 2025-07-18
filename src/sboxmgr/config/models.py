@@ -9,7 +9,7 @@ Implements ADR-0009 Configuration System Architecture with:
 
 import os
 from pathlib import Path
-from typing import Dict, List, Literal, Optional
+from typing import Literal, Optional
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings
@@ -34,11 +34,11 @@ class LoggingConfig(BaseSettings):
     )
 
     # Sink configuration
-    sinks: List[str] = Field(
+    sinks: list[str] = Field(
         default=["auto"],
         description="Logging sinks (auto, stdout, journald, syslog, file)",
     )
-    sink_levels: Dict[str, str] = Field(
+    sink_levels: dict[str, str] = Field(
         default_factory=dict, description="Per-sink log level overrides"
     )
 
@@ -258,14 +258,14 @@ class AppConfig(BaseSettings):
 
         return self
 
-    def dump_config(self) -> Dict:
+    def dump_config(self) -> dict:
         """Export configuration as dictionary for debugging.
 
         Used by --dump-config command to show resolved configuration.
         """
         return self.dict(exclude_unset=False, exclude_none=False)
 
-    def generate_json_schema(self) -> Dict:
+    def generate_json_schema(self) -> dict:
         """Generate JSON schema for configuration documentation."""
         return self.schema()
 
@@ -279,7 +279,7 @@ def create_default_config() -> AppConfig:
     return AppConfig()
 
 
-def create_config_from_dict(data: Dict) -> AppConfig:
+def create_config_from_dict(data: dict) -> AppConfig:
     """Create configuration from dictionary data.
 
     Used for loading configuration from files or CLI arguments.

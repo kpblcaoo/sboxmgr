@@ -7,7 +7,7 @@ before export to client applications.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from sboxmgr.subscription.models import PipelineContext
 
@@ -28,8 +28,8 @@ class ValidationResult:
     def __init__(
         self,
         valid: bool,
-        errors: Optional[List[str]] = None,
-        valid_servers: Optional[List[Any]] = None,
+        errors: Optional[list[str]] = None,
+        valid_servers: Optional[list[Any]] = None,
     ):
         """Initialize validation result.
 
@@ -105,7 +105,7 @@ class NoOpRawValidator(BaseRawValidator):
     """
 
     def validate(self, raw: bytes, context: PipelineContext) -> ValidationResult:
-        """Always return successful validation.
+        """Return successful validation result.
 
         Args:
             raw: Raw subscription data (ignored).

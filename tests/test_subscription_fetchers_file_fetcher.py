@@ -217,9 +217,11 @@ class TestFileFetcherCaching:
         fetcher = FileFetcher(source)
 
         # Mock file operations
-        with patch("pathlib.Path.exists", return_value=True), patch(
-            "pathlib.Path.stat"
-        ) as mock_stat, patch("builtins.open", mock_open(read_data=b"test")):
+        with (
+            patch("pathlib.Path.exists", return_value=True),
+            patch("pathlib.Path.stat") as mock_stat,
+            patch("builtins.open", mock_open(read_data=b"test")),
+        ):
             mock_stat.return_value.st_size = 4  # Size of "test"
             fetcher.fetch()
 

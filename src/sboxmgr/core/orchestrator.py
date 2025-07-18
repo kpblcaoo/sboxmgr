@@ -7,7 +7,7 @@ unified interface for CLI and other consumers.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -55,7 +55,12 @@ class OrchestratorError(Exception):
     errors with context preservation and error chaining support.
     """
 
-    def __init__(self, message: str, operation: str = None, cause: Exception = None):
+    def __init__(
+        self,
+        message: str,
+        operation: Optional[str] = None,
+        cause: Optional[Exception] = None,
+    ):
         """Initialize orchestrator error.
 
         Args:
@@ -171,8 +176,8 @@ class Orchestrator:
         self,
         url: str,
         source_type: str = "url_base64",
-        user_routes: Optional[List[str]] = None,
-        exclusions: Optional[List[str]] = None,
+        user_routes: Optional[list[str]] = None,
+        exclusions: Optional[list[str]] = None,
         mode: Optional[str] = None,
         force_reload: bool = False,
         **kwargs,
@@ -258,9 +263,9 @@ class Orchestrator:
             else:
                 raise OrchestratorError(
                     error_msg, operation="get_subscription_servers", cause=e
-                )
+                ) from e
 
-    def manage_exclusions(self, action: str, **kwargs) -> Dict[str, Any]:
+    def manage_exclusions(self, action: str, **kwargs) -> dict[str, Any]:
         """Unified interface for exclusion management operations.
 
         Provides a single entry point for all exclusion-related operations
@@ -355,17 +360,17 @@ class Orchestrator:
             else:
                 raise OrchestratorError(
                     error_msg, operation="manage_exclusions", cause=e
-                )
+                ) from e
 
     def export_configuration(
         self,
         source_url: str,
         source_type: str = "url_base64",
         export_format: str = "singbox",
-        exclusions: Optional[List[str]] = None,
-        user_routes: Optional[List[str]] = None,
+        exclusions: Optional[list[str]] = None,
+        user_routes: Optional[list[str]] = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Export subscription to client configuration format.
 
         Coordinates the complete process from subscription fetching through
@@ -468,7 +473,7 @@ class Orchestrator:
             else:
                 raise OrchestratorError(
                     error_msg, operation="export_configuration", cause=e
-                )
+                ) from e
 
     @classmethod
     def create_default(cls, **config_overrides) -> "Orchestrator":

@@ -1,6 +1,6 @@
 """Chain builders for postprocessors and middleware."""
 
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 import typer
 
@@ -28,7 +28,7 @@ except ImportError:
 
 
 def create_postprocessor_chain_from_list(
-    processors: List[str],
+    processors: list[str],
 ) -> Optional["PostProcessorChain"]:
     """Create PostProcessorChain from list of processor names.
 
@@ -40,8 +40,8 @@ def create_postprocessor_chain_from_list(
 
     Raises:
         typer.Exit: If invalid processor names found
-    """
 
+    """
     # Validate processor names
     validate_postprocessors(processors)
 
@@ -66,7 +66,7 @@ def create_postprocessor_chain_from_list(
     return None
 
 
-def create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
+def create_middleware_chain_from_list(middleware: list[str]) -> list[Any]:
     """Create middleware chain from list of middleware names.
 
     Args:
@@ -77,8 +77,8 @@ def create_middleware_chain_from_list(middleware: List[str]) -> List[Any]:
 
     Raises:
         typer.Exit: If invalid middleware names found
-    """
 
+    """
     # Validate middleware names
     validate_middleware(middleware)
 

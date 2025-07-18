@@ -1,3 +1,4 @@
+import json
 import os
 from unittest.mock import patch
 
@@ -26,14 +27,14 @@ def test_json_parser_debug_levels():
     with patch(
         "sboxmgr.subscription.parsers.json_parser.get_debug_level", return_value=0
     ):
-        with pytest.raises(Exception):
+        with pytest.raises((json.JSONDecodeError, ValueError)):
             parser.parse(invalid_json)
 
     # Test debug_level = 1 (no output for > 1 check)
     with patch(
         "sboxmgr.subscription.parsers.json_parser.get_debug_level", return_value=1
     ):
-        with pytest.raises(Exception):
+        with pytest.raises((json.JSONDecodeError, ValueError)):
             parser.parse(invalid_json)
 
     # Test debug_level = 2 (should trigger debug output)
@@ -41,7 +42,7 @@ def test_json_parser_debug_levels():
         "sboxmgr.subscription.parsers.json_parser.get_debug_level", return_value=2
     ):
         with patch("builtins.print") as mock_print:
-            with pytest.raises(Exception):
+            with pytest.raises((json.JSONDecodeError, ValueError)):
                 parser.parse(invalid_json)
             mock_print.assert_called_once()
             assert "[WARN] JSON parse error:" in mock_print.call_args[0][0]
@@ -89,7 +90,7 @@ def test_tolerant_json_parser_error_debug():
     with patch(
         "sboxmgr.subscription.parsers.json_parser.get_debug_level", return_value=0
     ):
-        with pytest.raises(Exception):
+        with pytest.raises((json.JSONDecodeError, ValueError)):
             parser.parse(invalid_json)
 
     # Test debug_level = 1 (should trigger debug output for errors)
@@ -97,7 +98,7 @@ def test_tolerant_json_parser_error_debug():
         "sboxmgr.subscription.parsers.json_parser.get_debug_level", return_value=1
     ):
         with patch("builtins.print") as mock_print:
-            with pytest.raises(Exception):
+            with pytest.raises((json.JSONDecodeError, ValueError)):
                 parser.parse(invalid_json)
             mock_print.assert_called()
             assert "JSON parse error after cleaning:" in mock_print.call_args[0][0]

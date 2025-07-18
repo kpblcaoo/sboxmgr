@@ -1,10 +1,6 @@
-"""Validation utilities for protocol models.
+"""Protocol validation utilities for subscription management."""
 
-This module provides utility functions for validating protocol configurations,
-generating schemas, and converting between different model types.
-"""
-
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from .outbound_models import (
     BlockOutbound,
@@ -32,7 +28,7 @@ from .protocol_configs import (
 )
 
 
-def validate_protocol_config(config: Dict[str, Any], protocol: str) -> ProtocolConfig:
+def validate_protocol_config(config: dict[str, Any], protocol: str) -> ProtocolConfig:
     """Validate protocol-specific configuration.
 
     Args:
@@ -44,6 +40,7 @@ def validate_protocol_config(config: Dict[str, Any], protocol: str) -> ProtocolC
 
     Raises:
         ValueError: If configuration is invalid
+
     """
     protocol_map = {
         "shadowsocks": ShadowsocksConfig,
@@ -59,10 +56,13 @@ def validate_protocol_config(config: Dict[str, Any], protocol: str) -> ProtocolC
         raise ValueError(f"Unsupported protocol: {protocol}")
 
     config_class = protocol_map[protocol]
-    return config_class(**config)
+    # Type cast to ensure mypy understands the return type
+    from typing import cast
+
+    return cast(ProtocolConfig, config_class(**config))
 
 
-def generate_protocol_schema(protocol: str) -> Dict[str, Any]:
+def generate_protocol_schema(protocol: str) -> dict[str, Any]:
     """Generate JSON schema for protocol configuration.
 
     Args:
@@ -70,6 +70,7 @@ def generate_protocol_schema(protocol: str) -> Dict[str, Any]:
 
     Returns:
         JSON schema dictionary
+
     """
     protocol_map = {
         "shadowsocks": ShadowsocksConfig,
@@ -84,10 +85,16 @@ def generate_protocol_schema(protocol: str) -> Dict[str, Any]:
     if protocol not in protocol_map:
         raise ValueError(f"Unsupported protocol: {protocol}")
 
-    return protocol_map[protocol].model_json_schema()
+    # Fix: Use model_json_schema() method instead of accessing it as attribute
+    config_class = protocol_map[protocol]
+    if hasattr(config_class, "model_json_schema"):
+        return config_class.model_json_schema()
+    else:
+        # Fallback for older Pydantic versions
+        return config_class.schema()  # type: ignore[attr-defined]
 
 
-def validate_outbound_config(config: Dict[str, Any]) -> OutboundModel:
+def validate_outbound_config(config: dict[str, Any]) -> OutboundModel:
     """Validate outbound configuration.
 
     Args:
@@ -98,6 +105,7 @@ def validate_outbound_config(config: Dict[str, Any]) -> OutboundModel:
 
     Raises:
         ValueError: If configuration is invalid
+
     """
     outbound_type = config.get("type", "")
 
@@ -123,13 +131,19 @@ def validate_outbound_config(config: Dict[str, Any]) -> OutboundModel:
     return outbound_class(**config)
 
 
-def generate_outbound_schema() -> Dict[str, Any]:
+def generate_outbound_schema() -> dict[str, Any]:
     """Generate JSON schema for outbound configuration.
 
     Returns:
         JSON schema dictionary for OutboundModel
+
     """
-    return OutboundConfig.model_json_schema()
+    # Fix: Use model_json_schema() method instead of accessing it as attribute
+    if hasattr(OutboundConfig, "model_json_schema"):
+        return OutboundConfig.model_json_schema()
+    else:
+        # Fallback for older Pydantic versions
+        return OutboundConfig.schema()
 
 
 def convert_protocol_to_outbound(
@@ -146,6 +160,7 @@ def convert_protocol_to_outbound(
 
     Raises:
         ValueError: If protocol type is not supported
+
     """
     if isinstance(protocol_config, ShadowsocksConfig):
         return ShadowsocksOutbound(
@@ -157,11 +172,10 @@ def convert_protocol_to_outbound(
             password=protocol_config.password,
             plugin=protocol_config.plugin,
             plugin_opts=protocol_config.plugin_opts,
-            local_address=(
-                [protocol_config.local_address]
-                if protocol_config.local_address
-                else None
-            ),
+            # Add required fields with defaults
+            tls=None,
+            local_address=None,
+            multiplex=None,
         )
 
     elif isinstance(protocol_config, VmessConfig):
@@ -181,17 +195,21 @@ def convert_protocol_to_outbound(
             server_port=protocol_config.server_port,
             uuid=user.id,
             security=user.security,
+            # Add required fields with defaults
+            tls=None,
+            local_address=None,
+            packet_encoding=None,
             multiplex=protocol_config.multiplex,
         )
 
     elif isinstance(protocol_config, VlessConfig):
         # Extract first user from settings for outbound
-        user = (
+        vless_user = (
             protocol_config.settings.clients[0]
             if protocol_config.settings.clients
             else None
         )
-        if not user:
+        if not vless_user:
             raise ValueError("VLESS config requires at least one user")
 
         return VlessOutbound(
@@ -199,8 +217,12 @@ def convert_protocol_to_outbound(
             tag=tag,
             server=protocol_config.server,
             server_port=protocol_config.server_port,
-            uuid=user.id,
-            flow=user.flow,
+            uuid=vless_user.id,
+            flow=vless_user.flow,
+            # Add required fields with defaults
+            tls=None,
+            local_address=None,
+            packet_encoding=None,
             multiplex=protocol_config.multiplex,
         )
 
@@ -212,6 +234,8 @@ def convert_protocol_to_outbound(
             server_port=protocol_config.server_port,
             password=protocol_config.password,
             tls=protocol_config.tls,
+            # Add required fields with defaults
+            local_address=None,
             multiplex=protocol_config.multiplex,
             fallback=protocol_config.fallback,
         )
@@ -229,6 +253,14 @@ def convert_protocol_to_outbound(
             peer_public_key=peer.public_key,
             mtu=protocol_config.interface.mtu,
             local_address=protocol_config.interface.address,
+            # Add required fields with defaults
+            server=None,
+            server_port=None,
+            tls=None,
+            multiplex=None,
+            keepalive=None,
+            peers=None,
+            reserved=None,
         )
 
     else:
@@ -236,7 +268,7 @@ def convert_protocol_to_outbound(
 
 
 def create_outbound_from_dict(
-    config: Dict[str, Any], tag: Optional[str] = None
+    config: dict[str, Any], tag: Optional[str] = None
 ) -> OutboundModel:
     """Create outbound configuration from dictionary.
 
@@ -246,6 +278,7 @@ def create_outbound_from_dict(
 
     Returns:
         Outbound configuration instance
+
     """
     # Add tag if provided
     if tag:

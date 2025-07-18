@@ -53,9 +53,10 @@ class TestFetchJson:
 
     def test_fetch_json_empty_response(self):
         """Test fetching empty JSON response."""
-        with patch("requests.get") as mock_get, patch(
-            "sboxmgr.config.fetch.error"
-        ) as mock_error:
+        with (
+            patch("requests.get") as mock_get,
+            patch("sboxmgr.config.fetch.error") as mock_error,
+        ):
             mock_response = Mock()
             mock_response.json.return_value = None
             mock_response.raise_for_status.return_value = None
@@ -68,9 +69,10 @@ class TestFetchJson:
 
     def test_fetch_json_timeout_error(self):
         """Test timeout error handling."""
-        with patch("requests.get", side_effect=requests.Timeout("Timeout")), patch(
-            "sboxmgr.config.fetch.error"
-        ) as mock_error:
+        with (
+            patch("requests.get", side_effect=requests.Timeout("Timeout")),
+            patch("sboxmgr.config.fetch.error") as mock_error,
+        ):
             result = fetch_json("https://example.com/config.json")
 
             assert result is None
@@ -80,9 +82,10 @@ class TestFetchJson:
 
     def test_fetch_json_http_error(self):
         """Test HTTP error handling."""
-        with patch("requests.get") as mock_get, patch(
-            "sboxmgr.config.fetch.error"
-        ) as mock_error:
+        with (
+            patch("requests.get") as mock_get,
+            patch("sboxmgr.config.fetch.error") as mock_error,
+        ):
             mock_response = Mock()
             mock_response.raise_for_status.side_effect = requests.HTTPError(
                 "404 Not Found"
@@ -97,9 +100,13 @@ class TestFetchJson:
 
     def test_fetch_json_connection_error(self):
         """Test connection error handling."""
-        with patch(
-            "requests.get", side_effect=requests.ConnectionError("Connection failed")
-        ), patch("sboxmgr.config.fetch.error") as mock_error:
+        with (
+            patch(
+                "requests.get",
+                side_effect=requests.ConnectionError("Connection failed"),
+            ),
+            patch("sboxmgr.config.fetch.error") as mock_error,
+        ):
             result = fetch_json("https://example.com/config.json")
 
             assert result is None
@@ -110,9 +117,10 @@ class TestFetchJson:
 
     def test_fetch_json_decode_error(self):
         """Test JSON decode error handling."""
-        with patch("requests.get") as mock_get, patch(
-            "sboxmgr.config.fetch.error"
-        ) as mock_error:
+        with (
+            patch("requests.get") as mock_get,
+            patch("sboxmgr.config.fetch.error") as mock_error,
+        ):
             mock_response = Mock()
             mock_response.json.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
             mock_response.raise_for_status.return_value = None
@@ -126,9 +134,10 @@ class TestFetchJson:
 
     def test_fetch_json_unexpected_error(self):
         """Test unexpected error handling."""
-        with patch("requests.get", side_effect=Exception("Unexpected error")), patch(
-            "sboxmgr.config.fetch.error"
-        ) as mock_error:
+        with (
+            patch("requests.get", side_effect=Exception("Unexpected error")),
+            patch("sboxmgr.config.fetch.error") as mock_error,
+        ):
             result = fetch_json("https://example.com/config.json")
 
             assert result is None
@@ -151,9 +160,12 @@ class TestSelectConfig:
             ]
         }
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"):
+        with (
+            patch(
+                "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
+            ),
+            patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"),
+        ):
             result = select_config(json_data, "server2", None)
 
             assert result == {
@@ -169,9 +181,12 @@ class TestSelectConfig:
             {"type": "shadowsocks", "tag": "server2", "server": "example2.com"},
         ]
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"):
+        with (
+            patch(
+                "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
+            ),
+            patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"),
+        ):
             result = select_config(outbounds, None, 1)
 
             assert result == {
@@ -191,9 +206,12 @@ class TestSelectConfig:
             ]
         }
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"):
+        with (
+            patch(
+                "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
+            ),
+            patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"),
+        ):
             result = select_config(json_data, None, 0)
 
             # Should select first valid outbound (vless), not direct
@@ -246,10 +264,15 @@ class TestSelectConfig:
             {"type": "vless", "tag": "server1", "server": "example1.com", "port": 443}
         ]
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions",
-            return_value={"exclusions": [{"id": "excluded_id"}]},
-        ), patch("sboxmgr.config.fetch.generate_server_id", return_value="excluded_id"):
+        with (
+            patch(
+                "sboxmgr.config.fetch.load_exclusions",
+                return_value={"exclusions": [{"id": "excluded_id"}]},
+            ),
+            patch(
+                "sboxmgr.config.fetch.generate_server_id", return_value="excluded_id"
+            ),
+        ):
             with pytest.raises(
                 ValueError,
                 match="Сервер с remarks 'server1' находится в списке исключённых",
@@ -262,10 +285,15 @@ class TestSelectConfig:
             {"type": "vless", "tag": "server1", "server": "example1.com", "port": 443}
         ]
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions",
-            return_value={"exclusions": [{"id": "excluded_id"}]},
-        ), patch("sboxmgr.config.fetch.generate_server_id", return_value="excluded_id"):
+        with (
+            patch(
+                "sboxmgr.config.fetch.load_exclusions",
+                return_value={"exclusions": [{"id": "excluded_id"}]},
+            ),
+            patch(
+                "sboxmgr.config.fetch.generate_server_id", return_value="excluded_id"
+            ),
+        ):
             with pytest.raises(
                 ValueError, match="Сервер с индексом 0 находится в списке исключённых"
             ):
@@ -275,8 +303,9 @@ class TestSelectConfig:
         """Test select_config with dry_run parameter."""
         outbounds = [{"type": "vless", "tag": "server1", "server": "example1.com"}]
 
-        with patch("sboxmgr.config.fetch.load_exclusions") as mock_load, patch(
-            "sboxmgr.config.fetch.generate_server_id", return_value="test_id"
+        with (
+            patch("sboxmgr.config.fetch.load_exclusions") as mock_load,
+            patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"),
         ):
             mock_load.return_value = {"exclusions": []}
 
@@ -296,9 +325,12 @@ class TestSelectConfig:
             {"type": "shadowsocks", "tag": "server2", "server": "example2.com"},
         ]
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"):
+        with (
+            patch(
+                "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
+            ),
+            patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"),
+        ):
             result = select_config(outbounds, "server2", None)
 
             assert result == {
@@ -333,9 +365,12 @@ class TestSelectConfigEdgeCases:
             ]
         }
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"):
+        with (
+            patch(
+                "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
+            ),
+            patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"),
+        ):
             # Test each type can be selected
             for i, outbound_type in enumerate(supported_types):
                 result = select_config(json_data, None, i)
@@ -355,9 +390,12 @@ class TestSelectConfigEdgeCases:
             ]
         }
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"):
+        with (
+            patch(
+                "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
+            ),
+            patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"),
+        ):
             # Index 0 should get first valid outbound (vless)
             result = select_config(json_data, None, 0)
             assert result["type"] == "vless"
@@ -384,10 +422,11 @@ class TestSelectConfigEdgeCases:
         def mock_generate_id(server):
             return f"{server['tag']}_id"
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions", return_value=exclusions
-        ), patch(
-            "sboxmgr.config.fetch.generate_server_id", side_effect=mock_generate_id
+        with (
+            patch("sboxmgr.config.fetch.load_exclusions", return_value=exclusions),
+            patch(
+                "sboxmgr.config.fetch.generate_server_id", side_effect=mock_generate_id
+            ),
         ):
             # server1 and server3 are excluded, only server2 should be selectable
             result = select_config(outbounds, "server2", None)
@@ -426,9 +465,12 @@ class TestSelectConfigEdgeCases:
             {"type": "vmess", "tag": "server3", "server": "example3.com"},  # Normal tag
         ]
 
-        with patch(
-            "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
-        ), patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"):
+        with (
+            patch(
+                "sboxmgr.config.fetch.load_exclusions", return_value={"exclusions": []}
+            ),
+            patch("sboxmgr.config.fetch.generate_server_id", return_value="test_id"),
+        ):
             # Should be able to select by index even without tag
             result = select_config(outbounds, None, 0)
             assert result["type"] == "vless"
@@ -493,9 +535,10 @@ class TestFetchJsonIntegration:
         ]
 
         for exception, expected_log in error_scenarios:
-            with patch("requests.get", side_effect=exception), patch(
-                "sboxmgr.config.fetch.error"
-            ) as mock_error:
+            with (
+                patch("requests.get", side_effect=exception),
+                patch("sboxmgr.config.fetch.error") as mock_error,
+            ):
                 result = fetch_json(test_url)
 
                 assert result is None

@@ -57,9 +57,9 @@ def test_list_servers_filters_service_outbounds(monkeypatch):
     )
 
     # Проверяем результат
-    assert (
-        result.exit_code == 0
-    ), f"Command failed with output: {result.stdout}\nError: {result.stderr}"
+    assert result.exit_code == 0, (
+        f"Command failed with output: {result.stdout}\nError: {result.stderr}"
+    )
     output = result.stdout
 
     # Должны быть только реальные серверы

@@ -1,7 +1,7 @@
 """Decorators for event handler registration."""
 
 import functools
-from typing import Any, Callable, Optional, Set
+from typing import Any, Callable, Optional
 
 from .core import EventHandler, get_event_manager
 from .types import EventData, EventType
@@ -13,7 +13,7 @@ class DecoratedEventHandler(EventHandler):
     def __init__(
         self,
         func: Callable,
-        event_types: Set[EventType],
+        event_types: set[EventType],
         source_filter: Optional[str] = None,
         priority: int = 50,
     ):
@@ -65,7 +65,7 @@ def event_handler(
         if auto_register:
             get_event_manager().register_handler(handler)
 
-        setattr(func, "_event_handler", handler)
+        func._event_handler = handler  # type: ignore[attr-defined]
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -95,7 +95,7 @@ def async_event_handler(
         if auto_register:
             get_event_manager().register_handler(handler)
 
-        setattr(func, "_event_handler", handler)
+        func._event_handler = handler  # type: ignore[attr-defined]
 
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):

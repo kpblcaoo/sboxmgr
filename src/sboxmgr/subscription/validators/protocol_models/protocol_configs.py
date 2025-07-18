@@ -4,7 +4,7 @@ This module provides detailed configuration models for specific VPN protocols
 including Shadowsocks, VMess, VLESS, Trojan, and WireGuard.
 """
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -31,12 +31,14 @@ class ShadowsocksConfig(BaseModel):
     plugin: Optional[str] = Field(
         None, description="Obfuscation plugin (e.g., v2ray-plugin)"
     )
-    plugin_opts: Optional[Dict[str, Any]] = Field(
+    plugin_opts: Optional[dict[str, Any]] = Field(
         None, description="Plugin obfuscation parameters"
     )
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
     @field_validator("method")
@@ -76,20 +78,23 @@ class VmessUser(BaseModel):
     alterId: int = Field(
         0, ge=0, le=65535, description="Number of alternative IDs (0-65535)"
     )
-    security: Optional[
-        Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]
-    ] = Field("auto", description="Encryption method")
+    security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = (
+        Field("auto", description="Encryption method")
+    )
     level: int = Field(0, ge=0, description="User level for access policy")
     email: Optional[str] = Field(None, description="Email for log identification")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class VmessSettings(BaseModel):
     """VMess protocol settings."""
 
-    clients: List[VmessUser] = Field(
+    clients: list[VmessUser] = Field(
         ..., description="List of users for authentication"
     )
     detour: Optional[str] = Field(None, description="Tag for connection redirection")
@@ -98,7 +103,10 @@ class VmessSettings(BaseModel):
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class VmessConfig(BaseModel):
@@ -116,7 +124,10 @@ class VmessConfig(BaseModel):
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 # VLESS
@@ -131,22 +142,28 @@ class VlessUser(BaseModel):
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class VlessSettings(BaseModel):
     """VLESS protocol settings."""
 
-    clients: List[VlessUser] = Field(
+    clients: list[VlessUser] = Field(
         ..., description="List of users for authentication"
     )
     decryption: str = Field("none", description="Decryption method (must be 'none')")
-    fallbacks: Optional[List[Dict[str, Any]]] = Field(
+    fallbacks: Optional[list[dict[str, Any]]] = Field(
         None, description="List of fallback addresses for redirection"
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class VlessConfig(BaseModel):
@@ -164,7 +181,10 @@ class VlessConfig(BaseModel):
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 # Trojan
@@ -174,7 +194,10 @@ class TrojanUser(BaseModel):
     password: str = Field(..., description="Authentication password")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class TrojanConfig(BaseModel):
@@ -188,12 +211,15 @@ class TrojanConfig(BaseModel):
         None, description="Multiplexing settings"
     )
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
-    fallback: Optional[Dict[str, Any]] = Field(
+    fallback: Optional[dict[str, Any]] = Field(
         None, description="Fallback address for redirection"
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 # WireGuard
@@ -201,7 +227,7 @@ class WireGuardPeer(BaseModel):
     """Peer for WireGuard protocol."""
 
     public_key: str = Field(..., description="Peer public key")
-    allowed_ips: List[str] = Field(..., description="Allowed IP addresses for routing")
+    allowed_ips: list[str] = Field(..., description="Allowed IP addresses for routing")
     endpoint: Optional[str] = Field(None, description="Peer address (IP:port)")
     persistent_keepalive: Optional[int] = Field(
         None, ge=0, description="Keepalive interval in seconds"
@@ -211,7 +237,10 @@ class WireGuardPeer(BaseModel):
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class WireGuardInterface(BaseModel):
@@ -222,14 +251,17 @@ class WireGuardInterface(BaseModel):
         None, ge=1, le=65535, description="Listening port"
     )
     fwmark: Optional[int] = Field(None, ge=0, description="Routing marker")
-    address: Optional[List[str]] = Field(None, description="Interface IP addresses")
+    address: Optional[list[str]] = Field(None, description="Interface IP addresses")
     mtu: Optional[int] = Field(
         0, ge=0, description="Maximum packet size (0 for auto-detection)"
     )
-    dns: Optional[List[str]] = Field(None, description="DNS servers for interface")
+    dns: Optional[list[str]] = Field(None, description="DNS servers for interface")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class WireGuardConfig(BaseModel):
@@ -238,11 +270,14 @@ class WireGuardConfig(BaseModel):
     interface: WireGuardInterface = Field(
         ..., description="WireGuard interface settings"
     )
-    peers: List[WireGuardPeer] = Field(..., description="List of peers for connection")
+    peers: list[WireGuardPeer] = Field(..., description="List of peers for connection")
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 # Protocol Union Type

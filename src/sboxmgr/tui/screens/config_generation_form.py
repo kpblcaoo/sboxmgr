@@ -13,6 +13,7 @@ class ConfigGenerationForm(ModalScreen[bool]):
     CSS_PATH = "tui.tcss"
 
     def __init__(self, **kwargs):
+        """Initialize the config generation form screen."""
         super().__init__(**kwargs)
         self.config_generated = False
 

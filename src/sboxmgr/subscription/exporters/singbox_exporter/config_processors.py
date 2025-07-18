@@ -1,7 +1,7 @@
 """Configuration processors for sing-box exporter."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from sboxmgr.subscription.models import ParsedServer
 
@@ -10,7 +10,7 @@ from .constants import CONFIG_WHITELIST, PROTOCOL_NORMALIZATION, TLS_CONFIG_FIEL
 logger = logging.getLogger(__name__)
 
 
-def create_base_outbound(server: ParsedServer, protocol_type: str) -> Dict[str, Any]:
+def create_base_outbound(server: ParsedServer, protocol_type: str) -> dict[str, Any]:
     """Create base outbound structure.
 
     Args:
@@ -19,6 +19,7 @@ def create_base_outbound(server: ParsedServer, protocol_type: str) -> Dict[str, 
 
     Returns:
         Base outbound configuration dictionary.
+
     """
     return {
         "type": protocol_type,
@@ -35,12 +36,13 @@ def normalize_protocol_type(server_type: str) -> str:
 
     Returns:
         Normalized protocol type.
+
     """
     return PROTOCOL_NORMALIZATION.get(server_type, server_type)
 
 
 def process_shadowsocks_config(
-    outbound: Dict[str, Any], server: ParsedServer, meta: Dict[str, Any]
+    outbound: dict[str, Any], server: ParsedServer, meta: dict[str, Any]
 ) -> bool:
     """Process Shadowsocks configuration.
 
@@ -51,6 +53,7 @@ def process_shadowsocks_config(
 
     Returns:
         True if configuration is valid, False if server should be skipped.
+
     """
     method = meta.get("cipher") or meta.get("method") or server.security
     if not method:
@@ -74,12 +77,13 @@ def process_shadowsocks_config(
     return True
 
 
-def process_transport_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
+def process_transport_config(outbound: dict[str, Any], meta: dict[str, Any]) -> None:
     """Process transport configuration (ws, grpc, tcp, udp).
 
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata to modify.
+
     """
     network = meta.pop("network", None)
     if network in ("ws", "grpc"):
@@ -94,7 +98,7 @@ def process_transport_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> 
 
 
 def process_tls_config(
-    outbound: Dict[str, Any], meta: Dict[str, Any], protocol_type: str
+    outbound: dict[str, Any], meta: dict[str, Any], protocol_type: str
 ) -> None:
     """Process TLS configuration.
 
@@ -102,6 +106,7 @@ def process_tls_config(
         outbound: Outbound configuration to modify.
         meta: Server metadata to modify.
         protocol_type: Protocol type for TLS handling.
+
     """
     if protocol_type in ("vless", "vmess", "trojan"):
         # These protocols handle TLS at transport level
@@ -126,13 +131,14 @@ def process_tls_config(
 
 
 def process_auth_and_flow_config(
-    outbound: Dict[str, Any], meta: Dict[str, Any]
+    outbound: dict[str, Any], meta: dict[str, Any]
 ) -> None:
     """Process authentication and flow configuration.
 
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata to modify.
+
     """
     # UUID for authentication
     if meta.get("uuid"):
@@ -144,7 +150,7 @@ def process_auth_and_flow_config(
 
 
 def process_tag_config(
-    outbound: Dict[str, Any], server: ParsedServer, meta: Dict[str, Any]
+    outbound: dict[str, Any], server: ParsedServer, meta: dict[str, Any]
 ) -> None:
     """Process tag configuration.
 
@@ -152,22 +158,30 @@ def process_tag_config(
         outbound: Outbound configuration to modify.
         server: Source server.
         meta: Server metadata.
+
     """
     # Priority: server.tag (normalized by middleware) > meta['name'] > generated tag
     if hasattr(server, "tag") and server.tag:
-        outbound["tag"] = server.tag
+        tag = server.tag
     elif meta.get("name"):
-        outbound["tag"] = meta["name"]
+        tag = meta["name"]
     else:
-        outbound["tag"] = f"{outbound['type']}-{server.address}"
+        tag = f"{outbound['type']}-{server.address}"
+
+    # Limit tag length to 1000 characters
+    if len(tag) > 1000:
+        tag = tag[:997] + "..."
+
+    outbound["tag"] = tag
 
 
-def process_additional_config(outbound: Dict[str, Any], meta: Dict[str, Any]) -> None:
+def process_additional_config(outbound: dict[str, Any], meta: dict[str, Any]) -> None:
     """Process additional configuration parameters.
 
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata.
+
     """
     # Only include whitelisted fields
     for key, value in meta.items():
@@ -177,7 +191,7 @@ def process_additional_config(outbound: Dict[str, Any], meta: Dict[str, Any]) ->
 
 def process_standard_server(
     server: ParsedServer, protocol_type: str
-) -> Optional[Dict[str, Any]]:
+) -> Optional[dict[str, Any]]:
     """Process standard server (non-special protocol).
 
     Args:
@@ -186,6 +200,7 @@ def process_standard_server(
 
     Returns:
         Outbound configuration or None if server should be skipped.
+
     """
     outbound = create_base_outbound(server, protocol_type)
     meta = dict(server.meta or {})

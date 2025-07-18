@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
-"""Script to get profile CLI help."""
+"""Get help for profile CLI commands."""
 
-import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+# Add src to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-# Initialize logging first
-from sboxmgr.logging.core import initialize_logging
-
-initialize_logging()
-
-# Now import profile CLI
-from sboxmgr.profiles.cli import app
+# Import profile CLI
+from sboxmgr.configs.cli import app
 
 if __name__ == "__main__":
     app()

@@ -14,7 +14,7 @@ repos:
 
   # 1. RUFF - Fast Python linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
+    rev: v0.12.4
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -36,19 +36,6 @@ repos:
               tests/.*
           )$
 
-  # 2. ISORT - Import sorting
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: [--profile=black, --line-length=88]
-        exclude: |
-          (?x)^(
-              archive/.*|
-              examples/.*|
-              scripts/.*|
-              tests/.*
-          )$
 
   # 3. DETECT-SECRETS - Security scanning
   - repo: https://github.com/Yelp/detect-secrets
@@ -89,6 +76,16 @@ repos:
       - id: check-json
       - id: check-toml
       - id: debug-statements
+
+  # 6. Wheel integrity check
+  - repo: local
+    hooks:
+      - id: check-wheel-contents
+        name: Check Wheel Contents
+        entry: python .hooks/check_build_contents.py
+        language: system
+        pass_filenames: false
+        always_run: true
 
 # Global settings
 default_language_version:

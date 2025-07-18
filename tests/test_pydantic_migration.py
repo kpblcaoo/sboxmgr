@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 
+from sboxmgr.configs.models import FullProfile, SubscriptionProfile
 from src.sboxmgr.core.exclusions.manager import ExclusionManager
 from src.sboxmgr.core.exclusions.models import ExclusionEntry, ExclusionList
 from src.sboxmgr.core.orchestrator import OrchestratorConfig
 from src.sboxmgr.events.core import Event
 from src.sboxmgr.events.types import EventData, EventPriority, EventType
-from src.sboxmgr.profiles.models import FullProfile, SubscriptionProfile
 from src.sboxmgr.subscription.errors import ErrorType, PipelineError
 from src.sboxmgr.subscription.models import (
     ParsedServer,
@@ -81,9 +81,7 @@ class TestPydanticMigration:
             # Test add
             assert manager.add("server1", "Test Server 1", "Testing")
             assert manager.add("server2", "Test Server 2", "Testing")
-            assert (
-                not manager.add("server1", "Test Server 1", "Testing")
-            )  # Duplicate
+            assert not manager.add("server1", "Test Server 1", "Testing")  # Duplicate
 
             # Test contains
             assert manager.contains("server1")

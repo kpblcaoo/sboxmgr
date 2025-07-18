@@ -8,7 +8,7 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from ..events import EventPriority, EventType, emit_event
 from .event_sender import ping_agent, send_event
@@ -385,7 +385,7 @@ class AgentBridge:
             )
             raise AgentError(f"Check failed: {e}") from e
 
-    def _call_agent(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def _call_agent(self, request: dict[str, Any]) -> dict[str, Any]:
         """Call sboxagent with JSON request.
 
         Args:

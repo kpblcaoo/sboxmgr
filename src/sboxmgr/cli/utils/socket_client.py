@@ -5,7 +5,7 @@ TODO: Реализовать подключение к Unix socket, отправ
 """
 
 import socket
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 SOCKET_PATH = "/var/run/sboxagent.sock"  # TODO: sync with agent config
 PROTOCOL_VERSION = 1
@@ -37,7 +37,7 @@ class SocketClient:
             self.sock.close()
             self.sock = None
 
-    def send_message(self, message: Dict[str, Any]):
+    def send_message(self, message: dict[str, Any]):
         """Send message through socket.
 
         Args:
@@ -50,7 +50,7 @@ class SocketClient:
         # TODO: framed JSON encode
         raise NotImplementedError
 
-    def receive_message(self) -> Optional[Dict[str, Any]]:
+    def receive_message(self) -> Optional[dict[str, Any]]:
         """Receive message from socket.
 
         Returns:

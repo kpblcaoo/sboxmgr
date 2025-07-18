@@ -9,7 +9,7 @@ Implements Phase 3 architecture with profile integration.
 
 import hashlib
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ...configs.models import FullProfile
 from ..models import ParsedServer, PipelineContext
@@ -45,7 +45,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
     middleware_type = "enrichment"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize enrichment middleware.
 
         Args:
@@ -71,16 +71,16 @@ class EnrichmentMiddleware(TransformMiddleware):
         self.max_enrichment_time = self.config.get("max_enrichment_time", 1.0)
 
         # Initialize caches
-        self._geo_cache: Dict[str, Dict[str, Any]] = {}
-        self._performance_cache: Dict[str, Dict[str, Any]] = {}
-        self._security_cache: Dict[str, Dict[str, Any]] = {}
+        self._geo_cache: dict[str, dict[str, Any]] = {}
+        self._performance_cache: dict[str, dict[str, Any]] = {}
+        self._security_cache: dict[str, dict[str, Any]] = {}
 
     def _do_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Enrich servers with additional metadata.
 
         Args:
@@ -124,7 +124,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
     def _extract_enrichment_config(
         self, profile: Optional[FullProfile]
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Extract enrichment configuration from profile.
 
         Args:
@@ -159,7 +159,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-        enrichment_config: Optional[Dict[str, Any]] = None,
+        enrichment_config: Optional[dict[str, Any]] = None,
     ) -> ParsedServer:
         """Enrich a single server with metadata.
 
@@ -269,7 +269,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         return server
 
-    def _lookup_geographic_info(self, address: str) -> Dict[str, Any]:
+    def _lookup_geographic_info(self, address: str) -> dict[str, Any]:
         """Look up geographic information for an address.
 
         Args:
@@ -300,25 +300,24 @@ class EnrichmentMiddleware(TransformMiddleware):
                             "country_name": response.country.name,
                             "city": response.city.name,
                             "latitude": (
-                                float(response.location.latitude)
+                                str(float(response.location.latitude))
                                 if response.location.latitude
                                 else None
                             ),
                             "longitude": (
-                                float(response.location.longitude)
+                                str(float(response.location.longitude))
                                 if response.location.longitude
                                 else None
                             ),
                             "timezone": response.location.time_zone,
                         }
                     )
-            else:
-                # Fallback: try to extract country from domain TLD
-                if "." in address and not address.replace(".", "").isdigit():
-                    tld = address.split(".")[-1].upper()
-                    if len(tld) == 2:
-                        geo_info["country"] = tld
-                        geo_info["source"] = "tld"
+            # Fallback: try to extract country from domain TLD
+            elif "." in address and not address.replace(".", "").isdigit():
+                tld = address.split(".")[-1].upper()
+                if len(tld) == 2:
+                    geo_info["country"] = tld
+                    geo_info["source"] = "tld"
 
         except Exception:
             # If all methods fail, mark as unknown
@@ -365,10 +364,16 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         # Check cache first
         if server_key in self._performance_cache:
-            cached_data, timestamp = self._performance_cache[server_key]
-            if time.time() - timestamp < self.performance_cache_duration:
-                server.meta["performance"] = cached_data
-                return server
+            cache_entry = self._performance_cache[server_key]
+            if isinstance(cache_entry, dict):
+                cached_data = cache_entry.get("performance_info", {})
+                timestamp = cache_entry.get("timestamp", 0)
+                if (
+                    isinstance(timestamp, (int, float))
+                    and time.time() - timestamp < self.performance_cache_duration
+                ):
+                    server.meta["performance"] = cached_data
+                    return server
 
         performance_info = {}
 
@@ -384,7 +389,11 @@ class EnrichmentMiddleware(TransformMiddleware):
             )
 
             # Cache the result
-            self._performance_cache[server_key] = (performance_info, time.time())
+            performance_cache_entry: dict[str, Any] = {
+                "performance_info": performance_info,
+                "timestamp": time.time(),
+            }
+            self._performance_cache[server_key] = performance_cache_entry
 
         except Exception as e:
             performance_info["error"] = str(e)
@@ -593,7 +602,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         else:
             return "system"
 
-    def _get_protocol_vulnerabilities(self, protocol_type: str) -> List[str]:
+    def _get_protocol_vulnerabilities(self, protocol_type: str) -> list[str]:
         """Get known vulnerabilities for protocol.
 
         Args:
@@ -612,7 +621,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         return vulnerabilities.get(protocol_type.lower(), [])
 
-    def _get_recommended_settings(self, server: ParsedServer) -> Dict[str, Any]:
+    def _get_recommended_settings(self, server: ParsedServer) -> dict[str, Any]:
         """Get recommended security settings for server.
 
         Args:
@@ -644,7 +653,7 @@ class EnrichmentMiddleware(TransformMiddleware):
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-        enrichment_config: Optional[Dict[str, Any]] = None,
+        enrichment_config: Optional[dict[str, Any]] = None,
     ) -> ParsedServer:
         """Apply custom enrichment based on profile configuration.
 
@@ -732,7 +741,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             profile: Full profile configuration
 
         """
-        compatibility = {"compatible": True, "issues": []}
+        compatibility: dict[str, Any] = {"compatible": True, "issues": []}
 
         export_format = profile.export.format
 
@@ -746,16 +755,16 @@ class EnrichmentMiddleware(TransformMiddleware):
                 "wireguard",
             ]:
                 compatibility["compatible"] = False
-                compatibility["issues"].append(
-                    f"Protocol {server.type} not supported by sing-box"
-                )
+                issues = compatibility["issues"]
+                if isinstance(issues, list):
+                    issues.append(f"Protocol {server.type} not supported by sing-box")
 
         elif export_format == "clash":
             # Check clash compatibility
             if server.type not in ["shadowsocks", "vmess", "trojan", "http", "socks"]:
                 compatibility["compatible"] = False
-                compatibility["issues"].append(
-                    f"Protocol {server.type} not supported by clash"
-                )
+                issues = compatibility["issues"]
+                if isinstance(issues, list):
+                    issues.append(f"Protocol {server.type} not supported by clash")
 
         server.meta["compatibility"] = compatibility

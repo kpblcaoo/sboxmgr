@@ -296,9 +296,10 @@ class TestPluginTemplate:
         # Try to create directory in non-existent parent
         invalid_path = str(tmp_path / "nonexistent" / "very" / "deep" / "path")
 
-        with patch(
-            "os.makedirs", side_effect=PermissionError("Permission denied")
-        ), patch("typer.echo") as mock_echo:
+        with (
+            patch("os.makedirs", side_effect=PermissionError("Permission denied")),
+            patch("typer.echo") as mock_echo,
+        ):
             with pytest.raises(typer.Exit) as exc_info:
                 plugin_template_func(
                     type="fetcher", name="Custom", output_dir=invalid_path
@@ -314,9 +315,10 @@ class TestPluginTemplate:
         """Test plugin_template handles file write errors."""
         output_dir = str(tmp_path / "test_output")
 
-        with patch("builtins.open", side_effect=IOError("Disk full")), patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch("builtins.open", side_effect=OSError("Disk full")),
+            patch("typer.echo") as mock_echo,
+        ):
             with pytest.raises(typer.Exit) as exc_info:
                 plugin_template_func(
                     type="fetcher", name="Custom", output_dir=output_dir

@@ -5,7 +5,7 @@ Replaces dataclass-based models with Pydantic BaseModel for better validation an
 """
 
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -45,8 +45,8 @@ class ExclusionEntryModel(BaseModel):
                 # Replace Z with +00:00 for fromisoformat
                 v = v.replace("Z", "+00:00")
                 return datetime.fromisoformat(v)
-            except ValueError:
-                raise ValueError(f"Invalid timestamp format: {v}")
+            except ValueError as e:
+                raise ValueError(f"Invalid timestamp format: {v}") from e
         elif isinstance(v, datetime):
             # Ensure timezone awareness
             if v.tzinfo is None:
@@ -93,7 +93,7 @@ class ExclusionListModel(BaseModel):
     and JSON schema generation capability.
     """
 
-    exclusions: List[ExclusionEntryModel] = Field(
+    exclusions: list[ExclusionEntryModel] = Field(
         default_factory=list, description="List of exclusion entries"
     )
     last_modified: datetime = Field(
@@ -120,8 +120,8 @@ class ExclusionListModel(BaseModel):
             try:
                 v = v.replace("Z", "+00:00")
                 return datetime.fromisoformat(v)
-            except ValueError:
-                raise ValueError(f"Invalid last_modified format: {v}")
+            except ValueError as e:
+                raise ValueError(f"Invalid last_modified format: {v}") from e
         elif isinstance(v, datetime):
             if v.tzinfo is None:
                 return v.replace(tzinfo=timezone.utc)

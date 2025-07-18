@@ -7,7 +7,7 @@ configuration and processing state.
 """
 
 import uuid
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -31,7 +31,7 @@ class SubscriptionSource(BaseModel):
 
     url: str
     source_type: str  # url_base64, url_json, file_json, uri_list, ...
-    headers: Optional[Dict[str, str]] = None
+    headers: Optional[dict[str, str]] = None
     label: Optional[str] = None
     user_agent: Optional[str] = None
 
@@ -75,21 +75,21 @@ class ParsedServer(BaseModel):
     address: str
     port: int
     security: Optional[str] = None
-    meta: Dict[str, Any] = Field(default_factory=dict)
+    meta: dict[str, Any] = Field(default_factory=dict)
     # Новые поля для поддержки всех протоколов
     uuid: Optional[str] = None
     password: Optional[str] = None
     private_key: Optional[str] = None
     peer_public_key: Optional[str] = None
     pre_shared_key: Optional[str] = None
-    local_address: Optional[List[str]] = None
+    local_address: Optional[list[str]] = None
     username: Optional[str] = None
     version: Optional[int] = None
-    uuid_list: Optional[List[str]] = None
-    alpn: Optional[List[str]] = None
-    obfs: Optional[Dict[str, Any]] = None
-    tls: Optional[Dict[str, Any]] = None
-    handshake: Optional[Dict[str, Any]] = None
+    uuid_list: Optional[list[str]] = None
+    alpn: Optional[list[str]] = None
+    obfs: Optional[dict[str, Any]] = None
+    tls: Optional[dict[str, Any]] = None
+    handshake: Optional[dict[str, Any]] = None
     congestion_control: Optional[str] = None
     tag: Optional[str] = None
 
@@ -110,6 +110,7 @@ class PipelineContext(BaseModel):
         debug_level: Debug verbosity level.
         metadata: Additional metadata dictionary.
         skip_policies: Whether to skip policy evaluation (for testing).
+        flags: List of flags for pipeline state tracking.
 
     """
 
@@ -118,11 +119,12 @@ class PipelineContext(BaseModel):
     trace_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     source: Optional[str] = None
     mode: str = "tolerant"  # 'strict' or 'tolerant'
-    user_routes: List[Any] = Field(default_factory=list)
-    exclusions: List[Any] = Field(default_factory=list)
+    user_routes: list[Any] = Field(default_factory=list)
+    exclusions: list[Any] = Field(default_factory=list)
     debug_level: int = 0
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     skip_policies: bool = False  # Whether to skip policy evaluation (for testing)
+    flags: list[str] = Field(default_factory=list)  # Pipeline state flags
 
 
 class PipelineResult(BaseModel):
@@ -245,16 +247,16 @@ class ClientProfile(BaseModel):
 
     """
 
-    inbounds: List[InboundProfile] = Field(
+    inbounds: list[InboundProfile] = Field(
         default_factory=list, description="List of inbound configurations."
     )
     dns_mode: Optional[str] = Field(
         default="system", description="DNS resolution mode."
     )
-    routing: Optional[Dict[str, Any]] = Field(
+    routing: Optional[dict[str, Any]] = Field(
         default_factory=dict, description="Routing configuration overrides."
     )
-    exclude_outbounds: Optional[List[str]] = Field(
+    exclude_outbounds: Optional[list[str]] = Field(
         default_factory=list, description="List of outbound types to exclude."
     )
     extra: Optional[dict] = Field(

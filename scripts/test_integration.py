@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Integration test for new sing-box models.
-"""
+"""Integration test for new sing-box models."""
 
 import json
 import subprocess
@@ -17,7 +15,6 @@ from sboxmgr.models import (
 
 def test_integration():
     """Test integration of new models with sing-box validation."""
-
     print("Testing new sing-box models integration...")
 
     # Create a complete sing-box configuration
@@ -63,6 +60,7 @@ def test_integration():
     try:
         result = subprocess.run(
             ["/usr/bin/sing-box", "check", "-c", config_file],
+            check=False,
             capture_output=True,
             text=True,
             timeout=10,

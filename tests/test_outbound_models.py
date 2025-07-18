@@ -230,9 +230,7 @@ class TestOutboundConversion:
             streamSettings=StreamSettings(),
         )
 
-        with pytest.raises(
-            ValueError, match="VMess configuration must have at least one user"
-        ):
+        with pytest.raises(ValueError, match="VMess config requires at least one user"):
             convert_protocol_to_outbound(protocol_config)
 
 

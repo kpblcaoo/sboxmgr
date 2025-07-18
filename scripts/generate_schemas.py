@@ -8,7 +8,7 @@ Implements ADR-0016: Pydantic as Single Source of Truth for Validation and Schem
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -21,11 +21,8 @@ try:
         ServiceConfig,
     )
 
-    # Sing-box configuration model
-    from sboxmgr.models.singbox.main import SingBoxConfig
-
     # New profile models (ADR-0017)
-    from sboxmgr.profiles.models import (
+    from sboxmgr.configs.models import (
         AgentProfile,
         ExportProfile,
         FilterProfile,
@@ -35,6 +32,11 @@ try:
         SubscriptionProfile,
         UIProfile,
     )
+
+    # Sing-box configuration model
+    from sboxmgr.models.singbox.main import SingBoxConfig
+
+    # Subscription models
     from sboxmgr.subscription.models import ClientProfile, InboundProfile
 
     # Note: ExclusionList and ExclusionRule are dataclasses, not Pydantic models
@@ -45,11 +47,12 @@ except ImportError as e:
     sys.exit(1)
 
 
-def generate_schemas() -> Dict[str, Dict[str, Any]]:
+def generate_schemas() -> dict[str, dict[str, Any]]:
     """Generate JSON schemas from Pydantic models.
 
     Returns:
         Dict mapping schema names to JSON schema dictionaries
+
     """
     schemas = {
         # Existing schemas (fix deprecation warnings)
@@ -77,12 +80,13 @@ def generate_schemas() -> Dict[str, Dict[str, Any]]:
     return schemas
 
 
-def save_schemas(schemas: Dict[str, Dict[str, Any]], output_dir: Path) -> None:
+def save_schemas(schemas: dict[str, dict[str, Any]], output_dir: Path) -> None:
     """Save schemas to JSON files.
 
     Args:
         schemas: Dictionary of schema name to schema content
         output_dir: Directory to save schema files
+
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 

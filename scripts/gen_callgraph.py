@@ -7,7 +7,6 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 
 class CallGraphVisitor(ast.NodeVisitor):
@@ -18,8 +17,8 @@ class CallGraphVisitor(ast.NodeVisitor):
         self.module_name = self._get_module_name(filename)
         self.current_class = None
         self.current_function = None
-        self.calls: List[Tuple[str, str, str]] = []  # (caller, callee, line)
-        self.definitions: List[Tuple[str, str, str]] = []  # (name, type, line)
+        self.calls: list[tuple[str, str, str]] = []  # (caller, callee, line)
+        self.definitions: list[tuple[str, str, str]] = []  # (name, type, line)
 
     def _get_module_name(self, filename: str) -> str:
         """Extract module name from filename."""
@@ -78,9 +77,9 @@ def get_ast_hash(content: str) -> str:
     return hashlib.sha256(ast_str.encode()).hexdigest()[:16]
 
 
-def analyze_file(filename: str) -> Dict:
+def analyze_file(filename: str) -> dict:
     """Analyze a single Python file."""
-    with open(filename, "r", encoding="utf-8") as f:
+    with open(filename, encoding="utf-8") as f:
         content = f.read()
 
     try:
@@ -106,7 +105,7 @@ def analyze_file(filename: str) -> Dict:
         }
 
 
-def find_python_files(src_dir: str) -> List[str]:
+def find_python_files(src_dir: str) -> list[str]:
     """Find all Python files in src directory."""
     files = []
     for root, dirs, filenames in os.walk(src_dir):
@@ -118,7 +117,7 @@ def find_python_files(src_dir: str) -> List[str]:
     return sorted(files)
 
 
-def generate_callgraph(src_dir: str = "src/sboxmgr") -> Dict:
+def generate_callgraph(src_dir: str = "src/sboxmgr") -> dict:
     """Generate callgraph and AST analysis."""
     files = find_python_files(src_dir)
 

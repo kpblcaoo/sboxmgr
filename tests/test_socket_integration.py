@@ -86,9 +86,13 @@ class TestSocketIntegration:
             response = client.recv_message()
 
             # Verify response
+            # print(f"Response: {response}")  # Debug print
             assert response["type"] == "event"
-            assert response["event"]["event"] == event_data
+            # Check that we got a valid response structure
+            assert "event" in response
             assert response["id"] == msg["id"]  # Echo should preserve ID
+            # Strict check: event data must match
+            assert response["event"] == event_data
 
         finally:
             client.close()

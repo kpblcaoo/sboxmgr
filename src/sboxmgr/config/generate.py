@@ -11,7 +11,6 @@ import json
 import os
 import tempfile
 from logging import error, info
-from typing import List
 
 from ..events import EventPriority, EventType, emit_event
 from .config_validator import validate_temp_config_json
@@ -70,7 +69,7 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
         raise FileNotFoundError(f"Config directory does not exist: {config_dir}")
 
     if os.path.exists(config_file):
-        with open(config_file, "r") as current_config_file:
+        with open(config_file) as current_config_file:
             current_config = current_config_file.read()
             if current_config.strip() == config.strip():
                 info("Configuration has not changed. Skipping update.")
@@ -100,7 +99,7 @@ def generate_config(outbounds, template_file, config_file, backup_file, excluded
 
 
 def generate_temp_config(
-    template_data: dict, servers: List[dict], user_routes: List[dict] = None
+    template_data: dict, servers: list[dict], user_routes: list[dict] = None
 ) -> dict:
     """Generate temporary configuration from template and servers.
 

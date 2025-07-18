@@ -9,7 +9,6 @@ processing pipeline.
 import hashlib
 import warnings
 from abc import ABC, abstractmethod
-from typing import List
 
 from .models import ParsedServer, PipelineContext
 
@@ -28,8 +27,8 @@ class BaseMiddleware(ABC):
 
     @abstractmethod
     def process(
-        self, servers: List[ParsedServer], context: PipelineContext
-    ) -> List[ParsedServer]:
+        self, servers: list[ParsedServer], context: PipelineContext
+    ) -> list[ParsedServer]:
         """Process servers through middleware transformation.
 
         Args:
@@ -53,12 +52,13 @@ class MiddlewareChain(BaseMiddleware):
 
         Args:
             middlewares: List of middleware instances to chain.
+
         """
         self.middlewares = middlewares
 
     def process(
-        self, servers: List[ParsedServer], context: PipelineContext
-    ) -> List[ParsedServer]:
+        self, servers: list[ParsedServer], context: PipelineContext
+    ) -> list[ParsedServer]:
         """Process servers through the middleware chain sequentially.
 
         Args:
@@ -86,12 +86,13 @@ class LoggingMiddleware(BaseMiddleware):
 
         Args:
             stage_name: Name of the processing stage for logging.
+
         """
         self.stage_name = stage_name
 
     def process(
-        self, servers: List[ParsedServer], context: PipelineContext
-    ) -> List[ParsedServer]:
+        self, servers: list[ParsedServer], context: PipelineContext
+    ) -> list[ParsedServer]:
         """Process servers with debug logging information.
 
         Args:
@@ -119,7 +120,9 @@ def register_middleware(cls):
     if not issubclass(cls, BaseMiddleware):
         raise TypeError(f"{cls.__name__} must inherit from BaseMiddleware")
     if not cls.__doc__ or "Google" not in (cls.__doc__ or ""):
-        warnings.warn(f"{cls.__name__} has no Google-style docstring (recommended)")
+        warnings.warn(
+            f"{cls.__name__} has no Google-style docstring (recommended)", stacklevel=2
+        )
     MIDDLEWARE_REGISTRY[cls.__name__] = cls
     print(f"[AUDIT] Registered middleware: {cls.__name__}")
     return cls
@@ -129,8 +132,8 @@ class TagFilterMiddleware(BaseMiddleware):
     """Filter servers by tag from context.tag_filters (tag list)."""
 
     def process(
-        self, servers: List[ParsedServer], context: PipelineContext
-    ) -> List[ParsedServer]:
+        self, servers: list[ParsedServer], context: PipelineContext
+    ) -> list[ParsedServer]:
         """Filter servers by tags from context.
 
         Args:
@@ -139,6 +142,7 @@ class TagFilterMiddleware(BaseMiddleware):
 
         Returns:
             List[ParsedServer]: Filtered servers matching tag criteria.
+
         """
         tags = getattr(context, "tag_filters", None)
         # Basic user input validation (SEC-MW-05)
@@ -160,8 +164,8 @@ class EnrichMiddleware(BaseMiddleware):
     """
 
     def process(
-        self, servers: List[ParsedServer], context: PipelineContext
-    ) -> List[ParsedServer]:
+        self, servers: list[ParsedServer], context: PipelineContext
+    ) -> list[ParsedServer]:
         """Enrich servers with metadata.
 
         Args:
@@ -170,6 +174,7 @@ class EnrichMiddleware(BaseMiddleware):
 
         Returns:
             List[ParsedServer]: Servers with enriched metadata.
+
         """
         for s in servers:
             if not hasattr(s, "meta") or s.meta is None:

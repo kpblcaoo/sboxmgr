@@ -26,7 +26,9 @@ def test_invalid_url(monkeypatch):
         "error" in output.lower()
         or "ошибка" in output.lower()
         or result.returncode != 0
-    ), f"stdout: {result.stdout}\nstderr: {result.stderr}\nreturncode: {result.returncode}"
+    ), (
+        f"stdout: {result.stdout}\nstderr: {result.stderr}\nreturncode: {result.returncode}"
+    )
 
 
 def test_invalid_index():

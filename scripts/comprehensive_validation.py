@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Комплексная валидация всех конфигураций против sing-box.
-"""
+"""Комплексная валидация всех конфигураций против sing-box."""
 
 import json
 import os
@@ -9,7 +7,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any
 
 # Добавляем путь к проекту
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -41,7 +39,11 @@ class ComprehensiveValidator:
         for path in possible_paths:
             try:
                 result = subprocess.run(
-                    [path, "version"], capture_output=True, text=True, timeout=5
+                    [path, "version"],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
                 )
                 if result.returncode == 0:
                     print(f"✅ Найден sing-box: {path}")
@@ -54,11 +56,13 @@ class ComprehensiveValidator:
         return None
 
     def validate_with_pydantic(
-        self, config: Dict[str, Any], protocol: str
-    ) -> Tuple[bool, str]:
+        self, config: dict[str, Any], protocol: str
+    ) -> tuple[bool, str]:
         """Валидирует конфигурацию с помощью Pydantic."""
         try:
             # Создаем полную конфигурацию sing-box
+            from sboxmgr.models.singbox.main import SingBoxConfig
+
             singbox_config = SingBoxConfig(**config)
 
             # Проверяем, что outbound соответствует протоколу
@@ -76,8 +80,8 @@ class ComprehensiveValidator:
             return False, f"❌ Pydantic ошибка: {str(e)}"
 
     def validate_with_singbox(
-        self, config: Dict[str, Any], protocol: str
-    ) -> Tuple[bool, str]:
+        self, config: dict[str, Any], protocol: str
+    ) -> tuple[bool, str]:
         """Валидирует конфигурацию с помощью sing-box."""
         if not self.singbox_path:
             return False, "❌ Sing-box не установлен"
@@ -91,6 +95,7 @@ class ComprehensiveValidator:
             # Запускаем sing-box check
             result = subprocess.run(
                 [self.singbox_path, "check", "-c", str(temp_config)],
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -123,7 +128,7 @@ class ComprehensiveValidator:
             print(f"\n📋 Валидация {protocol}...")
 
             try:
-                with open(config_file, "r", encoding="utf-8") as f:
+                with open(config_file, encoding="utf-8") as f:
                     config = json.load(f)
 
                 # Pydantic валидация

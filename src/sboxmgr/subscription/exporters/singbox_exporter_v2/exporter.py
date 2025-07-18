@@ -5,7 +5,7 @@ interface using the modular Pydantic models for better validation and type safet
 """
 
 import logging
-from typing import List, Optional
+from typing import Optional
 
 # Import new sing-box models
 from sboxmgr.models.singbox import (
@@ -37,7 +37,7 @@ class SingboxExporterV2(BaseExporter):
 
     def export(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         client_profile: Optional[ClientProfile] = None,
     ) -> str:
         """Export servers to sing-box JSON configuration string.
@@ -51,6 +51,7 @@ class SingboxExporterV2(BaseExporter):
 
         Raises:
             ValueError: If server data is invalid or cannot be exported
+
         """
         try:
             # Convert servers to outbounds
@@ -136,5 +137,5 @@ class SingboxExporterV2(BaseExporter):
             return json.dumps(config_data, indent=2)
 
         except Exception as e:
-            logger.error(f"Export failed: {e}")
-            raise ValueError(f"Failed to export configuration: {e}")
+            logger.error(f"Failed to export config: {e}")
+            raise ValueError(f"Config export failed: {e}") from e

@@ -1,6 +1,6 @@
 """Core subscription manager implementation."""
 
-from typing import List, Optional
+from typing import Optional
 
 from ..base_selector import DefaultSelector
 
@@ -40,6 +40,7 @@ class SubscriptionManager:
         error_handler: Centralized error handling.
         data_processor: Data processing pipeline stages.
         pipeline_coordinator: Pipeline coordination and orchestration.
+
     """
 
     def __init__(
@@ -59,6 +60,7 @@ class SubscriptionManager:
 
         Raises:
             ValueError: If source_type is unknown or unsupported.
+
         """
         # Load plugins
         load_entry_points()
@@ -95,8 +97,8 @@ class SubscriptionManager:
 
     def get_servers(
         self,
-        user_routes: Optional[List[str]] = None,
-        exclusions: Optional[List[str]] = None,
+        user_routes: Optional[list[str]] = None,
+        exclusions: Optional[list[str]] = None,
         mode: Optional[str] = None,
         context: Optional[PipelineContext] = None,
         force_reload: bool = False,
@@ -115,6 +117,7 @@ class SubscriptionManager:
 
         Returns:
             PipelineResult containing processed servers, context, errors, and success status.
+
         """
         # Setup defaults
         user_routes = user_routes or []
@@ -156,8 +159,8 @@ class SubscriptionManager:
 
     def export_config(
         self,
-        exclusions: Optional[List[str]] = None,
-        user_routes: Optional[List[str]] = None,
+        exclusions: Optional[list[str]] = None,
+        user_routes: Optional[list[str]] = None,
         context: Optional[PipelineContext] = None,
         routing_plugin=None,
         export_manager=None,
@@ -176,6 +179,7 @@ class SubscriptionManager:
 
         Returns:
             PipelineResult containing exported configuration.
+
         """
         # Get servers first
         servers_result = self.get_servers(
@@ -198,8 +202,8 @@ class SubscriptionManager:
 
     def _execute_pipeline(
         self,
-        user_routes: List[str],
-        exclusions: List[str],
+        user_routes: list[str],
+        exclusions: list[str],
         mode: str,
         context: PipelineContext,
     ) -> PipelineResult:
@@ -213,6 +217,7 @@ class SubscriptionManager:
 
         Returns:
             PipelineResult with processed servers.
+
         """
         # Stage 1: Fetch and validate raw data
         raw_data, fetch_success = self.data_processor.fetch_and_validate_raw(context)

@@ -8,7 +8,6 @@ transformations before final export.
 
 import inspect
 from abc import ABC, abstractmethod
-from typing import List
 
 from .models import ParsedServer, PipelineContext
 
@@ -25,8 +24,8 @@ class BasePostProcessor(ABC):
 
     @abstractmethod
     def process(
-        self, servers: List[ParsedServer], context: PipelineContext | None = None
-    ) -> List[ParsedServer]:
+        self, servers: list[ParsedServer], context: PipelineContext | None = None
+    ) -> list[ParsedServer]:
         """Process and transform parsed server data.
 
         Args:
@@ -47,8 +46,8 @@ class DedupPostProcessor(BasePostProcessor):
     """Remove duplicate servers based on type, address, port, and tag."""
 
     def process(
-        self, servers: List[ParsedServer], context: PipelineContext | None = None
-    ) -> List[ParsedServer]:
+        self, servers: list[ParsedServer], context: PipelineContext | None = None
+    ) -> list[ParsedServer]:
         """Remove duplicate servers from the list.
 
         Args:
@@ -57,6 +56,7 @@ class DedupPostProcessor(BasePostProcessor):
 
         Returns:
             List[ParsedServer]: Deduplicated server list.
+
         """
         seen = set()
         result = []
@@ -85,12 +85,13 @@ class PostProcessorChain(BasePostProcessor):
 
         Args:
             processors: List of postprocessor instances to chain.
+
         """
         self.processors = processors
 
     def process(
-        self, servers: List[ParsedServer], context: PipelineContext | None = None
-    ) -> List[ParsedServer]:
+        self, servers: list[ParsedServer], context: PipelineContext | None = None
+    ) -> list[ParsedServer]:
         """Apply all postprocessor plugins sequentially to the server list.
 
         Args:

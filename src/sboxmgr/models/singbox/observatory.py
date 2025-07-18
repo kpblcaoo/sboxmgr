@@ -1,6 +1,6 @@
 """Observatory models for sing-box configuration."""
 
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -15,7 +15,7 @@ class ObservatoryConfig(BaseModel):
     probe_interval: Optional[str] = Field(
         default=None, description="Interval for probing, e.g., '1h'."
     )
-    subject_selector: Optional[List[str]] = Field(
+    subject_selector: Optional[list[str]] = Field(
         default=None, description="Outbound tags to probe."
     )
 

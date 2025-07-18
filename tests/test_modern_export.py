@@ -84,7 +84,7 @@ class TestModernExport:
                 break
 
         assert private_rule is not None
-        assert private_rule.get("action") == "direct"
+        assert private_rule.get("action") == "auto"
 
     def test_modern_export_json_serialization(self):
         """Test that modern export produces valid JSON."""
@@ -138,9 +138,9 @@ class TestModernExport:
                 for warning in w
                 if issubclass(warning.category, DeprecationWarning)
             ]
-            assert (
-                len(deprecation_warnings) == 0
-            ), f"Got deprecation warnings: {deprecation_warnings}"
+            assert len(deprecation_warnings) == 0, (
+                f"Got deprecation warnings: {deprecation_warnings}"
+            )
 
             # Config should still be valid
             assert "outbounds" in config
@@ -187,6 +187,7 @@ class TestModernExport:
             # Run sing-box check
             result = subprocess.run(
                 [singbox_path, "check", "-c", config_file],
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -194,9 +195,9 @@ class TestModernExport:
 
             # Should not have legacy special outbounds warning
             output = result.stdout + result.stderr
-            assert (
-                "legacy special outbounds is deprecated" not in output
-            ), f"Modern export should not trigger legacy outbounds warning: {output}"
+            assert "legacy special outbounds is deprecated" not in output, (
+                f"Modern export should not trigger legacy outbounds warning: {output}"
+            )
 
             # Should exit successfully
             assert result.returncode == 0, f"sing-box check failed: {output}"
@@ -285,15 +286,15 @@ class TestModernExport:
                 break
 
         assert urltest_outbound is not None, "Should have urltest outbound"
-        assert (
-            "vless-server" in urltest_outbound["outbounds"]
-        ), "urltest should include vless"
-        assert (
-            "vmess-server" not in urltest_outbound["outbounds"]
-        ), "urltest should not include vmess"
-        assert (
-            "trojan-server" in urltest_outbound["outbounds"]
-        ), "urltest should include trojan"
+        assert "vless-server" in urltest_outbound["outbounds"], (
+            "urltest should include vless"
+        )
+        assert "vmess-server" not in urltest_outbound["outbounds"], (
+            "urltest should not include vmess"
+        )
+        assert "trojan-server" in urltest_outbound["outbounds"], (
+            "urltest should include trojan"
+        )
 
     def test_exclude_multiple_outbounds(self):
         """Test excluding multiple outbound types."""

@@ -1,7 +1,7 @@
 """Core exporter functions for sing-box configuration."""
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from sboxmgr.subscription.models import ClientProfile, ParsedServer, PipelineContext
 
@@ -13,7 +13,7 @@ from .protocol_handlers import get_protocol_dispatcher
 logger = logging.getLogger(__name__)
 
 
-def process_single_server(server: ParsedServer) -> Optional[Dict[str, Any]]:
+def process_single_server(server: ParsedServer) -> Optional[dict[str, Any]]:
     """Process a single server and return outbound configuration.
 
     Args:
@@ -21,6 +21,7 @@ def process_single_server(server: ParsedServer) -> Optional[Dict[str, Any]]:
 
     Returns:
         Outbound configuration or None if server should be skipped.
+
     """
     protocol_type = normalize_protocol_type(server.type)
 
@@ -48,11 +49,12 @@ def is_supported_protocol(protocol_type: str) -> bool:
 
     Returns:
         True if protocol is supported.
+
     """
     return protocol_type in SUPPORTED_PROTOCOLS
 
 
-def create_urltest_outbound(proxy_tags: List[str]) -> Dict[str, Any]:
+def create_urltest_outbound(proxy_tags: list[str]) -> dict[str, Any]:
     """Create URLTest outbound configuration.
 
     Args:
@@ -60,17 +62,20 @@ def create_urltest_outbound(proxy_tags: List[str]) -> Dict[str, Any]:
 
     Returns:
         URLTest outbound configuration.
+
     """
-    urltest_config = {
+    urltest_config: dict[str, Any] = {
         "type": "urltest",
         "tag": "auto",
         "outbounds": proxy_tags,
     }
-    urltest_config.update(DEFAULT_URLTEST_CONFIG)
+    # Update with default config, preserving original types
+    for key, value in DEFAULT_URLTEST_CONFIG.items():
+        urltest_config[key] = value
     return urltest_config
 
 
-def create_modern_routing_rules(proxy_tags: List[str]) -> List[Dict[str, Any]]:
+def create_modern_routing_rules(proxy_tags: list[str]) -> list[dict[str, Any]]:
     """Create modern routing rules with rule actions.
 
     Args:
@@ -78,16 +83,15 @@ def create_modern_routing_rules(proxy_tags: List[str]) -> List[Dict[str, Any]]:
 
     Returns:
         List of routing rules.
-    """
-    rules = []
 
-    # Private IP ranges - direct
-    rules.append(
-        {
-            "ip_cidr": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.0/8"],
-            "outbound": "direct",
-        }
-    )
+    """
+    rules: list[dict[str, Any]] = []
+
+    # DNS hijack rule (highest priority)
+    rules.append({"protocol": "dns", "action": "hijack-dns"})
+
+    # Private IP ranges - auto
+    rules.append({"ip_is_private": True, "action": "auto"})
 
     # Russian sites - direct
     rules.append({"rule_set": ["geoip-ru"], "outbound": "direct"})
@@ -99,10 +103,10 @@ def create_modern_routing_rules(proxy_tags: List[str]) -> List[Dict[str, Any]]:
 
 
 def singbox_export(
-    servers: List[ParsedServer],
-    routes: Optional[List[Dict[str, Any]]] = None,
+    servers: list[ParsedServer],
+    routes: Optional[list[dict[str, Any]]] = None,
     client_profile: Optional[ClientProfile] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Export parsed servers to sing-box configuration format (modern approach).
 
     This function exports configuration using the modern sing-box 1.11.0 approach
@@ -116,12 +120,26 @@ def singbox_export(
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
+
     """
     outbounds = []
     proxy_tags = []
 
+    # Filter servers based on exclude_outbounds if client_profile is provided
+    filtered_servers = servers
+    if (
+        client_profile
+        and hasattr(client_profile, "exclude_outbounds")
+        and client_profile.exclude_outbounds
+    ):
+        filtered_servers = [
+            server
+            for server in servers
+            if server.type not in client_profile.exclude_outbounds
+        ]
+
     # Process each server
-    for server in servers:
+    for server in filtered_servers:
         outbound = process_single_server(server)
         if outbound:
             outbounds.append(outbound)
@@ -132,6 +150,14 @@ def singbox_export(
         urltest_outbound = create_urltest_outbound(proxy_tags)
         outbounds.insert(0, urltest_outbound)
 
+    # Add standard outbounds (always present)
+    standard_outbounds = [
+        {"type": "direct", "tag": "direct"},
+        {"type": "block", "tag": "block"},
+        {"type": "dns", "tag": "dns-out"},
+    ]
+    outbounds.extend(standard_outbounds)
+
     # Use provided routing rules or create modern defaults
     if routes:
         routing_rules = routes
@@ -140,6 +166,11 @@ def singbox_export(
 
     # Determine final action
     final_action = "auto" if proxy_tags else "direct"
+
+    # Override final action from client_profile if provided
+    if client_profile and hasattr(client_profile, "routing") and client_profile.routing:
+        if "final" in client_profile.routing:
+            final_action = client_profile.routing["final"]
 
     # Build final configuration
     config = {
@@ -155,11 +186,11 @@ def singbox_export(
 
 
 def singbox_export_with_middleware(
-    servers: List[ParsedServer],
-    routes: Optional[List[Dict[str, Any]]] = None,
+    servers: list[ParsedServer],
+    routes: Optional[list[dict[str, Any]]] = None,
     client_profile: Optional[ClientProfile] = None,
     context: Optional[PipelineContext] = None,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Export parsed servers to sing-box configuration format using middleware.
 
     This function exports configuration using middleware for outbound filtering
@@ -174,6 +205,7 @@ def singbox_export_with_middleware(
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
+
     """
     outbounds = []
     proxy_tags = []
@@ -189,6 +221,14 @@ def singbox_export_with_middleware(
     if proxy_tags:
         urltest_outbound = create_urltest_outbound(proxy_tags)
         outbounds.insert(0, urltest_outbound)
+
+    # Add standard outbounds (always present)
+    standard_outbounds = [
+        {"type": "direct", "tag": "direct"},
+        {"type": "block", "tag": "block"},
+        {"type": "dns", "tag": "dns-out"},
+    ]
+    outbounds.extend(standard_outbounds)
 
     # Use provided routing rules or create modern defaults
     if routes:

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test script for new inbound protocols.
-"""
+"""Test script for new inbound protocols."""
 
 import json
 import subprocess
@@ -12,7 +10,6 @@ from src.sboxmgr.models.singbox import *
 
 def test_new_inbounds():
     """Test new inbound protocols with sing-box validation."""
-
     # Test configs for new protocols
     test_configs = [
         {
@@ -56,18 +53,26 @@ def test_new_inbounds():
 
     for i, config in enumerate(test_configs):
         protocol = config["type"]
-        print(f"\n{i+1}. Testing {protocol}...")
+        print(f"\n{i + 1}. Testing {protocol}...")
 
         # Test Pydantic validation
         try:
             if protocol == "naive":
-                inbound = NaiveInbound(**config)
+                from sboxmgr.models.singbox.inbound import NaiveInbound
+
+                NaiveInbound(**config)
             elif protocol == "redirect":
-                inbound = RedirectInbound(**config)
+                from sboxmgr.models.singbox.inbound import RedirectInbound
+
+                RedirectInbound(**config)
             elif protocol == "tproxy":
-                inbound = TproxyInbound(**config)
+                from sboxmgr.models.singbox.inbound import TproxyInbound
+
+                TproxyInbound(**config)
             elif protocol == "tun":
-                inbound = TunInbound(**config)
+                from sboxmgr.models.singbox.inbound import TunInbound
+
+                TunInbound(**config)
             else:
                 print(f"  ❌ Unknown protocol: {protocol}")
                 continue
@@ -91,6 +96,7 @@ def test_new_inbounds():
                 try:
                     result = subprocess.run(
                         ["/usr/bin/sing-box", "check", "-c", config_file],
+                        check=False,
                         capture_output=True,
                         text=True,
                         timeout=10,

@@ -46,5 +46,7 @@
   "cli.success.middleware_added": "Added middleware: {name}",
   "cli.success.profile_loaded": "Profile loaded: {path}",
   "cli.success.profile_generated": "Profile generated: {path}",
-  "cli.error.subscription_processing_failed": "cli.error.subscription_processing_failed"
+  "cli.error.subscription_processing_failed": "cli.error.subscription_processing_failed",
+  "cli.error.config_save_failed": "Failed to save configuration file.",
+  "cli.error.subscription_export_failed": "Failed to export subscription."
 }

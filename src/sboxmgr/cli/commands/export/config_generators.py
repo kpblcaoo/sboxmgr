@@ -1,7 +1,7 @@
 """Configuration generators for export command."""
 
 import json
-from typing import List, Optional
+from typing import Any, Optional
 
 import typer
 
@@ -49,6 +49,7 @@ def generate_config_from_subscription(
 
     Raises:
         typer.Exit: On processing errors
+
     """
     # Create subscription source
     # Используем автоопределение как в list-servers, а не жесткое кодирование форматов
@@ -86,12 +87,12 @@ def generate_config_from_subscription(
 
     except Exception as e:
         typer.echo(f"❌ {t('cli.error.subscription_processing_failed')}: {e}", err=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 def generate_profile_from_cli(
-    postprocessors: Optional[List[str]] = None,
-    middleware: Optional[List[str]] = None,
+    postprocessors: Optional[list[str]] = None,
+    middleware: Optional[list[str]] = None,
     output_path: str = "profile.json",
 ) -> None:
     """Generate FullProfile JSON from CLI parameters.
@@ -103,11 +104,11 @@ def generate_profile_from_cli(
 
     Raises:
         typer.Exit: If profile generation fails
-    """
 
+    """
     try:
         # Create basic profile structure
-        profile_data = {
+        profile_data: dict[str, Any] = {
             "id": "cli-generated-profile",
             "description": "Profile generated from CLI parameters",
             "filters": {
@@ -128,18 +129,22 @@ def generate_profile_from_cli(
         # Add postprocessor configuration
         if postprocessors:
             validate_postprocessors(postprocessors)
-            profile_data["metadata"]["postprocessors"] = {
-                "chain": [{"type": proc, "config": {}} for proc in postprocessors],
-                "execution_mode": "sequential",
-                "error_strategy": "continue",
-            }
+            metadata = profile_data["metadata"]
+            if isinstance(metadata, dict):
+                metadata["postprocessors"] = {
+                    "chain": [{"type": proc, "config": {}} for proc in postprocessors],
+                    "execution_mode": "sequential",
+                    "error_strategy": "continue",
+                }
 
         # Add middleware configuration
         if middleware:
             validate_middleware(middleware)
-            profile_data["metadata"]["middleware"] = {
-                "chain": [{"type": mw, "config": {}} for mw in middleware]
-            }
+            metadata = profile_data["metadata"]
+            if isinstance(metadata, dict):
+                metadata["middleware"] = {
+                    "chain": [{"type": mw, "config": {}} for mw in middleware]
+                }
 
         # Write profile to file
         with open(output_path, "w", encoding="utf-8") as f:
@@ -149,4 +154,4 @@ def generate_profile_from_cli(
 
     except Exception as e:
         typer.echo(f"❌ Failed to generate profile: {e}", err=True)
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e

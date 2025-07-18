@@ -103,7 +103,7 @@ def test_validate_single_protocol_config():
         # Missing password
     }
 
-    with pytest.raises(Exception):
+    with pytest.raises((ValueError, TypeError)):
         validate_single_protocol_config(invalid_config, "shadowsocks")
 
 
@@ -126,14 +126,12 @@ def test_protocol_validator_with_real_data():
     from sboxmgr.subscription.parsers.uri_list_parser import URIListParser
 
     # Test with example URI list
-    test_data = """
+    test_data = b"""
 # Test subscription
 ss://aes-256-gcm:password@example.com:8388#TestSS  # pragma: allowlist secret
 vless://uuid@host:443?encryption=none#TestVLESS
 vmess://eyJ2IjoiMiIsInBzIjoiVGVzdCIsImFkZCI6IjEyNy4wLjAuMSIsInBvcnQiOiI0NDMiLCJpZCI6InV1aWQiLCJhaWQiOiIwIiwibmV0IjoidGNwIiwidHlwZSI6Im5vbmUiLCJob3N0IjoiIiwicGF0aCI6IiIsInRscyI6IiJ9
-""".encode(
-        "utf-8"
-    )
+"""
 
     # Parse servers
     parser = URIListParser()

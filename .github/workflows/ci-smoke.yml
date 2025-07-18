@@ -1,0 +1,33 @@
+name: CI Smoke
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint with ruff
+        run: ruff check src/ --select F --ignore F403
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest toml build
+      - name: Install package
+        run: pip install .[dev]
+      - name: Run critical smoke tests
+        run: pytest tests/test_dependencies.py -v
+      - name: Check all imports are covered by dependencies
+        run: pytest tests/test_imports_vs_dependencies.py -v
+      - name: Run wheel install/import integration test
+        run: pytest tests/test_wheel_install.py -v

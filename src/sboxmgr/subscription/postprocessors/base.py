@@ -9,7 +9,7 @@ Implements Phase 3 of architectural improvements with profile integration.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from ...configs.models import FilterProfile, FullProfile
 from ..models import ParsedServer, PipelineContext
@@ -31,7 +31,7 @@ class BasePostProcessor(ABC):
 
     plugin_type = "postprocessor"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize postprocessor with optional configuration.
 
         Args:
@@ -43,10 +43,10 @@ class BasePostProcessor(ABC):
     @abstractmethod
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Process and transform parsed server data.
 
         Args:
@@ -64,7 +64,7 @@ class BasePostProcessor(ABC):
         pass
 
     def can_process(
-        self, servers: List[ParsedServer], context: Optional[PipelineContext] = None
+        self, servers: list[ParsedServer], context: Optional[PipelineContext] = None
     ) -> bool:
         """Check if this postprocessor can process the given servers.
 
@@ -78,7 +78,7 @@ class BasePostProcessor(ABC):
         """
         return len(servers) > 0
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get metadata about this postprocessor.
 
         Returns:
@@ -157,11 +157,11 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
 
     def pre_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
     ) -> None:
-        """Called before main processing. Override for setup logic.
+        """Call before main processing. Override for setup logic.
 
         Args:
             servers: List of servers to be processed
@@ -173,11 +173,11 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
 
     def post_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
     ) -> None:
-        """Called after main processing. Override for cleanup logic.
+        """Call after main processing. Override for cleanup logic.
 
         Args:
             servers: List of processed servers
@@ -189,10 +189,10 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
 
     def process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
+    ) -> list[ParsedServer]:
         """Process servers with pre/post hooks.
 
         Args:
@@ -212,11 +212,11 @@ class ChainablePostProcessor(ProfileAwarePostProcessor):
     @abstractmethod
     def _do_process(
         self,
-        servers: List[ParsedServer],
+        servers: list[ParsedServer],
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
-    ) -> List[ParsedServer]:
-        """Main processing logic. Override this method.
+    ) -> list[ParsedServer]:
+        """Execute main processing logic. Override this method.
 
         Args:
             servers: List of servers to process

@@ -21,6 +21,7 @@ def determine_output_format(output_file: str, format_flag: str) -> str:
 
     Returns:
         Determined format (json or toml)
+
     """
     if format_flag == "auto":
         ext = Path(output_file).suffix.lower()
@@ -40,6 +41,7 @@ def create_backup_if_needed(output_file: str, backup: bool) -> Optional[str]:
 
     Returns:
         Path to backup file if created, None otherwise
+
     """
     if not backup or not os.path.exists(output_file):
         return None
@@ -64,6 +66,7 @@ def write_config_to_file(
 
     Raises:
         typer.Exit: If writing fails
+
     """
     try:
         # Ensure output directory exists

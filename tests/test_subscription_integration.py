@@ -11,7 +11,6 @@ from sboxmgr.subscription.models import PipelineContext, SubscriptionSource
 
 def test_subscription_pipeline_integration():
     """Тест полного subscription pipeline без installation wizard."""
-
     # Используем base64 формат который точно работает
     import base64
 
@@ -45,9 +44,9 @@ def test_subscription_pipeline_integration():
 
         # Проверяем результат
         assert result.success, f"Pipeline failed: {result.errors}"
-        assert (
-            len(result.config) >= 1
-        ), f"Expected at least 1 server, got {len(result.config)}"
+        assert len(result.config) >= 1, (
+            f"Expected at least 1 server, got {len(result.config)}"
+        )
 
         # Тестируем export config
         export_mgr = ExportManager(export_format="singbox")
@@ -75,7 +74,6 @@ def test_subscription_pipeline_integration():
 
 def test_subscription_with_exclusions():
     """Тест subscription pipeline с исключениями."""
-
     # Используем base64 формат с именованными серверами
     import base64
 
@@ -127,7 +125,6 @@ def test_subscription_with_exclusions():
 
 def test_subscription_error_handling():
     """Тест обработки ошибок в subscription pipeline."""
-
     # Тест с несуществующим файлом
     source = SubscriptionSource(
         url="file:///nonexistent/file.json", source_type="url_json"
@@ -145,7 +142,6 @@ def test_subscription_error_handling():
 
 def test_subscription_user_agent():
     """Тест передачи User-Agent в subscription requests."""
-
     custom_ua = "TestAgent/1.0"
 
     source = SubscriptionSource(
@@ -162,7 +158,6 @@ def test_subscription_user_agent():
 
 def test_subscription_pipeline_modes():
     """Тест различных режимов pipeline (tolerant vs strict)."""
-
     # Создаём невалидные данные
     invalid_data = {
         "outbounds": [

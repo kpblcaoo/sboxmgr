@@ -1,12 +1,6 @@
-"""Unit tests for ProfileLoader."""
+"""Test profile loader functionality."""
 
-import sys
-from unittest.mock import MagicMock
-
-sys.modules["src.sboxmgr.logging.core"] = MagicMock()
-
-
-from src.sboxmgr.profiles.loader import (
+from sboxmgr.configs.loader import (
     SECTION_VALIDATORS,
     ExportSectionValidator,
     FilterSectionValidator,
@@ -211,7 +205,7 @@ class TestSectionValidatorsRegistry:
 
     def test_section_validators_registry_validate_methods(self):
         """Test that all validators in registry have validate method."""
-        for section, validator in SECTION_VALIDATORS.items():
+        for _section, validator in SECTION_VALIDATORS.items():
             assert hasattr(validator, "validate")
             assert callable(validator.validate)
 

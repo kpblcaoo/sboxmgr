@@ -4,8 +4,6 @@ This module implements the subscription management screen that allows
 users to add, remove, and manage their subscription sources.
 """
 
-from typing import List
-
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -167,6 +165,7 @@ class SubscriptionManagerScreen(Screen):
 
         Args:
             **kwargs: Additional arguments passed to Screen
+
         """
         import logging
 
@@ -174,7 +173,7 @@ class SubscriptionManagerScreen(Screen):
         logger.debug("[DEBUG] SubscriptionManagerScreen.__init__ called")
 
         super().__init__(**kwargs)
-        self._subscriptions: List = []
+        self._subscriptions: list = []
         self._active_subscription: str = ""
 
         logger.debug("[DEBUG] SubscriptionManagerScreen.__init__ completed")
@@ -184,6 +183,7 @@ class SubscriptionManagerScreen(Screen):
 
         Returns:
             The composed result containing the subscription manager widgets
+
         """
         import logging
 
@@ -242,7 +242,7 @@ class SubscriptionManagerScreen(Screen):
             yield Footer()
 
     def on_mount(self) -> None:
-        """Called when screen is mounted."""
+        """Initialize when screen is mounted."""
         import logging
 
         logger = logging.getLogger("tui_debug")
@@ -325,6 +325,7 @@ class SubscriptionManagerScreen(Screen):
 
         Returns:
             Static widget with subscription statistics
+
         """
         # Get current subscriptions from app state
         subscriptions = self.app.state.subscriptions
@@ -363,11 +364,12 @@ class SubscriptionManagerScreen(Screen):
 
         return Static("\n".join(info_lines))
 
-    def _create_subscription_items(self) -> List:
+    def _create_subscription_items(self) -> list:
         """Create subscription item widgets.
 
         Returns:
             List of subscription item widgets
+
         """
         items = []
 
@@ -418,6 +420,7 @@ class SubscriptionManagerScreen(Screen):
 
         Returns:
             Subscription URL
+
         """
         if isinstance(subscription, dict):
             return subscription.get("url", str(subscription))
@@ -436,6 +439,7 @@ class SubscriptionManagerScreen(Screen):
 
         Returns:
             Formatted subscription information string
+
         """
         try:
             return format_subscription_info(subscription)
@@ -538,6 +542,7 @@ class SubscriptionManagerScreen(Screen):
         Args:
             result: True if subscription was added successfully,
                    False if cancelled, or error message string
+
         """
         if result is True:
             # Reload subscriptions and refresh display
@@ -565,6 +570,7 @@ class SubscriptionManagerScreen(Screen):
 
         Args:
             event: The button pressed event
+
         """
         button_id = event.button.id
         if not button_id:
@@ -580,6 +586,7 @@ class SubscriptionManagerScreen(Screen):
 
         Args:
             button_id: Button ID containing subscription index
+
         """
         try:
             index = int(button_id.replace("activate_", ""))
@@ -606,6 +613,7 @@ class SubscriptionManagerScreen(Screen):
         Args:
             index: Subscription index
             subscription: Subscription object
+
         """
         # Store current selection for keyboard actions
         self._selected_index = index
@@ -618,7 +626,7 @@ class SubscriptionManagerScreen(Screen):
             else subscription.url
         )
         self.app.notify(
-            f"Selected: {url}\n" "Press 'r' to remove, 't' to toggle, 'a' to activate",
+            f"Selected: {url}\nPress 'r' to remove, 't' to toggle, 'a' to activate",
             severity="information",
         )
 
@@ -637,6 +645,7 @@ class SubscriptionManagerScreen(Screen):
 
         Args:
             index: Subscription index
+
         """
         try:
             if 0 <= index < len(self._subscriptions):
@@ -664,6 +673,7 @@ class SubscriptionManagerScreen(Screen):
 
         Args:
             index: Subscription index
+
         """
         try:
             if 0 <= index < len(self._subscriptions):
@@ -701,6 +711,7 @@ class SubscriptionManagerScreen(Screen):
 
         Args:
             index: Subscription index
+
         """
         try:
             if 0 <= index < len(self._subscriptions):
@@ -726,6 +737,7 @@ class SubscriptionManagerScreen(Screen):
 
         Args:
             button_id: Button ID containing subscription index
+
         """
         try:
             index = int(button_id.replace("remove_", ""))

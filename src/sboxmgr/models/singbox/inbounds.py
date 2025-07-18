@@ -1,6 +1,6 @@
 """Inbound models for sing-box configuration."""
 
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from pydantic import Field, field_validator
 
@@ -43,7 +43,15 @@ class InboundBase(SingBoxModelBase):
 class InboundWithUsers(InboundBase):
     """Base class for inbounds that support user authentication."""
 
-    users: Optional[List[AuthenticationUser]] = Field(
+    users: Optional[list[AuthenticationUser]] = Field(
+        default=None, description="Users for authentication."
+    )
+
+
+class InboundWithGenericUsers(InboundBase):
+    """Base class for inbounds that support generic user authentication."""
+
+    users: Optional[list[dict[str, Any]]] = Field(
         default=None, description="Users for authentication."
     )
 
@@ -54,8 +62,22 @@ class InboundWithTls(InboundWithUsers):
     tls: Optional[TlsConfig] = Field(default=None, description="TLS settings.")
 
 
+class InboundWithTlsGenericUsers(InboundWithGenericUsers):
+    """Base class for inbounds that support TLS with generic users."""
+
+    tls: Optional[TlsConfig] = Field(default=None, description="TLS settings.")
+
+
 class InboundWithTransport(InboundWithTls):
     """Base class for inbounds that support transport layer."""
+
+    transport: Optional[TransportConfig] = Field(
+        default=None, description="Transport layer settings."
+    )
+
+
+class InboundWithTransportGenericUsers(InboundWithTlsGenericUsers):
+    """Base class for inbounds that support transport layer with generic users."""
 
     transport: Optional[TransportConfig] = Field(
         default=None, description="Transport layer settings."
@@ -94,7 +116,7 @@ class ShadowsocksInbound(InboundBase):
     network: Optional[Network] = Field(
         default=None, description="Network type (tcp, udp, or both)."
     )
-    users: Optional[List[AuthenticationUser]] = Field(
+    users: Optional[list[AuthenticationUser]] = Field(
         default=None, description="Users for multi-user mode."
     )
 
@@ -128,7 +150,7 @@ class Hysteria2Inbound(InboundBase):
     obfs_type: Optional[Literal["salamander"]] = Field(
         default=None, description="Obfuscation type for Hysteria2."
     )
-    users: Optional[List[Dict[str, Any]]] = Field(
+    users: Optional[list[dict[str, Any]]] = Field(
         default=None, description="Users with password."
     )
 
@@ -141,26 +163,19 @@ class HttpInbound(InboundWithTls):
     path: Optional[str] = Field(default=None, description="HTTP path for requests.")
 
 
-class TrojanInbound(InboundWithTls):
+class TrojanInbound(InboundWithTlsGenericUsers):
     """Trojan inbound configuration."""
 
     type: Literal["trojan"] = Field(default="trojan", description="Trojan protocol.")
-    users: Optional[List[Dict[str, Any]]] = Field(
-        default=None, description="Users with password, e.g., [{'password': 'secret'}]."
-    )
-    fallback: Optional[Dict[str, Any]] = Field(
+    fallback: Optional[dict[str, Any]] = Field(
         default=None, description="Fallback settings, e.g., {'dest': '80'}."
     )
 
 
-class TuicInbound(InboundWithTls):
+class TuicInbound(InboundWithTlsGenericUsers):
     """TUIC inbound configuration."""
 
     type: Literal["tuic"] = Field(default="tuic", description="TUIC protocol.")
-    users: Optional[List[Dict[str, Any]]] = Field(
-        default=None,
-        description="Users with uuid, password, e.g., [{'uuid': 'uuid', 'password': 'secret'}].",
-    )
     congestion_control: Optional[Literal["bbr", "cubic", "new_reno"]] = Field(
         default=None, description="Congestion control algorithm."
     )
@@ -170,24 +185,16 @@ class TuicInbound(InboundWithTls):
 
 
 # TLS + Transport inbounds
-class VmessInbound(InboundWithTransport):
+class VmessInbound(InboundWithTransportGenericUsers):
     """VMess inbound configuration."""
 
     type: Literal["vmess"] = Field(default="vmess", description="VMess protocol.")
-    users: Optional[List[Dict[str, Any]]] = Field(
-        default=None,
-        description="Users with id, alterId, security, e.g., [{'id': 'uuid', 'alterId': 0}].",
-    )
 
 
-class VlessInbound(InboundWithTransport):
+class VlessInbound(InboundWithTransportGenericUsers):
     """VLESS inbound configuration."""
 
     type: Literal["vless"] = Field(default="vless", description="VLESS protocol.")
-    users: Optional[List[Dict[str, Any]]] = Field(
-        default=None,
-        description="Users with id, flow, e.g., [{'id': 'uuid', 'flow': 'xtls-rprx-vision'}].",
-    )
 
 
 # Special inbounds
@@ -211,13 +218,13 @@ class WireGuardInbound(InboundBase):
     interface_name: Optional[str] = Field(
         default=None, description="Name of the WireGuard interface."
     )
-    peers: Optional[List[Dict[str, Any]]] = Field(
+    peers: Optional[list[dict[str, Any]]] = Field(
         default=None,
         description="List of peer configurations, e.g., [{'public_key': 'xyz', 'allowed_ips': ['0.0.0.0/0']}].",
     )
 
 
-class ShadowTlsInbound(InboundWithTls):
+class ShadowTlsInbound(InboundWithTlsGenericUsers):
     """ShadowTLS inbound configuration."""
 
     type: Literal["shadowtls"] = Field(
@@ -229,10 +236,7 @@ class ShadowTlsInbound(InboundWithTls):
     password: Optional[str] = Field(
         default=None, description="Password for authentication."
     )
-    users: Optional[List[Dict[str, Any]]] = Field(
-        default=None, description="Users for authentication."
-    )
-    handshake: Optional[Dict[str, Any]] = Field(
+    handshake: Optional[dict[str, Any]] = Field(
         default=None,
         description="Handshake settings, e.g., {'server': 'example.com', 'port': 443}.",
     )
@@ -252,26 +256,26 @@ class DirectInbound(InboundBase):
     )
 
 
-class AnyTlsInbound(InboundWithTls):
+class AnyTlsInbound(InboundWithTlsGenericUsers):
     """AnyTLS inbound configuration."""
 
     type: Literal["anytls"] = Field(default="anytls", description="AnyTLS protocol.")
-    users: List[Dict[str, Any]] = Field(
+    users: list[dict[str, Any]] = Field(
         ..., description="AnyTLS users with name and password."
     )
-    padding_scheme: Optional[List[str]] = Field(
+    padding_scheme: Optional[list[str]] = Field(
         default=None, description="AnyTLS padding scheme line array."
     )
 
 
-class NaiveInbound(InboundWithTls):
+class NaiveInbound(InboundWithTlsGenericUsers):
     """Naive inbound configuration."""
 
     type: Literal["naive"] = Field(default="naive", description="Naive protocol.")
     network: Optional[Network] = Field(
         default=None, description="Listen network (tcp, udp, or both)."
     )
-    users: List[Dict[str, Any]] = Field(
+    users: list[dict[str, Any]] = Field(
         ..., description="Naive users with username and password."
     )
 
@@ -300,7 +304,7 @@ class TunInbound(InboundBase):
     interface_name: Optional[str] = Field(
         default=None, description="Virtual device name."
     )
-    address: Optional[List[str]] = Field(
+    address: Optional[list[str]] = Field(
         default=None, description="IPv4 and IPv6 prefix for the tun interface."
     )
     mtu: Optional[int] = Field(
@@ -324,22 +328,22 @@ class TunInbound(InboundBase):
     auto_redirect_output_mark: Optional[str] = Field(
         default=None, description="Output mark for auto redirect."
     )
-    loopback_address: Optional[List[str]] = Field(
+    loopback_address: Optional[list[str]] = Field(
         default=None, description="Loopback addresses."
     )
     strict_route: Optional[bool] = Field(
         default=None, description="Enable strict routing."
     )
-    route_address: Optional[List[str]] = Field(
+    route_address: Optional[list[str]] = Field(
         default=None, description="Route addresses."
     )
-    route_exclude_address: Optional[List[str]] = Field(
+    route_exclude_address: Optional[list[str]] = Field(
         default=None, description="Exclude addresses from routing."
     )
-    route_address_set: Optional[List[str]] = Field(
+    route_address_set: Optional[list[str]] = Field(
         default=None, description="Route address sets."
     )
-    route_exclude_address_set: Optional[List[str]] = Field(
+    route_exclude_address_set: Optional[list[str]] = Field(
         default=None, description="Exclude address sets from routing."
     )
     endpoint_independent_nat: Optional[bool] = Field(
@@ -351,53 +355,51 @@ class TunInbound(InboundBase):
     stack: Optional[Literal["system", "gvisor"]] = Field(
         default=None, description="Network stack."
     )
-    include_interface: Optional[List[str]] = Field(
+    include_interface: Optional[list[str]] = Field(
         default=None, description="Include interfaces."
     )
-    exclude_interface: Optional[List[str]] = Field(
+    exclude_interface: Optional[list[str]] = Field(
         default=None, description="Exclude interfaces."
     )
-    include_uid: Optional[List[int]] = Field(default=None, description="Include UIDs.")
-    include_uid_range: Optional[List[str]] = Field(
+    include_uid: Optional[list[int]] = Field(default=None, description="Include UIDs.")
+    include_uid_range: Optional[list[str]] = Field(
         default=None, description="Include UID ranges."
     )
-    exclude_uid: Optional[List[int]] = Field(default=None, description="Exclude UIDs.")
-    exclude_uid_range: Optional[List[str]] = Field(
+    exclude_uid: Optional[list[int]] = Field(default=None, description="Exclude UIDs.")
+    exclude_uid_range: Optional[list[str]] = Field(
         default=None, description="Exclude UID ranges."
     )
-    include_android_user: Optional[List[int]] = Field(
+    include_android_user: Optional[list[int]] = Field(
         default=None, description="Include Android users."
     )
-    include_package: Optional[List[str]] = Field(
+    include_package: Optional[list[str]] = Field(
         default=None, description="Include packages."
     )
-    exclude_package: Optional[List[str]] = Field(
+    exclude_package: Optional[list[str]] = Field(
         default=None, description="Exclude packages."
     )
-    platform: Optional[Dict[str, Any]] = Field(
+    platform: Optional[dict[str, Any]] = Field(
         default=None, description="Platform-specific settings."
     )
 
 
-Inbound = Annotated[
-    Union[
-        MixedInbound,
-        SocksInbound,
-        HttpInbound,
-        ShadowsocksInbound,
-        VmessInbound,
-        VlessInbound,
-        TrojanInbound,
-        Hysteria2Inbound,
-        WireGuardInbound,
-        TuicInbound,
-        ShadowTlsInbound,
-        DirectInbound,
-        AnyTlsInbound,
-        NaiveInbound,
-        RedirectInbound,
-        TproxyInbound,
-        TunInbound,
-    ],
-    Field(discriminator="type"),
+# Union type for all inbound configurations
+Inbound = Union[
+    MixedInbound,
+    SocksInbound,
+    HttpInbound,
+    ShadowsocksInbound,
+    VmessInbound,
+    VlessInbound,
+    TrojanInbound,
+    Hysteria2Inbound,
+    WireGuardInbound,
+    TuicInbound,
+    ShadowTlsInbound,
+    DirectInbound,
+    AnyTlsInbound,
+    NaiveInbound,
+    RedirectInbound,
+    TproxyInbound,
+    TunInbound,
 ]

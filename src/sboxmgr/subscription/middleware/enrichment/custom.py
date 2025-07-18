@@ -1,6 +1,6 @@
 """Custom enrichment functionality for server data."""
 
-from typing import List, Optional
+from typing import Any, Optional
 
 from ....configs.models import FullProfile
 from ...models import ParsedServer, PipelineContext
@@ -13,11 +13,12 @@ class CustomEnricher:
     priority scoring, and compatibility checks based on export format.
     """
 
-    def __init__(self, custom_enrichers: Optional[List[str]] = None):
+    def __init__(self, custom_enrichers: Optional[list[str]] = None):
         """Initialize custom enricher.
 
         Args:
             custom_enrichers: List of custom enricher names to apply
+
         """
         self.custom_enrichers = custom_enrichers or []
 
@@ -26,7 +27,7 @@ class CustomEnricher:
         server: ParsedServer,
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
-        enrichers: Optional[List[str]] = None,
+        enrichers: Optional[list[str]] = None,
     ) -> ParsedServer:
         """Apply custom enrichment to a server.
 
@@ -38,6 +39,7 @@ class CustomEnricher:
 
         Returns:
             Server with custom enrichment applied
+
         """
         if not profile:
             return server
@@ -72,6 +74,7 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         # Find matching subscription
         if hasattr(profile, "subscriptions") and profile.subscriptions:
@@ -97,6 +100,7 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         priority_score = 0.5  # Base score
 
@@ -163,8 +167,9 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
-        compatibility = {"compatible": True, "issues": []}
+        compatibility: dict[str, Any] = {"compatible": True, "issues": []}
 
         if not hasattr(profile, "export") or not profile.export:
             server.meta["compatibility"] = compatibility
@@ -235,6 +240,7 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         if "geo" not in server.meta:
             return
@@ -267,6 +273,7 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         usage_hints = []
 
