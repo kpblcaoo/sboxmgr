@@ -66,12 +66,9 @@ def create_urltest_outbound(proxy_tags: list[str]) -> dict[str, Any]:
         "tag": "auto",
         "outbounds": proxy_tags,
     }
-    # Update with default config, converting values to strings where needed
+    # Update with default config, preserving original types
     for key, value in DEFAULT_URLTEST_CONFIG.items():
-        if isinstance(value, (int, bool)):
-            urltest_config[key] = str(value)
-        else:
-            urltest_config[key] = str(value)  # Ensure all values are strings
+        urltest_config[key] = value
     return urltest_config
 
 
@@ -90,13 +87,13 @@ def create_modern_routing_rules(proxy_tags: list[str]) -> list[dict[str, Any]]:
     rules.append({"protocol": "dns", "action": "hijack-dns"})
 
     # Private IP ranges - auto
-    rules.append({"ip_is_private": "true", "action": "auto"})
+    rules.append({"ip_is_private": True, "action": "auto"})
 
     # Russian sites - direct
-    rules.append({"rule_set": "geoip-ru", "outbound": "direct"})
+    rules.append({"rule_set": ["geoip-ru"], "outbound": "direct"})
 
     # Block ads and malware
-    rules.append({"rule_set": "geosite-ads", "outbound": "block"})
+    rules.append({"rule_set": ["geosite-ads"], "outbound": "block"})
 
     return rules
 
