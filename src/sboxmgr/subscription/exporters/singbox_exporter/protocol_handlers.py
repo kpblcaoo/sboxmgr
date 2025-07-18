@@ -1,7 +1,7 @@
 """Protocol handlers for sing-box exporter."""
 
 import logging
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from sboxmgr.subscription.models import ParsedServer
 
@@ -295,7 +295,7 @@ def _get_server_tag(server: ParsedServer, protocol_type: str) -> str:
     return tag
 
 
-def get_protocol_dispatcher() -> dict[str, callable]:
+def get_protocol_dispatcher() -> dict[str, Callable]:
     """Get protocol dispatcher mapping.
 
     Returns:

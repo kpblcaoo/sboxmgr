@@ -10,6 +10,7 @@ import locale
 import os
 import re
 from pathlib import Path
+from typing import Optional
 
 
 class LanguageLoader:
@@ -27,7 +28,7 @@ class LanguageLoader:
 
     """
 
-    def __init__(self, lang: str = None, base_dir: Path = None):
+    def __init__(self, lang: Optional[str] = None, base_dir: Optional[Path] = None):
         """Initialize the language loader.
 
         Args:

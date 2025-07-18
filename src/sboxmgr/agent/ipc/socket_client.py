@@ -22,12 +22,15 @@ except ImportError:
     SBOX_COMMON_AVAILABLE = False
 
     # Create a dummy class for when sbox-common is not available
-    class FramedJSONProtocol:
+    class _DummyFramedJSONProtocol:
         def __init__(self):
             raise ImportError(
                 "sbox_common package not found. Please install it with: "
                 "pip install -e ../sbox-common or pip install sboxmgr[ipc]"
             )
+    
+    # Alias for compatibility
+    FramedJSONProtocol = _DummyFramedJSONProtocol
 
 
 class SocketClient:
@@ -112,6 +115,9 @@ class SocketClient:
             Received bytes (may be less than n if connection closed).
 
         """
+        if not self.sock:
+            raise RuntimeError("Socket is not connected")
+        
         buf = b""
         while len(buf) < n:
             chunk = self.sock.recv(n - len(buf))
