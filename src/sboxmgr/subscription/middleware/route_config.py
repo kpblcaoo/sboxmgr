@@ -159,13 +159,17 @@ class RouteConfigMiddleware(ProfileAwareMiddleware):
         return route_config
 
     def can_process(
-        self, servers: list[ParsedServer], context: Optional[PipelineContext] = None
+        self,
+        servers: list[ParsedServer],
+        context: PipelineContext,
+        profile: Optional[FullProfile] = None,
     ) -> bool:
         """Check if route configuration can be applied.
 
         Args:
             servers: List of servers
             context: Pipeline context
+            profile: Full profile configuration
 
         Returns:
             bool: True if route configuration is applicable

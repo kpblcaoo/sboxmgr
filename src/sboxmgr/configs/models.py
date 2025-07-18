@@ -93,7 +93,7 @@ class ExportConfig(BaseModel):
     )
     inbound_profile: str = Field(default="tun", description="Inbound profile name")
     output_file: str = Field(default="config.json", description="Output file path")
-    template: Optional[str] = Field(None, description="Custom template path")
+    template: Optional[str] = Field(default=None, description="Custom template path")
 
 
 class AgentConfig(BaseModel):
@@ -133,7 +133,7 @@ class UserConfig(BaseModel):
         default_factory=RoutingConfig, description="Routing configuration"
     )
     export: ExportConfig = Field(
-        default_factory=ExportConfig, description="Export settings"
+        default_factory=lambda: ExportConfig(), description="Export settings"
     )
 
     # Optional components

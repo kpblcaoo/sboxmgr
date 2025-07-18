@@ -82,6 +82,7 @@ class ExportManagerInterface(ABC):
         user_routes: Optional[list[dict]] = None,
         context: Optional[dict[str, Any]] = None,
         client_profile: Optional[Any] = None,
+        profile: Optional[Any] = None,
     ) -> dict:
         """Export servers to client configuration format.
 
@@ -91,6 +92,7 @@ class ExportManagerInterface(ABC):
             user_routes: Optional list of custom routing rules.
             context: Optional context dictionary for export customization.
             client_profile: Optional client profile override.
+            profile: Optional profile for processing.
 
         Returns:
             Dictionary containing the final client configuration.

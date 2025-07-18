@@ -26,7 +26,7 @@ def clash_export(
 
     """
     # Basic Clash configuration structure
-    config = {
+    config: dict[str, Any] = {
         "port": 7890,
         "socks-port": 7891,
         "allow-lan": True,
@@ -42,17 +42,22 @@ def clash_export(
     for server in servers:
         proxy = _convert_server_to_clash_proxy(server)
         if proxy:
-            config["proxies"].append(proxy)
+            proxies = config["proxies"]
+            if isinstance(proxies, list):
+                proxies.append(proxy)
 
     # Add default proxy group
-    if config["proxies"]:
-        config["proxy-groups"].append(
-            {
-                "name": "Proxy",
-                "type": "select",
-                "proxies": [proxy["name"] for proxy in config["proxies"]],
-            }
-        )
+    proxies = config["proxies"]
+    if proxies and isinstance(proxies, list):
+        proxy_groups = config["proxy-groups"]
+        if isinstance(proxy_groups, list):
+            proxy_groups.append(
+                {
+                    "name": "Proxy",
+                    "type": "select",
+                    "proxies": [proxy["name"] for proxy in proxies],
+                }
+            )
 
     # Add basic rules
     config["rules"] = [

@@ -233,7 +233,14 @@ def validate_single_protocol_config(
         ValueError: If configuration is invalid.
 
     """
-    return validate_protocol_config(config, protocol)
+    # Validate the config and return the model as dict
+    validated_config = validate_protocol_config(config, protocol)
+    # Convert Pydantic model to dict
+    if hasattr(validated_config, "model_dump"):
+        return validated_config.model_dump()
+    else:
+        # Fallback for older Pydantic versions
+        return validated_config.dict()
 
 
 def get_protocol_schema(protocol: str) -> dict[str, Any]:

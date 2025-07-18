@@ -61,7 +61,7 @@ def create_urltest_outbound(proxy_tags: list[str]) -> dict[str, Any]:
     Returns:
         URLTest outbound configuration.
     """
-    urltest_config = {
+    urltest_config: dict[str, Any] = {
         "type": "urltest",
         "tag": "auto",
         "outbounds": proxy_tags,
@@ -81,7 +81,7 @@ def create_modern_routing_rules(proxy_tags: list[str]) -> list[dict[str, Any]]:
     Returns:
         List of routing rules.
     """
-    rules = []
+    rules: list[dict[str, Any]] = []
 
     # DNS hijack rule (highest priority)
     rules.append({"protocol": "dns", "action": "hijack-dns"})

@@ -1,8 +1,4 @@
-"""Validation utilities for protocol models.
-
-This module provides utility functions for validating protocol configurations,
-generating schemas, and converting between different model types.
-"""
+"""Protocol validation utilities for subscription management."""
 
 from typing import Any, Optional
 
@@ -84,7 +80,13 @@ def generate_protocol_schema(protocol: str) -> dict[str, Any]:
     if protocol not in protocol_map:
         raise ValueError(f"Unsupported protocol: {protocol}")
 
-    return protocol_map[protocol].model_json_schema()
+    # Fix: Use model_json_schema() method instead of accessing it as attribute
+    config_class = protocol_map[protocol]
+    if hasattr(config_class, "model_json_schema"):
+        return config_class.model_json_schema()
+    else:
+        # Fallback for older Pydantic versions
+        return config_class.schema()  # type: ignore[attr-defined]
 
 
 def validate_outbound_config(config: dict[str, Any]) -> OutboundModel:
@@ -129,7 +131,12 @@ def generate_outbound_schema() -> dict[str, Any]:
     Returns:
         JSON schema dictionary for OutboundModel
     """
-    return OutboundConfig.model_json_schema()
+    # Fix: Use model_json_schema() method instead of accessing it as attribute
+    if hasattr(OutboundConfig, "model_json_schema"):
+        return OutboundConfig.model_json_schema()
+    else:
+        # Fallback for older Pydantic versions
+        return OutboundConfig.schema()
 
 
 def convert_protocol_to_outbound(
@@ -157,11 +164,10 @@ def convert_protocol_to_outbound(
             password=protocol_config.password,
             plugin=protocol_config.plugin,
             plugin_opts=protocol_config.plugin_opts,
-            local_address=(
-                [protocol_config.local_address]
-                if protocol_config.local_address
-                else None
-            ),
+            # Add required fields with defaults
+            tls=None,
+            local_address=None,
+            multiplex=None,
         )
 
     elif isinstance(protocol_config, VmessConfig):
@@ -181,17 +187,21 @@ def convert_protocol_to_outbound(
             server_port=protocol_config.server_port,
             uuid=user.id,
             security=user.security,
+            # Add required fields with defaults
+            tls=None,
+            local_address=None,
+            packet_encoding=None,
             multiplex=protocol_config.multiplex,
         )
 
     elif isinstance(protocol_config, VlessConfig):
         # Extract first user from settings for outbound
-        user = (
+        vless_user = (
             protocol_config.settings.clients[0]
             if protocol_config.settings.clients
             else None
         )
-        if not user:
+        if not vless_user:
             raise ValueError("VLESS config requires at least one user")
 
         return VlessOutbound(
@@ -199,8 +209,12 @@ def convert_protocol_to_outbound(
             tag=tag,
             server=protocol_config.server,
             server_port=protocol_config.server_port,
-            uuid=user.id,
-            flow=user.flow,
+            uuid=vless_user.id,
+            flow=vless_user.flow,
+            # Add required fields with defaults
+            tls=None,
+            local_address=None,
+            packet_encoding=None,
             multiplex=protocol_config.multiplex,
         )
 
@@ -212,6 +226,8 @@ def convert_protocol_to_outbound(
             server_port=protocol_config.server_port,
             password=protocol_config.password,
             tls=protocol_config.tls,
+            # Add required fields with defaults
+            local_address=None,
             multiplex=protocol_config.multiplex,
             fallback=protocol_config.fallback,
         )
@@ -229,6 +245,14 @@ def convert_protocol_to_outbound(
             peer_public_key=peer.public_key,
             mtu=protocol_config.interface.mtu,
             local_address=protocol_config.interface.address,
+            # Add required fields with defaults
+            server=None,
+            server_port=None,
+            tls=None,
+            multiplex=None,
+            keepalive=None,
+            peers=None,
+            reserved=None,
         )
 
     else:

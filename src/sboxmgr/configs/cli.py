@@ -81,7 +81,13 @@ def apply_profile(profile_path: str, dry_run: bool = False) -> None:
             console.print("[red]Profile validation failed:[/red]")
             for error in validation_result.errors:
                 console.print(f"  [red]• {error}[/red]")
-            raise typer.Exit(1) from validation_result.errors[0]
+            # Create a proper exception from the first error
+            first_error = (
+                validation_result.errors[0]
+                if validation_result.errors
+                else "Unknown validation error"
+            )
+            raise typer.Exit(1) from ValueError(first_error)
 
         if validation_result.warnings:
             console.print("[yellow]Profile warnings:[/yellow]")
@@ -145,7 +151,13 @@ def validate(
             console.print("[red]Profile validation failed:[/red]")
             for error in validation_result.errors:
                 console.print(f"  [red]• {error}[/red]")
-            raise typer.Exit(1) from validation_result.errors[0]
+            # Create a proper exception from the first error
+            first_error = (
+                validation_result.errors[0]
+                if validation_result.errors
+                else "Unknown validation error"
+            )
+            raise typer.Exit(1) from ValueError(first_error)
 
         console.print("[green]Profile is valid![/green]")
 
@@ -404,29 +416,32 @@ def switch_profile(profile_id: str, profiles_dir: Optional[str] = None) -> None:
 
         # Try to find profile by name first
         profiles = manager.list_profiles()
-        target_profile = None
+        target_profile_info = None
 
         # Look for exact name match
         for profile in profiles:
             if profile.name == profile_id and profile.valid:
-                target_profile = profile
+                target_profile_info = profile
                 break
 
         # If not found by name, try as path
-        if not target_profile:
+        user_config = None
+        if not target_profile_info:
             try:
                 loader = ProfileLoader()
-                profile = loader.load_from_file(profile_id)
-                target_profile = type(
+                loaded_profile = loader.load_from_file(profile_id)
+                target_profile_info = type(
                     "ProfileInfo",
                     (),
                     {"path": profile_id, "name": Path(profile_id).stem, "valid": True},
                 )()
+                # Use the loaded profile directly instead of loading again
+                user_config = loaded_profile
             except Exception as e:
                 console.print(f"[red]Failed to load profile: {profile_id} ({e})[/red]")
                 raise typer.Exit(1) from e
 
-        if not target_profile:
+        if not target_profile_info:
             console.print(f"[red]Profile not found: {profile_id}[/red]")
             console.print("[yellow]Available profiles:[/yellow]")
             for profile in profiles:
@@ -434,13 +449,15 @@ def switch_profile(profile_id: str, profiles_dir: Optional[str] = None) -> None:
                     console.print(f"  [blue]• {profile.name}[/blue]")
             raise typer.Exit(1) from Exception("Profile not found")
 
-        # Load and set active profile
-        loader = ProfileLoader()
-        profile = loader.load_from_file(target_profile.path)
-        manager.set_active_profile(profile)
+        # Load profile if not already loaded (for name-based profiles)
+        if user_config is None:
+            loader = ProfileLoader()
+            user_config = loader.load_from_file(target_profile_info.path)
+        # Ensure we're passing a UserConfig to set_active_profile
+        manager.set_active_profile(user_config)
 
-        console.print(f"[green]Switched to profile: {target_profile.name}[/green]")
-        console.print(f"  [blue]Path:[/blue] {target_profile.path}")
+        console.print(f"[green]Switched to profile: {target_profile_info.name}[/green]")
+        console.print(f"  [blue]Path:[/blue] {target_profile_info.path}")
 
     except Exception as e:
         console.print(f"[red]Failed to switch profile: {e}[/red]")

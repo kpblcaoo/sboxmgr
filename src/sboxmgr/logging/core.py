@@ -79,12 +79,16 @@ class LoggingCore:
         logger = logging.getLogger(name)
 
         # Add structured logging adapter if not already present
-        structured_adapter = getattr(logger, "_structured_adapter", None)
-        if structured_adapter is None:
+        # Use hasattr and getattr for safer attribute access
+        if not hasattr(logger, "_structured_adapter"):
             structured_adapter = StructuredLoggerAdapter(logger)
+            # Use setattr to safely set the attribute
             logger._structured_adapter = structured_adapter
+        else:
+            structured_adapter = logger._structured_adapter
 
-        return structured_adapter
+        # Return the base logger, not the adapter
+        return logger
 
     def reconfigure(self, new_config: LoggingConfig) -> None:
         """Reconfigure logging with new settings.

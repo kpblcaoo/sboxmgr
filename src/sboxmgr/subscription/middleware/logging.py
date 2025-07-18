@@ -276,7 +276,7 @@ class LoggingMiddleware(ChainableMiddleware):
             duration: Processing duration in seconds
 
         """
-        metrics = {
+        metrics: dict[str, Any] = {
             "total_servers": len(servers),
             "duration_seconds": round(duration, 3),
             "servers_per_second": (
@@ -287,7 +287,7 @@ class LoggingMiddleware(ChainableMiddleware):
         }
 
         # Count servers by type
-        server_types = {}
+        server_types: dict[str, int] = {}
         for server in servers:
             server_types[server.type] = server_types.get(server.type, 0) + 1
         metrics["server_types"] = server_types

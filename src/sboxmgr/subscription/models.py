@@ -110,6 +110,7 @@ class PipelineContext(BaseModel):
         debug_level: Debug verbosity level.
         metadata: Additional metadata dictionary.
         skip_policies: Whether to skip policy evaluation (for testing).
+        flags: List of flags for pipeline state tracking.
 
     """
 
@@ -123,6 +124,7 @@ class PipelineContext(BaseModel):
     debug_level: int = 0
     metadata: dict[str, Any] = Field(default_factory=dict)
     skip_policies: bool = False  # Whether to skip policy evaluation (for testing)
+    flags: list[str] = Field(default_factory=list)  # Pipeline state flags
 
 
 class PipelineResult(BaseModel):

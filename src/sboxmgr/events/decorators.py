@@ -65,7 +65,7 @@ def event_handler(
         if auto_register:
             get_event_manager().register_handler(handler)
 
-        func._event_handler = handler
+        func._event_handler = handler  # type: ignore[attr-defined]
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -95,7 +95,7 @@ def async_event_handler(
         if auto_register:
             get_event_manager().register_handler(handler)
 
-        func._event_handler = handler
+        func._event_handler = handler  # type: ignore[attr-defined]
 
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):

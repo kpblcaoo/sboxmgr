@@ -1,7 +1,7 @@
 """Configuration generators for export command."""
 
 import json
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 
@@ -107,7 +107,7 @@ def generate_profile_from_cli(
 
     try:
         # Create basic profile structure
-        profile_data = {
+        profile_data: dict[str, Any] = {
             "id": "cli-generated-profile",
             "description": "Profile generated from CLI parameters",
             "filters": {
@@ -128,18 +128,22 @@ def generate_profile_from_cli(
         # Add postprocessor configuration
         if postprocessors:
             validate_postprocessors(postprocessors)
-            profile_data["metadata"]["postprocessors"] = {
-                "chain": [{"type": proc, "config": {}} for proc in postprocessors],
-                "execution_mode": "sequential",
-                "error_strategy": "continue",
-            }
+            metadata = profile_data["metadata"]
+            if isinstance(metadata, dict):
+                metadata["postprocessors"] = {
+                    "chain": [{"type": proc, "config": {}} for proc in postprocessors],
+                    "execution_mode": "sequential",
+                    "error_strategy": "continue",
+                }
 
         # Add middleware configuration
         if middleware:
             validate_middleware(middleware)
-            profile_data["metadata"]["middleware"] = {
-                "chain": [{"type": mw, "config": {}} for mw in middleware]
-            }
+            metadata = profile_data["metadata"]
+            if isinstance(metadata, dict):
+                metadata["middleware"] = {
+                    "chain": [{"type": mw, "config": {}} for mw in middleware]
+                }
 
         # Write profile to file
         with open(output_path, "w", encoding="utf-8") as f:

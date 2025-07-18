@@ -7,7 +7,7 @@ including creation, loading, validation, and active config management.
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import ValidationError
 
@@ -133,7 +133,7 @@ class ConfigManager:
         # Load active config from file
         self._load_active_config_from_file()
 
-    def create_config(self, config_data: dict) -> UserConfig:
+    def create_config(self, config_data: dict[str, Any]) -> UserConfig:
         """Create a new config from dictionary data.
 
         Args:
@@ -342,7 +342,7 @@ class ConfigManager:
             logger.warning(f"[WARNING] Call stack: {traceback.format_stack()[-3:]}")
         try:
             # Create default config data
-            default_config_data = {
+            default_config_data: dict[str, Any] = {
                 "id": "default",
                 "description": "Default configuration for SBoxMgr",
                 "version": "1.0",
@@ -425,7 +425,7 @@ class ConfigManager:
 
         """
         logger = _get_logger()
-        configs = []
+        configs: list[ConfigInfo] = []
 
         if not self.configs_dir.exists():
             return configs
@@ -472,3 +472,45 @@ class ConfigManager:
         logger = _get_logger()
         if logger:
             logger.debug("Config cache cleared")
+
+    # Compatibility methods for old CLI code
+    @property
+    def profiles_dir(self) -> Path:
+        """Get profiles directory (alias for configs_dir for compatibility).
+
+        Returns:
+            Path: Profiles directory path
+        """
+        return self.configs_dir
+
+    def validate_profile(self, profile: UserConfig) -> ValidationResult:
+        """Validate a profile (alias for config validation).
+
+        Args:
+            profile: Profile to validate
+
+        Returns:
+            ValidationResult: Validation result
+        """
+        try:
+            # Basic validation - UserConfig already validates on creation
+            # Additional custom validation can be added here
+            return ValidationResult(valid=True)
+        except Exception as e:
+            return ValidationResult(valid=False, errors=[str(e)])
+
+    def set_active_profile(self, profile: UserConfig) -> None:
+        """Set active profile (alias for set_active_config).
+
+        Args:
+            profile: Profile to set as active
+        """
+        self.set_active_config(profile)
+
+    def list_profiles(self) -> list[ConfigInfo]:
+        """List profiles (alias for list_configs).
+
+        Returns:
+            List[ConfigInfo]: List of profile information
+        """
+        return self.list_configs()

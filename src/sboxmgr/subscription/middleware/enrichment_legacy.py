@@ -300,12 +300,12 @@ class EnrichmentMiddleware(TransformMiddleware):
                             "country_name": response.country.name,
                             "city": response.city.name,
                             "latitude": (
-                                float(response.location.latitude)
+                                str(float(response.location.latitude))
                                 if response.location.latitude
                                 else None
                             ),
                             "longitude": (
-                                float(response.location.longitude)
+                                str(float(response.location.longitude))
                                 if response.location.longitude
                                 else None
                             ),
@@ -364,13 +364,16 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         # Check cache first
         if server_key in self._performance_cache:
-            cached_data, timestamp = self._performance_cache[server_key]
-            if (
-                isinstance(timestamp, (int, float))
-                and time.time() - timestamp < self.performance_cache_duration
-            ):
-                server.meta["performance"] = cached_data
-                return server
+            cache_entry = self._performance_cache[server_key]
+            if isinstance(cache_entry, dict):
+                cached_data = cache_entry.get("performance_info", {})
+                timestamp = cache_entry.get("timestamp", 0)
+                if (
+                    isinstance(timestamp, (int, float))
+                    and time.time() - timestamp < self.performance_cache_duration
+                ):
+                    server.meta["performance"] = cached_data
+                    return server
 
         performance_info = {}
 
@@ -386,7 +389,11 @@ class EnrichmentMiddleware(TransformMiddleware):
             )
 
             # Cache the result
-            self._performance_cache[server_key] = (performance_info, time.time())
+            performance_cache_entry: dict[str, Any] = {
+                "performance_info": performance_info,
+                "timestamp": time.time(),
+            }
+            self._performance_cache[server_key] = performance_cache_entry
 
         except Exception as e:
             performance_info["error"] = str(e)
@@ -734,7 +741,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             profile: Full profile configuration
 
         """
-        compatibility = {"compatible": True, "issues": []}
+        compatibility: dict[str, Any] = {"compatible": True, "issues": []}
 
         export_format = profile.export.format
 
@@ -748,16 +755,16 @@ class EnrichmentMiddleware(TransformMiddleware):
                 "wireguard",
             ]:
                 compatibility["compatible"] = False
-                compatibility["issues"].append(
-                    f"Protocol {server.type} not supported by sing-box"
-                )
+                issues = compatibility["issues"]
+                if isinstance(issues, list):
+                    issues.append(f"Protocol {server.type} not supported by sing-box")
 
         elif export_format == "clash":
             # Check clash compatibility
             if server.type not in ["shadowsocks", "vmess", "trojan", "http", "socks"]:
                 compatibility["compatible"] = False
-                compatibility["issues"].append(
-                    f"Protocol {server.type} not supported by clash"
-                )
+                issues = compatibility["issues"]
+                if isinstance(issues, list):
+                    issues.append(f"Protocol {server.type} not supported by clash")
 
         server.meta["compatibility"] = compatibility
