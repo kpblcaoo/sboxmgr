@@ -24,21 +24,13 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install ruff isort black mypy pre-commit
+        pip install ruff mypy pre-commit
         pip install types-requests types-PyYAML types-toml
 
-    - name: Run Ruff linter
+    - name: Run Ruff linter and formatter
       run: |
         ruff check src/ tests/ examples/ scripts/
-
-    - name: Run Ruff formatter
-      run: |
         ruff format --check src/ tests/ examples/ scripts/
-
-    # isort is not used anymore, but keeping it here for reference
-#    - name: Run isort
-#      run: |
-#        isort --check-only src/ tests/ examples/ scripts/
 
     - name: Run MyPy type checker
       run: |
@@ -46,8 +38,7 @@ jobs:
 
     - name: Check docstrings
       run: |
-        pip install pydocstyle
-        pydocstyle src/sboxmgr/ --ignore=D100,D104,D105,D106,D107
+        ruff check src/ --select D --ignore D106,D107,D401
 
     - name: Check for security issues
       run: |
