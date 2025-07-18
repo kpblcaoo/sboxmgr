@@ -51,17 +51,14 @@ def test_export_dry_run_success(runner):
     # Should contain dry-run related messages
     output = result.stdout + result.stderr
     assert _contains_any(
-        output,
-        ["dry-run", "dry run", "ignored in --dry-run mode", "validation"]
+        output, ["dry-run", "dry run", "ignored in --dry-run mode", "validation"]
     )
 
 
 def test_export_agent_check_success(runner):
     """Test export with --agent-check flag - validates via agent."""
     # Test agent-check mode - should check via sboxagent
-    result = runner.invoke(
-        app, ["--agent-check", "--url", "https://example.com/sub"]
-    )
+    result = runner.invoke(app, ["--agent-check", "--url", "https://example.com/sub"])
 
     # Agent-check should fail gracefully on invalid URL
     assert result.exit_code == 1
@@ -107,8 +104,10 @@ def test_export_with_postprocessors_success(runner):
     result = runner.invoke(
         app,
         [
-            "--url", "https://example.com/sub",
-            "--postprocessors", "geo_filter,tag_filter",
+            "--url",
+            "https://example.com/sub",
+            "--postprocessors",
+            "geo_filter,tag_filter",
         ],
     )
 
@@ -119,14 +118,19 @@ def test_export_with_postprocessors_success(runner):
     output = result.stdout + result.stderr
     assert not _contains_any(
         output,
-        ["Unknown postprocessors", "Неизвестные постпроцессоры", "invalid postprocessor"]
+        [
+            "Unknown postprocessors",
+            "Неизвестные постпроцессоры",
+            "invalid postprocessor",
+        ],
     )
 
 
 def test_export_with_invalid_postprocessors_error(runner):
     """Test export with invalid postprocessors - should show error."""
     result = runner.invoke(
-        app, ["--url", "https://example.com/sub", "--postprocessors", "invalid_processor"]
+        app,
+        ["--url", "https://example.com/sub", "--postprocessors", "invalid_processor"],
     )
 
     # Should fail with invalid postprocessors
@@ -136,7 +140,12 @@ def test_export_with_invalid_postprocessors_error(runner):
     output = result.stdout + result.stderr
     assert _contains_any(
         output,
-        ["Unknown postprocessors", "Неизвестные постпроцессоры", "postprocessors", "invalid"]
+        [
+            "Unknown postprocessors",
+            "Неизвестные постпроцессоры",
+            "postprocessors",
+            "invalid",
+        ],
     )
 
 
@@ -153,8 +162,7 @@ def test_export_with_middleware_success(runner):
     # Should not error on valid middleware names
     output = result.stdout + result.stderr
     assert not _contains_any(
-        output,
-        ["Unknown middleware", "Неизвестное middleware", "invalid middleware"]
+        output, ["Unknown middleware", "Неизвестное middleware", "invalid middleware"]
     )
 
 
@@ -171,7 +179,7 @@ def test_export_with_invalid_middleware_error(runner):
     output = result.stdout + result.stderr
     assert _contains_any(
         output,
-        ["Unknown middleware", "Неизвестное middleware", "middleware", "invalid"]
+        ["Unknown middleware", "Неизвестное middleware", "middleware", "invalid"],
     )
 
 
@@ -203,7 +211,7 @@ def test_export_with_config_success(runner, sample_profile):
         output = result.stdout + result.stderr
         assert not _contains_any(
             output,
-            ["config file not found", "файл конфига не найден", "invalid config"]
+            ["config file not found", "файл конфига не найден", "invalid config"],
         )
     finally:
         os.unlink(config_path)
@@ -222,7 +230,12 @@ def test_export_with_invalid_config_error(runner):
     output = result.stdout + result.stderr
     assert _contains_any(
         output,
-        ["config file not found", "файл конфига не найден", "config not found", "error"]
+        [
+            "config file not found",
+            "файл конфига не найден",
+            "config not found",
+            "error",
+        ],
     )
 
 
@@ -235,9 +248,12 @@ def test_export_generate_profile_success(runner):
         result = runner.invoke(
             app,
             [
-                "--generate-profile", profile_path,
-                "--postprocessors", "geo_filter,tag_filter",
-                "--middleware", "logging",
+                "--generate-profile",
+                profile_path,
+                "--postprocessors",
+                "geo_filter,tag_filter",
+                "--middleware",
+                "logging",
             ],
         )
 
@@ -248,7 +264,7 @@ def test_export_generate_profile_success(runner):
         output = result.stdout + result.stderr
         assert _contains_any(
             output,
-            ["profile generated", "профиль сгенерирован", "generated", "success"]
+            ["profile generated", "профиль сгенерирован", "generated", "success"],
         )
 
         # Profile file should exist and be valid JSON
@@ -264,9 +280,7 @@ def test_export_generate_profile_success(runner):
 def test_export_flag_combinations_error(runner):
     """Test export with conflicting flags - should show validation errors."""
     # Test conflicting flags
-    result = runner.invoke(
-        app, ["--validate-only", "--url", "https://example.com/sub"]
-    )
+    result = runner.invoke(app, ["--validate-only", "--url", "https://example.com/sub"])
 
     # Should fail with conflicting flags
     assert result.exit_code == 1
@@ -274,8 +288,7 @@ def test_export_flag_combinations_error(runner):
     # Should show validation error
     output = result.stdout + result.stderr
     assert _contains_any(
-        output,
-        ["cannot be used with", "mutually exclusive", "conflict", "error"]
+        output, ["cannot be used with", "mutually exclusive", "conflict", "error"]
     )
 
 
@@ -289,8 +302,7 @@ def test_export_help_includes_phase4_flags(runner):
     # Should include Phase 4 flags
     output = result.stdout + result.stderr
     assert _contains_any(
-        output,
-        ["--postprocessors", "--middleware", "--generate-profile", "--config"]
+        output, ["--postprocessors", "--middleware", "--generate-profile", "--config"]
     )
 
 
@@ -299,8 +311,10 @@ def test_export_with_inbound_types_success(runner):
     result = runner.invoke(
         app,
         [
-            "--url", "https://example.com/sub",
-            "--inbound-types", "socks,http",
+            "--url",
+            "https://example.com/sub",
+            "--inbound-types",
+            "socks,http",
         ],
     )
 
@@ -310,7 +324,11 @@ def test_export_with_inbound_types_success(runner):
     # Should not error on valid inbound types (should fail on URL, not inbound validation)
     output = result.stdout + result.stderr
     # Check that error is about subscription, not inbound validation
-    assert "subscription" in output.lower() or "404" in output or "not found" in output.lower()
+    assert (
+        "subscription" in output.lower()
+        or "404" in output
+        or "not found" in output.lower()
+    )
 
 
 def test_export_with_inbound_parameters_success(runner):
@@ -318,10 +336,14 @@ def test_export_with_inbound_parameters_success(runner):
     result = runner.invoke(
         app,
         [
-            "--url", "https://example.com/sub",
-            "--socks-port", "1080",
-            "--http-port", "8080",
-            "--tun-address", "198.18.0.1/16",
+            "--url",
+            "https://example.com/sub",
+            "--socks-port",
+            "1080",
+            "--http-port",
+            "8080",
+            "--tun-address",
+            "198.18.0.1/16",
         ],
     )
 
@@ -331,7 +353,11 @@ def test_export_with_inbound_parameters_success(runner):
     # Should not error on valid parameters (should fail on URL, not parameter validation)
     output = result.stdout + result.stderr
     # Check that error is about subscription, not parameter validation
-    assert "subscription" in output.lower() or "404" in output or "not found" in output.lower()
+    assert (
+        "subscription" in output.lower()
+        or "404" in output
+        or "not found" in output.lower()
+    )
 
 
 def test_export_with_invalid_inbound_type_error(runner):
@@ -359,6 +385,5 @@ def test_export_help_includes_inbound_flags(runner):
     # Should include inbound flags
     output = result.stdout + result.stderr
     assert _contains_any(
-        output,
-        ["--inbound-types", "--socks-port", "--http-port", "--tun-address"]
+        output, ["--inbound-types", "--socks-port", "--http-port", "--tun-address"]
     )

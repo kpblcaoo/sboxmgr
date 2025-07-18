@@ -139,9 +139,9 @@ def test_cli_matrix(
     output = result.stdout + result.stderr + log_text
     text = expected_stdout_contains[0] if expected_stdout_contains else ""
     try:
-        assert (
-            result.returncode == expected_exit
-        ), f"{description}: неверный код возврата"
+        assert result.returncode == expected_exit, (
+            f"{description}: неверный код возврата"
+        )
         for fname in expected_files:
             if fname == "exclusions.json":
                 if not (tmp_path / fname).exists():
@@ -166,7 +166,9 @@ def test_cli_matrix(
             print(f"OUTPUT repr:\n{repr(output)}")
             print(f"TYPES: text={type(text)}, output={type(output)}")
             print("===============================\n")
-            raise AssertionError(f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе")
+            raise AssertionError(
+                f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе"
+            )
     except AssertionError:
         print("\n==== CLI MATRIX DIAGNOSTICS ====\nArgs:", args)
         print(f"Return code: {result.returncode}")
@@ -176,4 +178,6 @@ def test_cli_matrix(
         print(f"OUTPUT repr:\n{repr(output)}")
         print(f"TYPES: text={type(text)}, output={type(output)}")
         print("===============================\n")
-        raise AssertionError(f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе")
+        raise AssertionError(
+            f"{description}: не найдено ни одной из подстрок {expected_stdout_contains} в выводе или логе"
+        )

@@ -45,9 +45,9 @@ def test_subscription_pipeline_integration():
 
         # Проверяем результат
         assert result.success, f"Pipeline failed: {result.errors}"
-        assert (
-            len(result.config) >= 1
-        ), f"Expected at least 1 server, got {len(result.config)}"
+        assert len(result.config) >= 1, (
+            f"Expected at least 1 server, got {len(result.config)}"
+        )
 
         # Тестируем export config
         export_mgr = ExportManager(export_format="singbox")

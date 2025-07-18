@@ -33,10 +33,13 @@ class TestLoadSelectedConfig:
         # Create invalid JSON file
         config_file.write_text("{ invalid json content")
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("logging.error") as mock_error:
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("logging.error") as mock_error,
+        ):
             result = load_selected_config()
 
         assert result == {"selected": []}
@@ -61,10 +64,13 @@ class TestLoadSelectedConfig:
         config_file = tmp_path / "empty.json"
         config_file.write_text("")
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("logging.error") as mock_error:
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("logging.error") as mock_error,
+        ):
             result = load_selected_config()
 
         assert result == {"selected": []}
@@ -108,12 +114,16 @@ class TestLoadSelectedConfig:
         """Test loading when file has permission issues."""
         config_file = tmp_path / "permission_denied.json"
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("sboxmgr.server.state.file_exists", return_value=True), patch(
-            "sboxmgr.server.state.read_json",
-            side_effect=PermissionError("Permission denied"),
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("sboxmgr.server.state.file_exists", return_value=True),
+            patch(
+                "sboxmgr.server.state.read_json",
+                side_effect=PermissionError("Permission denied"),
+            ),
         ):
             # Should propagate the PermissionError since it's not JSONDecodeError
             with pytest.raises(PermissionError):
@@ -128,10 +138,13 @@ class TestSaveSelectedConfig:
         config_file = tmp_path / "default.json"
         test_data = {"selected": ["server1", "server2"]}
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("sboxmgr.server.state.atomic_write_json") as mock_write:
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("sboxmgr.server.state.atomic_write_json") as mock_write,
+        ):
             save_selected_config(test_data)
 
         mock_write.assert_called_once_with(test_data, str(config_file))
@@ -151,10 +164,13 @@ class TestSaveSelectedConfig:
         config_file = tmp_path / "empty.json"
         test_data = {"selected": []}
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("sboxmgr.server.state.atomic_write_json") as mock_write:
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("sboxmgr.server.state.atomic_write_json") as mock_write,
+        ):
             save_selected_config(test_data)
 
         mock_write.assert_called_once_with(test_data, str(config_file))
@@ -175,10 +191,13 @@ class TestSaveSelectedConfig:
             "metadata": {"created": "2024-01-01T00:00:00Z", "source": "subscription"},
         }
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("sboxmgr.server.state.atomic_write_json") as mock_write:
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("sboxmgr.server.state.atomic_write_json") as mock_write,
+        ):
             save_selected_config(test_data)
 
         mock_write.assert_called_once_with(test_data, str(config_file))
@@ -187,10 +206,13 @@ class TestSaveSelectedConfig:
         """Test saving None data."""
         config_file = tmp_path / "none.json"
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("sboxmgr.server.state.atomic_write_json") as mock_write:
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("sboxmgr.server.state.atomic_write_json") as mock_write,
+        ):
             save_selected_config(None)
 
         mock_write.assert_called_once_with(None, str(config_file))
@@ -200,11 +222,15 @@ class TestSaveSelectedConfig:
         config_file = tmp_path / "error.json"
         test_data = {"selected": ["server1"]}
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch(
-            "sboxmgr.server.state.atomic_write_json", side_effect=OSError("Disk full")
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch(
+                "sboxmgr.server.state.atomic_write_json",
+                side_effect=OSError("Disk full"),
+            ),
         ):
             with pytest.raises(OSError, match="Disk full"):
                 save_selected_config(test_data)
@@ -271,10 +297,13 @@ class TestServerStateIntegration:
         # Create corrupted file
         config_file.write_text("{ corrupted json")
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("logging.error"):
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("logging.error"),
+        ):
             # Load should return default
             loaded_data = load_selected_config()
             assert loaded_data == {"selected": []}
@@ -355,10 +384,13 @@ class TestServerStateEdgeCases:
             config_file = tmp_path / f"invalid_{len(invalid_content)}.json"
             config_file.write_text(invalid_content)
 
-            with patch(
-                "sboxmgr.server.state.get_selected_config_file",
-                return_value=str(config_file),
-            ), patch("logging.error") as mock_error:
+            with (
+                patch(
+                    "sboxmgr.server.state.get_selected_config_file",
+                    return_value=str(config_file),
+                ),
+                patch("logging.error") as mock_error,
+            ):
                 result = load_selected_config()
 
                 assert result == {"selected": []}, f"Failed for case: {description}"
@@ -368,9 +400,10 @@ class TestServerStateEdgeCases:
         """Test save_selected_config when get_selected_config_file returns None."""
         test_data = {"selected": ["test"]}
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file", return_value=None
-        ), patch("sboxmgr.server.state.atomic_write_json") as mock_write:
+        with (
+            patch("sboxmgr.server.state.get_selected_config_file", return_value=None),
+            patch("sboxmgr.server.state.atomic_write_json") as mock_write,
+        ):
             save_selected_config(test_data)
 
         mock_write.assert_called_once_with(test_data, None)
@@ -379,12 +412,16 @@ class TestServerStateEdgeCases:
         """Test when file_exists returns True but file is actually missing."""
         config_file = tmp_path / "false_positive.json"
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("sboxmgr.server.state.file_exists", return_value=True), patch(
-            "sboxmgr.server.state.read_json",
-            side_effect=FileNotFoundError("File not found"),
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("sboxmgr.server.state.file_exists", return_value=True),
+            patch(
+                "sboxmgr.server.state.read_json",
+                side_effect=FileNotFoundError("File not found"),
+            ),
         ):
             # Should propagate FileNotFoundError since it's not JSONDecodeError
             with pytest.raises(FileNotFoundError):
@@ -398,10 +435,13 @@ class TestServerStateEdgeCases:
             "description": "Test with émojis 🚀 and spëcial chars",
         }
 
-        with patch(
-            "sboxmgr.server.state.get_selected_config_file",
-            return_value=str(config_file),
-        ), patch("sboxmgr.server.state.atomic_write_json") as mock_write:
+        with (
+            patch(
+                "sboxmgr.server.state.get_selected_config_file",
+                return_value=str(config_file),
+            ),
+            patch("sboxmgr.server.state.atomic_write_json") as mock_write,
+        ):
             save_selected_config(test_data)
 
         mock_write.assert_called_once_with(test_data, str(config_file))

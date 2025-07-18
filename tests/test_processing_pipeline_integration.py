@@ -80,9 +80,13 @@ class TestExportManagerPhase4:
         # Test export without Phase 3 components
         mock_export_func = Mock(return_value={"outbounds": [], "route": {"rules": []}})
 
-        with patch("sboxmgr.export.export_manager.singbox_export", mock_export_func), \
-             patch("sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware", mock_export_func):
-
+        with (
+            patch("sboxmgr.export.export_manager.singbox_export", mock_export_func),
+            patch(
+                "sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware",
+                mock_export_func,
+            ),
+        ):
             export_mgr.export(SAMPLE_SERVERS)
 
             # Verify export was called with filtered servers
@@ -116,11 +120,17 @@ class TestExportManagerPhase4:
         export_mgr.routing_plugin = mock_router
 
         # Mock the export functions
-        mock_singbox_export = Mock(return_value={"outbounds": [], "route": {"rules": []}})
+        mock_singbox_export = Mock(
+            return_value={"outbounds": [], "route": {"rules": []}}
+        )
 
-        with patch("sboxmgr.export.export_manager.singbox_export", mock_singbox_export), \
-             patch("sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware", mock_singbox_export):
-
+        with (
+            patch("sboxmgr.export.export_manager.singbox_export", mock_singbox_export),
+            patch(
+                "sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware",
+                mock_singbox_export,
+            ),
+        ):
             context = PipelineContext(mode="test")
             export_mgr.export(SAMPLE_SERVERS, context=context)
 
@@ -152,11 +162,19 @@ class TestExportManagerPhase4:
             export_mgr.routing_plugin = mock_router
 
             # Mock the export functions
-            mock_singbox_export = Mock(return_value={"outbounds": [], "route": {"rules": []}})
+            mock_singbox_export = Mock(
+                return_value={"outbounds": [], "route": {"rules": []}}
+            )
 
-            with patch("sboxmgr.export.export_manager.singbox_export", mock_singbox_export), \
-                 patch("sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware", mock_singbox_export):
-
+            with (
+                patch(
+                    "sboxmgr.export.export_manager.singbox_export", mock_singbox_export
+                ),
+                patch(
+                    "sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware",
+                    mock_singbox_export,
+                ),
+            ):
                 context = PipelineContext(mode="test")
                 export_mgr.export(SAMPLE_SERVERS, context=context)
 
@@ -288,11 +306,17 @@ class TestPhase4ErrorHandling:
         export_mgr.routing_plugin = mock_router
 
         # Mock the export functions
-        mock_singbox_export = Mock(return_value={"outbounds": [], "route": {"rules": []}})
+        mock_singbox_export = Mock(
+            return_value={"outbounds": [], "route": {"rules": []}}
+        )
 
-        with patch("sboxmgr.export.export_manager.singbox_export", mock_singbox_export), \
-             patch("sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware", mock_singbox_export):
-
+        with (
+            patch("sboxmgr.export.export_manager.singbox_export", mock_singbox_export),
+            patch(
+                "sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware",
+                mock_singbox_export,
+            ),
+        ):
             # Should not raise exception, should continue with unprocessed servers
             result = export_mgr.export(SAMPLE_SERVERS)
 
@@ -316,11 +340,17 @@ class TestPhase4ErrorHandling:
         export_mgr.routing_plugin = mock_router
 
         # Mock the export functions
-        mock_singbox_export = Mock(return_value={"outbounds": [], "route": {"rules": []}})
+        mock_singbox_export = Mock(
+            return_value={"outbounds": [], "route": {"rules": []}}
+        )
 
-        with patch("sboxmgr.export.export_manager.singbox_export", mock_singbox_export), \
-             patch("sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware", mock_singbox_export):
-
+        with (
+            patch("sboxmgr.export.export_manager.singbox_export", mock_singbox_export),
+            patch(
+                "sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware",
+                mock_singbox_export,
+            ),
+        ):
             # Should not raise exception, should continue processing
             result = export_mgr.export(SAMPLE_SERVERS)
 
@@ -364,11 +394,19 @@ class TestPhase4EndToEnd:
             export_mgr.routing_plugin = mock_router
 
             # Mock the export functions
-            mock_singbox_export = Mock(return_value={"outbounds": [], "route": {"rules": []}})
+            mock_singbox_export = Mock(
+                return_value={"outbounds": [], "route": {"rules": []}}
+            )
 
-            with patch("sboxmgr.export.export_manager.singbox_export", mock_singbox_export), \
-                 patch("sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware", mock_singbox_export):
-
+            with (
+                patch(
+                    "sboxmgr.export.export_manager.singbox_export", mock_singbox_export
+                ),
+                patch(
+                    "sboxmgr.subscription.exporters.singbox_exporter.singbox_export_with_middleware",
+                    mock_singbox_export,
+                ),
+            ):
                 context = PipelineContext(mode="integration_test")
                 result = export_mgr.export(SAMPLE_SERVERS, context=context)
 

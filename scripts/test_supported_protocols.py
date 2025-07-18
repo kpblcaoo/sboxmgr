@@ -2,6 +2,7 @@
 """
 Test which protocols are actually supported by our sing-box version.
 """
+
 import json
 import subprocess
 import tempfile

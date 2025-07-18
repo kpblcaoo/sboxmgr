@@ -16,20 +16,27 @@ src_root = project_root / "src" / "sboxmgr"
 
 logger = logging.getLogger(__name__)
 
+
 def build_wheel():
     # Build from project root, not from test directory
-    subprocess.run([sys.executable, "-m", "build", "--wheel"], check=True, cwd=project_root)
+    subprocess.run(
+        [sys.executable, "-m", "build", "--wheel"], check=True, cwd=project_root
+    )
     dist_dir = project_root / "dist"
     wheels = list(dist_dir.glob("*.whl"))
     assert wheels, "No wheel built!"
     return wheels[-1]
 
+
 def find_all_submodules(package_path: Path, package_prefix: str):
     """Рекурсивно находит все подмодули и поддиректории пакета."""
     modules = set()
-    for _finder, name, _ispkg in pkgutil.walk_packages([str(package_path)], prefix=package_prefix + "."):
+    for _finder, name, _ispkg in pkgutil.walk_packages(
+        [str(package_path)], prefix=package_prefix + "."
+    ):
         modules.add(name)
     return modules
+
 
 def test_wheel_install_and_all_imports(tmp_path):
     wheel_path = build_wheel()
@@ -37,14 +44,18 @@ def test_wheel_install_and_all_imports(tmp_path):
 
     # Собираем список всех подмодулей ТОЛЬКО из sboxmgr пакета
     all_modules = {"sboxmgr"}
-    for _finder, name, _ispkg in pkgutil.walk_packages([str(src_root)], prefix="sboxmgr."):
+    for _finder, name, _ispkg in pkgutil.walk_packages(
+        [str(src_root)], prefix="sboxmgr."
+    ):
         all_modules.add(name)
 
     # Добавляем также logsetup как отдельный пакет
     logsetup_root = project_root / "src" / "logsetup"
     if logsetup_root.exists():
         all_modules.add("logsetup")
-        for _finder, name, _ispkg in pkgutil.walk_packages([str(logsetup_root)], prefix="logsetup."):
+        for _finder, name, _ispkg in pkgutil.walk_packages(
+            [str(logsetup_root)], prefix="logsetup."
+        ):
             all_modules.add(name)
 
     with tempfile.TemporaryDirectory() as venv_dir:
@@ -68,7 +79,9 @@ def test_wheel_install_and_all_imports(tmp_path):
                 "        exit(10)\n"
                 "    raise\n"
             )
-            result = subprocess.run([str(python_bin), "-c", code], capture_output=True, text=True)
+            result = subprocess.run(
+                [str(python_bin), "-c", code], capture_output=True, text=True
+            )
             if result.returncode == 10:
                 skipped.append(module)
             elif result.returncode != 0:
@@ -79,10 +92,14 @@ def test_wheel_install_and_all_imports(tmp_path):
 
         if failed:
             # Выводим структуру установленного пакета для диагностики
-            site_packages = subprocess.check_output([
-                str(python_bin), "-c",
-                "import site; print([p for p in site.getsitepackages() if 'site-packages' in p][0])"
-            ], text=True).strip()
+            site_packages = subprocess.check_output(
+                [
+                    str(python_bin),
+                    "-c",
+                    "import site; print([p for p in site.getsitepackages() if 'site-packages' in p][0])",
+                ],
+                text=True,
+            ).strip()
 
             # Проверяем структуру sboxmgr
             sboxmgr_dir = os.path.join(site_packages, "sboxmgr")
@@ -100,7 +117,7 @@ def test_wheel_install_and_all_imports(tmp_path):
             else:
                 msg += f"\n\nlogsetup directory not found in {site_packages}"
 
-            failed_msg = "\n".join([
-                f"Failed to import: {mod}\n{err}" for mod, err in failed
-            ])
+            failed_msg = "\n".join(
+                [f"Failed to import: {mod}\n{err}" for mod, err in failed]
+            )
             pytest.fail(failed_msg + msg)

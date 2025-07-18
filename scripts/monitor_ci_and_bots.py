@@ -31,7 +31,7 @@ class GitHubMonitor:
         self.api_base = "https://api.github.com"
         self.headers = {
             "Accept": "application/vnd.github.v3+json",
-            "User-Agent": "sboxmgr-ci-monitor"
+            "User-Agent": "sboxmgr-ci-monitor",
         }
 
         if token:
@@ -48,7 +48,9 @@ class GitHubMonitor:
         Returns:
             Commit SHA or None if not found
         """
-        url = f"{self.api_base}/repos/{self.repo_owner}/{self.repo_name}/commits/{branch}"
+        url = (
+            f"{self.api_base}/repos/{self.repo_owner}/{self.repo_name}/commits/{branch}"
+        )
 
         try:
             response = requests.get(url, headers=self.headers)
@@ -111,7 +113,9 @@ class GitHubMonitor:
             status = check.get("status", "unknown")
             conclusion = check.get("conclusion")
             if conclusion not in ("success", None):
-                print(f"\n🔴 CI check failed or not green: {name} (status={status}, conclusion={conclusion})")
+                print(
+                    f"\n🔴 CI check failed or not green: {name} (status={status}, conclusion={conclusion})"
+                )
                 logs_url = self.get_check_run_logs_url(check)
                 if logs_url:
                     print(f"  📄 Logs/details: {logs_url}")
@@ -126,21 +130,29 @@ class GitHubMonitor:
                                     print("  ... (truncated) ...")
                                 print("  --- CI LOG END ---")
                             else:
-                                print(f"  (Could not fetch raw log, status {resp.status_code})")
+                                print(
+                                    f"  (Could not fetch raw log, status {resp.status_code})"
+                                )
                         except Exception as e:
                             print(f"  (Error fetching log: {e})")
                 else:
                     print("  (No logs_url/details_url available)")
 
-    def print_bot_comments(self, commit_sha: str, bot_names=("bugbot", "cursor-bugbot", "Cursor BugBot")):
+    def print_bot_comments(
+        self, commit_sha: str, bot_names=("bugbot", "cursor-bugbot", "Cursor BugBot")
+    ):
         """Print comments from BugBot or other bots on a commit."""
         comments = self.get_commit_comments(commit_sha)
         found = False
         for comment in comments:
             user = comment.get("user", {}).get("login", "").lower()
-            if any(bot in user for bot in bot_names) or any(bot in comment.get("user", {}).get("login", "") for bot in bot_names):
+            if any(bot in user for bot in bot_names) or any(
+                bot in comment.get("user", {}).get("login", "") for bot in bot_names
+            ):
                 found = True
-                print(f"\n🤖 Bot comment by {comment.get('user', {}).get('login', 'Unknown')}:\n{'-'*40}")
+                print(
+                    f"\n🤖 Bot comment by {comment.get('user', {}).get('login', 'Unknown')}:\n{'-' * 40}"
+                )
                 print(comment.get("body", "")[:2000])
                 if len(comment.get("body", "")) > 2000:
                     print("... (truncated) ...")
@@ -148,7 +160,9 @@ class GitHubMonitor:
         if not found:
             print("(No bot comments found)")
 
-    def wait_for_ci_completion(self, commit_sha: str, timeout_minutes: int = 10) -> bool:
+    def wait_for_ci_completion(
+        self, commit_sha: str, timeout_minutes: int = 10
+    ) -> bool:
         """Wait for CI checks to complete. Also print logs for failed/neutral checks."""
         print(f"🔍 Monitoring CI checks for commit {commit_sha[:8]}...")
 
@@ -192,7 +206,9 @@ class GitHubMonitor:
                 else:
                     pending += 1
                     print(f"⏳ {name}: {status}")
-            print(f"📊 Status: {completed} completed, {pending} pending, {failed} failed, {non_green} non-green")
+            print(
+                f"📊 Status: {completed} completed, {pending} pending, {failed} failed, {non_green} non-green"
+            )
             # If all checks completed
             if pending == 0:
                 if non_green == 0:
@@ -216,7 +232,9 @@ class GitHubMonitor:
             self.print_bot_comments(commit_sha)
         return False
 
-    def monitor_bot_comments(self, commit_sha: str, timeout_minutes: int = 5) -> list[dict[str, Any]]:
+    def monitor_bot_comments(
+        self, commit_sha: str, timeout_minutes: int = 5
+    ) -> list[dict[str, Any]]:
         """Monitor for bot comments on a commit.
 
         Args:
@@ -252,7 +270,11 @@ class GitHubMonitor:
                 print(f"📝 Found {len(new_comments)} new comment(s):")
                 for comment in new_comments:
                     user = comment.get("user", {}).get("login", "Unknown")
-                    body = comment.get("body", "")[:100] + "..." if len(comment.get("body", "")) > 100 else comment.get("body", "")
+                    body = (
+                        comment.get("body", "")[:100] + "..."
+                        if len(comment.get("body", "")) > 100
+                        else comment.get("body", "")
+                    )
                     print(f"  👤 {user}: {body}")
                 return new_comments
 
@@ -270,10 +292,16 @@ def main():
     parser = argparse.ArgumentParser(description="Monitor CI checks and bot comments")
     parser.add_argument("--owner", default="kpblcaoo", help="Repository owner")
     parser.add_argument("--repo", default="sboxmgr", help="Repository name")
-    parser.add_argument("--branch", default="chore/ci-critical-import-checks", help="Branch to monitor")
+    parser.add_argument(
+        "--branch", default="chore/ci-critical-import-checks", help="Branch to monitor"
+    )
     parser.add_argument("--commit", help="Specific commit SHA to monitor")
-    parser.add_argument("--ci-timeout", type=int, default=10, help="CI timeout in minutes")
-    parser.add_argument("--bot-timeout", type=int, default=5, help="Bot monitoring timeout in minutes")
+    parser.add_argument(
+        "--ci-timeout", type=int, default=10, help="CI timeout in minutes"
+    )
+    parser.add_argument(
+        "--bot-timeout", type=int, default=5, help="Bot monitoring timeout in minutes"
+    )
     parser.add_argument("--token", help="GitHub personal access token")
 
     args = parser.parse_args()
@@ -290,7 +318,9 @@ def main():
             print("❌ Could not get latest commit SHA")
             sys.exit(1)
 
-    print(f"🚀 Starting monitoring for commit {commit_sha[:8]} on {args.owner}/{args.repo}")
+    print(
+        f"🚀 Starting monitoring for commit {commit_sha[:8]} on {args.owner}/{args.repo}"
+    )
 
     # Wait for CI completion
     ci_success = monitor.wait_for_ci_completion(commit_sha, args.ci_timeout)

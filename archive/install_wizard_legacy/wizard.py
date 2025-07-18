@@ -3,6 +3,7 @@ Installation Wizard for sboxmgr (Sing-box config manager)
 
 Dev-mode: set WIZARD_DEV=1 to prevent any real changes to the system (no file writes, no systemd, no chmod, only logging actions).
 """
+
 import hashlib
 import importlib.metadata
 import logging

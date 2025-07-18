@@ -53,11 +53,14 @@ def test_custom_selector_in_subscription_manager(monkeypatch):
     class MockResponse:
         def __init__(self, content):
             self.content = content
+
             class MockRaw:
                 def __init__(self, content):
                     self.content = content
+
                 def read(self, n=None):
                     return self.content
+
             self.raw = MockRaw(content)
 
         def raise_for_status(self):
@@ -72,7 +75,11 @@ def test_custom_selector_in_subscription_manager(monkeypatch):
         def select(self, servers, user_routes=None, exclusions=None, mode=None):
             # Фильтруем по user_routes (если указаны)
             if user_routes:
-                return [s for s in servers if getattr(s, "meta", {}).get("tag") in user_routes]
+                return [
+                    s
+                    for s in servers
+                    if getattr(s, "meta", {}).get("tag") in user_routes
+                ]
             # Иначе возвращаем все серверы
             return servers
 
@@ -82,6 +89,7 @@ def test_custom_selector_in_subscription_manager(monkeypatch):
     )  # уникальный URL
     mgr = SubscriptionManager(source)
     mgr.selector = OnlyTagBSelector()
+
     # Очищаем кеш
     # Мокаем fetcher и parser
     class DummyFetcher:
@@ -93,49 +101,54 @@ def test_custom_selector_in_subscription_manager(monkeypatch):
 
     mgr.fetcher = DummyFetcher(source)
     from sboxmgr.subscription.manager.core import DataProcessor
+
     mgr.data_processor = DataProcessor(mgr.fetcher, mgr.error_handler)
-    mgr.data_processor.parse_servers = lambda raw, context: ([
-        ParsedServer(
-            type="ss",
-            address="1.2.3.4",
-            port=443,
-            meta={
-                "tag": "A",
-                "method": "aes-256-gcm",
-                "password": "test12345",
-                "encryption": "aes-256-gcm",
-            },
-        ),
-        ParsedServer(
-            type="ss",
-            address="2.2.2.2",
-            port=1234,
-            meta={
-                "tag": "B",
-                "method": "aes-256-gcm",
-                "password": "test12345",
-                "encryption": "aes-256-gcm",
-            },
-        ),
-        ParsedServer(
-            type="ss",
-            address="3.3.3.3",
-            port=1080,
-            meta={
-                "tag": "C",
-                "method": "aes-256-gcm",
-                "password": "test12345",
-                "encryption": "aes-256-gcm",
-            },
-        ),
-    ], True)
+    mgr.data_processor.parse_servers = lambda raw, context: (
+        [
+            ParsedServer(
+                type="ss",
+                address="1.2.3.4",
+                port=443,
+                meta={
+                    "tag": "A",
+                    "method": "aes-256-gcm",
+                    "password": "test12345",
+                    "encryption": "aes-256-gcm",
+                },
+            ),
+            ParsedServer(
+                type="ss",
+                address="2.2.2.2",
+                port=1234,
+                meta={
+                    "tag": "B",
+                    "method": "aes-256-gcm",
+                    "password": "test12345",
+                    "encryption": "aes-256-gcm",
+                },
+            ),
+            ParsedServer(
+                type="ss",
+                address="3.3.3.3",
+                port=1080,
+                meta={
+                    "tag": "C",
+                    "method": "aes-256-gcm",
+                    "password": "test12345",
+                    "encryption": "aes-256-gcm",
+                },
+            ),
+        ],
+        True,
+    )
     from sboxmgr.subscription.models import PipelineContext
+
     context = PipelineContext(skip_policies=True)
     result = mgr.get_servers(
         user_routes=["B"],  # только серверы с тегом B
         exclusions=[],  # без исключений
         context=context,
-        force_reload=True
+        force_reload=True,
     )  # принудительно обновляем кеш
     tags = [s.meta.get("tag") for s in result.config]
     assert tags == ["B"]

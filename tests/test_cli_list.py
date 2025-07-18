@@ -62,4 +62,6 @@ def test_list_servers_excluded(tmp_path, monkeypatch):
 
         # Note: This test demonstrates the HTTP mocking pattern but may need further
         # refinement to properly test the exclusion functionality
-        assert result.exit_code == 0  # At least verify the command runs without crashing
+        assert (
+            result.exit_code == 0
+        )  # At least verify the command runs without crashing

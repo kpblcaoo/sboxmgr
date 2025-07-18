@@ -36,6 +36,7 @@ CRITICAL_MODULES = [
     "sboxmgr.cli.commands.exclusions",
 ]
 
+
 def check_dependency(module_name: str, required: bool = True) -> bool:
     """Check if a dependency can be imported."""
     try:
@@ -50,6 +51,7 @@ def check_dependency(module_name: str, required: bool = True) -> bool:
             print(f"⚠️  {module_name} - {e} (optional)")
             return True
 
+
 def check_module_import(module_name: str) -> bool:
     """Check if a module can be imported."""
     try:
@@ -62,6 +64,7 @@ def check_module_import(module_name: str) -> bool:
     except Exception as e:
         print(f"⚠️  {module_name} - {e} (imported but error)")
         return True
+
 
 def main():
     """Main function to check all dependencies."""
@@ -79,7 +82,7 @@ def main():
     modules_ok = all(check_module_import(module) for module in CRITICAL_MODULES)
 
     # Summary
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("📊 SUMMARY:")
     print(f"Core dependencies: {'✅ OK' if core_ok else '❌ FAILED'}")
     print(f"Optional dependencies: {'✅ OK' if optional_ok else '⚠️  WARNINGS'}")
@@ -92,6 +95,7 @@ def main():
     else:
         print("\n❌ Some critical dependencies or modules failed!")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

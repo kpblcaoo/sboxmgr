@@ -128,8 +128,8 @@ def _create_toml_with_comments(config_dict: dict[str, Any]) -> str:
         for sub in config_dict["subscriptions"]:
             lines.append("[[subscriptions]]")
             lines.append(f'id = "{sub["id"]}"')
-            lines.append(f'enabled = {str(sub.get("enabled", True)).lower()}')
-            lines.append(f'priority = {sub.get("priority", 1)}')
+            lines.append(f"enabled = {str(sub.get('enabled', True)).lower()}")
+            lines.append(f"priority = {sub.get('priority', 1)}")
             lines.append("")
 
     # Filters section
@@ -138,12 +138,12 @@ def _create_toml_with_comments(config_dict: dict[str, Any]) -> str:
         lines.append("[filters]")
         filters = config_dict["filters"]
         if filters.get("exclude_tags"):
-            lines.append(f'exclude_tags = {json.dumps(filters["exclude_tags"])}')
+            lines.append(f"exclude_tags = {json.dumps(filters['exclude_tags'])}")
         if filters.get("only_tags"):
-            lines.append(f'only_tags = {json.dumps(filters["only_tags"])}')
+            lines.append(f"only_tags = {json.dumps(filters['only_tags'])}")
         if filters.get("exclusions"):
-            lines.append(f'exclusions = {json.dumps(filters["exclusions"])}')
-        lines.append(f'only_enabled = {str(filters.get("only_enabled", True)).lower()}')
+            lines.append(f"exclusions = {json.dumps(filters['exclusions'])}")
+        lines.append(f"only_enabled = {str(filters.get('only_enabled', True)).lower()}")
         lines.append("")
 
     # Routing section
@@ -181,7 +181,7 @@ def _create_toml_with_comments(config_dict: dict[str, Any]) -> str:
         if export.get("inbound_profile"):
             lines.append(f'inbound_profile = "{export["inbound_profile"]}"')
         if export.get("inbound_types"):
-            lines.append(f'inbound_types = {json.dumps(export["inbound_types"])}')
+            lines.append(f"inbound_types = {json.dumps(export['inbound_types'])}")
         lines.append("")
 
     # Agent section
@@ -189,9 +189,9 @@ def _create_toml_with_comments(config_dict: dict[str, Any]) -> str:
         lines.append("# Agent configuration")
         lines.append("[agent]")
         agent = config_dict["agent"]
-        lines.append(f'auto_restart = {str(agent.get("auto_restart", False)).lower()}')
+        lines.append(f"auto_restart = {str(agent.get('auto_restart', False)).lower()}")
         lines.append(
-            f'monitor_latency = {str(agent.get("monitor_latency", True)).lower()}'
+            f"monitor_latency = {str(agent.get('monitor_latency', True)).lower()}"
         )
         if agent.get("health_check_interval"):
             lines.append(f'health_check_interval = "{agent["health_check_interval"]}"')
@@ -215,7 +215,7 @@ def _create_toml_with_comments(config_dict: dict[str, Any]) -> str:
         lines.append(f'mode = "{mode_val}"')
 
         lines.append(
-            f'show_debug_info = {str(ui.get("show_debug_info", False)).lower()}'
+            f"show_debug_info = {str(ui.get('show_debug_info', False)).lower()}"
         )
         if ui.get("theme"):
             lines.append(f'theme = "{ui["theme"]}"')

@@ -2,6 +2,7 @@
 """
 Build complete sing-box schema by analyzing documentation and existing models.
 """
+
 import json
 import re
 from pathlib import Path

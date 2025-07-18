@@ -5,7 +5,6 @@ both 'listen_port' and 'port' fields in inbound configurations, ensuring
 backward compatibility with existing configurations.
 """
 
-
 from sboxmgr.models.singbox.inbounds import MixedInbound
 from sboxmgr.subscription.exporters.singbox_exporter_v2.inbound_converter import (
     _convert_single_inbound,

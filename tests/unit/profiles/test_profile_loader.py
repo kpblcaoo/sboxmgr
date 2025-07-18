@@ -1,6 +1,5 @@
 """Test profile loader functionality."""
 
-
 from sboxmgr.configs.loader import (
     SECTION_VALIDATORS,
     ExportSectionValidator,

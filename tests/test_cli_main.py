@@ -31,7 +31,10 @@ class TestIsAiLang:
                 result = is_ai_lang("de")
                 assert result is True
                 # Verify the language data structure matches what we expect
-                assert language_data["__note__"] == "AI-generated translations - needs review"
+                assert (
+                    language_data["__note__"]
+                    == "AI-generated translations - needs review"
+                )
 
     def test_is_ai_lang_false(self, tmp_path):
         """Test is_ai_lang returns False for human-reviewed language."""
@@ -62,9 +65,7 @@ class TestIsAiLang:
             # Mock the path construction
             mock_lang_file = MagicMock()
             mock_lang_file.exists.return_value = False
-            mock_path.return_value.parent.parent.__truediv__.return_value.__truediv__.return_value = (
-                mock_lang_file
-            )
+            mock_path.return_value.parent.parent.__truediv__.return_value.__truediv__.return_value = mock_lang_file
             result = is_ai_lang("nonexistent")
             assert result is False
 

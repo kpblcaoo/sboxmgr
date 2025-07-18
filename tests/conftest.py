@@ -31,13 +31,18 @@ class MockResponse:
     def __init__(self, content=b"dummy", status_code=200):
         self.content = content
         self.status_code = status_code
-        self.raw = type('MockRaw', (), {'read': lambda self, *args, **kwargs: content})()
-        self.text = content.decode('utf-8') if isinstance(content, bytes) else str(content)
+        self.raw = type(
+            "MockRaw", (), {"read": lambda self, *args, **kwargs: content}
+        )()
+        self.text = (
+            content.decode("utf-8") if isinstance(content, bytes) else str(content)
+        )
 
     def raise_for_status(self):
         if self.status_code >= 400:
             raise Exception(f"HTTP {self.status_code}")
         return self
+
 
 @pytest.fixture(autouse=True)
 def mock_requests_get(monkeypatch):
@@ -45,9 +50,12 @@ def mock_requests_get(monkeypatch):
         # Return mock subscription data for test URLs
         if "mock-subscription.example.com" in url or "example.com" in url:
             # Mock base64 encoded subscription data
-            mock_data = "dm1lc3M6Ly9leGFtcGxlLXV1aWQxQGV4YW1wbGUuY29tOjQ0MyNFeGFtcGxlIFZNZXNz"
-            return MockResponse(content=mock_data.encode('utf-8'), status_code=200)
+            mock_data = (
+                "dm1lc3M6Ly9leGFtcGxlLXV1aWQxQGV4YW1wbGUuY29tOjQ0MyNFeGFtcGxlIFZNZXNz"
+            )
+            return MockResponse(content=mock_data.encode("utf-8"), status_code=200)
         return MockResponse()
+
     monkeypatch.setattr("requests.get", mock_get)
 
 
@@ -103,9 +111,10 @@ def cleanup_files(tmp_path, monkeypatch):
 @pytest.fixture(autouse=True)
 def mock_logging_setup():
     """Mock sboxmgr logging setup to prevent initialization errors during test collection."""
-    with patch("sboxmgr.logging.core.initialize_logging") as mock_init, patch(
-        "sboxmgr.logging.core.get_logger"
-    ) as mock_get_logger:
+    with (
+        patch("sboxmgr.logging.core.initialize_logging") as mock_init,
+        patch("sboxmgr.logging.core.get_logger") as mock_get_logger,
+    ):
         mock_init.return_value = None
         mock_get_logger.return_value = MagicMock()
         yield

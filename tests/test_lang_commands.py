@@ -11,14 +11,14 @@ class TestLangCmd:
 
     def test_lang_cmd_display_current_config_file_source(self, tmp_path):
         """Test lang_cmd displays current language from config file."""
-        with patch(
-            "sboxmgr.cli.commands.lang.detect_lang_source",
-            return_value=("de", "config file"),
-        ), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.cli.commands.lang.detect_lang_source",
+                return_value=("de", "config file"),
+            ),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.get.return_value = "Test help message"
             mock_loader.list_languages.return_value = ["en", "ru", "de"]
@@ -31,14 +31,14 @@ class TestLangCmd:
 
     def test_lang_cmd_display_system_lang_bilingual(self, tmp_path):
         """Test lang_cmd displays bilingual output for system LANG source."""
-        with patch(
-            "sboxmgr.cli.commands.lang.detect_lang_source",
-            return_value=("ru", "system LANG"),
-        ), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.cli.commands.lang.detect_lang_source",
+                return_value=("ru", "system LANG"),
+            ),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("typer.echo") as mock_echo,
+        ):
             # Mock English loader
             en_loader = MagicMock()
             en_loader.get.side_effect = lambda key: f"EN: {key}"
@@ -65,14 +65,14 @@ class TestLangCmd:
 
     def test_lang_cmd_display_default_source_bilingual(self, tmp_path):
         """Test lang_cmd displays bilingual output for default source."""
-        with patch(
-            "sboxmgr.cli.commands.lang.detect_lang_source",
-            return_value=("en", "default"),
-        ), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.cli.commands.lang.detect_lang_source",
+                return_value=("en", "default"),
+            ),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("typer.echo") as mock_echo,
+        ):
             en_loader = MagicMock()
             en_loader.get.side_effect = lambda key: f"EN: {key}"
             en_loader.list_languages.return_value = ["en", "ru"]
@@ -86,16 +86,15 @@ class TestLangCmd:
 
     def test_lang_cmd_list_available_languages(self):
         """Test lang_cmd lists available languages with names."""
-        with patch(
-            "sboxmgr.cli.commands.lang.detect_lang_source",
-            return_value=("en", "config file"),
-        ), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch(
-            "sboxmgr.cli.commands.lang.is_ai_lang"
-        ) as mock_is_ai, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.cli.commands.lang.detect_lang_source",
+                return_value=("en", "config file"),
+            ),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("sboxmgr.cli.commands.lang.is_ai_lang") as mock_is_ai,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.get.return_value = "Help message"
             mock_loader.list_languages.return_value = ["en", "ru", "de", "unknown"]
@@ -119,9 +118,11 @@ class TestLangCmd:
         """Test lang_cmd successfully sets language."""
         config_file = tmp_path / ".sboxmgr" / "config.toml"
 
-        with patch("sboxmgr.cli.commands.lang.Path.home", return_value=tmp_path), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch("typer.echo") as mock_echo:
+        with (
+            patch("sboxmgr.cli.commands.lang.Path.home", return_value=tmp_path),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.exists.return_value = True
             mock_loader_class.return_value = mock_loader
@@ -142,9 +143,10 @@ class TestLangCmd:
 
     def test_lang_cmd_set_language_not_found(self):
         """Test lang_cmd handles setting non-existent language."""
-        with patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch("typer.echo") as mock_echo:
+        with (
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.exists.return_value = False
             mock_loader.list_languages.return_value = ["en", "ru", "de"]
@@ -158,13 +160,12 @@ class TestLangCmd:
 
     def test_lang_cmd_set_language_config_write_error(self, tmp_path):
         """Test lang_cmd handles config file write errors."""
-        with patch("sboxmgr.cli.commands.lang.Path.home", return_value=tmp_path), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch(
-            "builtins.open", side_effect=PermissionError("Access denied")
-        ), patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch("sboxmgr.cli.commands.lang.Path.home", return_value=tmp_path),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("builtins.open", side_effect=PermissionError("Access denied")),
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.exists.return_value = True
             mock_loader_class.return_value = mock_loader
@@ -214,9 +215,11 @@ class TestLangCmdIntegration:
         """Test complete workflow of setting and displaying language."""
         config_file = tmp_path / ".sboxmgr" / "config.toml"
 
-        with patch("sboxmgr.cli.commands.lang.Path.home", return_value=tmp_path), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch("typer.echo") as mock_echo:
+        with (
+            patch("sboxmgr.cli.commands.lang.Path.home", return_value=tmp_path),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.exists.return_value = True
             mock_loader.get.return_value = "Test message"
@@ -238,16 +241,15 @@ class TestLangCmdIntegration:
 
     def test_lang_cmd_ai_language_detection(self):
         """Test AI language detection and display."""
-        with patch(
-            "sboxmgr.cli.commands.lang.detect_lang_source",
-            return_value=("en", "config file"),
-        ), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch(
-            "sboxmgr.cli.commands.lang.is_ai_lang"
-        ) as mock_is_ai, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.cli.commands.lang.detect_lang_source",
+                return_value=("en", "config file"),
+            ),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("sboxmgr.cli.commands.lang.is_ai_lang") as mock_is_ai,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.get.return_value = "Help message"
             mock_loader.list_languages.return_value = ["en", "de", "fr"]
@@ -267,16 +269,15 @@ class TestLangCmdIntegration:
 
     def test_lang_cmd_no_ai_languages(self):
         """Test display when no AI languages are present."""
-        with patch(
-            "sboxmgr.cli.commands.lang.detect_lang_source",
-            return_value=("en", "config file"),
-        ), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch(
-            "sboxmgr.cli.commands.lang.is_ai_lang", return_value=False
-        ), patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.cli.commands.lang.detect_lang_source",
+                return_value=("en", "config file"),
+            ),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("sboxmgr.cli.commands.lang.is_ai_lang", return_value=False),
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.get.return_value = "Help message"
             mock_loader.list_languages.return_value = ["en", "ru"]
@@ -297,14 +298,14 @@ class TestLangCmdEdgeCases:
 
     def test_lang_cmd_empty_language_list(self):
         """Test behavior when no languages are available."""
-        with patch(
-            "sboxmgr.cli.commands.lang.detect_lang_source",
-            return_value=("en", "default"),
-        ), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.cli.commands.lang.detect_lang_source",
+                return_value=("en", "default"),
+            ),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.get.return_value = "Help message"
             mock_loader.list_languages.return_value = []
@@ -320,9 +321,11 @@ class TestLangCmdEdgeCases:
         config_dir = tmp_path / ".sboxmgr"
         assert not config_dir.exists()
 
-        with patch("sboxmgr.cli.commands.lang.Path.home", return_value=tmp_path), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch("typer.echo"):
+        with (
+            patch("sboxmgr.cli.commands.lang.Path.home", return_value=tmp_path),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("typer.echo"),
+        ):
             mock_loader = MagicMock()
             mock_loader.exists.return_value = True
             mock_loader_class.return_value = mock_loader
@@ -335,16 +338,15 @@ class TestLangCmdEdgeCases:
 
     def test_lang_cmd_usage_instructions(self):
         """Test that usage instructions are displayed."""
-        with patch(
-            "sboxmgr.cli.commands.lang.detect_lang_source",
-            return_value=("en", "config file"),
-        ), patch(
-            "sboxmgr.cli.commands.lang.LanguageLoader"
-        ) as mock_loader_class, patch(
-            "sboxmgr.cli.commands.lang.is_ai_lang", return_value=False
-        ), patch(
-            "typer.echo"
-        ) as mock_echo:
+        with (
+            patch(
+                "sboxmgr.cli.commands.lang.detect_lang_source",
+                return_value=("en", "config file"),
+            ),
+            patch("sboxmgr.cli.commands.lang.LanguageLoader") as mock_loader_class,
+            patch("sboxmgr.cli.commands.lang.is_ai_lang", return_value=False),
+            patch("typer.echo") as mock_echo,
+        ):
             mock_loader = MagicMock()
             mock_loader.get.return_value = "Help message"
             mock_loader.list_languages.return_value = ["en", "ru"]

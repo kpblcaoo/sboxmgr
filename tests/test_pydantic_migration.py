@@ -81,9 +81,7 @@ class TestPydanticMigration:
             # Test add
             assert manager.add("server1", "Test Server 1", "Testing")
             assert manager.add("server2", "Test Server 2", "Testing")
-            assert (
-                not manager.add("server1", "Test Server 1", "Testing")
-            )  # Duplicate
+            assert not manager.add("server1", "Test Server 1", "Testing")  # Duplicate
 
             # Test contains
             assert manager.contains("server1")

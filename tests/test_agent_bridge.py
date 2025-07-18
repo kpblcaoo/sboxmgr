@@ -77,9 +77,9 @@ class TestEventSenderTimestamp:
         iso_pattern = (
             r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(\+00:00|Z|\+00:00Z)$"
         )
-        assert re.match(
-            iso_pattern, timestamp
-        ), f"Timestamp {timestamp} does not match ISO 8601 format"
+        assert re.match(iso_pattern, timestamp), (
+            f"Timestamp {timestamp} does not match ISO 8601 format"
+        )
 
         # Verify it's actually UTC by parsing
         # Handle case where timestamp might have duplicated timezone info
@@ -106,9 +106,9 @@ class TestEventSenderTimestamp:
 
         timestamp = command_message["timestamp"]
         iso_pattern = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(\+00:00|Z)$"
-        assert re.match(
-            iso_pattern, timestamp
-        ), f"Command timestamp {timestamp} does not match ISO 8601 format"
+        assert re.match(iso_pattern, timestamp), (
+            f"Command timestamp {timestamp} does not match ISO 8601 format"
+        )
 
     def test_heartbeat_message_timestamp(self):
         """Test heartbeat message timestamp format."""
@@ -120,6 +120,6 @@ class TestEventSenderTimestamp:
 
         timestamp = heartbeat_message["timestamp"]
         iso_pattern = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(\+00:00|Z)$"
-        assert re.match(
-            iso_pattern, timestamp
-        ), f"Heartbeat timestamp {timestamp} does not match ISO 8601 format"
+        assert re.match(iso_pattern, timestamp), (
+            f"Heartbeat timestamp {timestamp} does not match ISO 8601 format"
+        )

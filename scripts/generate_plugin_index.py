@@ -8,6 +8,7 @@ Usage:
 Собирает все плагины из PLUGIN_REGISTRY, группирует по plugin_type, формирует markdown-таблицу с именем класса, типом, docstring и путём к файлу.
 SEC: Импортируются только известные модули из src/sboxmgr/subscription/*, сторонние/неизвестные модули не импортируются.
 """
+
 import inspect
 import os
 

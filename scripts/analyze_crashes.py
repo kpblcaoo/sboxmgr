@@ -2,6 +2,7 @@
 """
 Analyze collected crashes from fuzz testing to identify patterns and issues.
 """
+
 import json
 import re
 from collections import Counter, defaultdict

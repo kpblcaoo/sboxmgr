@@ -27,18 +27,19 @@ class TestConfigManager:
             export=ExportConfig(
                 format="sing-box",  # This is an enum
                 inbound_profile="tun",
-                output_file="test.json"
-            )
+                output_file="test.json",
+            ),
         )
 
         # Save to TOML
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
             save_config_to_toml(config, f.name)
             toml_path = f.name
 
         try:
             # Load back from TOML
             from sboxmgr.configs.toml_support import load_config_from_toml
+
             loaded_config = load_config_from_toml(toml_path)
 
             # Verify enum values are preserved
@@ -49,7 +50,7 @@ class TestConfigManager:
             with open(toml_path) as f:
                 toml_content = f.read()
             assert 'format = "sing-box"' in toml_content
-            assert 'ExportFormat' not in toml_content
+            assert "ExportFormat" not in toml_content
 
         finally:
             os.unlink(toml_path)
@@ -64,10 +65,8 @@ class TestConfigManager:
                 id="valid-test",
                 description="Valid test config",
                 export=ExportConfig(
-                    format="sing-box",
-                    inbound_profile="tun",
-                    output_file="test.json"
-                )
+                    format="sing-box", inbound_profile="tun", output_file="test.json"
+                ),
             )
 
             valid_path = Path(test_dir) / "valid.toml"
@@ -75,46 +74,52 @@ class TestConfigManager:
 
             # Create TOML with syntax error
             broken_toml_path = Path(test_dir) / "broken.toml"
-            with open(broken_toml_path, 'w') as f:
-                f.write('id = "broken-test"\n[export\nformat = "sing-box"')  # Missing closing bracket
+            with open(broken_toml_path, "w") as f:
+                f.write(
+                    'id = "broken-test"\n[export\nformat = "sing-box"'
+                )  # Missing closing bracket
 
             # Create TOML with invalid data
             invalid_data_path = Path(test_dir) / "invalid.toml"
-            with open(invalid_data_path, 'w') as f:
-                toml.dump({
-                    'id': '',  # Empty ID - should be invalid
-                    'description': 'Invalid config',
-                    'export': {
-                        'format': 'unknown-format',  # Invalid format
-                        'inbound_profile': 'tun',
-                        'output_file': 'test.json'
-                    }
-                }, f)
+            with open(invalid_data_path, "w") as f:
+                toml.dump(
+                    {
+                        "id": "",  # Empty ID - should be invalid
+                        "description": "Invalid config",
+                        "export": {
+                            "format": "unknown-format",  # Invalid format
+                            "inbound_profile": "tun",
+                            "output_file": "test.json",
+                        },
+                    },
+                    f,
+                )
 
             # Test ConfigManager
             manager = ConfigManager(test_dir)
 
             # Test valid config
-            result = manager.switch_config('valid')
+            result = manager.switch_config("valid")
             assert result is True
-            assert manager.get_active_config_name() == 'valid-test'
+            assert manager.get_active_config_name() == "valid-test"
 
             # Test broken TOML
             with pytest.raises(Exception) as exc_info:
-                manager.switch_config('broken')
+                manager.switch_config("broken")
             assert "Key group not on a line by itself" in str(exc_info.value)
 
             # Test invalid data
             with pytest.raises(Exception) as exc_info:
-                manager.switch_config('invalid')
+                manager.switch_config("invalid")
             assert "validation error" in str(exc_info.value).lower()
 
             # Test nonexistent config
             with pytest.raises(FileNotFoundError):
-                manager.switch_config('nonexistent')
+                manager.switch_config("nonexistent")
 
         finally:
             import shutil
+
             shutil.rmtree(test_dir)
 
     def test_corrupted_active_config_file(self):
@@ -124,18 +129,19 @@ class TestConfigManager:
         try:
             # Create corrupted .active_config file
             active_config_file = Path(test_dir) / ".active_config"
-            with open(active_config_file, 'w') as f:
-                f.write('invalid json content')
+            with open(active_config_file, "w") as f:
+                f.write("invalid json content")
 
             # ConfigManager should handle this gracefully and create default
             manager = ConfigManager(test_dir)
 
             # Should have created default config due to corruption
             assert manager.get_active_config() is not None
-            assert manager.get_active_config_name() == 'default'
+            assert manager.get_active_config_name() == "default"
 
         finally:
             import shutil
+
             shutil.rmtree(test_dir)
 
     def test_no_configs_directory(self):
@@ -148,7 +154,7 @@ class TestConfigManager:
 
             # Should create default config
             assert manager.get_active_config() is not None
-            assert manager.get_active_config_name() == 'default'
+            assert manager.get_active_config_name() == "default"
 
             # Should have created default.toml
             default_path = Path(test_dir) / "default.toml"
@@ -156,6 +162,7 @@ class TestConfigManager:
 
         finally:
             import shutil
+
             shutil.rmtree(test_dir)
 
 
@@ -172,20 +179,16 @@ class TestConfigCLI:
             id="home",
             description="Home configuration",
             export=ExportConfig(
-                format="sing-box",
-                inbound_profile="tun",
-                output_file="home.json"
-            )
+                format="sing-box", inbound_profile="tun", output_file="home.json"
+            ),
         )
 
         self.work_config = UserConfig(
             id="work",
             description="Work configuration",
             export=ExportConfig(
-                format="sing-box",
-                inbound_profile="socks",
-                output_file="work.json"
-            )
+                format="sing-box", inbound_profile="socks", output_file="work.json"
+            ),
         )
 
         # Save configs
@@ -197,11 +200,12 @@ class TestConfigCLI:
     def teardown_method(self):
         """Clean up test environment."""
         import shutil
+
         shutil.rmtree(self.test_dir)
 
     def test_config_list_command(self):
         """Test config list command."""
-        with patch('sboxmgr.cli.commands.config.ConfigManager') as mock_manager:
+        with patch("sboxmgr.cli.commands.config.ConfigManager") as mock_manager:
             mock_instance = mock_manager.return_value
 
             # Mock list_configs to return test configs
@@ -215,15 +219,15 @@ class TestConfigCLI:
                     name="home",
                     size=1024,
                     modified=datetime.now(),
-                    valid=True
+                    valid=True,
                 ),
                 ConfigInfo(
                     path=str(Path(self.test_dir) / "work.toml"),
                     name="work",
                     size=2048,
                     modified=datetime.now(),
-                    valid=True
-                )
+                    valid=True,
+                ),
             ]
             mock_instance.list_configs.return_value = mock_configs
             mock_instance.get_active_config_name.return_value = "home"
@@ -237,7 +241,7 @@ class TestConfigCLI:
 
     def test_config_list_no_configs(self):
         """Test config list with no configurations."""
-        with patch('sboxmgr.cli.commands.config.ConfigManager') as mock_manager:
+        with patch("sboxmgr.cli.commands.config.ConfigManager") as mock_manager:
             mock_instance = mock_manager.return_value
             mock_instance.list_configs.return_value = []
 
@@ -248,15 +252,19 @@ class TestConfigCLI:
 
     def test_config_switch_command(self):
         """Test config switch command."""
-        with patch('sboxmgr.cli.commands.config.ConfigManager') as mock_manager, \
-             patch('sboxmgr.cli.commands.config.load_config_auto') as mock_load:
-
+        with (
+            patch("sboxmgr.cli.commands.config.ConfigManager") as mock_manager,
+            patch("sboxmgr.cli.commands.config.load_config_auto") as mock_load,
+        ):
             mock_instance = mock_manager.return_value
-            mock_instance.get_active_config_name.side_effect = ["home", "work"]  # First call returns "home", second "work"
+            mock_instance.get_active_config_name.side_effect = [
+                "home",
+                "work",
+            ]  # First call returns "home", second "work"
             mock_instance.configs_dir = Path("/tmp/test")
 
             # Mock config file exists
-            with patch('pathlib.Path.exists', return_value=True):
+            with patch("pathlib.Path.exists", return_value=True):
                 # Mock load_config_auto to return a valid config
                 mock_config = UserConfig(id="work", description="Work config")
                 mock_load.return_value = mock_config
@@ -269,7 +277,7 @@ class TestConfigCLI:
 
     def test_config_switch_already_active(self):
         """Test switching to already active config."""
-        with patch('sboxmgr.cli.commands.config.ConfigManager') as mock_manager:
+        with patch("sboxmgr.cli.commands.config.ConfigManager") as mock_manager:
             mock_instance = mock_manager.return_value
             mock_instance.get_active_config_name.return_value = "home"
 
@@ -280,14 +288,14 @@ class TestConfigCLI:
 
     def test_config_switch_invalid_config(self):
         """Test switching to invalid config."""
-        with patch('sboxmgr.cli.commands.config.ConfigManager') as mock_manager:
+        with patch("sboxmgr.cli.commands.config.ConfigManager") as mock_manager:
             mock_instance = mock_manager.return_value
             mock_instance.get_active_config_name.return_value = "home"
             mock_instance.configs_dir = Path("/tmp/test")
             mock_instance.list_configs.return_value = []
 
             # Mock config file doesn't exist
-            with patch('pathlib.Path.exists', return_value=False):
+            with patch("pathlib.Path.exists", return_value=False):
                 result = self.runner.invoke(app, ["switch", "invalid"])
 
                 assert result.exit_code == 1
@@ -295,20 +303,23 @@ class TestConfigCLI:
 
     def test_config_switch_validation_error(self):
         """Test switching to config with validation errors."""
-        with patch('sboxmgr.cli.commands.config.ConfigManager') as mock_manager, \
-             patch('sboxmgr.cli.commands.config.load_config_auto') as mock_load:
-
+        with (
+            patch("sboxmgr.cli.commands.config.ConfigManager") as mock_manager,
+            patch("sboxmgr.cli.commands.config.load_config_auto") as mock_load,
+        ):
             mock_instance = mock_manager.return_value
             mock_instance.get_active_config_name.return_value = "home"
             mock_instance.configs_dir = Path("/tmp/test")
 
             # Mock config file exists but load_config_auto raises ValidationError
-            with patch('pathlib.Path.exists', return_value=True):
+            with patch("pathlib.Path.exists", return_value=True):
                 from pydantic import ValidationError
 
                 # Create a proper ValidationError
                 try:
-                    UserConfig(id="", description="Invalid")  # This will raise ValidationError
+                    UserConfig(
+                        id="", description="Invalid"
+                    )  # This will raise ValidationError
                 except ValidationError as e:
                     mock_load.side_effect = e
 
@@ -319,7 +330,7 @@ class TestConfigCLI:
 
     def test_config_status_command(self):
         """Test config status command."""
-        with patch('sboxmgr.cli.commands.config.ConfigManager') as mock_manager:
+        with patch("sboxmgr.cli.commands.config.ConfigManager") as mock_manager:
             mock_instance = mock_manager.return_value
             mock_instance.get_active_config_name.return_value = "home"
             mock_instance.get_active_config.return_value = self.home_config
@@ -332,7 +343,7 @@ class TestConfigCLI:
 
     def test_config_status_no_active(self):
         """Test config status with no active config."""
-        with patch('sboxmgr.cli.commands.config.ConfigManager') as mock_manager:
+        with patch("sboxmgr.cli.commands.config.ConfigManager") as mock_manager:
             mock_instance = mock_manager.return_value
             mock_instance.get_active_config.return_value = None
 
@@ -356,7 +367,7 @@ class TestConfigCLI:
         """Test config validate with invalid file."""
         # Create invalid config file
         invalid_path = Path(self.test_dir) / "invalid.toml"
-        with open(invalid_path, 'w') as f:
+        with open(invalid_path, "w") as f:
             f.write('id = ""\ndescription = "Invalid"')  # Missing required fields
 
         result = self.runner.invoke(app, ["validate", str(invalid_path)])
@@ -384,10 +395,10 @@ class TestConfigEnvVars:
         from sboxmgr.cli.commands.export.cli import export
 
         sig = inspect.signature(export)
-        assert 'config' in sig.parameters
+        assert "config" in sig.parameters
 
         # Verify the parameter has the correct envvar
-        sig.parameters['config']
+        sig.parameters["config"]
         # Note: This is a simplified test - full testing would require
         # actual CLI invocation with environment variables
 
@@ -402,19 +413,23 @@ class TestConfigWithBrokenEnum:
         try:
             # Create TOML with invalid enum value
             invalid_enum_path = Path(test_dir) / "invalid_enum.toml"
-            with open(invalid_enum_path, 'w') as f:
-                toml.dump({
-                    'id': 'test-invalid-enum',
-                    'description': 'Config with invalid enum',
-                    'export': {
-                        'format': 'invalid-format',  # Invalid enum value
-                        'inbound_profile': 'tun',
-                        'output_file': 'test.json'
-                    }
-                }, f)
+            with open(invalid_enum_path, "w") as f:
+                toml.dump(
+                    {
+                        "id": "test-invalid-enum",
+                        "description": "Config with invalid enum",
+                        "export": {
+                            "format": "invalid-format",  # Invalid enum value
+                            "inbound_profile": "tun",
+                            "output_file": "test.json",
+                        },
+                    },
+                    f,
+                )
 
             # Try to load - should raise validation error
             from sboxmgr.configs.toml_support import load_config_from_toml
+
             with pytest.raises(Exception) as exc_info:
                 load_config_from_toml(str(invalid_enum_path))
 
@@ -422,6 +437,7 @@ class TestConfigWithBrokenEnum:
 
         finally:
             import shutil
+
             shutil.rmtree(test_dir)
 
 

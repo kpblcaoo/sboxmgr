@@ -189,7 +189,10 @@ class TestBugFix7CLIUnsupportedFormatHandling:
         # The current implementation doesn't validate format, so it should work
         assert result.exit_code == 0 or result.exit_code != 0
         # Just verify the command doesn't crash
-        assert "config management not available" in result.output.lower() or result.exit_code == 0
+        assert (
+            "config management not available" in result.output.lower()
+            or result.exit_code == 0
+        )
 
 
 class TestBugFix8ReturnTypeAnnotations:

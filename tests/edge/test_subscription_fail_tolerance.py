@@ -43,11 +43,14 @@ def test_fail_tolerant_pipeline(monkeypatch):
     class MockResponse:
         def __init__(self, content):
             self.content = content
+
             class MockRaw:
                 def __init__(self, content):
                     self.content = content
+
                 def read(self, n=None):
                     return self.content
+
             self.raw = MockRaw(content)
 
         def raise_for_status(self):
@@ -71,8 +74,12 @@ def test_fail_tolerant_pipeline(monkeypatch):
             mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
             mgr.fetcher = DummyFetcher(src)
             from sboxmgr.subscription.manager.core import DataProcessor
+
             mgr.data_processor = DataProcessor(mgr.fetcher, mgr.error_handler)
-            mgr.data_processor.parse_servers = lambda raw, context: (DummyParser().parse(raw), True)
+            mgr.data_processor.parse_servers = lambda raw, context: (
+                DummyParser().parse(raw),
+                True,
+            )
             servers = mgr.get_servers()
             print(
                 f"SRC: {src.url} | success: {getattr(servers, 'success', None)} | config: {getattr(servers, 'config', None)} | errors: {getattr(servers, 'errors', None)}"

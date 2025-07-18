@@ -11,7 +11,9 @@ from sboxmgr.tui.utils.validation import (
     validate_tags,
 )
 
-pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
+pytestmark = pytest.mark.skip(
+    reason="TUI tests are optional and may be moved to experimental"
+)
 
 
 class TestValidateSubscriptionUrl:

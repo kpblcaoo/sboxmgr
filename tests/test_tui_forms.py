@@ -6,7 +6,9 @@ import pytest
 
 from sboxmgr.tui.components.forms import ConfigGenerationForm, SubscriptionForm
 
-pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
+pytestmark = pytest.mark.skip(
+    reason="TUI tests are optional and may be moved to experimental"
+)
 
 
 class TestSubscriptionForm:
@@ -22,7 +24,9 @@ class TestSubscriptionForm:
         form = SubscriptionForm()
 
         # Mock the validation function
-        with patch('sboxmgr.tui.components.forms.validate_subscription_url') as mock_validate:
+        with patch(
+            "sboxmgr.tui.components.forms.validate_subscription_url"
+        ) as mock_validate:
             mock_validate.return_value = (True, "")
 
             # Create mock event
@@ -47,7 +51,9 @@ class TestSubscriptionForm:
         form = SubscriptionForm()
 
         # Mock the validation function
-        with patch('sboxmgr.tui.components.forms.validate_subscription_url') as mock_validate:
+        with patch(
+            "sboxmgr.tui.components.forms.validate_subscription_url"
+        ) as mock_validate:
             mock_validate.return_value = (False, "Invalid URL format")
 
             # Create mock event
@@ -72,7 +78,7 @@ class TestSubscriptionForm:
         form = SubscriptionForm()
 
         # Mock the validation function
-        with patch('sboxmgr.tui.components.forms.validate_tags') as mock_validate:
+        with patch("sboxmgr.tui.components.forms.validate_tags") as mock_validate:
             mock_validate.return_value = (True, "", ["RU", "premium"])
 
             # Create mock event
@@ -101,9 +107,12 @@ class TestSubscriptionForm:
         assert form is not None
 
         # Test validation logic separately
-        with patch('sboxmgr.tui.components.forms.validate_subscription_url') as mock_validate_url, \
-             patch('sboxmgr.tui.components.forms.validate_tags') as mock_validate_tags:
-
+        with (
+            patch(
+                "sboxmgr.tui.components.forms.validate_subscription_url"
+            ) as mock_validate_url,
+            patch("sboxmgr.tui.components.forms.validate_tags") as mock_validate_tags,
+        ):
             # Test URL validation
             mock_validate_url.return_value = (True, "")
             is_valid, error = mock_validate_url("https://example.com/subscription")
@@ -126,7 +135,9 @@ class TestSubscriptionForm:
         assert form is not None
 
         # Test validation logic for invalid inputs
-        with patch('sboxmgr.tui.components.forms.validate_subscription_url') as mock_validate_url:
+        with patch(
+            "sboxmgr.tui.components.forms.validate_subscription_url"
+        ) as mock_validate_url:
             # Test invalid URL validation
             mock_validate_url.return_value = (False, "Invalid URL format")
             is_valid, error = mock_validate_url("invalid-url")
@@ -158,7 +169,9 @@ class TestConfigGenerationForm:
         form = ConfigGenerationForm()
 
         # Mock the validation function
-        with patch('sboxmgr.tui.components.forms.validate_output_path') as mock_validate:
+        with patch(
+            "sboxmgr.tui.components.forms.validate_output_path"
+        ) as mock_validate:
             mock_validate.return_value = (True, "")
 
             # Create mock event
@@ -200,11 +213,13 @@ class TestConfigGenerationForm:
         form.query_one = mock_query_one
 
         # Mock validation function
-        with patch('sboxmgr.tui.components.forms.validate_output_path') as mock_validate:
+        with patch(
+            "sboxmgr.tui.components.forms.validate_output_path"
+        ) as mock_validate:
             mock_validate.return_value = (True, "")
 
             # Mock Path.touch to simulate successful file creation
-            with patch('pathlib.Path.touch') as mock_touch:
+            with patch("pathlib.Path.touch") as mock_touch:
                 # Mock dismiss method
                 form.dismiss = Mock()
 
@@ -242,11 +257,13 @@ class TestConfigGenerationForm:
         form.query_one = mock_query_one
 
         # Mock validation function
-        with patch('sboxmgr.tui.components.forms.validate_output_path') as mock_validate:
+        with patch(
+            "sboxmgr.tui.components.forms.validate_output_path"
+        ) as mock_validate:
             mock_validate.return_value = (True, "")
 
             # Mock Path.touch to raise exception
-            with patch('pathlib.Path.touch') as mock_touch:
+            with patch("pathlib.Path.touch") as mock_touch:
                 mock_touch.side_effect = PermissionError("Permission denied")
 
                 # Mock dismiss method
@@ -269,7 +286,7 @@ class TestConfigGenerationForm:
         assert form is not None
 
         # Test that the form has the expected CSS classes and structure
-        assert hasattr(form, 'CSS')
+        assert hasattr(form, "CSS")
         assert "form-container" in form.CSS
 
     def test_config_form_cancel(self):
@@ -335,7 +352,9 @@ class TestConfigGenerationForm:
         form.query_one = mock_query_one
 
         # Mock validation function to return error
-        with patch('sboxmgr.tui.components.forms.validate_output_path') as mock_validate:
+        with patch(
+            "sboxmgr.tui.components.forms.validate_output_path"
+        ) as mock_validate:
             mock_validate.return_value = (False, "Invalid path")
 
             # Call generate button handler

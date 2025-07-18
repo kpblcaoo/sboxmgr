@@ -245,9 +245,7 @@ class MVPEcosystemTest:
                             if "$schema" in schema or "type" in schema:
                                 print(f"✅ Schema {schema_file.name} is valid JSON")
                             else:
-                                print(
-                                    f"⚠️  Schema {schema_file.name} may be incomplete"
-                                )
+                                print(f"⚠️  Schema {schema_file.name} may be incomplete")
                         except json.JSONDecodeError as e:
                             print(f"❌ Schema {schema_file.name} is invalid JSON: {e}")
                             return False

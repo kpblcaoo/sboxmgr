@@ -29,7 +29,14 @@ def load_pyproject_dependencies() -> list[str]:
     package_names = []
     for dep in dependencies:
         # Handle different formats: "package>=1.0", "package==1.0", "package"
-        package_name = dep.split(">=")[0].split("==")[0].split("<")[0].split("~=")[0].split("!=")[0].strip()
+        package_name = (
+            dep.split(">=")[0]
+            .split("==")[0]
+            .split("<")[0]
+            .split("~=")[0]
+            .split("!=")[0]
+            .strip()
+        )
         package_names.append(package_name)
 
     return package_names
@@ -135,7 +142,9 @@ def test_no_file_dependencies():
     for group_name, group_deps in optional_deps.items():
         for dep in group_deps:
             if dep.startswith("file://"):
-                pytest.fail(f"File dependency found in optional dependencies [{group_name}]: {dep}")
+                pytest.fail(
+                    f"File dependency found in optional dependencies [{group_name}]: {dep}"
+                )
 
 
 def test_package_builds():
@@ -145,12 +154,13 @@ def test_package_builds():
     """
     try:
         import subprocess
+
         # Just check that build command works (without --dry-run)
         result = subprocess.run(
             [sys.executable, "-m", "build", "--help"],
             capture_output=True,
             text=True,
-            cwd=Path.cwd()
+            cwd=Path.cwd(),
         )
 
         if result.returncode != 0:

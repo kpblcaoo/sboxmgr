@@ -60,6 +60,7 @@ class ComprehensiveValidator:
         try:
             # Создаем полную конфигурацию sing-box
             from sboxmgr.models.singbox.main import SingBoxConfig
+
             singbox_config = SingBoxConfig(**config)
 
             # Проверяем, что outbound соответствует протоколу

@@ -310,7 +310,10 @@ class TestIntegrationWithSubscriptionManager:
 
             def evaluate(self, context: PolCtx) -> PolicyResult:
                 # Allow servers with address "test.com", deny others
-                if hasattr(context.server, 'address') and context.server.address == "test.com":
+                if (
+                    hasattr(context.server, "address")
+                    and context.server.address == "test.com"
+                ):
                     return PolicyResult.allow("Test server allowed")
                 else:
                     return PolicyResult.deny("Test server denied")
@@ -323,16 +326,10 @@ class TestIntegrationWithSubscriptionManager:
         try:
             # Create real test servers
             allowed_server = ParsedServer(
-                type="vmess",
-                address="test.com",
-                port=443,
-                tag="test-server"
+                type="vmess", address="test.com", port=443, tag="test-server"
             )
             denied_server = ParsedServer(
-                type="vmess",
-                address="blocked.com",
-                port=443,
-                tag="blocked-server"
+                type="vmess", address="blocked.com", port=443, tag="blocked-server"
             )
             servers = [allowed_server, denied_server]
 
@@ -342,11 +339,12 @@ class TestIntegrationWithSubscriptionManager:
 
             # Test policy application through pipeline coordinator
             from sboxmgr.subscription.manager import PipelineCoordinator
+
             coordinator = PipelineCoordinator(
                 middleware_chain=Mock(),
                 postprocessor=Mock(),
                 selector=Mock(),
-                error_handler=Mock()
+                error_handler=Mock(),
             )
 
             result = coordinator.apply_policies(servers, context)
@@ -368,6 +366,7 @@ class TestIntegrationWithSubscriptionManager:
         class FailingPolicy(BasePolicy):
             name = "FailingPolicy"
             description = "Policy that always raises an exception"
+
             def evaluate(self, context: PolCtx) -> PolicyResult:
                 raise RuntimeError("Intentional policy failure")
 
@@ -375,12 +374,22 @@ class TestIntegrationWithSubscriptionManager:
         original_policies = policy_registry.policies.copy()
         policy_registry.policies = [test_policy]
         try:
-            servers = [ParsedServer(type="vmess", address="test.com", port=443, tag="test-server")]
+            servers = [
+                ParsedServer(
+                    type="vmess", address="test.com", port=443, tag="test-server"
+                )
+            ]
             context = PipelineContext()
             context.metadata = {}
             context.fail_tolerant = True
             from sboxmgr.subscription.manager import PipelineCoordinator
-            coordinator = PipelineCoordinator(middleware_chain=None, postprocessor=None, selector=None, error_handler=None)
+
+            coordinator = PipelineCoordinator(
+                middleware_chain=None,
+                postprocessor=None,
+                selector=None,
+                error_handler=None,
+            )
             result = coordinator.apply_policies(servers, context)
             assert result == servers  # pipeline не фильтрует
             assert "policy_error" in context.metadata
@@ -397,6 +406,7 @@ class TestIntegrationWithSubscriptionManager:
         class FailingPolicy(BasePolicy):
             name = "FailingPolicy"
             description = "Policy that always raises an exception"
+
             def evaluate(self, context: PolCtx) -> PolicyResult:
                 raise RuntimeError("Intentional policy failure")
 
@@ -404,13 +414,24 @@ class TestIntegrationWithSubscriptionManager:
         original_policies = policy_registry.policies.copy()
         policy_registry.policies = [test_policy]
         try:
-            servers = [ParsedServer(type="vmess", address="test.com", port=443, tag="test-server")]
+            servers = [
+                ParsedServer(
+                    type="vmess", address="test.com", port=443, tag="test-server"
+                )
+            ]
             context = PipelineContext()
             context.metadata = {}
             # fail_tolerant не установлен
             from sboxmgr.subscription.manager import PipelineCoordinator
-            coordinator = PipelineCoordinator(middleware_chain=None, postprocessor=None, selector=None, error_handler=None)
+
+            coordinator = PipelineCoordinator(
+                middleware_chain=None,
+                postprocessor=None,
+                selector=None,
+                error_handler=None,
+            )
             import pytest
+
             with pytest.raises(RuntimeError, match="Intentional policy failure"):
                 coordinator.apply_policies(servers, context)
         finally:

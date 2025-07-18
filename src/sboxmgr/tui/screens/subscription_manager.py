@@ -4,7 +4,6 @@ This module implements the subscription management screen that allows
 users to add, remove, and manage their subscription sources.
 """
 
-
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
@@ -617,7 +616,7 @@ class SubscriptionManagerScreen(Screen):
             else subscription.url
         )
         self.app.notify(
-            f"Selected: {url}\n" "Press 'r' to remove, 't' to toggle, 'a' to activate",
+            f"Selected: {url}\nPress 'r' to remove, 't' to toggle, 'a' to activate",
             severity="information",
         )
 

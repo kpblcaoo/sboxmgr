@@ -28,9 +28,9 @@ def test_uri_list_parser():
         )
         for s in servers
     )
-    assert (
-        has_emoji_or_special
-    ), "Должен быть хотя бы один сервер с emoji или специальными символами"
+    assert has_emoji_or_special, (
+        "Должен быть хотя бы один сервер с emoji или специальными символами"
+    )
     # Проверяем, что ошибки корректно отражаются в meta
     for s in servers:
         if s.address == "invalid":

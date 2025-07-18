@@ -13,6 +13,7 @@ Phase 4 enhancements:
 - Middleware chain configuration with --middleware flag
 - Backward compatibility with existing export workflows
 """
+
 import json
 import os
 import tempfile
@@ -222,7 +223,6 @@ def _create_postprocessor_chain_from_list(
             processor_instances,
             {"execution_mode": "sequential", "error_strategy": "continue"},
         )
-
 
 
 def _create_middleware_chain_from_list(middleware: list[str]) -> list[Any]:

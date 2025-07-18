@@ -6,7 +6,9 @@ import pytest
 
 from sboxmgr.tui.screens.server_list import ServerListScreen
 
-pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
+pytestmark = pytest.mark.skip(
+    reason="TUI tests are optional and may be moved to experimental"
+)
 
 
 class TestServerListScreen:
@@ -30,12 +32,12 @@ class TestServerListScreen:
         # We can't test the full compose without an app context, but we can test the logic
         assert len(screen._servers) == 0
 
-    @patch.object(ServerListScreen, 'app')
+    @patch.object(ServerListScreen, "app")
     def test_server_loading(self, mock_app, screen):
         """Test server loading from app state."""
         mock_servers = [
             {"protocol": "vmess", "address": "server1.com", "port": 443},
-            {"protocol": "vless", "address": "server2.com", "port": 80}
+            {"protocol": "vless", "address": "server2.com", "port": 80},
         ]
         mock_app.state.servers = mock_servers
 
@@ -44,7 +46,7 @@ class TestServerListScreen:
         # Should load servers from app state
         assert len(screen._servers) == 2
 
-    @patch.object(ServerListScreen, 'app')
+    @patch.object(ServerListScreen, "app")
     def test_exclusion_loading(self, mock_app, screen):
         """Test exclusion loading from app state."""
         mock_exclusions = {"server1", "server2"}
@@ -69,7 +71,7 @@ class TestServerListScreen:
             "protocol": "vmess",
             "address": "example.com",
             "port": 443,
-            "tag": "test-server"
+            "tag": "test-server",
         }
 
         display_text = screen._format_server_display(server)
@@ -86,7 +88,7 @@ class TestServerListScreen:
             "address": "example.com",
             "port": 443,
             "network": "tcp",
-            "security": "tls"
+            "security": "tls",
         }
 
         stats = screen._get_server_stats(server)
@@ -94,7 +96,7 @@ class TestServerListScreen:
         # Should return formatted stats or None
         assert stats is None or isinstance(stats, str)
 
-    @patch.object(ServerListScreen, 'app')
+    @patch.object(ServerListScreen, "app")
     def test_checkbox_change_handling(self, mock_app, screen):
         """Test checkbox change handling."""
         # Setup a server
@@ -113,13 +115,13 @@ class TestServerListScreen:
         # Should call toggle_server_exclusion
         mock_app.state.toggle_server_exclusion.assert_called_once()
 
-    @patch.object(ServerListScreen, 'app')
+    @patch.object(ServerListScreen, "app")
     def test_select_all_functionality(self, mock_app, screen):
         """Test select all button functionality."""
         # Setup servers
         screen._servers = [
             {"protocol": "vmess", "address": "test1.com", "port": 443},
-            {"protocol": "vless", "address": "test2.com", "port": 80}
+            {"protocol": "vless", "address": "test2.com", "port": 80},
         ]
 
         # Mock the screen's query_one method
@@ -130,7 +132,7 @@ class TestServerListScreen:
 
         def mock_query_one(selector, widget_type=None):
             # Extract index from selector like "#server_0"
-            index = int(selector.split('_')[1])
+            index = int(selector.split("_")[1])
             return mock_checkboxes[index]
 
         screen.query_one = Mock(side_effect=mock_query_one)
@@ -141,13 +143,13 @@ class TestServerListScreen:
         for cb in mock_checkboxes:
             assert cb.value is True
 
-    @patch.object(ServerListScreen, 'app')
+    @patch.object(ServerListScreen, "app")
     def test_select_none_functionality(self, mock_app, screen):
         """Test select none button functionality."""
         # Setup servers
         screen._servers = [
             {"protocol": "vmess", "address": "test1.com", "port": 443},
-            {"protocol": "vless", "address": "test2.com", "port": 80}
+            {"protocol": "vless", "address": "test2.com", "port": 80},
         ]
 
         # Mock the screen's query_one method
@@ -158,7 +160,7 @@ class TestServerListScreen:
 
         def mock_query_one(selector, widget_type=None):
             # Extract index from selector like "#server_0"
-            index = int(selector.split('_')[1])
+            index = int(selector.split("_")[1])
             return mock_checkboxes[index]
 
         screen.query_one = Mock(side_effect=mock_query_one)
@@ -169,7 +171,7 @@ class TestServerListScreen:
         for cb in mock_checkboxes:
             assert cb.value is False
 
-    @patch.object(ServerListScreen, 'app')
+    @patch.object(ServerListScreen, "app")
     def test_apply_changes_functionality(self, mock_app, screen):
         """Test apply changes button functionality."""
         screen.on_apply_changes_pressed()
@@ -178,7 +180,7 @@ class TestServerListScreen:
         mock_app.notify.assert_called_once()
         mock_app.pop_screen.assert_called_once()
 
-    @patch.object(ServerListScreen, 'app')
+    @patch.object(ServerListScreen, "app")
     def test_back_button_functionality(self, mock_app, screen):
         """Test back button functionality."""
         screen.on_back_pressed()
@@ -190,7 +192,7 @@ class TestServerListScreen:
         """Test info panel creation with servers."""
         screen._servers = [
             {"protocol": "vmess", "address": "test1.com", "port": 443},
-            {"protocol": "vless", "address": "test2.com", "port": 80}
+            {"protocol": "vless", "address": "test2.com", "port": 80},
         ]
         screen._excluded_servers = {"test1.com:443"}
 

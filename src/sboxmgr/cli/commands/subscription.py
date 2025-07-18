@@ -5,7 +5,6 @@ and displays available server configurations. This is the only remaining
 command in this module after the CLI reorganization.
 """
 
-
 import typer
 
 from sboxmgr.i18n.t import t

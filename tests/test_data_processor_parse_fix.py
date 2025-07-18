@@ -42,7 +42,10 @@ def test_parse_servers_empty_list_success():
     # Mock parser that returns empty list
     mock_parser = MockParser([])
 
-    with patch('sboxmgr.subscription.manager.data_processor.detect_parser', return_value=mock_parser):
+    with patch(
+        "sboxmgr.subscription.manager.data_processor.detect_parser",
+        return_value=mock_parser,
+    ):
         # Execute
         servers, success = processor.parse_servers(b"test_data", context)
 
@@ -68,7 +71,10 @@ def test_parse_servers_all_invalid_success():
     invalid_servers = [MockServer("invalid"), MockServer("invalid")]
     mock_parser = MockParser(invalid_servers)
 
-    with patch('sboxmgr.subscription.manager.data_processor.detect_parser', return_value=mock_parser):
+    with patch(
+        "sboxmgr.subscription.manager.data_processor.detect_parser",
+        return_value=mock_parser,
+    ):
         # Execute
         servers, success = processor.parse_servers(b"test_data", context)
 
@@ -95,11 +101,14 @@ def test_parse_servers_mixed_valid_invalid_success():
     mixed_servers = [
         MockServer("valid1.example.com"),
         MockServer("invalid"),
-        MockServer("valid2.example.com")
+        MockServer("valid2.example.com"),
     ]
     mock_parser = MockParser(mixed_servers)
 
-    with patch('sboxmgr.subscription.manager.data_processor.detect_parser', return_value=mock_parser):
+    with patch(
+        "sboxmgr.subscription.manager.data_processor.detect_parser",
+        return_value=mock_parser,
+    ):
         # Execute
         servers, success = processor.parse_servers(b"test_data", context)
 
@@ -124,8 +133,11 @@ def test_parse_servers_debug_logging_controlled():
     context_low = PipelineContext(debug_level=0)
     mock_parser = MockParser([MockServer("test.example.com")])
 
-    with patch('sboxmgr.subscription.manager.data_processor.detect_parser', return_value=mock_parser):
-        with patch('builtins.print') as mock_print:
+    with patch(
+        "sboxmgr.subscription.manager.data_processor.detect_parser",
+        return_value=mock_parser,
+    ):
+        with patch("builtins.print") as mock_print:
             # Execute
             servers, success = processor.parse_servers(b"test_data", context_low)
 
@@ -136,8 +148,11 @@ def test_parse_servers_debug_logging_controlled():
     # Test with debug_level=2 (debug output enabled)
     context_high = PipelineContext(debug_level=2)
 
-    with patch('sboxmgr.subscription.manager.data_processor.detect_parser', return_value=mock_parser):
-        with patch('builtins.print') as mock_print:
+    with patch(
+        "sboxmgr.subscription.manager.data_processor.detect_parser",
+        return_value=mock_parser,
+    ):
+        with patch("builtins.print") as mock_print:
             # Execute
             servers, success = processor.parse_servers(b"test_data", context_high)
 
@@ -157,7 +172,9 @@ def test_parse_servers_no_parser_error():
     processor = DataProcessor(mock_fetcher, mock_error_handler)
     context = PipelineContext(debug_level=0)
 
-    with patch('sboxmgr.subscription.manager.data_processor.detect_parser', return_value=None):
+    with patch(
+        "sboxmgr.subscription.manager.data_processor.detect_parser", return_value=None
+    ):
         # Execute
         servers, success = processor.parse_servers(b"test_data", context)
 
@@ -184,7 +201,10 @@ def test_parse_servers_parser_exception_error():
     mock_parser = Mock()
     mock_parser.parse.side_effect = Exception("Parser failed")
 
-    with patch('sboxmgr.subscription.manager.data_processor.detect_parser', return_value=mock_parser):
+    with patch(
+        "sboxmgr.subscription.manager.data_processor.detect_parser",
+        return_value=mock_parser,
+    ):
         # Execute
         servers, success = processor.parse_servers(b"test_data", context)
 

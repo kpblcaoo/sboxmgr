@@ -71,7 +71,9 @@ def test_event_sending():
             print(f"❌ Event '{event_type}' failed with error: {e}")
 
     print(f"📊 Event sending: {success_count}/{len(test_events)} successful")
-    assert success_count == len(test_events), f"Only {success_count}/{len(test_events)} events sent successfully"
+    assert success_count == len(test_events), (
+        f"Only {success_count}/{len(test_events)} events sent successfully"
+    )
 
 
 @pytest.mark.skip(reason="Requires running sboxagent - skip in CI")

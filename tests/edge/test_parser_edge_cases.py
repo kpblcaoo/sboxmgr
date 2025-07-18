@@ -305,9 +305,11 @@ def test_middleware_chain_order_tagfilter_vs_enrich(monkeypatch):
     class MockResponse:
         def __init__(self, content):
             self.content = content
+
             class MockRaw:
                 def read(self, n=None):
                     return content
+
             self.raw = MockRaw()
 
         def raise_for_status(self):
@@ -360,6 +362,7 @@ def test_middleware_chain_order_tagfilter_vs_enrich(monkeypatch):
     mgr1 = SubscriptionManager(src1, middleware_chain=chain1)
     mgr1.fetcher = DummyFetcher(src1)
     from sboxmgr.subscription.manager.core import DataProcessor
+
     mgr1.data_processor = DataProcessor(mgr1.fetcher, mgr1.error_handler)
     mgr1.detect_parser = lambda raw, t: type(
         "P", (), {"parse": lambda self, raw: servers}
@@ -543,7 +546,9 @@ def test_enrichmiddleware_external_lookup_timeout(monkeypatch):
     signal.alarm(1)  # 1 секунда на enrichment
     try:
         BadEnrich().process(servers, context)
-        raise AssertionError("EnrichMiddleware must not do long external lookup without timeout")
+        raise AssertionError(
+            "EnrichMiddleware must not do long external lookup without timeout"
+        )
     except TimeoutError:
         pass
     finally:
@@ -564,7 +569,9 @@ def test_hookmiddleware_privilege_escalation():
                 os.setuid(0)  # попытка стать root
             except Exception:
                 return servers  # sandbox: не даём эскалировать
-            raise AssertionError("HookMiddleware must not be able to escalate privileges!")
+            raise AssertionError(
+                "HookMiddleware must not be able to escalate privileges!"
+            )
             return servers
 
     servers = [ParsedServer(type="ss", address="1.1.1.1", port=443, meta={})]
@@ -729,11 +736,14 @@ def test_parsed_validator_required_fields(monkeypatch):
     class MockResponse:
         def __init__(self, content):
             self.content = content
+
             class MockRaw:
                 def __init__(self, content):
                     self.content = content
+
                 def read(self, n=None):
                     return self.content
+
             self.raw = MockRaw(content)
 
         def raise_for_status(self):
@@ -807,6 +817,7 @@ def test_parsed_validator_required_fields(monkeypatch):
     mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
     mgr.fetcher = DummyFetcher(src)
     from sboxmgr.subscription.manager.core import DataProcessor
+
     mgr.data_processor = DataProcessor(mgr.fetcher, mgr.error_handler)
     mgr.data_processor.parse_servers = lambda raw, context: (servers, True)
     context = PipelineContext(mode="strict")
@@ -885,16 +896,22 @@ def test_parsed_validator_strict_tolerant_modes(monkeypatch):
     class MockResponse:
         def __init__(self, content):
             self.content = content
+
             class MockRaw:
                 def __init__(self, content):
                     self.content = content
+
                 def read(self, n=None):
                     return self.content
+
             self.raw = MockRaw(content)
+
         def raise_for_status(self):
             pass
+
     def mock_get(url, **kwargs):
         return MockResponse(b"ZGF0YQ==")
+
     monkeypatch.setattr("requests.get", mock_get)
 
     class DummyFetcher:
@@ -912,6 +929,7 @@ def test_parsed_validator_strict_tolerant_modes(monkeypatch):
     mgr = SubscriptionManager(src, detect_parser=lambda raw, t: DummyParser())
     mgr.fetcher = DummyFetcher(src)
     from sboxmgr.subscription.manager.core import DataProcessor
+
     mgr.data_processor = DataProcessor(mgr.fetcher, mgr.error_handler)
     mgr.data_processor.parse_servers = lambda raw, context: (servers, True)
 
@@ -919,65 +937,65 @@ def test_parsed_validator_strict_tolerant_modes(monkeypatch):
     context_tolerant = PipelineContext(mode="tolerant")
     result_tolerant = mgr.get_servers(context=context_tolerant, mode="tolerant")
 
-    assert (
-        result_tolerant.success
-    ), "Tolerant режим должен быть успешным при наличии валидных серверов"
-    assert (
-        len(result_tolerant.config) == 4
-    ), f"Tolerant режим должен вернуть 4 валидных сервера, получено {len(result_tolerant.config)}"
-    assert any(
-        s.address == "1.2.3.4" for s in result_tolerant.config
-    ), "Первый валидный сервер должен быть в результате"
-    assert any(
-        s.address == "5.6.7.8" for s in result_tolerant.config
-    ), "Второй валидный сервер должен быть в результате"
-    assert any(
-        s.address == "unknown-server-2" for s in result_tolerant.config
-    ), "Первый невалидный сервер должен быть исправлен и в результате"
-    assert any(
-        s.address == "ss-server-3" for s in result_tolerant.config
-    ), "Второй невалидный сервер должен быть исправлен и в результате"
+    assert result_tolerant.success, (
+        "Tolerant режим должен быть успешным при наличии валидных серверов"
+    )
+    assert len(result_tolerant.config) == 4, (
+        f"Tolerant режим должен вернуть 4 валидных сервера, получено {len(result_tolerant.config)}"
+    )
+    assert any(s.address == "1.2.3.4" for s in result_tolerant.config), (
+        "Первый валидный сервер должен быть в результате"
+    )
+    assert any(s.address == "5.6.7.8" for s in result_tolerant.config), (
+        "Второй валидный сервер должен быть в результате"
+    )
+    assert any(s.address == "unknown-server-2" for s in result_tolerant.config), (
+        "Первый невалидный сервер должен быть исправлен и в результате"
+    )
+    assert any(s.address == "ss-server-3" for s in result_tolerant.config), (
+        "Второй невалидный сервер должен быть исправлен и в результате"
+    )
 
     # Проверяем, что ошибки валидации есть в errors
     assert len(result_tolerant.errors) > 0, "Ошибки валидации должны быть в errors"
-    assert any(
-        "missing type" in e.message for e in result_tolerant.errors
-    ), "Должна быть ошибка о missing type"
-    assert any(
-        "invalid port" in e.message for e in result_tolerant.errors
-    ), "Должна быть ошибка о invalid port"
+    assert any("missing type" in e.message for e in result_tolerant.errors), (
+        "Должна быть ошибка о missing type"
+    )
+    assert any("invalid port" in e.message for e in result_tolerant.errors), (
+        "Должна быть ошибка о invalid port"
+    )
 
     # Тест 2: Strict режим - должен вернуть все сервера (включая невалидные)
     context_strict = PipelineContext(mode="strict")
     result_strict = mgr.get_servers(context=context_strict, mode="strict")
 
-    assert (
-        result_strict.success
-    ), "Strict режим должен быть успешным даже с невалидными серверами"
-    assert (
-        len(result_strict.config) == 4
-    ), f"Strict режим должен вернуть все 4 сервера, получено {len(result_strict.config)}"
-    assert any(
-        s.address == "1.2.3.4" for s in result_strict.config
-    ), "Первый валидный сервер должен быть в результате"
-    assert any(
-        s.address == "5.6.7.8" for s in result_strict.config
-    ), "Второй валидный сервер должен быть в результате"
-    assert any(
-        s.address == "unknown-server-2" for s in result_strict.config
-    ), "Первый невалидный сервер должен быть в результате (исправлен валидатором)"
-    assert any(
-        s.address == "ss-server-3" for s in result_strict.config
-    ), "Второй невалидный сервер должен быть в результате (исправлен валидатором)"
+    assert result_strict.success, (
+        "Strict режим должен быть успешным даже с невалидными серверами"
+    )
+    assert len(result_strict.config) == 4, (
+        f"Strict режим должен вернуть все 4 сервера, получено {len(result_strict.config)}"
+    )
+    assert any(s.address == "1.2.3.4" for s in result_strict.config), (
+        "Первый валидный сервер должен быть в результате"
+    )
+    assert any(s.address == "5.6.7.8" for s in result_strict.config), (
+        "Второй валидный сервер должен быть в результате"
+    )
+    assert any(s.address == "unknown-server-2" for s in result_strict.config), (
+        "Первый невалидный сервер должен быть в результате (исправлен валидатором)"
+    )
+    assert any(s.address == "ss-server-3" for s in result_strict.config), (
+        "Второй невалидный сервер должен быть в результате (исправлен валидатором)"
+    )
 
     # Проверяем, что ошибки валидации есть в errors
     assert len(result_strict.errors) > 0, "Ошибки валидации должны быть в errors"
-    assert any(
-        "missing type" in e.message for e in result_strict.errors
-    ), "Должна быть ошибка о missing type"
-    assert any(
-        "invalid port" in e.message for e in result_strict.errors
-    ), "Должна быть ошибка о invalid port"
+    assert any("missing type" in e.message for e in result_strict.errors), (
+        "Должна быть ошибка о missing type"
+    )
+    assert any("invalid port" in e.message for e in result_strict.errors), (
+        "Должна быть ошибка о invalid port"
+    )
 
     # Тест 3: Tolerant режим с полностью невалидными серверами
     all_invalid_servers = [
@@ -1025,29 +1043,35 @@ def test_parsed_validator_strict_tolerant_modes(monkeypatch):
     )
     mgr_invalid.fetcher = DummyFetcher(src)
     from sboxmgr.subscription.manager.core import DataProcessor
-    mgr_invalid.data_processor = DataProcessor(mgr_invalid.fetcher, mgr_invalid.error_handler)
-    mgr_invalid.data_processor.parse_servers = lambda raw, context: (all_invalid_servers, True)
+
+    mgr_invalid.data_processor = DataProcessor(
+        mgr_invalid.fetcher, mgr_invalid.error_handler
+    )
+    mgr_invalid.data_processor.parse_servers = lambda raw, context: (
+        all_invalid_servers,
+        True,
+    )
 
     result_invalid = mgr_invalid.get_servers(
         context=context_tolerant, mode="tolerant", force_reload=True
     )
 
     # Валидатор автоматически исправляет серверы, поэтому они проходят политики
-    assert (
-        result_invalid.success
-    ), "Tolerant режим должен быть успешным, так как валидатор исправляет серверы"
-    assert (
-        len(result_invalid.config) == 3
-    ), "Tolerant режим должен вернуть 3 исправленных сервера"
-    assert any(
-        s.address == "unknown-server-0" for s in result_invalid.config
-    ), "Первый сервер должен быть исправлен"
-    assert any(
-        s.address == "ss-server-1" for s in result_invalid.config
-    ), "Второй сервер должен быть исправлен"
-    assert any(
-        s.address == "ss-server-2" for s in result_invalid.config
-    ), "Третий сервер должен быть исправлен"
+    assert result_invalid.success, (
+        "Tolerant режим должен быть успешным, так как валидатор исправляет серверы"
+    )
+    assert len(result_invalid.config) == 3, (
+        "Tolerant режим должен вернуть 3 исправленных сервера"
+    )
+    assert any(s.address == "unknown-server-0" for s in result_invalid.config), (
+        "Первый сервер должен быть исправлен"
+    )
+    assert any(s.address == "ss-server-1" for s in result_invalid.config), (
+        "Второй сервер должен быть исправлен"
+    )
+    assert any(s.address == "ss-server-2" for s in result_invalid.config), (
+        "Третий сервер должен быть исправлен"
+    )
     assert len(result_invalid.errors) > 0, "Ошибки валидации должны быть в errors"
 
 

@@ -45,9 +45,9 @@ class VmessOutbound(OutboundBase):
 
     type: Literal["vmess"] = "vmess"
     uuid: str = Field(..., description="User UUID")
-    security: Optional[
-        Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]
-    ] = Field("auto", description="Encryption method")
+    security: Optional[Literal["auto", "aes-128-gcm", "chacha20-poly1305", "none"]] = (
+        Field("auto", description="Encryption method")
+    )
     packet_encoding: Optional[Literal["packet", "xudp"]] = Field(
         None, description="Packet encoding method"
     )

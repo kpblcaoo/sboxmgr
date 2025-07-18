@@ -10,13 +10,15 @@ import pytest
 
 from sboxmgr.tui.state.tui_state import TUIState
 
-pytestmark = pytest.mark.skip(reason="TUI tests are optional and may be moved to experimental")
+pytestmark = pytest.mark.skip(
+    reason="TUI tests are optional and may be moved to experimental"
+)
 
 
 class TestTUIState:
     """Test cases for TUIState class."""
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
     def test_initial_state(self):
         """Test initial state of TUIState."""
         state = TUIState()
@@ -32,21 +34,21 @@ class TestTUIState:
         assert state.current_screen == "welcome"
         assert state.show_advanced is False
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
     def test_has_subscriptions_empty(self):
         """Test has_subscriptions with no subscriptions."""
         state = TUIState()
         assert state.has_subscriptions() is False
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
     def test_has_subscriptions_with_data(self):
         """Test has_subscriptions with subscriptions."""
         state = TUIState()
         state.add_subscription("https://example.com/sub")
         assert state.has_subscriptions() is True
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
-    @patch('sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers')
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
+    @patch("sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers")
     def test_add_subscription_success(self, mock_get_servers):
         """Test successful subscription addition."""
         # Mock successful server retrieval
@@ -65,8 +67,8 @@ class TestTUIState:
         assert state.subscriptions[0].source_type == "url"
         assert state.active_subscription == "https://example.com/sub"
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
-    @patch('sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers')
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
+    @patch("sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers")
     def test_add_subscription_without_tags(self, mock_get_servers):
         """Test subscription addition without tags."""
         # Mock successful server retrieval
@@ -83,8 +85,8 @@ class TestTUIState:
         assert len(state.subscriptions) == 1
         assert state.subscriptions[0].label is None
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
-    @patch('sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers')
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
+    @patch("sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers")
     def test_add_multiple_subscriptions(self, mock_get_servers):
         """Test adding multiple subscriptions."""
         # Mock successful server retrieval
@@ -107,8 +109,8 @@ class TestTUIState:
         # Active subscription should remain the first one
         assert state.active_subscription == "https://example.com/sub1"
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
-    @patch('sboxmgr.tui.state.tui_state.SubscriptionSource')
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
+    @patch("sboxmgr.tui.state.tui_state.SubscriptionSource")
     def test_add_subscription_failure(self, mock_subscription_source):
         """Test subscription addition failure."""
         mock_subscription_source.side_effect = Exception("Invalid URL")
@@ -120,8 +122,8 @@ class TestTUIState:
         assert len(state.subscriptions) == 0
         assert state.active_subscription is None
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
-    @patch('sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers')
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
+    @patch("sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers")
     def test_remove_subscription_success(self, mock_get_servers):
         """Test successful subscription removal."""
         # Mock successful server retrieval
@@ -142,8 +144,8 @@ class TestTUIState:
         # Active subscription should switch to remaining one
         assert state.active_subscription == "https://example.com/sub2"
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
-    @patch('sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers')
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
+    @patch("sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers")
     def test_remove_active_subscription(self, mock_get_servers):
         """Test removing active subscription."""
         # Mock successful server retrieval
@@ -163,8 +165,8 @@ class TestTUIState:
         assert len(state.subscriptions) == 1
         assert state.active_subscription == "https://example.com/sub2"
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
-    @patch('sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers')
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
+    @patch("sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers")
     def test_remove_last_subscription(self, mock_get_servers):
         """Test removing the last subscription."""
         # Mock successful server retrieval
@@ -182,8 +184,8 @@ class TestTUIState:
         assert len(state.subscriptions) == 0
         assert state.active_subscription is None
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
-    @patch('sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers')
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
+    @patch("sboxmgr.core.orchestrator.Orchestrator.get_subscription_servers")
     def test_remove_nonexistent_subscription(self, mock_get_servers):
         """Test removing nonexistent subscription."""
         # Mock successful server retrieval
@@ -200,7 +202,7 @@ class TestTUIState:
         assert result is True  # Should succeed even if not found
         assert len(state.subscriptions) == 1  # Original subscription remains
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
     def test_get_counts(self):
         """Test count getter methods."""
         state = TUIState()
@@ -219,7 +221,7 @@ class TestTUIState:
         assert state.get_server_count() == 3
         assert state.get_excluded_count() == 2
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
     def test_toggle_server_exclusion(self):
         """Test server exclusion toggling."""
         state = TUIState()
@@ -234,7 +236,7 @@ class TestTUIState:
         assert result is False  # Now included
         assert "server1" not in state.excluded_servers
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
     def test_is_server_excluded(self):
         """Test server exclusion check."""
         state = TUIState()
@@ -244,7 +246,7 @@ class TestTUIState:
         state.excluded_servers.append("server1")
         assert state.is_server_excluded("server1") is True
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
     def test_clear_exclusions(self):
         """Test clearing all exclusions."""
         state = TUIState()
@@ -254,7 +256,7 @@ class TestTUIState:
 
         assert len(state.excluded_servers) == 0
 
-    @patch('sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE', False)
+    @patch("sboxmgr.tui.state.tui_state.PROFILES_AVAILABLE", False)
     def test_set_advanced_mode(self):
         """Test advanced mode setting."""
         state = TUIState()

@@ -3,6 +3,7 @@
 This test parses all .py files in the project, extracts all top-level imports,
 and checks that every external (non-stdlib, non-local) import is present in pyproject.toml dependencies (main or optional).
 """
+
 import ast
 import importlib.util
 import sys
@@ -19,6 +20,7 @@ except AttributeError:
     # Fallback for older Python
     import os
     import sysconfig
+
     STDLIB_MODULES = set(sys.builtin_module_names)
     stdlib_path = sysconfig.get_paths()["stdlib"]
     for _root, _dirs, files in os.walk(stdlib_path):
@@ -35,7 +37,14 @@ def get_pyproject_dependencies() -> set:
     pyproject = toml.load(top_dir / "pyproject.toml")
     deps = set()
     for dep in pyproject.get("project", {}).get("dependencies", []):
-        name = dep.split("==")[0].split(">=")[0].split("<=")[0].split("~=")[0].split("!=")[0].strip()
+        name = (
+            dep.split("==")[0]
+            .split(">=")[0]
+            .split("<=")[0]
+            .split("~=")[0]
+            .split("!=")[0]
+            .strip()
+        )
         # Map known cases
         if name == "python-dotenv":
             name = "dotenv"
@@ -47,7 +56,14 @@ def get_pyproject_dependencies() -> set:
     # Add all optional dependencies
     for group in pyproject.get("project", {}).get("optional-dependencies", {}).values():
         for dep in group:
-            name = dep.split("==")[0].split(">=")[0].split("<=")[0].split("~=")[0].split("!=")[0].strip()
+            name = (
+                dep.split("==")[0]
+                .split(">=")[0]
+                .split("<=")[0]
+                .split("~=")[0]
+                .split("!=")[0]
+                .strip()
+            )
             if name == "python-dotenv":
                 name = "dotenv"
             if name == "pydantic-settings":
@@ -66,7 +82,17 @@ def is_external_import(module: str) -> bool:
     if module.startswith("_"):
         return False
     # Filter out internal modules and test artifacts
-    internal_modules = {"src", "tests", "logsetup", "sbox_common", "systemd", "cli", "conftest", "export", "utils"}
+    internal_modules = {
+        "src",
+        "tests",
+        "logsetup",
+        "sbox_common",
+        "systemd",
+        "cli",
+        "conftest",
+        "export",
+        "utils",
+    }
     if module in internal_modules:
         return False
     return True
@@ -105,8 +131,11 @@ def test_external_imports_covered_by_dependencies():
             if importlib.util.find_spec(module) is not None:
                 missing.add(module)
     if missing:
-        pytest.fail(f"External imports not covered by pyproject.toml dependencies (main or optional): {sorted(missing)}")
+        pytest.fail(
+            f"External imports not covered by pyproject.toml dependencies (main or optional): {sorted(missing)}"
+        )
     # Успех — ничего не делать, не возвращать True/False
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

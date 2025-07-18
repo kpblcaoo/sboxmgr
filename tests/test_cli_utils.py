@@ -137,8 +137,9 @@ class TestIsAiLang:
         lang_file.write_text(json.dumps(lang_data))
 
         # Mock file reading to raise exception
-        with patch("sboxmgr.cli.utils.Path") as mock_path, patch(
-            "builtins.open", side_effect=PermissionError("Access denied")
+        with (
+            patch("sboxmgr.cli.utils.Path") as mock_path,
+            patch("builtins.open", side_effect=PermissionError("Access denied")),
         ):
             mock_path.return_value.parent.parent = tmp_path
             result = is_ai_lang("protected")
@@ -167,9 +168,10 @@ class TestDetectLangSource:
         config_file = config_dir / "config.toml"
         config_file.write_text('default_lang = "de"\n')
 
-        with patch.dict(os.environ, {}, clear=True), patch(
-            "sboxmgr.cli.utils.Path.home"
-        ) as mock_home:
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch("sboxmgr.cli.utils.Path.home") as mock_home,
+        ):
             mock_home.return_value = tmp_path
 
             from sboxmgr.cli.utils import detect_lang_source
@@ -181,9 +183,11 @@ class TestDetectLangSource:
 
     def test_detect_lang_source_system_lang(self):
         """Test detect_lang_source with system locale."""
-        with patch.dict(os.environ, {}, clear=True), patch(
-            "sboxmgr.cli.utils.Path.home"
-        ) as mock_home, patch("locale.getdefaultlocale") as mock_locale:
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch("sboxmgr.cli.utils.Path.home") as mock_home,
+            patch("locale.getdefaultlocale") as mock_locale,
+        ):
             # Mock config file doesn't exist
             mock_home.return_value = Path("/nonexistent")
             mock_locale.return_value = ("en_US", "UTF-8")
@@ -197,9 +201,11 @@ class TestDetectLangSource:
 
     def test_detect_lang_source_default_fallback(self):
         """Test detect_lang_source falls back to default."""
-        with patch.dict(os.environ, {}, clear=True), patch(
-            "sboxmgr.cli.utils.Path.home"
-        ) as mock_home, patch("locale.getdefaultlocale") as mock_locale:
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch("sboxmgr.cli.utils.Path.home") as mock_home,
+            patch("locale.getdefaultlocale") as mock_locale,
+        ):
             # Mock config file doesn't exist and no system locale
             mock_home.return_value = Path("/nonexistent")
             mock_locale.return_value = (None, None)
@@ -218,9 +224,11 @@ class TestDetectLangSource:
         config_file.parent.mkdir(parents=True)
         config_file.write_text("invalid toml content [")
 
-        with patch.dict(os.environ, {}, clear=True), patch(
-            "sboxmgr.cli.utils.Path.home"
-        ) as mock_home, patch("locale.getdefaultlocale") as mock_locale:
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch("sboxmgr.cli.utils.Path.home") as mock_home,
+            patch("locale.getdefaultlocale") as mock_locale,
+        ):
             mock_home.return_value = tmp_path
             mock_locale.return_value = ("fr_FR", "UTF-8")
 
@@ -233,9 +241,11 @@ class TestDetectLangSource:
 
     def test_detect_lang_source_complex_locale(self):
         """Test detect_lang_source with complex locale format."""
-        with patch.dict(os.environ, {}, clear=True), patch(
-            "sboxmgr.cli.utils.Path.home"
-        ) as mock_home, patch("locale.getdefaultlocale") as mock_locale:
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch("sboxmgr.cli.utils.Path.home") as mock_home,
+            patch("locale.getdefaultlocale") as mock_locale,
+        ):
             mock_home.return_value = Path("/nonexistent")
             mock_locale.return_value = ("zh_CN.UTF-8", "UTF-8")
 
@@ -252,11 +262,12 @@ class TestDetectLangSource:
         config_file.parent.mkdir(parents=True)
         config_file.write_text('some_other_setting = "value"\n')
 
-        with patch.dict(os.environ, {}, clear=True), patch(
-            "sboxmgr.cli.utils.Path.home"
-        ) as mock_home, patch("locale.getdefaultlocale") as mock_locale, patch(
-            "toml.load"
-        ) as mock_toml_load:
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch("sboxmgr.cli.utils.Path.home") as mock_home,
+            patch("locale.getdefaultlocale") as mock_locale,
+            patch("toml.load") as mock_toml_load,
+        ):
             mock_home.return_value = tmp_path
             mock_locale.return_value = ("es_ES", "UTF-8")
             mock_toml_load.return_value = {"some_other_setting": "value"}

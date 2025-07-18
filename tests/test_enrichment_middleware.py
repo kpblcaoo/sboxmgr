@@ -11,9 +11,27 @@ class TestEnrichmentMiddleware:
     def test_enrichment_preserves_tags(self):
         """Test that EnrichmentMiddleware preserves existing tags and does not normalize them."""
         servers = [
-            ParsedServer(type="vless", address="1.1.1.1", port=443, tag="Test Server", meta={"name": "Test Server"}),
-            ParsedServer(type="vless", address="2.2.2.2", port=443, tag="Test Server (1)", meta={"name": "Test Server"}),
-            ParsedServer(type="vless", address="3.3.3.3", port=443, tag="Test Server (2)", meta={"name": "Test Server"}),
+            ParsedServer(
+                type="vless",
+                address="1.1.1.1",
+                port=443,
+                tag="Test Server",
+                meta={"name": "Test Server"},
+            ),
+            ParsedServer(
+                type="vless",
+                address="2.2.2.2",
+                port=443,
+                tag="Test Server (1)",
+                meta={"name": "Test Server"},
+            ),
+            ParsedServer(
+                type="vless",
+                address="3.3.3.3",
+                port=443,
+                tag="Test Server (2)",
+                meta={"name": "Test Server"},
+            ),
         ]
         result = self.middleware.process(servers, self.context)
         tags = [s.tag for s in result]
@@ -26,8 +44,20 @@ class TestEnrichmentMiddleware:
     def test_enrichment_without_tag_normalization(self):
         """Test that EnrichmentMiddleware does not perform tag normalization."""
         servers = [
-            ParsedServer(type="vless", address="1.1.1.1", port=443, tag="", meta={"name": "Test Server"}),
-            ParsedServer(type="vless", address="2.2.2.2", port=443, tag="", meta={"name": "Test Server"}),
+            ParsedServer(
+                type="vless",
+                address="1.1.1.1",
+                port=443,
+                tag="",
+                meta={"name": "Test Server"},
+            ),
+            ParsedServer(
+                type="vless",
+                address="2.2.2.2",
+                port=443,
+                tag="",
+                meta={"name": "Test Server"},
+            ),
         ]
         result = self.middleware.process(servers, self.context)
         # EnrichmentMiddleware should not normalize tags, so they should remain empty
@@ -36,7 +66,9 @@ class TestEnrichmentMiddleware:
 
     def test_enrichment_adds_metadata(self):
         """Test that EnrichmentMiddleware adds enrichment metadata."""
-        server = ParsedServer(type="vless", address="1.1.1.1", port=443, tag="test", meta={})
+        server = ParsedServer(
+            type="vless", address="1.1.1.1", port=443, tag="test", meta={}
+        )
         result = self.middleware.process([server], self.context)[0]
 
         # EnrichmentMiddleware should add basic metadata
@@ -48,10 +80,18 @@ class TestEnrichmentMiddleware:
     def test_integration_with_tag_normalizer(self):
         """Test that EnrichmentMiddleware works correctly with TagNormalizer in pipeline."""
         servers = [
-            ParsedServer(type="vless", address="1.1.1.1", port=443, meta={"name": "Alpha"}),
-            ParsedServer(type="vless", address="2.2.2.2", port=443, meta={"label": "Beta"}),
-            ParsedServer(type="vless", address="3.3.3.3", port=443, meta={"tag": "Gamma"}),
-            ParsedServer(type="vless", address="4.4.4.4", port=443, tag="Delta", meta={}),
+            ParsedServer(
+                type="vless", address="1.1.1.1", port=443, meta={"name": "Alpha"}
+            ),
+            ParsedServer(
+                type="vless", address="2.2.2.2", port=443, meta={"label": "Beta"}
+            ),
+            ParsedServer(
+                type="vless", address="3.3.3.3", port=443, meta={"tag": "Gamma"}
+            ),
+            ParsedServer(
+                type="vless", address="4.4.4.4", port=443, tag="Delta", meta={}
+            ),
             ParsedServer(type="vless", address="5.5.5.5", port=443, tag="", meta={}),
         ]
 
@@ -83,7 +123,9 @@ class TestEnrichmentMiddleware:
         }
         middleware = EnrichmentMiddleware(config)
 
-        server = ParsedServer(type="vless", address="1.1.1.1", port=443, tag="test", meta={})
+        server = ParsedServer(
+            type="vless", address="1.1.1.1", port=443, tag="test", meta={}
+        )
         result = middleware.process([server], self.context)[0]
 
         # Should still add basic metadata even with all enrichment disabled

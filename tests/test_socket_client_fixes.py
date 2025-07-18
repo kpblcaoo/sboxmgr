@@ -56,7 +56,7 @@ class TestSocketClientBugFixes:
         client.sock = Mock()
 
         # Simulate complete header but connection closed during body read
-        header = b"\x00\x00\x00\x0A\x00\x00\x00\x01"  # length=10, version=1
+        header = b"\x00\x00\x00\x0a\x00\x00\x00\x01"  # length=10, version=1
         partial_body = b'{"test":'
 
         client.sock.recv.side_effect = [header, partial_body, b""]

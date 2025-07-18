@@ -25,10 +25,13 @@ class TestExclusionsBasic:
 
     def test_exclusions_view_mode(self, mock_manager):
         """Test exclusions in view mode."""
-        with patch(
-            "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
-            return_value=mock_manager,
-        ), patch("sboxmgr.cli.commands.exclusions._view_exclusions") as mock_view:
+        with (
+            patch(
+                "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
+                return_value=mock_manager,
+            ),
+            patch("sboxmgr.cli.commands.exclusions._view_exclusions") as mock_view,
+        ):
             exclusions(
                 url="http://test.com",
                 view=True,
@@ -49,14 +52,14 @@ class TestExclusionsBasic:
         """Test exclusions clear mode with confirmation."""
         mock_manager.clear.return_value = 5
 
-        with patch(
-            "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
-            return_value=mock_manager,
-        ), patch(
-            "sboxmgr.cli.commands.exclusions.Confirm.ask", return_value=True
-        ), patch(
-            "sboxmgr.cli.commands.exclusions.rprint"
-        ) as mock_rprint:
+        with (
+            patch(
+                "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
+                return_value=mock_manager,
+            ),
+            patch("sboxmgr.cli.commands.exclusions.Confirm.ask", return_value=True),
+            patch("sboxmgr.cli.commands.exclusions.rprint") as mock_rprint,
+        ):
             exclusions(
                 url="http://test.com",
                 view=False,
@@ -80,14 +83,14 @@ class TestExclusionsBasic:
 
     def test_exclusions_clear_mode_cancelled(self, mock_manager):
         """Test exclusions clear mode with cancellation."""
-        with patch(
-            "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
-            return_value=mock_manager,
-        ), patch(
-            "sboxmgr.cli.commands.exclusions.Confirm.ask", return_value=False
-        ), patch(
-            "sboxmgr.cli.commands.exclusions.rprint"
-        ) as mock_rprint:
+        with (
+            patch(
+                "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
+                return_value=mock_manager,
+            ),
+            patch("sboxmgr.cli.commands.exclusions.Confirm.ask", return_value=False),
+            patch("sboxmgr.cli.commands.exclusions.rprint") as mock_rprint,
+        ):
             exclusions(
                 url="http://test.com",
                 view=False,
@@ -113,14 +116,17 @@ class TestExclusionsBasic:
         """Test exclusions shows help when no action specified."""
         sample_json_data = {"outbounds": [{"type": "vless", "tag": "test"}]}
 
-        with patch(
-            "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
-            return_value=mock_manager,
-        ), patch(
-            "sboxmgr.cli.commands.exclusions.fetch_json", return_value=sample_json_data
-        ), patch(
-            "sboxmgr.cli.commands.exclusions.rprint"
-        ) as mock_rprint:
+        with (
+            patch(
+                "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
+                return_value=mock_manager,
+            ),
+            patch(
+                "sboxmgr.cli.commands.exclusions.fetch_json",
+                return_value=sample_json_data,
+            ),
+            patch("sboxmgr.cli.commands.exclusions.rprint") as mock_rprint,
+        ):
             exclusions(
                 url="http://test.com",
                 view=False,
@@ -244,14 +250,14 @@ class TestExclusionsIntegration:
         manager.clear.return_value = 3
 
         # Test clear mode with JSON output
-        with patch(
-            "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
-            return_value=manager,
-        ), patch(
-            "sboxmgr.cli.commands.exclusions.Confirm.ask", return_value=True
-        ), patch(
-            "builtins.print"
-        ) as mock_print:
+        with (
+            patch(
+                "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
+                return_value=manager,
+            ),
+            patch("sboxmgr.cli.commands.exclusions.Confirm.ask", return_value=True),
+            patch("builtins.print") as mock_print,
+        ):
             exclusions(
                 url="http://test.com",
                 view=False,
@@ -274,14 +280,16 @@ class TestExclusionsIntegration:
         manager = MagicMock()
         sample_data = {"outbounds": [{"type": "vless", "tag": "test-server"}]}
 
-        with patch(
-            "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
-            return_value=manager,
-        ), patch(
-            "sboxmgr.cli.commands.exclusions.fetch_json", return_value=sample_data
-        ), patch(
-            "sboxmgr.cli.commands.exclusions._list_servers"
-        ) as mock_list:
+        with (
+            patch(
+                "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
+                return_value=manager,
+            ),
+            patch(
+                "sboxmgr.cli.commands.exclusions.fetch_json", return_value=sample_data
+            ),
+            patch("sboxmgr.cli.commands.exclusions._list_servers") as mock_list,
+        ):
             exclusions(
                 url="http://test.com",
                 view=False,
@@ -322,10 +330,13 @@ class TestExclusionsViewMode:
             {"id": "test1", "name": "server1", "reason": "test"}
         ]
 
-        with patch(
-            "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
-            return_value=manager,
-        ), patch("builtins.print") as mock_print:
+        with (
+            patch(
+                "sboxmgr.cli.commands.exclusions.ExclusionManager.default",
+                return_value=manager,
+            ),
+            patch("builtins.print") as mock_print,
+        ):
             exclusions(
                 url="http://test.com",
                 view=True,

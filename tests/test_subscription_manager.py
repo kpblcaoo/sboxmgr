@@ -21,7 +21,7 @@ def test_base64_subscription(tmp_path):
     assert os.path.exists(example_path)
 
     # Читаем содержимое файла для отладки
-    with open(example_path, 'rb') as f:
+    with open(example_path, "rb") as f:
         raw_content = f.read()
     print(f"Raw file content: {repr(raw_content)}")
     print(f"Raw file length: {len(raw_content)}")
@@ -132,23 +132,29 @@ def test_export_config_with_test_router(tmp_path):
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
     # Мокаем get_servers для простоты
-    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=[
-            type(
-                "S",
-                (),
-                {
-                    "type": "ss",
-                    "address": "1.2.3.4",
-                    "port": 1234,
-                    "security": None,
-                    "meta": {"tag": "test"},
-                },
-            )()
-        ],
-        context=PipelineContext(),
-        errors=[],
-        success=True,
+    mgr.get_servers = (
+        lambda user_routes=None,
+        exclusions=None,
+        mode=None,
+        context=None,
+        force_reload=False: PipelineResult(
+            config=[
+                type(
+                    "S",
+                    (),
+                    {
+                        "type": "ss",
+                        "address": "1.2.3.4",
+                        "port": 1234,
+                        "security": None,
+                        "meta": {"tag": "test"},
+                    },
+                )()
+            ],
+            context=PipelineContext(),
+            errors=[],
+            success=True,
+        )
     )
     router = MockRouter()
     exclusions = ["5.6.7.8"]
@@ -178,9 +184,13 @@ def test_export_config_integration_edge_cases(tmp_path):
             self.security = security
             self.meta = meta or {}
             # Add required attributes for export
-            self.password = meta.get("password", "password1234") if meta else "password1234"
+            self.password = (
+                meta.get("password", "password1234") if meta else "password1234"
+            )
             self.method = meta.get("method", "aes-256-gcm") if meta else "aes-256-gcm"
-            self.tag = meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            self.tag = (
+                meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            )
 
     servers = [
         S("ss", "1.2.3.4", 1234, meta={"tag": "A"}),
@@ -190,7 +200,9 @@ def test_export_config_integration_edge_cases(tmp_path):
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
 
-    def mock_get_servers(user_routes=None, exclusions=None, mode=None, context=None, force_reload=False):
+    def mock_get_servers(
+        user_routes=None, exclusions=None, mode=None, context=None, force_reload=False
+    ):
         # Apply exclusions to servers
         filtered_servers = servers
         if exclusions:
@@ -248,9 +260,13 @@ def test_export_config_unicode_emoji(tmp_path):
             self.security = security
             self.meta = meta or {}
             # Add required attributes for export
-            self.password = meta.get("password", "password1234") if meta else "password1234"
+            self.password = (
+                meta.get("password", "password1234") if meta else "password1234"
+            )
             self.method = meta.get("method", "aes-256-gcm") if meta else "aes-256-gcm"
-            self.tag = meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            self.tag = (
+                meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            )
 
     servers = [
         S("ss", "1.2.3.4", 1234, meta={"tag": "🚀Rocket"}),
@@ -258,8 +274,14 @@ def test_export_config_unicode_emoji(tmp_path):
     ]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True
+    mgr.get_servers = (
+        lambda user_routes=None,
+        exclusions=None,
+        mode=None,
+        context=None,
+        force_reload=False: PipelineResult(
+            config=servers, context=PipelineContext(), errors=[], success=True
+        )
     )
 
     class MockRouter(BaseRoutingPlugin):
@@ -296,9 +318,13 @@ def test_export_config_large_server_list(tmp_path):
             self.security = security
             self.meta = meta or {}
             # Add required attributes for export
-            self.password = meta.get("password", "password1234") if meta else "password1234"
+            self.password = (
+                meta.get("password", "password1234") if meta else "password1234"
+            )
             self.method = meta.get("method", "aes-256-gcm") if meta else "aes-256-gcm"
-            self.tag = meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            self.tag = (
+                meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            )
 
     servers = [
         S(
@@ -311,8 +337,14 @@ def test_export_config_large_server_list(tmp_path):
     ]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True
+    mgr.get_servers = (
+        lambda user_routes=None,
+        exclusions=None,
+        mode=None,
+        context=None,
+        force_reload=False: PipelineResult(
+            config=servers, context=PipelineContext(), errors=[], success=True
+        )
     )
 
     class TestRouter(BaseRoutingPlugin):
@@ -344,8 +376,14 @@ def test_export_config_invalid_inputs(tmp_path):
 
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=[], context=PipelineContext(), errors=[], success=True
+    mgr.get_servers = (
+        lambda user_routes=None,
+        exclusions=None,
+        mode=None,
+        context=None,
+        force_reload=False: PipelineResult(
+            config=[], context=PipelineContext(), errors=[], success=True
+        )
     )
 
     class TestRouter(BaseRoutingPlugin):
@@ -362,7 +400,9 @@ def test_export_config_invalid_inputs(tmp_path):
             """
             return []
 
-    config = mgr.export_config(None, None, PipelineContext(), routing_plugin=TestRouter())
+    config = mgr.export_config(
+        None, None, PipelineContext(), routing_plugin=TestRouter()
+    )
     outbounds = config.config["outbounds"]
     assert len(outbounds) == 3
     assert {"type": "direct", "tag": "direct"} in outbounds
@@ -372,7 +412,12 @@ def test_export_config_invalid_inputs(tmp_path):
     rules = config.config["route"]["rules"]
     print(f"Generated rules: {rules}")
     assert all(
-        "ip_cidr" in r or "domain" in r or "geosite" in r or "rule_set" in r or "protocol" in r or "ip_is_private" in r
+        "ip_cidr" in r
+        or "domain" in r
+        or "geosite" in r
+        or "rule_set" in r
+        or "protocol" in r
+        or "ip_is_private" in r
         for r in rules
     )
 
@@ -390,9 +435,13 @@ def test_export_config_same_tag_different_types(tmp_path):
             self.security = security
             self.meta = meta or {}
             # Add required attributes for export
-            self.password = meta.get("password", "password1234") if meta else "password1234"
+            self.password = (
+                meta.get("password", "password1234") if meta else "password1234"
+            )
             self.method = meta.get("method", "aes-256-gcm") if meta else "aes-256-gcm"
-            self.tag = meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            self.tag = (
+                meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            )
 
     servers = [
         S("ss", "1.2.3.4", 1234, meta={"tag": "DUP"}),
@@ -400,8 +449,14 @@ def test_export_config_same_tag_different_types(tmp_path):
     ]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True
+    mgr.get_servers = (
+        lambda user_routes=None,
+        exclusions=None,
+        mode=None,
+        context=None,
+        force_reload=False: PipelineResult(
+            config=servers, context=PipelineContext(), errors=[], success=True
+        )
     )
 
     class TagRouter(BaseRoutingPlugin):
@@ -440,15 +495,25 @@ def test_export_config_user_routes_vs_exclusions(tmp_path):
             self.security = security
             self.meta = meta or {}
             # Add required attributes for export
-            self.password = meta.get("password", "password1234") if meta else "password1234"
+            self.password = (
+                meta.get("password", "password1234") if meta else "password1234"
+            )
             self.method = meta.get("method", "aes-256-gcm") if meta else "aes-256-gcm"
-            self.tag = meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            self.tag = (
+                meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            )
 
     servers = [S("ss", "1.2.3.4", 1234, meta={"tag": "A"})]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True
+    mgr.get_servers = (
+        lambda user_routes=None,
+        exclusions=None,
+        mode=None,
+        context=None,
+        force_reload=False: PipelineResult(
+            config=servers, context=PipelineContext(), errors=[], success=True
+        )
     )
 
     class ConflictRouter(BaseRoutingPlugin):
@@ -496,15 +561,25 @@ def test_export_config_user_routes_wildcard_not_implemented(tmp_path):
             self.security = security
             self.meta = meta or {}
             # Add required attributes for export
-            self.password = meta.get("password", "password1234") if meta else "password1234"
+            self.password = (
+                meta.get("password", "password1234") if meta else "password1234"
+            )
             self.method = meta.get("method", "aes-256-gcm") if meta else "aes-256-gcm"
-            self.tag = meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            self.tag = (
+                meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            )
 
     servers = [S("ss", "1.2.3.4", 1234)]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True
+    mgr.get_servers = (
+        lambda user_routes=None,
+        exclusions=None,
+        mode=None,
+        context=None,
+        force_reload=False: PipelineResult(
+            config=servers, context=PipelineContext(), errors=[], success=True
+        )
     )
 
     class WildcardRouter(BaseRoutingPlugin):
@@ -556,15 +631,25 @@ def test_export_config_unsupported_mode(tmp_path):
             self.security = security
             self.meta = meta or {}
             # Add required attributes for export
-            self.password = meta.get("password", "password1234") if meta else "password1234"
+            self.password = (
+                meta.get("password", "password1234") if meta else "password1234"
+            )
             self.method = meta.get("method", "aes-256-gcm") if meta else "aes-256-gcm"
-            self.tag = meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            self.tag = (
+                meta.get("tag", f"{type}_{address}") if meta else f"{type}_{address}"
+            )
 
     servers = [S("ss", "1.2.3.4", 1234)]
     source = SubscriptionSource(url="file://dummy", source_type="url_base64")
     mgr = SubscriptionManager(source)
-    mgr.get_servers = lambda user_routes=None, exclusions=None, mode=None, context=None, force_reload=False: PipelineResult(
-        config=servers, context=PipelineContext(), errors=[], success=True
+    mgr.get_servers = (
+        lambda user_routes=None,
+        exclusions=None,
+        mode=None,
+        context=None,
+        force_reload=False: PipelineResult(
+            config=servers, context=PipelineContext(), errors=[], success=True
+        )
     )
 
     class ModeRouter(BaseRoutingPlugin):
@@ -667,6 +752,7 @@ def test_subscription_manager_caching(monkeypatch):
     mgr.fetcher = DummyFetcher(src)
     # Пересоздаём data_processor с новым fetcher
     from sboxmgr.subscription.manager.core import DataProcessor
+
     mgr.data_processor = DataProcessor(mgr.fetcher, mgr.error_handler)
     mgr.detect_parser = lambda raw, t: DummyParser()
     mgr.data_processor.parse_servers = lambda raw, context: (servers, True)
@@ -699,9 +785,7 @@ def test_fetcher_caching(monkeypatch):
     calls = {}
 
     class DummyRequests:
-        def get(
-            self, url, headers=None, stream=None, timeout=None
-        ):
+        def get(self, url, headers=None, stream=None, timeout=None):
             class Resp:
                 def raise_for_status(self):
                     pass
@@ -711,11 +795,13 @@ def test_fetcher_caching(monkeypatch):
                         def read(self, n=None):
                             calls["count"] = calls.get("count", 0) + 1
                             return b"data"
+
                     self.raw = Raw()
 
             return Resp()
 
     import requests
+
     monkeypatch.setattr(requests, "get", DummyRequests().get)
     src = SubscriptionSource(url="http://test", source_type="url_base64")
     fetcher = URLFetcher(src)
