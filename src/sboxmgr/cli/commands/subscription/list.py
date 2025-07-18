@@ -153,7 +153,7 @@ def list_servers(
         if no_user_agent:
             ua = ""
         else:
-            ua = user_agent
+            ua = user_agent or "ClashMeta/1.0"  # Default User-Agent if None
 
         # Определяем source_type на основе формата
         if format == "base64":

@@ -20,7 +20,6 @@ from sboxmgr.i18n.t import t
 SUPPORTED_PROTOCOLS = ["vless", "shadowsocks", "vmess", "trojan", "tuic", "hysteria2"]
 
 console = Console()
-rprint = console.print
 
 # Create the exclusions command app
 app = typer.Typer(
@@ -51,17 +50,17 @@ def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
             if json_output:
                 print(json.dumps({"error": error_msg, "url": url}))
             else:
-                rprint(f"[red]❌ {error_msg}:[/red]")
-                rprint(f"[dim]   {url}[/dim]")
-                rprint(f"[yellow]💡 {t('cli.check_url_connection')}[/yellow]")
+                console.print(f"[red]❌ {error_msg}:[/red]")
+                console.print(f"[dim]   {url}[/dim]")
+                console.print(f"[yellow]💡 {t('cli.check_url_connection')}[/yellow]")
             raise typer.Exit(1) from None
         return json_data
     except Exception as e:
         if json_output:
             print(json.dumps({"error": str(e), "url": url}))
         else:
-            rprint(f"[red]❌ {t('error.config_load_failed')}: {e}[/red]")
-            rprint(f"[dim]URL: {url}[/dim]")
+            console.print(f"[red]❌ {t('error.config_load_failed')}: {e}[/red]")
+            console.print(f"[dim]URL: {url}[/dim]")
         raise typer.Exit(1) from None
 
 
@@ -86,15 +85,15 @@ def _cache_server_data(
         if json_output:
             print(json.dumps({"error": error_msg}))
         else:
-            rprint(f"[red]❌ {error_msg}[/red]")
-            rprint(f"[yellow]💡 {t('cli.subscription_format_hint')}[/yellow]")
+            console.print(f"[red]❌ {error_msg}[/red]")
+            console.print(f"[yellow]💡 {t('cli.subscription_format_hint')}[/yellow]")
         raise typer.Exit(1) from None
 
 
 def _show_usage_help() -> None:
     """Display usage help when no action is specified."""
-    rprint(f"[yellow]💡 {t('cli.exclusions.usage_hint')}[/yellow]")
-    rprint(f"[dim]{t('cli.exclusions.usage_example')}[/dim]")
+    console.print(f"[yellow]💡 {t('cli.exclusions.usage_hint')}[/yellow]")
+    console.print(f"[dim]{t('cli.exclusions.usage_example')}[/dim]")
 
 
 @app.command("list")
@@ -121,7 +120,7 @@ def exclusions_list(
         return
 
     if not exclusions:
-        rprint("[dim]📝 No exclusions found.[/dim]")
+        console.print("[dim]📝 No exclusions found.[/dim]")
         return
 
     table = Table(title=f"🚫 Current Exclusions ({len(exclusions)})")
@@ -135,7 +134,7 @@ def exclusions_list(
             exc["id"][:12] + "...",
             exc.get("name", "N/A"),
             exc.get("reason", "N/A"),
-            exc.get("timestamp", "N/A")[:10] if exc.get("timestamp") else "N/A",
+            exc.get("timestamp", "N/A")[:10],
         )
 
     console.print(table)
@@ -196,7 +195,7 @@ def exclusions_add(
             if json_output:
                 print(json.dumps({"error": error_msg}))
             else:
-                rprint(f"[red]❌ {error_msg}[/red]")
+                console.print(f"[red]❌ {error_msg}[/red]")
             raise typer.Exit(1) from None
 
         servers = manager._servers_cache["servers"]
@@ -215,7 +214,7 @@ def exclusions_add(
                 print(json.dumps({"error": "; ".join(errors)}))
             else:
                 for error in errors:
-                    rprint(f"[red]❌ {error}[/red]")
+                    console.print(f"[red]❌ {error}[/red]")
             raise typer.Exit(1) from None
 
         added_by_index = manager.add_by_index(servers, indices, protocols, reason)
@@ -229,7 +228,7 @@ def exclusions_add(
             if json_output:
                 print(json.dumps({"error": error_msg}))
             else:
-                rprint(f"[red]❌ {error_msg}[/red]")
+                console.print(f"[red]❌ {error_msg}[/red]")
             raise typer.Exit(1) from None
 
         servers = manager._servers_cache["servers"]
@@ -249,9 +248,9 @@ def exclusions_add(
             )
         )
     elif added_ids:
-        rprint(f"[green]✅ Added {len(added_ids)} exclusions.[/green]")
+        console.print(f"[green]✅ Added {len(added_ids)} exclusions.[/green]")
     else:
-        rprint(
+        console.print(
             "[yellow]⚠️ No new exclusions added (already excluded or not found).[/yellow]"
         )
 
@@ -309,7 +308,7 @@ def exclusions_remove(
             if json_output:
                 print(json.dumps({"error": error_msg}))
             else:
-                rprint(f"[red]❌ {error_msg}[/red]")
+                console.print(f"[red]❌ {error_msg}[/red]")
             raise typer.Exit(1) from None
 
         servers = manager._servers_cache["servers"]
@@ -328,7 +327,7 @@ def exclusions_remove(
                 print(json.dumps({"error": "; ".join(errors)}))
             else:
                 for error in errors:
-                    rprint(f"[red]❌ {error}[/red]")
+                    console.print(f"[red]❌ {error}[/red]")
             raise typer.Exit(1) from None
 
         removed_by_index = manager.remove_by_index(servers, indices, protocols)
@@ -350,9 +349,9 @@ def exclusions_remove(
             )
         )
     elif removed_ids:
-        rprint(f"[green]✅ Removed {len(removed_ids)} exclusions.[/green]")
+        console.print(f"[green]✅ Removed {len(removed_ids)} exclusions.[/green]")
     else:
-        rprint("[yellow]⚠️ No exclusions removed (not found).[/yellow]")
+        console.print("[yellow]⚠️ No exclusions removed (not found).[/yellow]")
 
 
 @app.command("clear")
@@ -384,14 +383,14 @@ def exclusions_clear(
                 )
             )
         else:
-            rprint("[yellow]💡 No exclusions to clear[/yellow]")
+            console.print("[yellow]💡 No exclusions to clear[/yellow]")
         return
 
     # Confirmation
     if not global_yes and not Confirm.ask(
         f"[bold red]{t('cli.clear_exclusions.confirm')}[/bold red]"
     ):
-        rprint(f"[yellow]{t('cli.operation_cancelled')}[/yellow]")
+        console.print(f"[yellow]{t('cli.operation_cancelled')}[/yellow]")
         return
 
     count = manager.clear()
@@ -399,7 +398,7 @@ def exclusions_clear(
     if json_output:
         print(json.dumps({"action": "clear", "removed_count": count}))
     else:
-        rprint(
+        console.print(
             f"[green]✅ {t('cli.clear_exclusions.success').format(count=count)}[/green]"
         )
 
@@ -486,54 +485,54 @@ def exclusions_main(
         _cache_server_data(manager, json_data, json_output)
 
         # Handle operations that require server data
-    if list_servers:
-        # EXACT COPY from old _list_servers function
-        servers_info = manager.list_servers(show_excluded=show_excluded)
+        if list_servers:
+            # EXACT COPY from old _list_servers function
+            servers_info = manager.list_servers(show_excluded=show_excluded)
 
-        if json_output:
-            data = {
-                "total": len(servers_info),
-                "servers": [
-                    {
-                        "index": idx,
-                        "id": manager._get_server_id(server),
-                        "tag": server.get("tag", "N/A"),
-                        "type": server.get("type", "N/A"),
-                        "server": server.get("server", "N/A"),
-                        "server_port": server.get("server_port", "N/A"),
-                        "is_excluded": is_excluded,
-                    }
-                    for idx, server, is_excluded in servers_info
-                ],
-            }
-            print(json.dumps(data, indent=2))
+            if json_output:
+                data = {
+                    "total": len(servers_info),
+                    "servers": [
+                        {
+                            "index": idx,
+                            "id": manager._get_server_id(server),
+                            "tag": server.get("tag", "N/A"),
+                            "type": server.get("type", "N/A"),
+                            "server": server.get("server", "N/A"),
+                            "server_port": server.get("server_port", "N/A"),
+                            "is_excluded": is_excluded,
+                        }
+                        for idx, server, is_excluded in servers_info
+                    ],
+                }
+                print(json.dumps(data, indent=2))
+                return
+
+            if not servers_info:
+                console.print("[dim]📡 No servers found.[/dim]")
+                return
+
+            table = Table(title=f"📡 Available Servers ({len(servers_info)})")
+            table.add_column("Index", style="cyan", justify="right")
+            table.add_column("Tag", style="white")
+            table.add_column("Type", style="blue")
+            table.add_column("Server:Port", style="green")
+            table.add_column("Status", style="bold")
+
+            for idx, server, is_excluded in servers_info:
+                status = "🚫 EXCLUDED" if is_excluded else "✅ Available"
+                status_style = "red" if is_excluded else "green"
+
+                table.add_row(
+                    str(idx),
+                    server.get("tag", "N/A"),
+                    server.get("type", "N/A"),
+                    f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}",
+                    f"[{status_style}]{status}[/{status_style}]",
+                )
+
+            console.print(table)
             return
-
-        if not servers_info:
-            rprint("[dim]📡 No servers found.[/dim]")
-            return
-
-        table = Table(title=f"📡 Available Servers ({len(servers_info)})")
-        table.add_column("Index", style="cyan", justify="right")
-        table.add_column("Tag", style="white")
-        table.add_column("Type", style="blue")
-        table.add_column("Server:Port", style="green")
-        table.add_column("Status", style="bold")
-
-        for idx, server, is_excluded in servers_info:
-            status = "🚫 EXCLUDED" if is_excluded else "✅ Available"
-            status_style = "red" if is_excluded else "green"
-
-            table.add_row(
-                str(idx),
-                server.get("tag", "N/A"),
-                server.get("type", "N/A"),
-                f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}",
-                f"[{status_style}]{status}[/{status_style}]",
-            )
-
-        console.print(table)
-        return
 
     if interactive:
         # Interactive functionality not implemented in this version
