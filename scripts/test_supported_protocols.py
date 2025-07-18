@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test which protocols are actually supported by our sing-box version.
-"""
+"""Test which protocols are actually supported by our sing-box version."""
 
 import json
 import subprocess
@@ -11,7 +9,6 @@ from pathlib import Path
 
 def test_protocol_support():
     """Test which protocols are supported by sing-box."""
-
     # Known protocols from documentation
     outbound_protocols = [
         "vless",

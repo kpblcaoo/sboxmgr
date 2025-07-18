@@ -113,8 +113,10 @@ class MockRouter(BaseRoutingPlugin):
             exclusions: Список исключений.
             user_routes: Пользовательские маршруты.
             context (PipelineContext): Контекст пайплайна.
+
         Returns:
             list: Маршруты.
+
         """
         self.last_call = {
             "servers": servers,
@@ -224,8 +226,10 @@ def test_export_config_integration_edge_cases(tmp_path):
                 exclusions: Список исключений.
                 user_routes: Пользовательские маршруты.
                 context (PipelineContext): Контекст пайплайна.
+
             Returns:
                 list: Маршруты.
+
             """
             assert "5.6.7.8" in exclusions
             assert user_routes[0]["domain"] == ["example.com"]
@@ -293,8 +297,10 @@ def test_export_config_unicode_emoji(tmp_path):
                 exclusions: Список исключений.
                 user_routes: Пользовательские маршруты.
                 context (PipelineContext): Контекст пайплайна.
+
             Returns:
                 list: Маршруты.
+
             """
             return [{"outbound": s.type, "tag": s.meta.get("tag", "")} for s in servers]
 
@@ -356,8 +362,10 @@ def test_export_config_large_server_list(tmp_path):
                 exclusions: Список исключений.
                 user_routes: Пользовательские маршруты.
                 context (PipelineContext): Контекст пайплайна.
+
             Returns:
                 list: Маршруты.
+
             """
             return [{"outbound": s.type, "tag": s.address} for s in servers]
 
@@ -395,8 +403,10 @@ def test_export_config_invalid_inputs(tmp_path):
                 exclusions: Список исключений.
                 user_routes: Пользовательские маршруты.
                 context (PipelineContext): Контекст пайплайна.
+
             Returns:
                 list: Маршруты.
+
             """
             return []
 
@@ -468,8 +478,10 @@ def test_export_config_same_tag_different_types(tmp_path):
                 exclusions: Список исключений.
                 user_routes: Пользовательские маршруты.
                 context (PipelineContext): Контекст пайплайна.
+
             Returns:
                 list: Маршруты.
+
             """
             return [{"outbound": s.type, "tag": s.meta.get("tag", "")} for s in servers]
 
@@ -525,8 +537,10 @@ def test_export_config_user_routes_vs_exclusions(tmp_path):
                 exclusions: Список исключений.
                 user_routes: Пользовательские маршруты.
                 context (PipelineContext): Контекст пайплайна.
+
             Returns:
                 list: Маршруты.
+
             """
             if not servers:
                 return []
@@ -591,8 +605,10 @@ def test_export_config_user_routes_wildcard_not_implemented(tmp_path):
                 exclusions: Список исключений.
                 user_routes: Пользовательские маршруты.
                 context (PipelineContext): Контекст пайплайна.
+
             Returns:
                 list: Маршруты.
+
             """
             for route in user_routes:
                 if route.get("domain") == ["*"]:
@@ -661,8 +677,10 @@ def test_export_config_unsupported_mode(tmp_path):
                 exclusions: Список исключений.
                 user_routes: Пользовательские маршруты.
                 context (PipelineContext): Контекст пайплайна.
+
             Returns:
                 list: Маршруты.
+
             """
             if context and getattr(context, "mode", None) not in ("default", "geo"):
                 raise ValueError(f"Unsupported mode: {getattr(context, 'mode', None)}")

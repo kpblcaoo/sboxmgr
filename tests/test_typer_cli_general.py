@@ -14,6 +14,7 @@ def fake_url():
 
     Returns:
         str: Test subscription URL.
+
     """
     return "https://example.com/sub-link"
 
@@ -24,6 +25,7 @@ def minimal_config():
 
     Returns:
         dict: Minimal valid configuration with one outbound.
+
     """
     return {
         "outbounds": [

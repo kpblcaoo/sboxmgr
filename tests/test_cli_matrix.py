@@ -114,8 +114,8 @@ def add_output_args(args, tmp_path):
 def test_cli_matrix(
     args, description, expected_exit, expected_files, expected_stdout_contains, tmp_path
 ):
-    """
-    CLI matrix: tolerant-поиск сообщений, не трогает exclusions.json вне tmp_path.
+    """CLI matrix: tolerant-поиск сообщений, не трогает exclusions.json вне tmp_path.
+
     Если тест падает — выводит stdout, stderr и лог для диагностики.
     """
     project_root = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Analyze collected crashes from fuzz testing to identify patterns and issues.
-"""
+"""Analyze collected crashes from fuzz testing to identify patterns and issues."""
 
 import json
 import re

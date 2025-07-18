@@ -481,7 +481,6 @@ class TestExclusionManagerEnhanced:
 
     def test_thread_safety_simulation(self, manager):
         """Test thread safety with concurrent operations."""
-
         results = []
 
         def add_exclusions(start_id):

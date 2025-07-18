@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Build complete sing-box schema by analyzing documentation and existing models.
-"""
+"""Build complete sing-box schema by analyzing documentation and existing models."""
 
 import json
 import re

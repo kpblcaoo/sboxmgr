@@ -56,6 +56,7 @@ def _validate_flag_combinations(
 
     Raises:
         typer.Exit: If invalid flag combination detected
+
     """
     if dry_run and agent_check:
         typer.echo(
@@ -86,6 +87,7 @@ def _determine_output_format(output_file: str, format_arg: str) -> str:
 
     Returns:
         Determined output format (json or toml)
+
     """
     if format_arg == "auto":
         # Auto-detect from file extension
@@ -112,6 +114,7 @@ def _create_backup_if_needed(output_file: str, backup: bool) -> Optional[str]:
 
     Returns:
         Backup file path or None
+
     """
     if backup and os.path.exists(output_file):
         backup_file = f"{output_file}.backup"
@@ -131,6 +134,7 @@ def _run_agent_check(config_file: str, delete_after: bool = False) -> bool:
 
     Returns:
         True if check passed, False otherwise
+
     """
     try:
         bridge = AgentBridge()
@@ -171,8 +175,8 @@ def _load_profile_from_file(profile_path: str) -> Optional[FullProfile]:
 
     Raises:
         typer.Exit: If profile loading fails
-    """
 
+    """
     if not os.path.exists(profile_path):
         typer.echo(f"❌ Profile file not found: {profile_path}", err=True)
         raise typer.Exit(1)
@@ -201,8 +205,8 @@ def _create_postprocessor_chain_from_list(
 
     Returns:
         Configured PostProcessorChain or None
-    """
 
+    """
     processor_instances = []
     processor_map = {
         "geo_filter": GeoFilterPostProcessor,
@@ -233,8 +237,8 @@ def _create_middleware_chain_from_list(middleware: list[str]) -> list[Any]:
 
     Returns:
         List of configured middleware instances
-    """
 
+    """
     middleware_instances = []
     middleware_map = {"logging": LoggingMiddleware, "enrichment": EnrichmentMiddleware}
 
@@ -266,8 +270,8 @@ def _generate_config_from_subscription(
 
     Raises:
         typer.Exit: On processing errors
-    """
 
+    """
     # Create subscription source
     source = SubscriptionSource(
         url=url, user_agent=user_agent if not no_user_agent else None
@@ -306,6 +310,7 @@ def _write_config_to_file(
 
     Raises:
         typer.Exit: If writing fails
+
     """
     try:
         # Ensure output directory exists
@@ -415,6 +420,7 @@ def export(
 
     Raises:
         typer.Exit: On validation failure or processing errors
+
     """
     from logsetup.setup import setup_logging
 

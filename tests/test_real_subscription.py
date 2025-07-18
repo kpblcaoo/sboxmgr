@@ -11,7 +11,6 @@ from sboxmgr.subscription.validators.protocol_validator import (
 
 def test_real_subscription_validation():
     """Test validation with real subscription data."""
-
     # Use example from examples with correct path
     example_path = os.path.abspath(
         os.path.join(
@@ -56,7 +55,6 @@ def test_real_subscription_validation():
 
 def test_subscription_with_enhanced_validation():
     """Test subscription processing with enhanced validation."""
-
     # Создаем тестовую подписку с разными протоколами
     test_data = b"""
 # Test subscription with various protocols
@@ -108,7 +106,6 @@ trojan://password@host:443#TestTrojan
 
 def test_protocol_specific_validation():
     """Test protocol-specific validation."""
-
     # Создаем тестовые серверы
     from sboxmgr.subscription.models import ParsedServer
     from sboxmgr.subscription.validators.protocol_validator import (
@@ -164,7 +161,6 @@ def test_protocol_specific_validation():
 
 def test_json_subscription_clash_format():
     """Test JSON subscription in Clash format."""
-
     # Используем JSON пример
     example_path = os.path.abspath(
         os.path.join(
@@ -204,7 +200,6 @@ def test_json_subscription_clash_format():
 
 def test_base64_subscription_sfi_format():
     """Test base64 subscription in SFI format."""
-
     # Используем base64 пример
     example_path = os.path.abspath(
         os.path.join(
@@ -251,7 +246,6 @@ def test_base64_subscription_sfi_format():
 
 def test_subscription_without_user_agent():
     """Test subscription without User-Agent header."""
-
     # Используем URI list пример без User-Agent
     example_path = os.path.abspath(
         os.path.join(
@@ -296,7 +290,6 @@ def test_subscription_without_user_agent():
 
 def test_subscription_with_custom_user_agent():
     """Test subscription with custom User-Agent header."""
-
     # Используем URI list пример с кастомным User-Agent
     example_path = os.path.abspath(
         os.path.join(

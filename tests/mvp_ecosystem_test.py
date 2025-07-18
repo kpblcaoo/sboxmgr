@@ -52,6 +52,7 @@ class MVPEcosystemTest:
         Args:
             test_name: Name of the test
             test_func: Test function to execute
+
         """
         self.total_tests += 1
         print(f"\n🧪 Running: {test_name}")
@@ -356,6 +357,7 @@ class MVPEcosystemTest:
 
         Returns:
             Dictionary with test results and summary.
+
         """
         print("🚀 Starting MVP Ecosystem Test Suite")
         print("=" * 60)

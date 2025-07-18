@@ -61,6 +61,7 @@ def mock_requests_get(monkeypatch):
 
 def run_cli(args, env=None, cwd=None):
     """Вспомогательная функция для вызова CLI с capture_output.
+
     exclusions.json и selected_config.json будут создаваться в cwd (tmp_path) через env.
     """
     if env is None:
@@ -153,6 +154,7 @@ def test_subscription_url():
 
     Returns:
         str: Real subscription URL if TEST_URL is set, otherwise mock URL.
+
     """
     url = os.getenv("TEST_URL")
     if url and not os.getenv("SKIP_EXTERNAL_TESTS"):
@@ -168,6 +170,7 @@ def real_subscription_available():
 
     Returns:
         bool: True if TEST_URL is set and external tests are enabled.
+
     """
     return bool(os.getenv("TEST_URL") and not os.getenv("SKIP_EXTERNAL_TESTS"))
 
@@ -178,6 +181,7 @@ def sample_parsed_servers():
 
     Returns:
         list: List of ParsedServer objects with realistic test data.
+
     """
     return [
         ParsedServer(
@@ -215,6 +219,7 @@ def mock_pipeline_result_success(sample_parsed_servers):
 
     Returns:
         PipelineResult: Mock successful result with sample servers.
+
     """
     return PipelineResult(
         config=sample_parsed_servers,
@@ -230,6 +235,7 @@ def mock_pipeline_result_failure():
 
     Returns:
         PipelineResult: Mock failed result.
+
     """
     return PipelineResult(
         config=None,

@@ -313,7 +313,6 @@ class TestExclusionsConstants:
 
     def test_supported_protocols_constant(self):
         """Test that SUPPORTED_PROTOCOLS is defined."""
-
         assert isinstance(SUPPORTED_PROTOCOLS, list)
         assert len(SUPPORTED_PROTOCOLS) > 0
         assert "vless" in SUPPORTED_PROTOCOLS

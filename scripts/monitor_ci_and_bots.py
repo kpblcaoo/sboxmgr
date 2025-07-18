@@ -25,6 +25,7 @@ class GitHubMonitor:
             repo_owner: Repository owner (username or organization)
             repo_name: Repository name
             token: GitHub personal access token (optional, for private repos)
+
         """
         self.repo_owner = repo_owner
         self.repo_name = repo_name
@@ -47,6 +48,7 @@ class GitHubMonitor:
 
         Returns:
             Commit SHA or None if not found
+
         """
         url = (
             f"{self.api_base}/repos/{self.repo_owner}/{self.repo_name}/commits/{branch}"
@@ -68,6 +70,7 @@ class GitHubMonitor:
 
         Returns:
             List of check runs
+
         """
         url = f"{self.api_base}/repos/{self.repo_owner}/{self.repo_name}/commits/{commit_sha}/check-runs"
 
@@ -87,6 +90,7 @@ class GitHubMonitor:
 
         Returns:
             List of comments
+
         """
         url = f"{self.api_base}/repos/{self.repo_owner}/{self.repo_name}/commits/{commit_sha}/comments"
 
@@ -243,6 +247,7 @@ class GitHubMonitor:
 
         Returns:
             List of bot comments found
+
         """
         print(f"🤖 Monitoring for bot comments on commit {commit_sha[:8]}...")
 

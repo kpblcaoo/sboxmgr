@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test script for new inbound protocols.
-"""
+"""Test script for new inbound protocols."""
 
 import json
 import subprocess
@@ -12,7 +10,6 @@ from src.sboxmgr.models.singbox import *
 
 def test_new_inbounds():
     """Test new inbound protocols with sing-box validation."""
-
     # Test configs for new protocols
     test_configs = [
         {

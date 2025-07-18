@@ -17,6 +17,7 @@ def load_pyproject_dependencies() -> list[str]:
 
     Returns:
         List of package names (without version constraints).
+
     """
     pyproject_path = Path("pyproject.toml")
     if not pyproject_path.exists():
@@ -50,6 +51,7 @@ def package_to_module_name(package_name: str) -> str:
 
     Returns:
         Module name for importlib.import_module
+
     """
     # Common mappings for packages that don't match module names
     mappings = {

@@ -26,6 +26,8 @@ class OutboundBase(BaseModel):
     local_address: Optional[list[str]] = Field(None, description="Local address list")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
 
@@ -177,4 +179,6 @@ class OutboundConfig(BaseModel):
     outbound: OutboundModel = Field(..., discriminator="type")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"

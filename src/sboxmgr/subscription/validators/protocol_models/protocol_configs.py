@@ -37,6 +37,8 @@ class ShadowsocksConfig(BaseModel):
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
     @field_validator("method")
@@ -83,7 +85,10 @@ class VmessUser(BaseModel):
     email: Optional[str] = Field(None, description="Email for log identification")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class VmessSettings(BaseModel):
@@ -98,7 +103,10 @@ class VmessSettings(BaseModel):
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class VmessConfig(BaseModel):
@@ -116,7 +124,10 @@ class VmessConfig(BaseModel):
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 # VLESS
@@ -131,7 +142,10 @@ class VlessUser(BaseModel):
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class VlessSettings(BaseModel):
@@ -146,7 +160,10 @@ class VlessSettings(BaseModel):
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class VlessConfig(BaseModel):
@@ -164,7 +181,10 @@ class VlessConfig(BaseModel):
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 # Trojan
@@ -174,7 +194,10 @@ class TrojanUser(BaseModel):
     password: str = Field(..., description="Authentication password")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class TrojanConfig(BaseModel):
@@ -193,7 +216,10 @@ class TrojanConfig(BaseModel):
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 # WireGuard
@@ -211,7 +237,10 @@ class WireGuardPeer(BaseModel):
     )
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class WireGuardInterface(BaseModel):
@@ -229,7 +258,10 @@ class WireGuardInterface(BaseModel):
     dns: Optional[list[str]] = Field(None, description="DNS servers for interface")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 class WireGuardConfig(BaseModel):
@@ -242,7 +274,10 @@ class WireGuardConfig(BaseModel):
     udp: Optional[bool] = Field(True, description="Enable UDP traffic")
 
     class Config:
-        extra = "forbid"
+        """Pydantic configuration for the model."""
+
+
+extra = "forbid"
 
 
 # Protocol Union Type

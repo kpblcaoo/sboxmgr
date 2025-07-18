@@ -1,5 +1,4 @@
-"""
-Sing-box fuzzing strategies for Hypothesis.
+"""Sing-box fuzzing strategies for Hypothesis.
 
 This module contains strategies for generating valid sing-box configurations
 for property-based testing against both Pydantic models and sing-box binary.

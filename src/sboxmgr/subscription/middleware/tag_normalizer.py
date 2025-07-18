@@ -25,6 +25,7 @@ class TagNormalizer(BaseMiddleware):
     """
 
     def __init__(self, config: Optional[dict[str, Any]] = None):
+        """Initialize the tag normalizer middleware."""
         super().__init__(config)
         self._used_tags: set[str] = set()
 

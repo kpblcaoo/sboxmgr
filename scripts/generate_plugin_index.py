@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Автоматическая генерация docs/plugins/index.md по зарегистрированным плагинам.
+"""Автоматическая генерация docs/plugins/index.md по зарегистрированным плагинам.
 
 Usage:
     python scripts/generate_plugin_index.py

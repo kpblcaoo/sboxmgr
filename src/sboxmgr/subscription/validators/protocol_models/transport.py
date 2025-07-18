@@ -20,6 +20,8 @@ class RealityConfig(BaseModel):
     fingerprint: Optional[str] = Field(None, description="Browser fingerprint")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
 
@@ -43,6 +45,8 @@ class UtlsConfig(BaseModel):
     ] = Field(None, description="Browser fingerprint to emulate")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
 
@@ -59,6 +63,8 @@ class WsConfig(BaseModel):
     )
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
 
@@ -69,6 +75,8 @@ class HttpConfig(BaseModel):
     path: str = Field(..., description="HTTP path")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
 
@@ -91,6 +99,8 @@ class GrpcConfig(BaseModel):
     )
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
 
@@ -102,4 +112,6 @@ class QuicConfig(BaseModel):
     certificate: Optional[str] = Field(None, description="QUIC certificate")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"

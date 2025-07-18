@@ -13,7 +13,6 @@ from sboxmgr.subscription.exporters.singbox_exporter_v2.inbound_converter import
 
 def test_inbound_port_field_backward_compatibility():
     """Test that inbound conversion supports both listen_port and port fields."""
-
     # Test with listen_port field (existing sing-box format)
     config_with_listen_port = {
         "type": "mixed",
@@ -73,7 +72,6 @@ def test_inbound_port_field_backward_compatibility():
 
 def test_inbound_port_field_with_different_types():
     """Test port field handling with different inbound types."""
-
     # Test SOCKS inbound
     socks_config = {
         "type": "socks",
@@ -125,7 +123,6 @@ def test_inbound_port_field_with_inboundprofile():
 
 def test_inbound_port_field_edge_cases():
     """Test edge cases for port field handling."""
-
     # Test with None port (should use default)
     config_none_port = {
         "type": "mixed",

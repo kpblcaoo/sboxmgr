@@ -54,6 +54,8 @@ class TlsConfig(BaseModel):
     )
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
 
@@ -75,6 +77,8 @@ class StreamSettings(BaseModel):
     quic_settings: Optional[QuicConfig] = Field(None, description="QUIC settings")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"
 
 
@@ -97,4 +101,6 @@ class MultiplexConfig(BaseModel):
     padding: Optional[bool] = Field(None, description="Enable padding for obfuscation")
 
     class Config:
+        """Pydantic configuration for the model."""
+
         extra = "forbid"

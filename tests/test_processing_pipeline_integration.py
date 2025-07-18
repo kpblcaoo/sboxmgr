@@ -189,7 +189,6 @@ class TestExportManagerPhase4:
 
     def test_configure_from_profile(self):
         """Test configuring ExportManager from FullProfile."""
-
         try:
             from sboxmgr.configs.models import FilterProfile, FullProfile
 
@@ -293,7 +292,6 @@ class TestPhase4ErrorHandling:
 
     def test_export_with_failing_postprocessor(self):
         """Test export continues when postprocessor fails."""
-
         # Create mock postprocessor that fails
         mock_postprocessor_chain = Mock()
         mock_postprocessor_chain.process.side_effect = Exception("Postprocessor failed")
@@ -326,7 +324,6 @@ class TestPhase4ErrorHandling:
 
     def test_export_with_failing_middleware(self):
         """Test export continues when middleware fails."""
-
         # Create mock middleware that fails
         mock_middleware = Mock()
         mock_middleware.process.side_effect = Exception("Middleware failed")

@@ -12,6 +12,7 @@ def setup_subscription_mock(monkeypatch, subscription_data=None):
         monkeypatch: pytest monkeypatch fixture
         subscription_data (str, optional): Custom base64 subscription data.
             If None, uses default mock data with 2 servers.
+
     """
     if subscription_data is None:
         # Default mock data: 2 vmess servers for testing exclusions/selection
@@ -50,6 +51,7 @@ def setup_legacy_json_mock(monkeypatch, json_data=None):
         monkeypatch: pytest monkeypatch fixture
         json_data (dict, optional): Custom JSON data to return.
             If None, uses default mock data with 2 servers.
+
     """
     if json_data is None:
         # Default mock JSON: 2 servers for testing exclusions
@@ -106,6 +108,7 @@ def setup_version_mock(monkeypatch, version="1.11.5"):
     Args:
         monkeypatch: pytest monkeypatch fixture
         version (str): Version to return from sing-box --version
+
     """
 
     def mock_run(*args, **kwargs):
@@ -130,6 +133,7 @@ def setup_full_cli_mock(monkeypatch, subscription_data=None, version="1.11.5"):
         monkeypatch: pytest monkeypatch fixture
         subscription_data (str, optional): Custom subscription data
         version (str): sing-box version to mock
+
     """
     setup_subscription_mock(monkeypatch, subscription_data)
     setup_version_mock(monkeypatch, version)
@@ -144,6 +148,7 @@ def setup_legacy_cli_mock(monkeypatch, json_data=None, version="1.11.5"):
         monkeypatch: pytest monkeypatch fixture
         json_data (dict, optional): Custom JSON data
         version (str): sing-box version to mock
+
     """
     setup_legacy_json_mock(monkeypatch, json_data)
     setup_version_mock(monkeypatch, version)
@@ -163,6 +168,7 @@ def setup_universal_cli_mock(
         json_data (dict, optional): Custom JSON data for legacy commands
         subscription_data (str, optional): Custom subscription data for new commands
         version (str): sing-box version to mock
+
     """
     if json_data is None:
         # Default mock JSON: 2 servers for testing exclusions

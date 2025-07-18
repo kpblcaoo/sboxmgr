@@ -52,6 +52,7 @@ def generate_schemas() -> dict[str, dict[str, Any]]:
 
     Returns:
         Dict mapping schema names to JSON schema dictionaries
+
     """
     schemas = {
         # Existing schemas (fix deprecation warnings)
@@ -85,6 +86,7 @@ def save_schemas(schemas: dict[str, dict[str, Any]], output_dir: Path) -> None:
     Args:
         schemas: Dictionary of schema name to schema content
         output_dir: Directory to save schema files
+
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 

@@ -1,5 +1,4 @@
-"""
-Tests for socket client bug fixes.
+"""Tests for socket client bug fixes.
 
 Tests:
 1. Brittle pathing fix - proper import handling

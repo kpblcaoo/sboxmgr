@@ -1,5 +1,4 @@
-"""
-Basic tests for config functionality (ADR-0017).
+"""Basic tests for config functionality (ADR-0017).
 
 Tests the core config models and CLI commands to ensure they work correctly.
 """

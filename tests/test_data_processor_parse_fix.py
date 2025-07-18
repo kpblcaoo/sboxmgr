@@ -30,7 +30,6 @@ class MockServer:
 
 def test_parse_servers_empty_list_success():
     """Test that empty server list is handled gracefully."""
-
     # Setup
     mock_fetcher = Mock()
     mock_fetcher.source.source_type = "test"
@@ -58,7 +57,6 @@ def test_parse_servers_empty_list_success():
 
 def test_parse_servers_all_invalid_success():
     """Test that all invalid servers are handled gracefully."""
-
     # Setup
     mock_fetcher = Mock()
     mock_fetcher.source.source_type = "test"
@@ -88,7 +86,6 @@ def test_parse_servers_all_invalid_success():
 
 def test_parse_servers_mixed_valid_invalid_success():
     """Test that mixed valid/invalid servers are handled correctly."""
-
     # Setup
     mock_fetcher = Mock()
     mock_fetcher.source.source_type = "test"
@@ -121,7 +118,6 @@ def test_parse_servers_mixed_valid_invalid_success():
 
 def test_parse_servers_debug_logging_controlled():
     """Test that debug logging is properly controlled by debug_level."""
-
     # Setup
     mock_fetcher = Mock()
     mock_fetcher.source.source_type = "test"
@@ -163,7 +159,6 @@ def test_parse_servers_debug_logging_controlled():
 
 def test_parse_servers_no_parser_error():
     """Test that missing parser still creates proper error."""
-
     # Setup
     mock_fetcher = Mock()
     mock_fetcher.source.source_type = "test"
@@ -188,7 +183,6 @@ def test_parse_servers_no_parser_error():
 
 def test_parse_servers_parser_exception_error():
     """Test that parser exceptions are properly handled."""
-
     # Setup
     mock_fetcher = Mock()
     mock_fetcher.source.source_type = "test"
