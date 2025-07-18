@@ -231,7 +231,7 @@ app.command("exclusions")(exclusions)
 
 
 # Aliases for deprecated commands (for backward compatibility)
-@app.command("list-servers", hidden=True)
+# Note: These are hidden aliases that will be removed in future versions
 def list_servers_alias(
     url: str = typer.Option(
         ...,
@@ -264,7 +264,7 @@ def list_servers_alias(
 ):
     """Alias for sboxctl subscription list (deprecated)."""
     typer.echo("⚠️  Warning: 'list-servers' is deprecated, use 'subscription list'")
-    # Call the original function with all parameters
+    # Call the original function with all parameters including context
     subscription_list_servers(
         url=url,
         debug=debug,
@@ -272,10 +272,10 @@ def list_servers_alias(
         no_user_agent=no_user_agent,
         format=format,
         policy_details=policy_details,
+        ctx=ctx,
     )
 
 
-@app.command("exclusions", hidden=True)
 def exclusions_alias(
     url: str = typer.Option(
         ...,
@@ -305,7 +305,7 @@ def exclusions_alias(
 ):
     """Alias for sboxctl subscription exclusions (deprecated)."""
     typer.echo("⚠️  Warning: 'exclusions' is deprecated, use 'subscription exclusions'")
-    # Call the original function with all parameters
+    # Call the original function with all parameters including context
     exclusions(
         url=url,
         add=add,
@@ -319,6 +319,7 @@ def exclusions_alias(
         show_excluded=show_excluded,
         yes=yes,
         debug=debug,
+        ctx=ctx,
     )
 
 

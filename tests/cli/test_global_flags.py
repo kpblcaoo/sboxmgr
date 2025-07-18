@@ -1,5 +1,6 @@
 """Tests for global flags functionality in CLI."""
 
+import re
 import pytest
 from typer.testing import CliRunner
 
@@ -36,7 +37,10 @@ def test_global_version_flag(runner):
     assert result.exit_code == 0
     # Should output version or "unknown"
     version_output = result.stdout.strip()
-    assert version_output in ["unknown", "0.1.0rc1"] or version_output.startswith("0.")
+    # Validate version output against semantic versioning or "unknown"
+    # Support formats like: 1.2.3, 1.2.3-rc1, 1.2.3+build, 0.1.0rc1
+    semver_pattern = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-?[\w\.-]+)?(?:\+[\w\.-]+)?$"
+    assert version_output == "unknown" or re.match(semver_pattern, version_output) is not None
 
 
 def test_deprecated_aliases_exist(runner):

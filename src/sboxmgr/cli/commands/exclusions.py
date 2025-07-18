@@ -69,8 +69,17 @@ def exclusions(
         typer.echo("🔧 Managing exclusions...")
         if url:
             typer.echo(f"   URL: {url}")
+        # Explicitly track action parameters
+        actions = {
+            "add": add,
+            "remove": remove,
+            "view": view,
+            "clear": clear,
+            "list_servers": list_servers,
+            "interactive": interactive,
+        }
         typer.echo(
-            f"   Actions: {[k for k, v in locals().items() if v and k in ['add', 'remove', 'view', 'clear', 'list_servers', 'interactive']]}"
+            f"   Actions: {[action for action, enabled in actions.items() if enabled]}"
         )
         typer.echo(f"   Skip confirmations: {final_yes}")
 
