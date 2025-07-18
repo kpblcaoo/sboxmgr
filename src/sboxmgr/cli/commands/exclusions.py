@@ -51,12 +51,29 @@ def exclusions(
     ),
     yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompts"),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
+    ctx: typer.Context = None,
 ):
     """Manage server exclusions for subscription-based proxy configurations.
 
     Supports adding, removing, viewing exclusions with interactive selection,
     wildcard patterns, and JSON export capabilities.
     """
+    # Get global flags from context
+    global_yes = ctx.obj.get("yes", False) if ctx.obj else False
+    verbose = ctx.obj.get("verbose", False) if ctx.obj else False
+
+    # Combine local and global yes flags
+    final_yes = yes or global_yes
+
+    if verbose:
+        typer.echo("🔧 Managing exclusions...")
+        if url:
+            typer.echo(f"   URL: {url}")
+        typer.echo(
+            f"   Actions: {[k for k, v in locals().items() if v and k in ['add', 'remove', 'view', 'clear', 'list_servers', 'interactive']]}"
+        )
+        typer.echo(f"   Skip confirmations: {final_yes}")
+
     # Validate conflicting options
     if add and remove:
         typer.echo("❌ Error: --add and --remove are mutually exclusive", err=True)
@@ -73,7 +90,7 @@ def exclusions(
         return
 
     if clear:
-        _handle_clear_operation(manager, json_output, yes)
+        _handle_clear_operation(manager, json_output, final_yes)
         return
 
     # For operations requiring server data, fetch and cache it
