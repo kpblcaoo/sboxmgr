@@ -52,5 +52,6 @@
   "cli.deprecated.list_servers": "⚠️  Warning: 'list-servers' is deprecated, use 'subscription list'",
   "cli.deprecated.exclusions": "⚠️  Warning: 'exclusions' is deprecated, use 'subscription exclusions'",
   "cli.subscription.help": "Manage subscriptions and servers",
-  "cli.subscription.exclusions.help": "Manage server exclusions"
+  "cli.subscription.exclusions.help": "Manage server exclusions",
+  "cli.subscription.list.help": "List servers from subscription"
 }
