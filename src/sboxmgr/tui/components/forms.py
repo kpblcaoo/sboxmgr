@@ -23,7 +23,7 @@ from sboxmgr.tui.utils.validation import (
 
 # Setup logging
 def setup_form_logging():
-    """Setup logging for forms."""
+    """Set up logging for forms."""
     log_file = Path.home() / ".sboxmgr" / "tui_debug.log"
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -60,6 +60,7 @@ class SubscriptionForm(ModalScreen[bool | str]):
     Returns:
         bool: True if subscription was added successfully, False if cancelled
         str: Error message if an error occurred
+
     """
 
     BINDINGS = [
@@ -126,6 +127,7 @@ class SubscriptionForm(ModalScreen[bool | str]):
 
         Returns:
             The composed result containing the form widgets
+
         """
         with Center():
             with Vertical(classes="form-container"):
@@ -156,6 +158,7 @@ class SubscriptionForm(ModalScreen[bool | str]):
 
         Args:
             event: The input changed event
+
         """
         url = event.value.strip()
         error_widget = self.query_one("#url_error", Static)
@@ -175,6 +178,7 @@ class SubscriptionForm(ModalScreen[bool | str]):
 
         Args:
             event: The input changed event
+
         """
         tags_text = event.value.strip()
         error_widget = self.query_one("#tags_error", Static)
@@ -313,11 +317,11 @@ class SubscriptionForm(ModalScreen[bool | str]):
         self.dismiss(False)
 
     def action_paste_clipboard(self) -> None:
-        """Action to paste from clipboard using hotkey."""
+        """Paste from clipboard using hotkey."""
         self.on_paste_pressed()
 
     def action_cancel(self) -> None:
-        """Action to cancel the form using hotkey."""
+        """Cancel the form using hotkey."""
         self.dismiss(False)
 
 
@@ -330,6 +334,7 @@ class ConfigGenerationForm(ModalScreen[bool | str]):
     Returns:
         bool: True if config was generated successfully, False if cancelled
         str: Error message if an error occurred
+
     """
 
     CSS = """
@@ -392,6 +397,7 @@ class ConfigGenerationForm(ModalScreen[bool | str]):
 
         Returns:
             The composed result containing the form widgets
+
         """
         # Get default path from profile settings
         app_state = self.app.state
@@ -436,6 +442,7 @@ class ConfigGenerationForm(ModalScreen[bool | str]):
 
         Args:
             event: The input changed event
+
         """
         path = event.value.strip()
         error_widget = self.query_one("#path_error", Static)

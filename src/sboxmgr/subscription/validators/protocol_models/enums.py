@@ -1,7 +1,7 @@
 """Protocol common enums for VPN protocols validation.
 
-This module provides common enumeration types used across different VPN protocols
-for consistent validation and configuration handling.
+This module provides common enumeration types used across different VPN
+protocols for consistent validation and configuration handling.
 """
 
 from enum import Enum

@@ -40,6 +40,7 @@ def validate_protocol_config(config: dict[str, Any], protocol: str) -> ProtocolC
 
     Raises:
         ValueError: If configuration is invalid
+
     """
     protocol_map = {
         "shadowsocks": ShadowsocksConfig,
@@ -69,6 +70,7 @@ def generate_protocol_schema(protocol: str) -> dict[str, Any]:
 
     Returns:
         JSON schema dictionary
+
     """
     protocol_map = {
         "shadowsocks": ShadowsocksConfig,
@@ -103,6 +105,7 @@ def validate_outbound_config(config: dict[str, Any]) -> OutboundModel:
 
     Raises:
         ValueError: If configuration is invalid
+
     """
     outbound_type = config.get("type", "")
 
@@ -133,6 +136,7 @@ def generate_outbound_schema() -> dict[str, Any]:
 
     Returns:
         JSON schema dictionary for OutboundModel
+
     """
     # Fix: Use model_json_schema() method instead of accessing it as attribute
     if hasattr(OutboundConfig, "model_json_schema"):
@@ -156,6 +160,7 @@ def convert_protocol_to_outbound(
 
     Raises:
         ValueError: If protocol type is not supported
+
     """
     if isinstance(protocol_config, ShadowsocksConfig):
         return ShadowsocksOutbound(
@@ -273,6 +278,7 @@ def create_outbound_from_dict(
 
     Returns:
         Outbound configuration instance
+
     """
     # Add tag if provided
     if tag:

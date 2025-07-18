@@ -249,6 +249,7 @@ def tui_cmd(
         sboxctl tui                    # Launch TUI with default settings
         sboxctl tui --debug 1          # Launch with debug info
         sboxctl tui --profile work     # Launch with specific profile
+
     """
     try:
         from sboxmgr.tui.app import SboxmgrTUI

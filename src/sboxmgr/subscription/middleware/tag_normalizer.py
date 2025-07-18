@@ -1,5 +1,4 @@
-"""
-Tag normalization middleware for consistent server naming.
+"""Tag normalization middleware for consistent server naming.
 
 This module provides centralized tag normalization logic to ensure
 consistent server naming across all User-Agent types and parsers.
@@ -14,8 +13,7 @@ from .base import BaseMiddleware
 
 
 class TagNormalizer(BaseMiddleware):
-    """
-    Middleware for normalizing server tags with priority-based selection.
+    """Middleware for normalizing server tags with priority-based selection.
 
     Priority order:
     1. meta['name'] (human-readable from source)
@@ -36,8 +34,7 @@ class TagNormalizer(BaseMiddleware):
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> list[ParsedServer]:
-        """
-        Process servers to normalize their tags.
+        """Process servers to normalize their tags.
 
         Args:
             servers: List of server models to process
@@ -46,6 +43,7 @@ class TagNormalizer(BaseMiddleware):
 
         Returns:
             List of servers with normalized tags
+
         """
         self._used_tags.clear()
 
@@ -65,14 +63,14 @@ class TagNormalizer(BaseMiddleware):
         return servers
 
     def _normalize_tag(self, server: ParsedServer) -> str:
-        """
-        Normalize a single server's tag based on priority.
+        """Normalize a single server's tag based on priority.
 
         Args:
             server: Server model to normalize
 
         Returns:
             Normalized tag string
+
         """
         # Priority 1: meta['name'] (human-readable from source)
         if server.meta and server.meta.get("name"):
@@ -104,14 +102,14 @@ class TagNormalizer(BaseMiddleware):
         return f"{server.type}-{id(server)}"
 
     def _sanitize_tag(self, tag: str) -> str:
-        """
-        Sanitize tag to ensure it's valid for various formats (JSON, YAML, etc.).
+        """Sanitize tag to ensure it's valid for various formats (JSON, YAML, etc.).
 
         Args:
             tag: Raw tag string
 
         Returns:
             Sanitized tag string
+
         """
         # Only remove control characters and normalize whitespace
         # Keep all printable characters including emojis, symbols, etc.
@@ -128,14 +126,14 @@ class TagNormalizer(BaseMiddleware):
         return sanitized
 
     def _ensure_unique_tag(self, tag: str) -> str:
-        """
-        Ensure tag is unique by appending suffix if needed.
+        """Ensure tag is unique by appending suffix if needed.
 
         Args:
             tag: Base tag string
 
         Returns:
             Unique tag string
+
         """
         if tag not in self._used_tags:
             self._used_tags.add(tag)

@@ -40,6 +40,7 @@ class SubscriptionManager:
         error_handler: Centralized error handling.
         data_processor: Data processing pipeline stages.
         pipeline_coordinator: Pipeline coordination and orchestration.
+
     """
 
     def __init__(
@@ -59,6 +60,7 @@ class SubscriptionManager:
 
         Raises:
             ValueError: If source_type is unknown or unsupported.
+
         """
         # Load plugins
         load_entry_points()
@@ -115,6 +117,7 @@ class SubscriptionManager:
 
         Returns:
             PipelineResult containing processed servers, context, errors, and success status.
+
         """
         # Setup defaults
         user_routes = user_routes or []
@@ -176,6 +179,7 @@ class SubscriptionManager:
 
         Returns:
             PipelineResult containing exported configuration.
+
         """
         # Get servers first
         servers_result = self.get_servers(
@@ -213,6 +217,7 @@ class SubscriptionManager:
 
         Returns:
             PipelineResult with processed servers.
+
         """
         # Stage 1: Fetch and validate raw data
         raw_data, fetch_success = self.data_processor.fetch_and_validate_raw(context)

@@ -27,6 +27,7 @@ class PipelineCoordinator:
             postprocessor: Post-processor chain.
             selector: Server selector.
             error_handler: Optional error handler.
+
         """
         self.middleware_chain = middleware_chain
         self.postprocessor = postprocessor
@@ -45,6 +46,7 @@ class PipelineCoordinator:
 
         Returns:
             List of servers after policy application.
+
         """
         import logging
 
@@ -132,6 +134,7 @@ class PipelineCoordinator:
 
         Returns:
             Tuple of (processed_servers, success_flag).
+
         """
         try:
             if not self.middleware_chain:
@@ -168,6 +171,7 @@ class PipelineCoordinator:
 
         Returns:
             Tuple of (selected_servers, success_flag).
+
         """
         try:
             # Apply post-processing
@@ -201,6 +205,7 @@ class PipelineCoordinator:
 
         Returns:
             PipelineResult object with servers and context.
+
         """
         errors = (
             context.metadata.get("errors", []) if hasattr(context, "metadata") else []
@@ -230,6 +235,7 @@ class PipelineCoordinator:
 
         Returns:
             PipelineResult with exported configuration.
+
         """
         try:
             # Import here to avoid circular dependencies

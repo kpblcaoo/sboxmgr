@@ -52,6 +52,7 @@ class MiddlewareChain(BaseMiddleware):
 
         Args:
             middlewares: List of middleware instances to chain.
+
         """
         self.middlewares = middlewares
 
@@ -85,6 +86,7 @@ class LoggingMiddleware(BaseMiddleware):
 
         Args:
             stage_name: Name of the processing stage for logging.
+
         """
         self.stage_name = stage_name
 
@@ -140,6 +142,7 @@ class TagFilterMiddleware(BaseMiddleware):
 
         Returns:
             List[ParsedServer]: Filtered servers matching tag criteria.
+
         """
         tags = getattr(context, "tag_filters", None)
         # Basic user input validation (SEC-MW-05)
@@ -171,6 +174,7 @@ class EnrichMiddleware(BaseMiddleware):
 
         Returns:
             List[ParsedServer]: Servers with enriched metadata.
+
         """
         for s in servers:
             if not hasattr(s, "meta") or s.meta is None:

@@ -166,7 +166,7 @@ class LoggingMiddleware(ChainableMiddleware):
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> list[ParsedServer]:
-        """Main processing logic - pass through with logging.
+        """Execute main processing logic - pass through with logging.
 
         Args:
             servers: List of servers to process

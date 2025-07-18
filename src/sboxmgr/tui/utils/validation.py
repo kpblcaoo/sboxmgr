@@ -17,6 +17,7 @@ def validate_subscription_url(url: str) -> tuple[bool, Optional[str]]:
 
     Returns:
         Tuple of (is_valid, error_message)
+
     """
     if not url:
         return False, "URL cannot be empty"
@@ -58,6 +59,7 @@ def validate_output_path(path: str) -> tuple[bool, Optional[str]]:
 
     Returns:
         Tuple of (is_valid, error_message)
+
     """
     if not path:
         return False, "Output path cannot be empty"
@@ -97,6 +99,7 @@ def validate_tags(tags_text: str) -> tuple[bool, Optional[str], list[str]]:
 
     Returns:
         Tuple of (is_valid, error_message, parsed_tags)
+
     """
     if not tags_text or not tags_text.strip():
         return True, None, []

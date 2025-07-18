@@ -156,7 +156,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> None:
-        """Called before main processing. Override for setup logic.
+        """Call before main processing. Override for setup logic.
 
         Args:
             servers: List of servers to be processed
@@ -172,7 +172,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> None:
-        """Called after main processing. Override for cleanup logic.
+        """Call after main processing. Override for cleanup logic.
 
         Args:
             servers: List of processed servers
@@ -211,7 +211,7 @@ class ChainableMiddleware(ProfileAwareMiddleware):
         context: PipelineContext,
         profile: Optional[FullProfile] = None,
     ) -> list[ParsedServer]:
-        """Main processing logic. Override this method.
+        """Execute main processing logic. Override this method.
 
         Args:
             servers: List of servers to process

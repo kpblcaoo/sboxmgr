@@ -18,6 +18,7 @@ class PerformanceEnricher:
 
         Args:
             cache_duration: How long to cache performance data in seconds
+
         """
         self.cache_duration = cache_duration
         self._cache: dict[str, tuple[dict[str, Any], float]] = {}
@@ -31,6 +32,7 @@ class PerformanceEnricher:
 
         Returns:
             Server with performance enrichment applied
+
         """
         server_key = f"{server.address}:{server.port}"
 
@@ -73,6 +75,7 @@ class PerformanceEnricher:
 
         Returns:
             Latency class ('low', 'medium', 'high', 'unknown')
+
         """
         # Basic heuristics for latency estimation
         if "geo" in server.meta:
@@ -99,6 +102,7 @@ class PerformanceEnricher:
 
         Returns:
             Efficiency rating ('high', 'medium', 'low')
+
         """
         efficiency_map = {
             # High efficiency protocols
@@ -128,6 +132,7 @@ class PerformanceEnricher:
 
         Returns:
             Security level ('high', 'medium', 'low')
+
         """
         # Base security by protocol
         protocol_security = {
@@ -167,6 +172,7 @@ class PerformanceEnricher:
 
         Returns:
             Reliability score (0.0 to 1.0)
+
         """
         # Base reliability by protocol
         protocol_reliability = {

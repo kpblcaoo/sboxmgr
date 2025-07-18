@@ -18,6 +18,7 @@ class GeoEnricher:
 
         Args:
             geo_database_path: Optional path to GeoIP database file
+
         """
         self.geo_database_path = geo_database_path
         self._cache: dict[str, dict[str, Any]] = {}
@@ -31,6 +32,7 @@ class GeoEnricher:
 
         Returns:
             Server with geographic enrichment applied
+
         """
         server_key = server.address
 
@@ -64,6 +66,7 @@ class GeoEnricher:
 
         Returns:
             Dictionary with geographic information
+
         """
         geo_info = {}
 
@@ -95,6 +98,7 @@ class GeoEnricher:
 
         Returns:
             Geographic information dictionary
+
         """
         import geoip2.database
         import geoip2.errors
@@ -133,6 +137,7 @@ class GeoEnricher:
 
         Returns:
             Geographic information dictionary
+
         """
         geo_info = {}
 
@@ -153,6 +158,7 @@ class GeoEnricher:
 
         Returns:
             True if address is private
+
         """
         try:
             ip = ipaddress.ip_address(address)

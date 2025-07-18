@@ -28,7 +28,7 @@ except ImportError:
 
 # Setup logging for TUI debugging
 def setup_tui_logging():
-    """Setup logging for TUI debugging."""
+    """Set up logging for TUI debugging."""
     log_file = Path.home() / ".sboxmgr" / "tui_debug.log"
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -76,6 +76,7 @@ class TUIState:
         selected_servers: List of selected server IDs for operations
         current_screen: Current screen identifier
         show_advanced: Whether to show advanced options
+
     """
 
     debug: int = 0
@@ -163,6 +164,7 @@ class TUIState:
 
         Returns:
             bool: True if subscription was added successfully
+
         """
         logger.debug(f"[DEBUG] Starting add_subscription for URL: {url}")
         logger.debug(f"[DEBUG] Enabled: {enabled}")
@@ -238,6 +240,7 @@ class TUIState:
         Args:
             url: Subscription URL
             enabled: Whether subscription is enabled
+
         """
         if self.debug >= 2:
             logger.debug(
@@ -327,6 +330,7 @@ class TUIState:
 
         Returns:
             bool: True if subscription was removed successfully
+
         """
         try:
             # Remove from local state
@@ -362,6 +366,7 @@ class TUIState:
 
         Args:
             url: Subscription URL to remove
+
         """
         if not self.active_config:
             return
@@ -458,6 +463,7 @@ class TUIState:
 
         Returns:
             True if user has at least one subscription
+
         """
         return len(self.subscriptions) > 0
 
@@ -466,6 +472,7 @@ class TUIState:
 
         Returns:
             Number of subscriptions
+
         """
         return len(self.subscriptions)
 
@@ -474,6 +481,7 @@ class TUIState:
 
         Returns:
             Number of servers
+
         """
         return len(self.servers)
 
@@ -482,6 +490,7 @@ class TUIState:
 
         Returns:
             Number of excluded servers
+
         """
         return len(self.excluded_servers)
 
@@ -493,6 +502,7 @@ class TUIState:
 
         Returns:
             True if server is now excluded, False if included
+
         """
         if server_id in self.excluded_servers:
             self.excluded_servers.remove(server_id)
@@ -509,6 +519,7 @@ class TUIState:
 
         Returns:
             True if server is excluded
+
         """
         return server_id in self.excluded_servers
 
@@ -521,6 +532,7 @@ class TUIState:
 
         Args:
             exclusions: List of server IDs to exclude
+
         """
         self.excluded_servers = exclusions.copy()
         if self.debug >= 2:
@@ -541,6 +553,7 @@ class TUIState:
 
         Args:
             enabled: Whether to show advanced options
+
         """
         self.show_advanced = enabled
 
@@ -552,6 +565,7 @@ class TUIState:
 
         Returns:
             bool: True if configuration was generated successfully
+
         """
         if self.debug >= 2:
             logger.debug(
@@ -693,6 +707,7 @@ class TUIState:
 
         Returns:
             FullProfile or None if conversion failed
+
         """
         if self.debug >= 2:
             logger.debug("[DEBUG] _convert_to_full_profile called")
@@ -740,6 +755,7 @@ class TUIState:
 
         Returns:
             str: Name of active profile or 'default' if none
+
         """
         if self.active_config:
             return self.active_config.id
@@ -750,6 +766,7 @@ class TUIState:
 
         Returns:
             dict: Export settings
+
         """
         if self.active_config and self.active_config.export:
             return {

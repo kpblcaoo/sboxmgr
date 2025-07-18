@@ -33,6 +33,7 @@ class CacheManager:
 
         Returns:
             Tuple representing the unique cache key.
+
         """
         return (
             str(fetcher_source.url),
@@ -50,6 +51,7 @@ class CacheManager:
 
         Returns:
             Cached result or None if not found.
+
         """
         with self._cache_lock:
             return self._get_servers_cache.get(cache_key)
@@ -60,6 +62,7 @@ class CacheManager:
         Args:
             cache_key: Cache key to store under.
             result: Result to cache.
+
         """
         with self._cache_lock:
             self._get_servers_cache[cache_key] = result
@@ -74,6 +77,7 @@ class CacheManager:
 
         Args:
             cache_key: Cache key to remove.
+
         """
         with self._cache_lock:
             self._get_servers_cache.pop(cache_key, None)
@@ -83,6 +87,7 @@ class CacheManager:
 
         Returns:
             Number of cached items.
+
         """
         with self._cache_lock:
             return len(self._get_servers_cache)

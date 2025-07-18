@@ -21,6 +21,7 @@ def process_single_server(server: ParsedServer) -> Optional[dict[str, Any]]:
 
     Returns:
         Outbound configuration or None if server should be skipped.
+
     """
     protocol_type = normalize_protocol_type(server.type)
 
@@ -48,6 +49,7 @@ def is_supported_protocol(protocol_type: str) -> bool:
 
     Returns:
         True if protocol is supported.
+
     """
     return protocol_type in SUPPORTED_PROTOCOLS
 
@@ -60,6 +62,7 @@ def create_urltest_outbound(proxy_tags: list[str]) -> dict[str, Any]:
 
     Returns:
         URLTest outbound configuration.
+
     """
     urltest_config: dict[str, Any] = {
         "type": "urltest",
@@ -80,6 +83,7 @@ def create_modern_routing_rules(proxy_tags: list[str]) -> list[dict[str, Any]]:
 
     Returns:
         List of routing rules.
+
     """
     rules: list[dict[str, Any]] = []
 
@@ -116,6 +120,7 @@ def singbox_export(
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
+
     """
     outbounds = []
     proxy_tags = []
@@ -200,6 +205,7 @@ def singbox_export_with_middleware(
     Returns:
         Dictionary containing complete sing-box configuration with outbounds,
         routing rules, and optional inbounds section.
+
     """
     outbounds = []
     proxy_tags = []

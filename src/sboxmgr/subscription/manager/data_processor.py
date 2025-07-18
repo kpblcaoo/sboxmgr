@@ -20,6 +20,7 @@ class DataProcessor:
         Args:
             fetcher: Subscription data fetcher instance.
             error_handler: Optional error handler (creates default if None).
+
         """
         self.fetcher = fetcher
         self.error_handler = error_handler or ErrorHandler()
@@ -36,6 +37,7 @@ class DataProcessor:
         Returns:
             Tuple of (raw_data, success_flag). If success_flag is False,
             appropriate errors will be added to context.metadata['errors'].
+
         """
         try:
             # Log User-Agent if debug enabled
@@ -71,6 +73,7 @@ class DataProcessor:
 
         Returns:
             Tuple of (parsed_servers, success_flag).
+
         """
         try:
             # Detect and get parser
@@ -133,6 +136,7 @@ class DataProcessor:
 
         Returns:
             Tuple of (validated_servers, success_flag).
+
         """
         try:
             debug_level = getattr(context, "debug_level", 0)

@@ -28,6 +28,7 @@ class SboxmgrTUI(App):
         SUB_TITLE: Application subtitle
         BINDINGS: Key bindings for the application
         state: The global TUI state
+
     """
 
     CSS_PATH = "tui.tcss"
@@ -49,6 +50,7 @@ class SboxmgrTUI(App):
             debug: Debug level (0-3)
             profile: Profile name to use
             **kwargs: Additional arguments passed to App
+
         """
         super().__init__(**kwargs)
         self.state = TUIState(debug=debug, profile=profile)
@@ -58,6 +60,7 @@ class SboxmgrTUI(App):
 
         Returns:
             Empty list - we'll install the initial screen in on_mount
+
         """
         # Empty compose - we'll install the initial screen in on_mount
         return []
@@ -105,6 +108,7 @@ class SboxmgrTUI(App):
 
         Args:
             event: The subscription added event
+
         """
         # Transition from welcome to main screen
         self.switch_screen(MainScreen(id="main"))

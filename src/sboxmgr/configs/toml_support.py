@@ -35,6 +35,7 @@ def load_config_from_toml(file_path: Union[str, Path]) -> UserConfig:
         FileNotFoundError: If file doesn't exist
         toml.TomlDecodeError: If TOML is invalid
         ValidationError: If config data is invalid
+
     """
     path = Path(file_path).expanduser().resolve()
 
@@ -70,6 +71,7 @@ def save_config_to_toml(config: UserConfig, file_path: Union[str, Path]) -> None
     Args:
         config: Configuration to save
         file_path: Path where to save the TOML file
+
     """
     path = Path(file_path).expanduser().resolve()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -105,6 +107,7 @@ def _create_toml_with_comments(config_dict: dict[str, Any]) -> str:
 
     Returns:
         str: TOML content with comments
+
     """
     lines = []
 
@@ -270,6 +273,7 @@ def convert_json_to_toml(
     Args:
         json_path: Path to JSON config file
         toml_path: Path where to save TOML file
+
     """
     json_path = Path(json_path).expanduser().resolve()
     toml_path = Path(toml_path).expanduser().resolve()
@@ -308,6 +312,7 @@ def detect_config_format(file_path: Union[str, Path]) -> str:
 
     Returns:
         str: Format name ('json', 'toml', 'unknown')
+
     """
     path = Path(file_path)
     suffix = path.suffix.lower()
@@ -331,6 +336,7 @@ def load_config_auto(file_path: Union[str, Path]) -> UserConfig:
 
     Raises:
         ValueError: If format is not supported
+
     """
     format_type = detect_config_format(file_path)
 

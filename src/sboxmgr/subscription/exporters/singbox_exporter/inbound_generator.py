@@ -18,6 +18,7 @@ def generate_inbounds(profile: ClientProfile) -> list[dict[str, Any]]:
         - Binds to localhost (127.0.0.1) by default.
         - Safe default ports, external bind only with explicit confirmation.
         - Validation through pydantic.
+
     """
     inbounds = []
 
@@ -46,6 +47,7 @@ def _get_inbound_tag(inbound) -> str:
 
     Returns:
         Inbound tag string.
+
     """
     if inbound.options and inbound.options.get("tag"):
         return inbound.options["tag"]
@@ -58,6 +60,7 @@ def _configure_tun_inbound(inb: dict[str, Any], inbound) -> None:
     Args:
         inb: Inbound configuration to modify.
         inbound: Source inbound object.
+
     """
     # Add all fields from options to root for TUN
     if inbound.options:
@@ -72,6 +75,7 @@ def _configure_regular_inbound(inb: dict[str, Any], inbound) -> None:
     Args:
         inb: Inbound configuration to modify.
         inbound: Source inbound object.
+
     """
     # Add listen and port fields
     if hasattr(inbound, "listen") and inbound.listen:

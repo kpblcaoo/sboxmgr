@@ -53,6 +53,7 @@ def convert_client_profile_to_inbounds(
 
     Returns:
         List of appropriate inbound model instances
+
     """
     inbounds = []
 
@@ -107,6 +108,7 @@ def _convert_single_inbound(
 
     Returns:
         Appropriate inbound model instance or None if conversion fails
+
     """
     try:
         # Convert InboundProfile to dict if needed

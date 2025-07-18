@@ -24,6 +24,7 @@ class EnrichmentTagNormalizer:
 
         Args:
             prefer_names: Whether to prefer human-readable names over technical IDs
+
         """
         self.prefer_names = prefer_names
 
@@ -38,6 +39,7 @@ class EnrichmentTagNormalizer:
 
         Returns:
             List of servers with normalized tags
+
         """
         for server in servers:
             server.tag = self._normalize_tag(server)
@@ -52,6 +54,7 @@ class EnrichmentTagNormalizer:
 
         Returns:
             Normalized tag string
+
         """
         # Priority 1: meta['name']
         if server.meta and server.meta.get("name"):
@@ -90,6 +93,7 @@ class EnrichmentTagNormalizer:
 
         Returns:
             Sanitized tag string
+
         """
         # Remove control characters and normalize whitespace
         import re

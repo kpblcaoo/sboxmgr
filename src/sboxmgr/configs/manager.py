@@ -412,6 +412,7 @@ class ConfigManager:
         Raises:
             FileNotFoundError: If file doesn't exist
             ValidationError: If config data is invalid
+
         """
         from .toml_support import load_config_auto
 
@@ -480,6 +481,7 @@ class ConfigManager:
 
         Returns:
             Path: Profiles directory path
+
         """
         return self.configs_dir
 
@@ -491,6 +493,7 @@ class ConfigManager:
 
         Returns:
             ValidationResult: Validation result
+
         """
         try:
             # Basic validation - UserConfig already validates on creation
@@ -504,6 +507,7 @@ class ConfigManager:
 
         Args:
             profile: Profile to set as active
+
         """
         self.set_active_config(profile)
 
@@ -512,5 +516,6 @@ class ConfigManager:
 
         Returns:
             List[ConfigInfo]: List of profile information
+
         """
         return self.list_configs()

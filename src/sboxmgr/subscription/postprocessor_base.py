@@ -56,6 +56,7 @@ class DedupPostProcessor(BasePostProcessor):
 
         Returns:
             List[ParsedServer]: Deduplicated server list.
+
         """
         seen = set()
         result = []
@@ -84,6 +85,7 @@ class PostProcessorChain(BasePostProcessor):
 
         Args:
             processors: List of postprocessor instances to chain.
+
         """
         self.processors = processors
 

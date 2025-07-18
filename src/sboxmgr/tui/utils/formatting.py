@@ -17,6 +17,7 @@ def format_server_info(server: ParsedServer) -> str:
 
     Returns:
         Formatted server information string
+
     """
     # Get normalized tag using middleware logic
     tag = _get_normalized_tag(server)
@@ -68,6 +69,7 @@ def _get_normalized_tag(server: ParsedServer) -> str:
 
     Returns:
         Normalized tag string
+
     """
     # Priority 1: meta['name'] (human-readable from source)
     if server.meta and server.meta.get("name"):
@@ -111,6 +113,7 @@ def format_subscription_info(
 
     Returns:
         Formatted subscription information string
+
     """
     # Truncate URL if too long
     display_url = url
@@ -136,6 +139,7 @@ def format_file_size(size_bytes: int) -> str:
 
     Returns:
         Formatted size string
+
     """
     if size_bytes == 0:
         return "0 B"
@@ -162,6 +166,7 @@ def format_duration(seconds: float) -> str:
 
     Returns:
         Formatted duration string
+
     """
     if seconds < 1:
         return f"{int(seconds * 1000)}ms"
@@ -187,6 +192,7 @@ def truncate_text(text: str, max_length: int = 50, suffix: str = "...") -> str:
 
     Returns:
         Truncated text
+
     """
     if len(text) <= max_length:
         return text

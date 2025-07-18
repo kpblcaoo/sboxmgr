@@ -40,6 +40,7 @@ class EnrichmentMiddleware(TransformMiddleware):
             'geo_database_path': '/path/to/geoip.db'
         })
         enriched_servers = middleware.process(servers, context, profile)
+
     """
 
     middleware_type = "enrichment"
@@ -49,6 +50,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         Args:
             config: Configuration dictionary for enrichment options
+
         """
         super().__init__(config)
 
@@ -92,6 +94,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         Returns:
             List of enriched servers
+
         """
         if not servers:
             return servers
@@ -133,6 +136,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         Returns:
             Dictionary with enrichment configuration
+
         """
         enrichment_config = {
             "enable_geo_enrichment": self.enable_geo_enrichment,
@@ -175,6 +179,7 @@ class EnrichmentMiddleware(TransformMiddleware):
 
         Returns:
             Enriched server
+
         """
         if not enrichment_config:
             enrichment_config = self._extract_enrichment_config(profile)

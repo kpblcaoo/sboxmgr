@@ -49,6 +49,7 @@ def generate_config_from_subscription(
 
     Raises:
         typer.Exit: On processing errors
+
     """
     # Create subscription source
     # Используем автоопределение как в list-servers, а не жесткое кодирование форматов
@@ -103,8 +104,8 @@ def generate_profile_from_cli(
 
     Raises:
         typer.Exit: If profile generation fails
-    """
 
+    """
     try:
         # Create basic profile structure
         profile_data: dict[str, Any] = {

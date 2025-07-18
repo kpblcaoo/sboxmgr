@@ -1,4 +1,8 @@
-# This is a template file - copy to your test directory and modify as needed
+"""Template for test fetcher plugin (for sboxmgr plugin system).
+
+This file provides a template for creating test fetcher plugins.
+"""
+
 import pytest
 
 from sboxmgr.subscription.fetchers.testfetcher import TestFetcher

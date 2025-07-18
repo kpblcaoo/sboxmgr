@@ -43,6 +43,7 @@ class URLFetcher(BaseFetcher):
 
         Args:
             source: Subscription source configuration.
+
         """
         super().__init__(source)  # SEC: centralized scheme validation
 

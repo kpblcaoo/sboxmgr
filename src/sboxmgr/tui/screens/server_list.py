@@ -126,6 +126,7 @@ class ServerListScreen(Screen):
 
         Args:
             **kwargs: Additional arguments passed to Screen
+
         """
         super().__init__(**kwargs)
         self._servers: list = []
@@ -136,6 +137,7 @@ class ServerListScreen(Screen):
 
         Returns:
             The composed result containing the server list widgets
+
         """
         yield Header()
 
@@ -181,6 +183,7 @@ class ServerListScreen(Screen):
 
         Returns:
             String with server statistics
+
         """
         if not self._servers:
             return "No servers loaded"
@@ -202,6 +205,7 @@ class ServerListScreen(Screen):
 
         Returns:
             List of server item widgets
+
         """
         items = []
         for i, server in enumerate(self._servers):
@@ -259,6 +263,7 @@ class ServerListScreen(Screen):
 
         Returns:
             Unique server identifier
+
         """
         # Handle dict objects
         if isinstance(server, dict):
@@ -286,6 +291,7 @@ class ServerListScreen(Screen):
 
         Returns:
             Formatted server information string
+
         """
         try:
             return format_server_info(server)
@@ -328,6 +334,7 @@ class ServerListScreen(Screen):
 
         Returns:
             Server statistics string or None
+
         """
         # This could be extended to show ping, speed, etc.
         # For now, just show basic info
@@ -347,6 +354,7 @@ class ServerListScreen(Screen):
 
         Args:
             event: The checkbox changed event
+
         """
         checkbox_id = event.checkbox.id
         if not checkbox_id or not checkbox_id.startswith("server_"):
@@ -376,6 +384,7 @@ class ServerListScreen(Screen):
         Args:
             server_index: Index of the server
             is_excluded: Whether the server is excluded
+
         """
         try:
             checkbox = self.query_one(f"#server_{server_index}", Checkbox)

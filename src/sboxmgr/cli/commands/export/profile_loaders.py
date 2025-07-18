@@ -28,8 +28,8 @@ def load_profile_from_file(profile_path: str) -> Optional["FullProfile"]:
 
     Raises:
         typer.Exit: If profile loading fails
-    """
 
+    """
     if not os.path.exists(profile_path):
         typer.echo(
             f"❌ {t('cli.error.profile_not_found').format(path=profile_path)}", err=True
@@ -73,6 +73,7 @@ def load_client_profile_from_file(
 
     Raises:
         typer.Exit: If client profile loading fails
+
     """
     if not os.path.exists(client_profile_path):
         typer.echo(f"❌ Client profile not found: {client_profile_path}", err=True)
@@ -110,6 +111,7 @@ def create_client_profile_from_profile(
 
     Returns:
         ClientProfile with inbounds configured from profile, or None if no profile
+
     """
     if not profile or not hasattr(profile, "export") or not profile.export:
         return None
@@ -261,6 +263,7 @@ def create_client_profile_from_user_config(user_config) -> Optional["ClientProfi
 
     Returns:
         ClientProfile with inbounds configured from user config, or None if no config
+
     """
     if not user_config or not hasattr(user_config, "export") or not user_config.export:
         return None
@@ -372,6 +375,7 @@ def load_profiles(
 
     Raises:
         typer.Exit: On loading failure
+
     """
     loaded_profile = None
     if profile:

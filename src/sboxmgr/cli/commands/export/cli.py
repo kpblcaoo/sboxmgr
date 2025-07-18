@@ -182,6 +182,7 @@ def export(
         user_agent: Custom User-Agent header
         no_user_agent: Disable User-Agent header
         profile: Profile JSON file for Phase 3 processing configuration
+        config: User configuration file to use (TOML/JSON)
         client_profile: Client profile JSON file for inbound configuration
         postprocessors: Comma-separated list of postprocessors (geo_filter,tag_filter,latency_sort)
         middleware: Comma-separated list of middleware (logging,enrichment)
@@ -204,6 +205,7 @@ def export(
 
     Raises:
         typer.Exit: On validation failure or processing errors
+
     """
     # Setup logging
     setup_logging(debug_level=debug)

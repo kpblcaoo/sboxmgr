@@ -40,8 +40,8 @@ def create_postprocessor_chain_from_list(
 
     Raises:
         typer.Exit: If invalid processor names found
-    """
 
+    """
     # Validate processor names
     validate_postprocessors(processors)
 
@@ -77,8 +77,8 @@ def create_middleware_chain_from_list(middleware: list[str]) -> list[Any]:
 
     Raises:
         typer.Exit: If invalid middleware names found
-    """
 
+    """
     # Validate middleware names
     validate_middleware(middleware)
 

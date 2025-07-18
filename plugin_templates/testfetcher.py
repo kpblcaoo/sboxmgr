@@ -1,3 +1,8 @@
+"""Test fetcher plugin for sboxmgr (template).
+
+This file provides a minimal example of a custom fetcher plugin.
+"""
+
 from ..base_fetcher import BaseFetcher
 from ..registry import register
 
@@ -14,6 +19,7 @@ class TestFetcher(BaseFetcher):
         source = SubscriptionSource(url="custom://example", source_type="custom_fetcher")
         fetcher = TestFetcher(source)
         data = fetcher.fetch()
+
     """
 
     def fetch(self, force_reload: bool = False) -> bytes:
@@ -27,5 +33,6 @@ class TestFetcher(BaseFetcher):
 
         Raises:
             NotImplementedError: This method must be implemented by subclasses.
+
         """
         raise NotImplementedError("Implement your custom fetch logic here")

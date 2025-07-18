@@ -18,6 +18,7 @@ class CustomEnricher:
 
         Args:
             custom_enrichers: List of custom enricher names to apply
+
         """
         self.custom_enrichers = custom_enrichers or []
 
@@ -38,6 +39,7 @@ class CustomEnricher:
 
         Returns:
             Server with custom enrichment applied
+
         """
         if not profile:
             return server
@@ -72,6 +74,7 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         # Find matching subscription
         if hasattr(profile, "subscriptions") and profile.subscriptions:
@@ -97,6 +100,7 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         priority_score = 0.5  # Base score
 
@@ -163,6 +167,7 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         compatibility: dict[str, Any] = {"compatible": True, "issues": []}
 
@@ -235,6 +240,7 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         if "geo" not in server.meta:
             return
@@ -267,6 +273,7 @@ class CustomEnricher:
             server: Server to enrich
             context: Pipeline context
             profile: Full profile configuration
+
         """
         usage_hints = []
 

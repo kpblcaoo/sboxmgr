@@ -287,7 +287,6 @@ class ExportManager:
             New ExportManager instance configured from profile.
 
         """
-
         # Configure PostProcessorChain from profile
         postprocessor_chain = None
         if hasattr(profile, "filter") and profile.filter:
@@ -364,7 +363,6 @@ class ExportManager:
             Configured PostProcessorChain or None.
 
         """
-
         from sboxmgr.subscription.postprocessors import (
             GeoFilterPostProcessor,
             LatencySortPostProcessor,
@@ -405,7 +403,6 @@ class ExportManager:
             List of configured middleware components.
 
         """
-
         middleware_chain = []
 
         # Add tag normalizer middleware (always enabled for consistent behavior)
@@ -486,7 +483,6 @@ class ExportManager:
             client_profile: Client profile with configuration
 
         """
-
         try:
             from sboxmgr.subscription.middleware import (
                 OutboundFilterMiddleware,
@@ -528,7 +524,6 @@ class ExportManager:
         TagNormalizer is always added to provide consistent server naming
         across different User-Agent types and parsers.
         """
-
         try:
             from sboxmgr.subscription.middleware import TagNormalizer
 

@@ -83,7 +83,7 @@ indent-width = 4
 target-version = "py39"
 
 [tool.ruff.lint]
-# Enable all critical checks
+# Enable all critical checks + Google-style docstrings
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
@@ -92,17 +92,19 @@ select = [
     "B",   # flake8-bugbear
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
+    "D",   # pydocstyle (Google-style by default)
 ]
 ignore = [
     "E501",  # line too long, handled by formatter
     "B008",  # do not perform function calls in argument defaults
     "B006",  # do not use mutable data structures for argument defaults
     "F403",  # wildcard imports (used for plugin registration)
-    # B904: raise exceptions with 'from' in except blocks (CLI patterns)
-    # Исключено, потому что большинство срабатываний связано с Typer CLI и raise typer.Exit(1),
-    # что является стандартной практикой для CLI-приложений и не несёт пользы для читаемости или надёжности.
-    # См. обсуждение в https://github.com/astral-sh/ruff/issues/10038 и https://github.com/tiangolo/typer/issues/570
-    "B904",
+    "B904",  # raise exceptions with 'from' in except blocks (CLI patterns)
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+    "D106",  # Missing docstring in public nested class (Pydantic Config)
+    "D107",  # Missing docstring in __init__
+    "D401",  # First line should be in imperative mood (стилистическое)
 ]
 
 [tool.ruff.format]

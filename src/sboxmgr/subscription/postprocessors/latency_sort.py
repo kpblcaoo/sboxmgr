@@ -335,7 +335,7 @@ class LatencySortPostProcessor(ChainablePostProcessor):
         context: Optional[PipelineContext] = None,
         profile: Optional[FullProfile] = None,
     ) -> None:
-        """Setup before latency measurements.
+        """Set up before latency measurements.
 
         Args:
             servers: List of servers to be processed

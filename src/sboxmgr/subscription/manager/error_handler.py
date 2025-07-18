@@ -37,6 +37,7 @@ class ErrorHandler:
 
         Returns:
             Formatted PipelineError object.
+
         """
         return PipelineError(
             type=error_type,
@@ -57,6 +58,7 @@ class ErrorHandler:
 
         Returns:
             Fetch error object.
+
         """
         return self.create_pipeline_error(
             ErrorType.FETCH, "fetch", message, context_data
@@ -74,6 +76,7 @@ class ErrorHandler:
 
         Returns:
             Validation error object.
+
         """
         return self.create_pipeline_error(
             ErrorType.VALIDATION, stage, message, context_data
@@ -90,6 +93,7 @@ class ErrorHandler:
 
         Returns:
             Parse error object.
+
         """
         return self.create_pipeline_error(
             ErrorType.PARSE, "parse", message, context_data
@@ -107,6 +111,7 @@ class ErrorHandler:
 
         Returns:
             Internal error object.
+
         """
         return self.create_pipeline_error(
             ErrorType.INTERNAL, stage, message, context_data
@@ -118,6 +123,7 @@ class ErrorHandler:
         Args:
             context: Pipeline context to add error to.
             error: Error to add.
+
         """
         if not hasattr(context, "metadata"):
             context.metadata = {}
@@ -134,6 +140,7 @@ class ErrorHandler:
 
         Returns:
             True if context has errors, False otherwise.
+
         """
         return (
             hasattr(context, "metadata")
@@ -149,6 +156,7 @@ class ErrorHandler:
 
         Returns:
             Number of errors in context.
+
         """
         if not self.has_errors(context):
             return 0

@@ -38,6 +38,7 @@ class FileFetcher(BaseFetcher):
 
         Args:
             source: Subscription source configuration.
+
         """
         super().__init__(source)
 

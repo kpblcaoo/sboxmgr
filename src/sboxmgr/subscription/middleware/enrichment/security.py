@@ -25,6 +25,7 @@ class SecurityEnricher:
 
         Returns:
             Server with security enrichment applied
+
         """
         security_info = {}
 
@@ -56,6 +57,7 @@ class SecurityEnricher:
 
         Returns:
             Encryption level ('strong', 'moderate', 'weak', 'none')
+
         """
         if hasattr(server, "security") and server.security:
             # Strong encryption
@@ -102,6 +104,7 @@ class SecurityEnricher:
 
         Returns:
             Port classification
+
         """
         # Well-known secure ports
         if port in [443, 8443]:
@@ -134,6 +137,7 @@ class SecurityEnricher:
 
         Returns:
             List of vulnerability descriptions
+
         """
         vulnerabilities = {
             "vmess": ["timing_attack_v1", "weak_uuid_generation", "aead_deprecation"],
@@ -157,6 +161,7 @@ class SecurityEnricher:
 
         Returns:
             Dictionary with recommended settings
+
         """
         recommendations = {}
         protocol = server.type.lower()

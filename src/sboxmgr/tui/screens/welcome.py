@@ -68,6 +68,7 @@ class WelcomeScreen(Screen):
 
             Args:
                 url: The URL of the added subscription
+
             """
             super().__init__()
             self.url = url
@@ -77,6 +78,7 @@ class WelcomeScreen(Screen):
 
         Returns:
             The composed result containing the welcome screen widgets
+
         """
         with Center():
             with Middle():
@@ -112,6 +114,7 @@ class WelcomeScreen(Screen):
         Args:
             result: True if subscription was added successfully,
                    False if cancelled, or error message string
+
         """
         if result is True:
             # Get the app state to check if we now have subscriptions

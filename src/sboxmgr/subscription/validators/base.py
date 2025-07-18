@@ -105,7 +105,7 @@ class NoOpRawValidator(BaseRawValidator):
     """
 
     def validate(self, raw: bytes, context: PipelineContext) -> ValidationResult:
-        """Always return successful validation.
+        """Return successful validation result.
 
         Args:
             raw: Raw subscription data (ignored).

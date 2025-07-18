@@ -41,6 +41,7 @@ def validate_flag_combinations(
 
     Raises:
         typer.Exit: If invalid flag combination detected
+
     """
     # Existing validations
     if dry_run and agent_check:
@@ -84,6 +85,7 @@ def validate_postprocessors(processors: list[str]) -> None:
 
     Raises:
         typer.Exit: If invalid postprocessor names found
+
     """
     if invalid := [x for x in processors if x not in ALLOWED_POSTPROCESSORS]:
         typer.echo(
@@ -105,6 +107,7 @@ def validate_middleware(middleware: list[str]) -> None:
 
     Raises:
         typer.Exit: If invalid middleware names found
+
     """
     if invalid := [x for x in middleware if x not in ALLOWED_MIDDLEWARE]:
         typer.echo(
@@ -126,6 +129,7 @@ def validate_final_route(final_route: str) -> None:
 
     Raises:
         typer.Exit: If final route is invalid
+
     """
     # Check if it's a valid predefined route
     if final_route in VALID_FINAL_ROUTES:
@@ -151,6 +155,7 @@ def validate_exclude_outbounds(exclude_outbounds: str) -> None:
 
     Raises:
         typer.Exit: If exclude outbounds contains invalid values
+
     """
     exclude_list = [o.strip() for o in exclude_outbounds.split(",") if o.strip()]
 
@@ -184,6 +189,7 @@ def validate_and_parse_cli_parameters(
 
     Raises:
         typer.Exit: On validation failure
+
     """
     postprocessors_list = None
     middleware_list = None
@@ -217,6 +223,7 @@ def validate_output_format(format_value: str) -> None:
 
     Raises:
         typer.Exit: If format is invalid
+
     """
     if format_value not in VALID_OUTPUT_FORMATS:
         typer.echo(f"❌ Invalid output format: {format_value}", err=True)
@@ -234,6 +241,7 @@ def validate_export_format(export_format: str) -> None:
 
     Raises:
         typer.Exit: If export format is invalid
+
     """
     if export_format not in VALID_EXPORT_FORMATS:
         typer.echo(f"❌ Invalid export format: {export_format}", err=True)

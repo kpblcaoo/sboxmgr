@@ -29,6 +29,7 @@ class BasicEnricher:
 
         Returns:
             Server with basic enrichment applied
+
         """
         # Add processing metadata
         server.meta["enriched_at"] = time.time()

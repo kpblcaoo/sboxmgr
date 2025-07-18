@@ -16,6 +16,7 @@ def export_wireguard(server: ParsedServer) -> Optional[dict[str, Any]]:
 
     Returns:
         Outbound configuration dict or None if incomplete.
+
     """
     required_fields = [
         server.address,
@@ -65,6 +66,7 @@ def export_hysteria2(server: ParsedServer) -> Optional[dict[str, Any]]:
 
     Returns:
         Outbound configuration dict or None if incomplete.
+
     """
     required_fields = [server.address, server.port, server.password]
 
@@ -95,6 +97,7 @@ def export_tuic(server: ParsedServer) -> Optional[dict[str, Any]]:
 
     Returns:
         Outbound configuration dict or None if incomplete.
+
     """
     required_fields = [server.address, server.port, server.uuid, server.password]
 
@@ -139,6 +142,7 @@ def export_shadowtls(server: ParsedServer) -> Optional[dict[str, Any]]:
 
     Returns:
         Outbound configuration dict or None if incomplete.
+
     """
     required_fields = [server.address, server.port, server.password, server.version]
 
@@ -176,6 +180,7 @@ def export_anytls(server: ParsedServer) -> Optional[dict[str, Any]]:
 
     Returns:
         Outbound configuration dict or None if incomplete.
+
     """
     required_fields = [server.address, server.port, server.uuid]
 
@@ -210,6 +215,7 @@ def export_tor(server: ParsedServer) -> Optional[dict[str, Any]]:
 
     Returns:
         Outbound configuration dict or None if incomplete.
+
     """
     required_fields = [server.address, server.port]
 
@@ -239,6 +245,7 @@ def export_ssh(server: ParsedServer) -> Optional[dict[str, Any]]:
 
     Returns:
         Outbound configuration dict or None if incomplete.
+
     """
     required_fields = [server.address, server.port, server.username]
 
@@ -278,6 +285,7 @@ def _get_server_tag(server: ParsedServer, protocol_type: str) -> str:
 
     Returns:
         Server tag string.
+
     """
     meta = getattr(server, "meta", {}) or {}
 
@@ -300,6 +308,7 @@ def get_protocol_dispatcher() -> dict[str, Callable]:
 
     Returns:
         Dictionary mapping protocol types to export functions.
+
     """
     return {
         "wireguard": export_wireguard,

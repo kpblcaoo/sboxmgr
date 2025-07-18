@@ -19,6 +19,7 @@ def create_base_outbound(server: ParsedServer, protocol_type: str) -> dict[str, 
 
     Returns:
         Base outbound configuration dictionary.
+
     """
     return {
         "type": protocol_type,
@@ -35,6 +36,7 @@ def normalize_protocol_type(server_type: str) -> str:
 
     Returns:
         Normalized protocol type.
+
     """
     return PROTOCOL_NORMALIZATION.get(server_type, server_type)
 
@@ -51,6 +53,7 @@ def process_shadowsocks_config(
 
     Returns:
         True if configuration is valid, False if server should be skipped.
+
     """
     method = meta.get("cipher") or meta.get("method") or server.security
     if not method:
@@ -80,6 +83,7 @@ def process_transport_config(outbound: dict[str, Any], meta: dict[str, Any]) -> 
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata to modify.
+
     """
     network = meta.pop("network", None)
     if network in ("ws", "grpc"):
@@ -102,6 +106,7 @@ def process_tls_config(
         outbound: Outbound configuration to modify.
         meta: Server metadata to modify.
         protocol_type: Protocol type for TLS handling.
+
     """
     if protocol_type in ("vless", "vmess", "trojan"):
         # These protocols handle TLS at transport level
@@ -133,6 +138,7 @@ def process_auth_and_flow_config(
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata to modify.
+
     """
     # UUID for authentication
     if meta.get("uuid"):
@@ -152,6 +158,7 @@ def process_tag_config(
         outbound: Outbound configuration to modify.
         server: Source server.
         meta: Server metadata.
+
     """
     # Priority: server.tag (normalized by middleware) > meta['name'] > generated tag
     if hasattr(server, "tag") and server.tag:
@@ -174,6 +181,7 @@ def process_additional_config(outbound: dict[str, Any], meta: dict[str, Any]) ->
     Args:
         outbound: Outbound configuration to modify.
         meta: Server metadata.
+
     """
     # Only include whitelisted fields
     for key, value in meta.items():
@@ -192,6 +200,7 @@ def process_standard_server(
 
     Returns:
         Outbound configuration or None if server should be skipped.
+
     """
     outbound = create_base_outbound(server, protocol_type)
     meta = dict(server.meta or {})
