@@ -1,7 +1,16 @@
-"""Subscription exclusions command module.
+"""Exclusions management commands for subscription CLI.
 
-This module provides the 'subscription exclusions' command group for managing
-server exclusions with subcommands for list, add, remove, and clear operations.
+This module provides the CLI interface for managing server exclusions
+within the subscription command group. It includes commands for listing,
+adding, removing, and clearing exclusions.
+
+Legacy exclusions_main command removed - functionality fully migrated to subcommands.
+All operations now available through individual commands:
+- sboxctl subscription exclusions list
+- sboxctl subscription exclusions add --servers 0,1,2
+- sboxctl subscription exclusions remove --servers 0,1,2
+- sboxctl subscription exclusions clear
+- sboxctl subscription exclusions list-servers
 """
 
 import json
@@ -278,15 +287,6 @@ def exclusions_clear(
 
     manager = ExclusionManager.default()
     exclusions_clear_logic(manager, json_output, global_yes)
-
-
-# Legacy exclusions_main command removed - functionality fully migrated to subcommands
-# All operations now available through individual commands:
-# - sboxctl subscription exclusions list
-# - sboxctl subscription exclusions add --servers 0,1,2
-# - sboxctl subscription exclusions remove --servers 0,1,2
-# - sboxctl subscription exclusions clear
-# - sboxctl subscription exclusions list-servers
 
 
 __all__ = ["app"]

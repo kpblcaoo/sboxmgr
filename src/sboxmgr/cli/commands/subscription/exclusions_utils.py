@@ -69,8 +69,8 @@ def validate_server_indices(
         raise typer.Exit(1) from None
 
 
-def ensure_server_cache(manager: ExclusionManager, json_output: bool) -> None:
-    """Ensure server cache is available.
+def require_server_cache(manager: ExclusionManager, json_output: bool) -> None:
+    """Require server cache to be available.
 
     Args:
         manager: Exclusion manager instance

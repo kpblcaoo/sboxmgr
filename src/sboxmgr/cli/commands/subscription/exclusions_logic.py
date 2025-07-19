@@ -10,11 +10,10 @@ import typer
 from rich.console import Console
 
 from sboxmgr.core.exclusions.manager import ExclusionManager
-from sboxmgr.utils.id import generate_server_id
 
 from .exclusions_utils import (
-    ensure_server_cache,
     parse_server_input,
+    require_server_cache,
     validate_server_indices,
 )
 
@@ -39,7 +38,7 @@ def _add_exclusions_by_indices(
         List of added server IDs
 
     """
-    ensure_server_cache(manager, json_output)
+    require_server_cache(manager, json_output)
 
     servers_data = manager._servers_cache["servers"]
     protocols = manager._servers_cache["supported_protocols"]
@@ -68,7 +67,7 @@ def _add_exclusions_by_patterns(
         List of added server IDs
 
     """
-    ensure_server_cache(manager, json_output)
+    require_server_cache(manager, json_output)
 
     servers_data = manager._servers_cache["servers"]
     protocols = manager._servers_cache["supported_protocols"]
@@ -92,7 +91,7 @@ def _remove_exclusions_by_indices(
         List of removed server IDs
 
     """
-    ensure_server_cache(manager, json_output)
+    require_server_cache(manager, json_output)
 
     servers_data = manager._servers_cache["servers"]
     protocols = manager._servers_cache["supported_protocols"]
@@ -312,6 +311,8 @@ def exclusions_list_servers_logic(
 ) -> None:
     """Internal logic for listing servers with exclusion status."""
     from rich.table import Table
+
+    from sboxmgr.utils.id import generate_server_id
 
     servers_info = manager.list_servers(show_excluded=show_excluded)
 

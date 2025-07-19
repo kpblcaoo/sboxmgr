@@ -503,5 +503,5 @@ class URIListParser(BaseParser):
                 type="vmess",
                 address="invalid",
                 port=0,
-                meta={"error": f"parse failed: {type(e).__name__}"},
+                meta={"error": f"parse failed: {type(e).__name__} - {str(e)}"},
             )
