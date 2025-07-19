@@ -39,7 +39,8 @@ def test_base64_subscription(tmp_path):
     print(f"Result config length: {len(result.config)}")
     if result.config:
         print(f"First server: {result.config[0]}")
-    assert result.success or result.errors  # либо успех, либо ошибки
+    # Проверяем что результат корректен (либо успех, либо есть ошибки)
+    assert result.success or len(result.errors) > 0
 
 
 # Пример edge-case подписок (минимальные заглушки)

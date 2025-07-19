@@ -92,6 +92,7 @@ def is_external_import(module: str) -> bool:
         "conftest",
         "export",
         "utils",
+        "configs",
     }
     if module in internal_modules:
         return False
