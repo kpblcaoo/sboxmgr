@@ -75,15 +75,6 @@ def _format_policy_details(context: PipelineContext, server_tag: str) -> str:
     return " | ".join(details) if details else "✅ ALLOWED"
 
 
-# Create the list command app
-app = typer.Typer(
-    help=t("cli.subscription.list.help"),
-    name="list",
-    add_completion=False,
-)
-
-
-@app.command()
 def list_servers(
     url: str = typer.Option(
         ...,
@@ -199,132 +190,141 @@ def list_servers(
                 # Показываем исправления валидации
                 validation_fixes = context.metadata.get("validation_fixes", [])
                 if validation_fixes:
-                    typer.echo("\n🔧 Validation Fixes Applied:")
-                    for fix in validation_fixes:
-                        severity_icon = "ℹ️" if fix["severity"] == "info" else "⚠️"
-                        typer.echo(
-                            f"   {severity_icon} Server {fix['server_identifier']}: {fix['description']}"
-                        )
+                    typer.echo(f"   Validation fixes applied: {len(validation_fixes)}")
 
-                # Выводим причины блокировки по каждому серверу
-                typer.echo(
-                    "\n❌ Сервера заблокированы политиками. Причины по каждому серверу:"
-                )
-                # Собираем уникальные server_id
-                all_servers = set(
-                    [v["server"] for v in violations]
-                    + [w["server"] for w in warnings]
-                    + [i["server"] for i in info_results]
-                )
-                for server_id in all_servers:
-                    typer.echo(f"\nServer: {server_id}")
-                    vlist = [v for v in violations if v["server"] == server_id]
-                    wlist = [w for w in warnings if w["server"] == server_id]
-                    ilist = [i for i in info_results if i["server"] == server_id]
-                    if vlist:
-                        for v in vlist:
-                            typer.echo(f"  ❌ DENIED by {v['policy']}: {v['reason']}")
-                    if wlist:
-                        for w in wlist:
-                            typer.echo(f"  ⚠️ WARNING by {w['policy']}: {w['reason']}")
-                    if ilist:
-                        for i in ilist:
-                            typer.echo(f"  ℹ️ INFO by {i['policy']}: {i['reason']}")
-
-                # Если нет валидной конфигурации из-за политик, завершаем с кодом 2
-                if not config.config or not isinstance(config.config, dict):
-                    raise typer.Exit(2)
-
-        if not config.config or not isinstance(config.config, dict):
-            typer.echo("[Error] No valid config generated from subscription.", err=True)
+        if not config.success:
+            typer.echo("❌ Failed to export subscription.")
+            if config.errors:
+                for error in config.errors:
+                    typer.echo(f"   Error: {error}")
             raise typer.Exit(1)
 
-        # Получаем все outbounds и фильтруем служебные
-        all_outbounds = config.config.get("outbounds", [])
-        servers = [s for s in all_outbounds if not _is_service_outbound(s)]
+        if not config.config or "outbounds" not in config.config:
+            typer.echo("❌ No valid config generated from subscription.")
+            raise typer.Exit(1)
 
-        # JSON output
+        outbounds = config.config["outbounds"]
+        if not outbounds:
+            typer.echo("📡 No servers found in subscription.")
+            return
+
+        # Фильтруем служебные outbounds
+        servers = [
+            outbound for outbound in outbounds if not _is_service_outbound(outbound)
+        ]
+
+        if not servers:
+            typer.echo("📡 No user servers found (only service outbounds).")
+            return
+
         if output_format == "json":
-            import json
-
+            # JSON output
             server_data = []
-            for i, s in enumerate(servers):
-                server_tag = s.get("tag", s.get("server", ""))
+            for i, server in enumerate(servers):
                 server_info = {
                     "index": i,
-                    "tag": server_tag,
-                    "type": s.get("type", ""),
-                    "server": s.get("server", ""),
-                    "port": s.get("server_port", ""),
+                    "tag": server.get("tag", "N/A"),
+                    "type": server.get("type", "N/A"),
                 }
 
+                # Add protocol-specific details
+                if server.get("type") == "shadowsocks":
+                    server_info.update(
+                        {
+                            "server": server.get("server", "N/A"),
+                            "server_port": server.get("server_port", "N/A"),
+                            "method": server.get("method", "N/A"),
+                        }
+                    )
+                elif server.get("type") == "vmess":
+                    server_info.update(
+                        {
+                            "server": server.get("server", "N/A"),
+                            "server_port": server.get("server_port", "N/A"),
+                            "uuid": server.get("uuid", "N/A"),
+                            "security": server.get("security", "N/A"),
+                        }
+                    )
+                elif server.get("type") == "vless":
+                    server_info.update(
+                        {
+                            "server": server.get("server", "N/A"),
+                            "server_port": server.get("server_port", "N/A"),
+                            "uuid": server.get("uuid", "N/A"),
+                            "encryption": server.get("encryption", "N/A"),
+                        }
+                    )
+                elif server.get("type") == "trojan":
+                    server_info.update(
+                        {
+                            "server": server.get("server", "N/A"),
+                            "server_port": server.get("server_port", "N/A"),
+                            "password": server.get("password", "N/A"),
+                        }
+                    )
+                else:
+                    # Generic fallback
+                    server_info.update(
+                        {
+                            "server": server.get("server", "N/A"),
+                            "server_port": server.get("server_port", "N/A"),
+                        }
+                    )
+
+                # Add policy details if requested
                 if policy_details:
-                    policy_info = _format_policy_details(context, server_tag)
-                    server_info["policy_status"] = policy_info
+                    server_info["policy_status"] = _format_policy_details(
+                        context, server.get("tag", "")
+                    )
 
                 server_data.append(server_info)
 
-            result = {
-                "total_servers": len(servers),
-                "servers": server_data,
-            }
+            import json
+
+            print(
+                json.dumps(
+                    {"servers": server_data, "total": len(server_data)}, indent=2
+                )
+            )
+        else:
+            # Table output
+            from rich.console import Console
+            from rich.table import Table
+
+            console = Console()
+
+            table = Table(title=f"📡 Available Servers ({len(servers)})")
+            table.add_column("Index", style="cyan", justify="right")
+            table.add_column("Tag", style="white")
+            table.add_column("Type", style="blue")
+            table.add_column("Server:Port", style="green")
 
             if policy_details:
-                violations = context.metadata.get("policy_violations", [])
-                warnings = context.metadata.get("policy_warnings", [])
-                result["policy_summary"] = {
-                    "servers_denied": len({v["server"] for v in violations}),
-                    "servers_with_warnings": len({w["server"] for w in warnings}),
-                    "total_violations": len(violations),
-                    "total_warnings": len(warnings),
-                }
+                table.add_column("Policy Status", style="yellow")
 
-            typer.echo(json.dumps(result, indent=2))
-            return
+            for i, server in enumerate(servers):
+                server_tag = server.get("tag", "N/A")
+                server_type = server.get("type", "N/A")
+                server_addr = (
+                    f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}"
+                )
 
-        # Выводим статистику политик если включены детали и есть сервера
-        if policy_details and servers:
-            violations = context.metadata.get("policy_violations", [])
-            warnings = context.metadata.get("policy_warnings", [])
-            info_results = context.metadata.get("policy_info", [])
-
-            typer.echo("\n📊 Policy Evaluation Summary:")
-            typer.echo(f"   Total servers processed: {len(servers)}")
-            typer.echo(f"   Servers denied: {len({v['server'] for v in violations})}")
-            typer.echo(
-                f"   Servers with warnings: {len({w['server'] for w in warnings})}"
-            )
-            typer.echo(f"   Total policy violations: {len(violations)}")
-            typer.echo(f"   Total policy warnings: {len(warnings)}")
-
-            # Показываем исправления валидации
-            validation_fixes = context.metadata.get("validation_fixes", [])
-            if validation_fixes:
-                typer.echo("\n🔧 Validation Fixes Applied:")
-                for fix in validation_fixes:
-                    severity_icon = "ℹ️" if fix["severity"] == "info" else "⚠️"
-                    typer.echo(
-                        f"   {severity_icon} Server {fix['server_identifier']}: {fix['description']}"
+                if policy_details:
+                    policy_status = _format_policy_details(context, server_tag)
+                    table.add_row(
+                        str(i), server_tag, server_type, server_addr, policy_status
                     )
-            typer.echo()
+                else:
+                    table.add_row(str(i), server_tag, server_type, server_addr)
 
-        for i, s in enumerate(servers):
-            server_tag = s.get("tag", s.get("server", ""))
-            server_info = (
-                f"[{i}] {server_tag} ({s.get('type', '')}:{s.get('server_port', '')})"
-            )
-
-            if policy_details:
-                policy_info = _format_policy_details(context, server_tag)
-                typer.echo(f"{server_info}")
-                if policy_info != "✅ ALLOWED":
-                    typer.echo(f"    {policy_info}")
-            else:
-                typer.echo(server_info)
+            console.print(table)
 
     except Exception as e:
-        typer.echo(f"❌ {t('cli.error.subscription_export_failed')}: {e}", err=True)
-        raise typer.Exit(1) from e
+        if verbose:
+            typer.echo(f"❌ Error: {e}")
+        else:
+            typer.echo("❌ Failed to list servers from subscription.")
+        raise typer.Exit(1)
 
 
-__all__ = ["app", "list_servers"]
+__all__ = ["list_servers"]
