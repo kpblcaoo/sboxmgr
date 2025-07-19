@@ -220,7 +220,7 @@ def test_base64_subscription_sfi_format():
 
         # Проверяем, что есть серверы (может быть shadowsocks или другие типы)
         types = {s.type for s in result.config}
-        assert len(types) > 0, f"Expected at least one protocol type, got: {types}"
+        assert types, f"Expected at least one protocol type, got: {types}"
 
         # Тестируем новый валидатор
         validator = EnhancedRequiredFieldsValidator()

@@ -30,6 +30,7 @@ from .exclusions_logic import (
     exclusions_list_servers_logic,
     exclusions_remove_logic,
 )
+from .exclusions_utils import validate_subscription_url
 
 console = Console()
 
@@ -194,9 +195,7 @@ def exclusions_add(
     verbose = _get_context_value(ctx, "verbose", False)
 
     # Validate URL
-    if not url:
-        typer.echo("❌ Error: Subscription URL is required (use -u/--url)", err=True)
-        raise typer.Exit(1)
+    validate_subscription_url(url, json_output)
 
     manager = ExclusionManager.default()
 
@@ -229,9 +228,7 @@ def exclusions_remove(
     verbose = _get_context_value(ctx, "verbose", False)
 
     # Validate URL
-    if not url:
-        typer.echo("❌ Error: Subscription URL is required (use -u/--url)", err=True)
-        raise typer.Exit(1)
+    validate_subscription_url(url, json_output)
 
     if verbose:
         typer.echo("➖ Removing exclusions...")
@@ -265,9 +262,7 @@ def exclusions_list_servers(
     verbose = _get_context_value(ctx, "verbose", False)
 
     # Validate URL
-    if not url:
-        typer.echo("❌ Error: Subscription URL is required (use -u/--url)", err=True)
-        raise typer.Exit(1)
+    validate_subscription_url(url, json_output)
 
     if verbose:
         typer.echo("📡 Listing servers...")

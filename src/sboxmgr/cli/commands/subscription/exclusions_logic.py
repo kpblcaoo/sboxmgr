@@ -38,7 +38,13 @@ def _add_exclusions_by_indices(
         List of added server IDs
 
     """
-    require_server_cache(manager, json_output)
+    error = require_server_cache(manager)
+    if error:
+        if json_output:
+            print(json.dumps({"error": error}))
+        else:
+            console.print(f"[red]❌ {error}[/red]")
+        raise typer.Exit(1) from None
 
     servers_data = manager._servers_cache["servers"]
     protocols = manager._servers_cache["supported_protocols"]
@@ -67,7 +73,13 @@ def _add_exclusions_by_patterns(
         List of added server IDs
 
     """
-    require_server_cache(manager, json_output)
+    error = require_server_cache(manager)
+    if error:
+        if json_output:
+            print(json.dumps({"error": error}))
+        else:
+            console.print(f"[red]❌ {error}[/red]")
+        raise typer.Exit(1) from None
 
     servers_data = manager._servers_cache["servers"]
     protocols = manager._servers_cache["supported_protocols"]
@@ -91,7 +103,13 @@ def _remove_exclusions_by_indices(
         List of removed server IDs
 
     """
-    require_server_cache(manager, json_output)
+    error = require_server_cache(manager)
+    if error:
+        if json_output:
+            print(json.dumps({"error": error}))
+        else:
+            console.print(f"[red]❌ {error}[/red]")
+        raise typer.Exit(1) from None
 
     servers_data = manager._servers_cache["servers"]
     protocols = manager._servers_cache["supported_protocols"]

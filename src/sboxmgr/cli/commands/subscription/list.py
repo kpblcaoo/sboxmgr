@@ -87,7 +87,7 @@ def list_servers(
     user_agent: str = typer.Option(
         DEFAULT_USER_AGENT,
         "--user-agent",
-        help="Override User-Agent for subscription fetcher. If not provided, the default 'ClashMeta/1.0' will be used.",
+        help="Override User-Agent for subscription fetcher. If not provided, the default defined by DEFAULT_USER_AGENT will be used.",
     ),
     no_user_agent: bool = typer.Option(
         False, "--no-user-agent", help="Do not send User-Agent header at all"

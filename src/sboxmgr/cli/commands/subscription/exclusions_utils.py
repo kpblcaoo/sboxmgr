@@ -38,9 +38,29 @@ def parse_server_input(servers: str) -> tuple[list[int], list[str]]:
     return indices, patterns
 
 
+def validate_subscription_url(url: str, json_output: bool) -> None:
+    """Validate that subscription URL is provided.
+
+    Args:
+        url: Subscription URL to validate
+        json_output: Whether to output errors in JSON format
+
+    Raises:
+        typer.Exit: If URL is not provided
+
+    """
+    if not url:
+        error_msg = "Subscription URL is required (use -u/--url)"
+        if json_output:
+            print(json.dumps({"error": error_msg}))
+        else:
+            console.print(f"[red]❌ {error_msg}[/red]")
+        raise typer.Exit(1) from None
+
+
 def validate_server_indices(
     indices: list[int], supported_servers: list, json_output: bool
-) -> None:
+) -> list[str]:
     """Validate server indices against available servers.
 
     Args:
@@ -48,8 +68,8 @@ def validate_server_indices(
         supported_servers: List of available servers
         json_output: Whether to output errors in JSON format
 
-    Raises:
-        typer.Exit: If validation fails
+    Returns:
+        List of validation errors (empty if all valid)
 
     """
     errors = []
@@ -68,22 +88,19 @@ def validate_server_indices(
                 console.print(f"[red]❌ {error}[/red]")
         raise typer.Exit(1) from None
 
+    return errors
 
-def require_server_cache(manager: ExclusionManager, json_output: bool) -> None:
+
+def require_server_cache(manager: ExclusionManager) -> str | None:
     """Require server cache to be available.
 
     Args:
         manager: Exclusion manager instance
-        json_output: Whether to output errors in JSON format
 
-    Raises:
-        typer.Exit: If cache is not available
+    Returns:
+        Error message if cache is not available, None if available
 
     """
     if not manager.has_servers_cache():
-        error_msg = "Server cache not available"
-        if json_output:
-            print(json.dumps({"error": error_msg}))
-        else:
-            console.print(f"[red]❌ {error_msg}[/red]")
-        raise typer.Exit(1) from None
+        return "Server cache not available"
+    return None

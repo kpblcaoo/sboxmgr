@@ -34,7 +34,7 @@ def list_servers(
     ),
     debug: int = typer.Option(0, "-d", "--debug", help="Debug verbosity level (0-2)"),
     user_agent: str = typer.Option(
-        None,
+        "ClashMeta/1.0",
         "--user-agent",
         help="Override User-Agent for subscription fetcher (default: ClashMeta/1.0)",
     ),
