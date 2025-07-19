@@ -14,6 +14,7 @@ import re
 from typing import Optional
 from urllib.parse import parse_qs, unquote, urlparse
 
+from sboxmgr.utils.base64_utils import handle_base64_padding
 from sboxmgr.utils.env import get_debug_level
 
 from ..base_parser import BaseParser
@@ -210,10 +211,7 @@ class URIListParser(BaseParser):
             Properly padded base64 string
 
         """
-        padding_needed = len(b64_string) % 4
-        if padding_needed:
-            return b64_string + "=" * (4 - padding_needed)
-        return b64_string
+        return handle_base64_padding(b64_string)
 
     def _extract_ss_components(self, uri: str, line: str) -> tuple[str, str]:
         """Extract method:password and host:port components from SS URI.
@@ -447,47 +445,91 @@ class URIListParser(BaseParser):
             logger.warning(f"Failed to parse vless URI: {str(e)}")
             return None
 
+    def _decode_vmess_base64(self, b64: str) -> tuple[bytes, str]:
+        """Decode base64 part of vmess URI.
+
+        Args:
+            b64: Base64 string from vmess URI
+
+        Returns:
+            Tuple of (decoded_bytes, error_message)
+
+        """
+        try:
+            b64_padded = self._handle_base64_padding(b64)
+            decoded_bytes = base64.urlsafe_b64decode(b64_padded)
+            return decoded_bytes, ""
+        except Exception as e:
+            return b"", f"base64 decode failed: {type(e).__name__}"
+
+    def _decode_vmess_utf8(self, decoded_bytes: bytes) -> tuple[str, str]:
+        """Decode vmess bytes as UTF-8.
+
+        Args:
+            decoded_bytes: Raw bytes from base64 decode
+
+        Returns:
+            Tuple of (decoded_string, error_message)
+
+        """
+        try:
+            decoded = decoded_bytes.decode("utf-8")
+            return decoded, ""
+        except UnicodeDecodeError as e:
+            return "", f"utf-8 decode failed: {str(e)}"
+
+    def _parse_vmess_json(self, decoded: str) -> tuple[dict, str]:
+        """Parse vmess JSON configuration.
+
+        Args:
+            decoded: UTF-8 decoded string from vmess URI
+
+        Returns:
+            Tuple of (parsed_data, error_message)
+
+        """
+        try:
+            data = json.loads(decoded)
+            return data, ""
+        except json.JSONDecodeError as e:
+            return {}, f"json parse failed: {str(e)}"
+
     def _parse_vmess(self, line: str) -> Optional[ParsedServer]:
         """Parse vmess URI with enhanced error handling."""
         try:
             b64 = line[8:]
-            # Handle padding issues using helper method
-            b64_padded = self._handle_base64_padding(b64)
 
-            # Try to decode base64
-            try:
-                decoded_bytes = base64.urlsafe_b64decode(b64_padded)
-            except Exception as e:
-                logger.warning(f"Failed to decode base64 in vmess URI: {str(e)}")
+            # Step 1: Decode base64
+            decoded_bytes, base64_error = self._decode_vmess_base64(b64)
+            if base64_error:
+                logger.warning(f"Failed to decode base64 in vmess URI: {base64_error}")
                 return ParsedServer(
                     type="vmess",
                     address="invalid",
                     port=0,
-                    meta={"error": f"base64 decode failed: {type(e).__name__}"},
+                    meta={"error": base64_error},
                 )
 
-            # Try to decode as UTF-8
-            try:
-                decoded = decoded_bytes.decode("utf-8")
-            except UnicodeDecodeError as e:
-                logger.warning(f"Failed to decode vmess URI as UTF-8: {str(e)}")
+            # Step 2: Decode as UTF-8
+            decoded, utf8_error = self._decode_vmess_utf8(decoded_bytes)
+            if utf8_error:
+                logger.warning(f"Failed to decode vmess URI as UTF-8: {utf8_error}")
                 return ParsedServer(
                     type="vmess",
                     address="invalid",
                     port=0,
-                    meta={"error": f"utf-8 decode failed: {str(e)}"},
+                    meta={"error": utf8_error},
                 )
 
-            # Try to parse JSON
-            try:
-                data = json.loads(decoded)
-            except json.JSONDecodeError as e:
-                logger.warning(f"Failed to parse vmess URI JSON: {str(e)}")
+            # Step 3: Parse JSON
+            data, json_error = self._parse_vmess_json(decoded)
+            if json_error:
+                logger.warning(f"Failed to parse vmess URI JSON: {json_error}")
                 return ParsedServer(
                     type="vmess",
                     address="invalid",
                     port=0,
-                    meta={"error": f"json parse failed: {str(e)}"},
+                    meta={"error": json_error},
                 )
 
             return ParsedServer(

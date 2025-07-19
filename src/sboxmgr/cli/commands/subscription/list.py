@@ -84,7 +84,7 @@ def list_servers(
         envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
     ),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
-    user_agent: Optional[str] = typer.Option(
+    user_agent: str = typer.Option(
         DEFAULT_USER_AGENT,
         "--user-agent",
         help="Override User-Agent for subscription fetcher. If not provided, the default 'ClashMeta/1.0' will be used.",

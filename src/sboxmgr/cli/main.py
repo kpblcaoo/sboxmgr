@@ -258,6 +258,11 @@ def list_servers_alias(
         "--policy-details",
         help="Show policy evaluation details for each server",
     ),
+    output_format: str = typer.Option(
+        "table",
+        "--output-format",
+        help="Output format: table, json",
+    ),
     ctx: typer.Context = None,
 ):
     """Alias for sboxctl subscription list (deprecated)."""
@@ -270,6 +275,7 @@ def list_servers_alias(
         no_user_agent=no_user_agent,
         format=format,
         policy_details=policy_details,
+        output_format=output_format,
         ctx=ctx,
     )
 
