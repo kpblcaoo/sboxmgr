@@ -16,6 +16,7 @@ from sboxmgr.config.fetch import fetch_json
 from sboxmgr.constants import SUPPORTED_PROTOCOLS
 from sboxmgr.core.exclusions import ExclusionManager
 from sboxmgr.i18n.t import t
+from sboxmgr.utils.id import generate_server_id
 
 console = Console()
 
@@ -610,8 +611,7 @@ def exclusions_main(
                     "servers": [
                         {
                             "index": idx,
-                            "id": server.get("id")
-                            or f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}",
+                            "id": generate_server_id(server),
                             "tag": server.get("tag", "N/A"),
                             "type": server.get("type", "N/A"),
                             "server": server.get("server", "N/A"),

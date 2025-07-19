@@ -49,7 +49,7 @@ def test_export_dry_run_success(runner):
     assert result.exit_code == 1
 
     # Should contain dry-run related messages
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert _contains_any(
         output, ["dry-run", "dry run", "ignored in --dry-run mode", "validation"]
     )
@@ -64,7 +64,7 @@ def test_export_agent_check_success(runner):
     assert result.exit_code == 1
 
     # Should contain agent-related messages
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert _contains_any(output, ["agent-check", "agent", "validation"])
 
 
@@ -115,7 +115,7 @@ def test_export_with_postprocessors_success(runner):
     assert result.exit_code == 1
 
     # Should not error on valid postprocessor names
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert not _contains_any(
         output,
         [
@@ -137,7 +137,7 @@ def test_export_with_invalid_postprocessors_error(runner):
     assert result.exit_code == 1
 
     # Should show error message
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert _contains_any(
         output,
         [
@@ -160,7 +160,7 @@ def test_export_with_middleware_success(runner):
     assert result.exit_code == 1
 
     # Should not error on valid middleware names
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert not _contains_any(
         output, ["Unknown middleware", "Неизвестное middleware", "invalid middleware"]
     )
@@ -176,7 +176,7 @@ def test_export_with_invalid_middleware_error(runner):
     assert result.exit_code == 1
 
     # Should show error message
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert _contains_any(
         output,
         ["Unknown middleware", "Неизвестное middleware", "middleware", "invalid"],
@@ -208,7 +208,7 @@ def test_export_with_config_success(runner, sample_profile):
         assert result.exit_code == 1
 
         # Should not error on valid config file
-        output = result.stdout
+        output = result.stdout + result.stderr
         assert not _contains_any(
             output,
             ["config file not found", "файл конфига не найден", "invalid config"],
@@ -227,7 +227,7 @@ def test_export_with_invalid_config_error(runner):
     assert result.exit_code == 1
 
     # Should show error message
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert _contains_any(
         output,
         [
@@ -286,7 +286,7 @@ def test_export_flag_combinations_error(runner):
     assert result.exit_code == 1
 
     # Should show validation error
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert _contains_any(
         output, ["cannot be used with", "mutually exclusive", "conflict", "error"]
     )
@@ -322,7 +322,7 @@ def test_export_with_inbound_types_success(runner):
     assert result.exit_code == 1
 
     # Should not error on valid inbound types (should fail on URL, not inbound validation)
-    output = result.stdout
+    output = result.stdout + result.stderr
     # Check that error is about subscription, not inbound validation
     assert (
         "subscription" in output.lower()
@@ -351,7 +351,7 @@ def test_export_with_inbound_parameters_success(runner):
     assert result.exit_code == 1
 
     # Should not error on valid parameters (should fail on URL, not parameter validation)
-    output = result.stdout
+    output = result.stdout + result.stderr
     # Check that error is about subscription, not parameter validation
     assert (
         "subscription" in output.lower()
