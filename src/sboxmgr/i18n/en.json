@@ -13,11 +13,7 @@
   "cli.dry_run.help": "Validate config and print result (no changes).",
   "cli.config_file.help": "Path to config.json (overrides env)",
   "cli.backup_file.help": "Path to config.json.bak (overrides env)",
-  "cli.add.help": "Add exclusions (comma-separated indices or names)",
-  "cli.remove.help": "Remove exclusions (comma-separated indices or names)",
-  "cli.view.help": "View current exclusions",
   "cli.list_servers.help": "List all available servers from config.",
-  "cli.clear_exclusions.help": "Clear all exclusions.",
   "cli.clear_exclusions.confirm": "Are you sure you want to clear ALL exclusions?",
   "cli.clear_exclusions.success": "Cleared {count} exclusions.",
   "cli.lang.help": "Manage CLI language (i18n): show current, list available, set and persist language.",
@@ -30,7 +26,6 @@
   "cli.subscription_format_hint": "The subscription might not be in the expected format",
   "error.invalid_server_format": "Invalid server data format",
   "error.subscription_fetch_failed": "Failed to fetch subscription data",
-  "cli.interactive.help": "Interactive server selection",
   "cli.json.help": "Output in JSON format",
   "cli.reason.help": "Reason for exclusion",
   "cli.show_excluded.help": "Show excluded servers in list",
@@ -49,7 +44,6 @@
   "cli.error.subscription_processing_failed": "cli.error.subscription_processing_failed",
   "cli.error.config_save_failed": "Failed to save configuration file.",
   "cli.deprecated.list_servers": "⚠️  Warning: 'list-servers' is deprecated, use 'subscription list'",
-  "cli.deprecated.exclusions": "⚠️  Warning: 'exclusions' is deprecated, use 'subscription exclusions'",
   "cli.subscription.help": "Manage subscriptions and servers",
   "cli.subscription.exclusions.help": "Manage server exclusions"
 }
