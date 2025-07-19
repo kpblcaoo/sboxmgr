@@ -28,6 +28,32 @@ app = typer.Typer(
 )
 
 
+@app.callback()
+def exclusions_callback(
+    url: str = typer.Option(
+        None,
+        "-u",
+        "--url",
+        help=t("cli.url.help"),
+        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
+    ),
+    debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompts"),
+    ctx: typer.Context = None,
+):
+    """Common options for exclusions commands.
+
+    These options are available to all exclusions subcommands.
+    """
+    if ctx is not None:
+        # Store common options in context for subcommands to access
+        if ctx.obj is None:
+            ctx.obj = {}
+        ctx.obj["exclusions_url"] = url
+        ctx.obj["exclusions_debug"] = debug
+        ctx.obj["exclusions_yes"] = yes
+
+
 def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
     """Fetch and validate subscription data from URL.
 
@@ -100,7 +126,10 @@ def exclusions_list(
     json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
     ctx: typer.Context = None,
 ):
-    """List current exclusions."""
+    """List current exclusions.
+
+    Shows all currently excluded servers with their details.
+    """
     # Get global flags from context
     verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
 
@@ -381,19 +410,26 @@ def exclusions_add(
         ..., "--servers", help="Server indices or names to exclude"
     ),
     reason: str = typer.Option("CLI operation", "--reason", help=t("cli.reason.help")),
-    url: str = typer.Option(
-        ...,
-        "-u",
-        "--url",
-        help=t("cli.url.help"),
-        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
-    ),
     json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
     ctx: typer.Context = None,
 ):
-    """Add servers to exclusions."""
-    # Get global flags from context
+    """Add servers to exclusions.
+
+    Exclude servers by index or wildcard pattern.
+
+    Examples:
+    - sboxctl subscription exclusions add --servers 0,1,2 --reason "slow servers"
+    - sboxctl subscription exclusions add --servers "US*" --reason "US servers"
+
+    """
+    # Get common options from context
+    url = ctx.obj.get("exclusions_url") if ctx is not None and ctx.obj else None
     verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
+
+    # Validate URL
+    if not url:
+        typer.echo("❌ Error: Subscription URL is required (use -u/--url)", err=True)
+        raise typer.Exit(1)
 
     manager = ExclusionManager.default()
 
@@ -409,19 +445,26 @@ def exclusions_remove(
     servers: str = typer.Option(
         ..., "--servers", help="Server indices or names to remove from exclusions"
     ),
-    url: str = typer.Option(
-        ...,
-        "-u",
-        "--url",
-        help=t("cli.url.help"),
-        envvar=["SBOXMGR_URL", "SINGBOX_URL", "TEST_URL"],
-    ),
     json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
     ctx: typer.Context = None,
 ):
-    """Remove servers from exclusions."""
-    # Get global flags from context
+    """Remove servers from exclusions.
+
+    Remove servers from exclusions by index or server ID.
+
+    Examples:
+    - sboxctl subscription exclusions remove --servers 0,1,2
+    - sboxctl subscription exclusions remove --servers "server-id-123"
+
+    """
+    # Get common options from context
+    url = ctx.obj.get("exclusions_url") if ctx is not None and ctx.obj else None
     verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
+
+    # Validate URL
+    if not url:
+        typer.echo("❌ Error: Subscription URL is required (use -u/--url)", err=True)
+        raise typer.Exit(1)
 
     if verbose:
         typer.echo("➖ Removing exclusions...")
@@ -437,12 +480,96 @@ def exclusions_remove(
     _exclusions_remove_logic(manager, servers, json_output, verbose)
 
 
+@app.command("list-servers")
+def exclusions_list_servers(
+    json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
+    show_excluded: bool = typer.Option(
+        True, "--show-excluded/--hide-excluded", help=t("cli.show_excluded.help")
+    ),
+    ctx: typer.Context = None,
+):
+    """List all available servers with their exclusion status.
+
+    Shows all servers from the subscription with their current exclusion status.
+    Use --hide-excluded to show only available servers.
+    """
+    # Get common options from context
+    url = ctx.obj.get("exclusions_url") if ctx is not None and ctx.obj else None
+    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
+
+    # Validate URL
+    if not url:
+        typer.echo("❌ Error: Subscription URL is required (use -u/--url)", err=True)
+        raise typer.Exit(1)
+
+    if verbose:
+        typer.echo("📡 Listing servers...")
+        typer.echo(f"   URL: {url}")
+        typer.echo(f"   Show excluded: {show_excluded}")
+
+    manager = ExclusionManager.default()
+
+    # Fetch and cache server data
+    json_data = _fetch_and_validate_subscription(url, json_output)
+    _cache_server_data(manager, json_data, json_output)
+
+    # List servers with exclusion status
+    servers_info = manager.list_servers(show_excluded=show_excluded)
+
+    if json_output:
+        data = {
+            "total": len(servers_info),
+            "servers": [
+                {
+                    "index": idx,
+                    "id": generate_server_id(server),
+                    "tag": server.get("tag", "N/A"),
+                    "type": server.get("type", "N/A"),
+                    "server": server.get("server", "N/A"),
+                    "server_port": server.get("server_port", "N/A"),
+                    "is_excluded": is_excluded,
+                }
+                for idx, server, is_excluded in servers_info
+            ],
+        }
+        print(json.dumps(data, indent=2))
+        return
+
+    if not servers_info:
+        console.print("[dim]📡 No servers found.[/dim]")
+        return
+
+    table = Table(title=f"📡 Available Servers ({len(servers_info)})")
+    table.add_column("Index", style="cyan", justify="right")
+    table.add_column("Tag", style="white")
+    table.add_column("Type", style="blue")
+    table.add_column("Server:Port", style="green")
+    table.add_column("Status", style="bold")
+
+    for idx, server, is_excluded in servers_info:
+        status = "🚫 EXCLUDED" if is_excluded else "✅ Available"
+        status_style = "red" if is_excluded else "green"
+
+        table.add_row(
+            str(idx),
+            server.get("tag", "N/A"),
+            server.get("type", "N/A"),
+            f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}",
+            f"[{status_style}]{status}[/{status_style}]",
+        )
+
+    console.print(table)
+
+
 @app.command("clear")
 def exclusions_clear(
     json_output: bool = typer.Option(False, "--json", help=t("cli.json.help")),
     ctx: typer.Context = None,
 ):
-    """Clear all exclusions."""
+    """Clear all exclusions.
+
+    Removes all server exclusions. Requires confirmation unless --yes is used.
+    """
     # Get global flags from context
     verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
     global_yes = ctx.obj.get("yes", False) if ctx is not None and ctx.obj else False
@@ -454,7 +581,7 @@ def exclusions_clear(
     _exclusions_clear_logic(manager, json_output, global_yes)
 
 
-@app.command()
+@app.command(hidden=True)
 def exclusions_main(
     url: str = typer.Option(
         ...,
@@ -486,7 +613,27 @@ def exclusions_main(
 
     Supports adding, removing, viewing exclusions with interactive selection,
     wildcard patterns, and JSON export capabilities.
+
+    ⚠️  DEPRECATED: This command is deprecated and will be removed in a future version.
+    Use individual subcommands instead:
+    - sboxctl subscription exclusions list
+    - sboxctl subscription exclusions add --servers 0,1,2
+    - sboxctl subscription exclusions remove --servers 0,1,2
+    - sboxctl subscription exclusions clear
+    - sboxctl subscription exclusions list-servers
     """
+    # Show deprecation warning
+    typer.secho(
+        "⚠️  'exclusions-main' is deprecated and will be removed in a future version.",
+        fg="yellow",
+        err=True,
+    )
+    typer.secho(
+        "💡 Use individual subcommands instead: list, add, remove, clear, list-servers",
+        fg="blue",
+        err=True,
+    )
+
     # Get global flags from context
     global_yes = ctx.obj.get("yes", False) if ctx is not None and ctx.obj else False
     verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
