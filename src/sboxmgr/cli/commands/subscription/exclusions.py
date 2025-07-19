@@ -129,6 +129,7 @@ def _exclusions_add_logic(
 
     Raises:
         typer.Exit: If an error occurs during the exclusion process.
+
     """
     if verbose:
         typer.echo("➕ Adding exclusions...")
@@ -459,7 +460,7 @@ def exclusions_remove(
                 console.print(f"[red]❌ {error_msg}[/red]")
             raise typer.Exit(1) from None
 
-        servers = manager._servers_cache["servers"]
+        servers_data = manager._servers_cache["servers"]
         protocols = manager._servers_cache["supported_protocols"]
         supported_servers = manager._servers_cache["supported_servers"]
 
@@ -478,7 +479,7 @@ def exclusions_remove(
                     console.print(f"[red]❌ {error}[/red]")
             raise typer.Exit(1) from None
 
-        removed_by_index = manager.remove_by_index(servers, indices, protocols)
+        removed_by_index = manager.remove_by_index(servers_data, indices, protocols)
         removed_ids.extend(removed_by_index)
 
     # Remove by server IDs
