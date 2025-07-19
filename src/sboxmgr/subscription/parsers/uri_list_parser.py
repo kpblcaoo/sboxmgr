@@ -442,6 +442,16 @@ class URIListParser(BaseParser):
         Returns:
             Tuple of (decoded_bytes, error_message)
 
+        Examples:
+            >>> parser._decode_vmess_base64("eyJ2IjoiMiIsInBzIjoiVGVzdCIsImFkZCI6IjEyNy4wLjAuMSIsInBvcnQiOiI0NDMiLCJpZCI6InV1aWQiLCJhaWQiOiIwIiwibmV0IjoidGNwIiwidHlwZSI6Im5vbmUiLCJob3N0IjoiIiwicGF0aCI6IiIsInRscyI6IiJ9")  # pragma: allowlist secret
+            (b'{"v":"2","ps":"Test","add":"127.0.0.1","port":"443","id":"uuid","aid":"0","net":"tcp","type":"none","host":"","path":"","tls":""}', '')
+
+            >>> parser._decode_vmess_base64("invalid_base64")
+            (b'', 'base64 decode failed: binascii.Error')
+
+            >>> parser._decode_vmess_base64("eyJ2IjoiMiIsInBzIjoiVGVzdCIsImFkZCI6IjEyNy4wLjAuMSIsInBvcnQiOiI0NDMiLCJpZCI6InV1aWQiLCJhaWQiOiIwIiwibmV0IjoidGNwIiwidHlwZSI6Im5vbmUiLCJob3N0IjoiIiwicGF0aCI6IiIsInRscyI6IiI")  # pragma: allowlist secret
+            (b'{"v":"2","ps":"Test","add":"127.0.0.1","port":"443","id":"uuid","aid":"0","net":"tcp","type":"none","host":"","path":"","tls":""}', '')
+
         """
         try:
             b64_padded = handle_base64_padding(b64)
