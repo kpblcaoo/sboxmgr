@@ -18,6 +18,8 @@ from sboxmgr.cli.commands.subscription.exclusions import (
     exclusions_clear,
     exclusions_main,
     _exclusions_add_logic,
+    _exclusions_list_logic,
+    _exclusions_clear_logic,
     _fetch_and_validate_subscription,
     _cache_server_data,
     _show_usage_help,
@@ -270,7 +272,7 @@ class TestExclusionsMain:
                 "sboxmgr.cli.commands.subscription.exclusions.ExclusionManager.default",
                 return_value=mock_manager,
             ),
-            patch("sboxmgr.cli.commands.subscription.exclusions.exclusions_list") as mock_list,
+            patch("sboxmgr.cli.commands.subscription.exclusions._exclusions_list_logic") as mock_list,
         ):
             exclusions_main(
                 url="http://test.com",
@@ -296,7 +298,7 @@ class TestExclusionsMain:
                 "sboxmgr.cli.commands.subscription.exclusions.ExclusionManager.default",
                 return_value=mock_manager,
             ),
-            patch("sboxmgr.cli.commands.subscription.exclusions.exclusions_clear") as mock_clear,
+            patch("sboxmgr.cli.commands.subscription.exclusions._exclusions_clear_logic") as mock_clear,
         ):
             exclusions_main(
                 url="http://test.com",
@@ -309,7 +311,7 @@ class TestExclusionsMain:
                 reason="test",
                 json_output=False,
                 show_excluded=True,
-                yes=False,
+                yes=True,  # Skip confirmation to avoid stdin issues
                 debug=0,
             )
 
