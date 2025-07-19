@@ -155,7 +155,7 @@ def _exclusions_add_logic(
     # Add by indices
     if indices:
         # Use cached servers data instead of re-caching
-        if not manager._servers_cache:
+        if not manager.has_servers_cache():
             error_msg = "Server cache not available"
             if json_output:
                 print(json.dumps({"error": error_msg}))
@@ -188,7 +188,7 @@ def _exclusions_add_logic(
     # Add by wildcard patterns
     if patterns:
         # Use cached servers data instead of re-caching
-        if not manager._servers_cache:
+        if not manager.has_servers_cache():
             error_msg = "Server cache not available"
             if json_output:
                 print(json.dumps({"error": error_msg}))
@@ -252,7 +252,7 @@ def _exclusions_remove_logic(
     # Remove by indices
     if indices:
         # Use cached servers data instead of re-caching
-        if not manager._servers_cache:
+        if not manager.has_servers_cache():
             error_msg = "Server cache not available"
             if json_output:
                 print(json.dumps({"error": error_msg}))
@@ -652,9 +652,9 @@ def exclusions_main(
             return
 
     if interactive:
-        # NOTE: Interactive mode is intentionally disabled for v2.
+        # NOTE: Interactive mode is intentionally disabled.
         # Use explicit sub-commands (list/add/remove) instead.
-        typer.echo("❌ Interactive mode is not available in subscription exclusions v2")
+        typer.echo("❌ Interactive mode is not available in subscription exclusions.")
         typer.echo("💡 Use individual commands instead:")
         typer.echo("   sboxctl subscription exclusions list")
         typer.echo("   sboxctl subscription exclusions add --servers 0,1,2")

@@ -48,10 +48,8 @@
   "cli.success.profile_generated": "Profile generated: {path}",
   "cli.error.subscription_processing_failed": "cli.error.subscription_processing_failed",
   "cli.error.config_save_failed": "Failed to save configuration file.",
-  "cli.error.subscription_export_failed": "Failed to export subscription.",
   "cli.deprecated.list_servers": "⚠️  Warning: 'list-servers' is deprecated, use 'subscription list'",
   "cli.deprecated.exclusions": "⚠️  Warning: 'exclusions' is deprecated, use 'subscription exclusions'",
   "cli.subscription.help": "Manage subscriptions and servers",
-  "cli.subscription.exclusions.help": "Manage server exclusions",
-  "cli.subscription.list.help": "List servers from subscription"
+  "cli.subscription.exclusions.help": "Manage server exclusions"
 }
