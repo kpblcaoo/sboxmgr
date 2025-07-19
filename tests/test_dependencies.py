@@ -98,7 +98,7 @@ def test_critical_modules_importable():
         "sboxmgr.subscription.parsers.clash_parser",
         "sboxmgr.cli.commands.export",
         "sboxmgr.cli.commands.lang",
-        "sboxmgr.cli.commands.exclusions",
+        "sboxmgr.cli.commands.subscription.exclusions",
         "sboxmgr.cli.commands.subscription",
         "sboxmgr.cli.commands.config",
         "sboxmgr.cli.commands.policy",
