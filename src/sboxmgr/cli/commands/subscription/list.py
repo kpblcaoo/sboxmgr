@@ -313,10 +313,38 @@ def list_servers(
             if config.errors:
                 for error in config.errors:
                     typer.echo(f"   Error: {error}")
+            # Show policy violations even if config failed (for debugging)
+            if verbose and policy_details:
+                violations = context.metadata.get("policy_violations", [])
+                warnings = context.metadata.get("policy_warnings", [])
+                if violations or warnings:
+                    typer.echo("\n📊 Policy Evaluation (config failed):")
+                    for violation in violations:
+                        typer.echo(
+                            f"   ❌ {violation.get('server', 'unknown')}: {violation.get('reason', 'unknown')}"
+                        )
+                    for warning in warnings:
+                        typer.echo(
+                            f"   ⚠️ {warning.get('server', 'unknown')}: {warning.get('reason', 'unknown')}"
+                        )
             raise typer.Exit(1)
 
         if not config.config or "outbounds" not in config.config:
             typer.echo("❌ No valid config generated from subscription.")
+            # Show policy violations even if config is empty (for debugging)
+            if verbose and policy_details:
+                violations = context.metadata.get("policy_violations", [])
+                warnings = context.metadata.get("policy_warnings", [])
+                if violations or warnings:
+                    typer.echo("\n📊 Policy Evaluation (empty config):")
+                    for violation in violations:
+                        typer.echo(
+                            f"   ❌ {violation.get('server', 'unknown')}: {violation.get('reason', 'unknown')}"
+                        )
+                    for warning in warnings:
+                        typer.echo(
+                            f"   ⚠️ {warning.get('server', 'unknown')}: {warning.get('reason', 'unknown')}"
+                        )
             raise typer.Exit(1)
 
         outbounds = config.config["outbounds"]

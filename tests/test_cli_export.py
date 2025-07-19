@@ -64,8 +64,18 @@ def test_export_agent_check_success(runner):
     assert result.exit_code == 1
 
     # Should fail with exit code 1 (agent-check mode fails on invalid URL)
-    # Note: Messages are in stderr which pytest cannot capture separately
     assert result.exit_code == 1
+    # Validate error messages in output
+    output = result.stdout + result.stderr
+    assert _contains_any(
+        output,
+        [
+            "agent-check",
+            "invalid URL",
+            "failed to validate",
+            "error"
+        ],
+    )
 
 
 def test_export_validate_only_success(runner):
@@ -137,8 +147,18 @@ def test_export_with_invalid_postprocessors_error(runner):
     assert result.exit_code == 1
 
     # Should fail with exit code 1 (invalid postprocessors)
-    # Note: Error messages are in stderr which pytest cannot capture separately
     assert result.exit_code == 1
+    # Validate error messages in output
+    output = result.stdout + result.stderr
+    assert _contains_any(
+        output,
+        [
+            "Unknown postprocessors",
+            "Неизвестные постпроцессоры",
+            "invalid postprocessor",
+            "error"
+        ],
+    )
 
 
 def test_export_with_middleware_success(runner):
@@ -168,8 +188,18 @@ def test_export_with_invalid_middleware_error(runner):
     assert result.exit_code == 1
 
     # Should fail with exit code 1 (invalid middleware)
-    # Note: Error messages are in stderr which pytest cannot capture separately
     assert result.exit_code == 1
+    # Validate error messages in output
+    output = result.stdout + result.stderr
+    assert _contains_any(
+        output,
+        [
+            "Unknown middleware",
+            "Неизвестное middleware",
+            "invalid middleware",
+            "error"
+        ],
+    )
 
 
 def test_export_with_config_success(runner, sample_profile):
@@ -216,8 +246,18 @@ def test_export_with_invalid_config_error(runner):
     assert result.exit_code == 1
 
     # Should fail with exit code 1 (invalid config file)
-    # Note: Error messages are in stderr which pytest cannot capture separately
     assert result.exit_code == 1
+    # Validate error messages in output
+    output = result.stdout + result.stderr
+    assert _contains_any(
+        output,
+        [
+            "config file not found",
+            "файл конфига не найден",
+            "invalid config",
+            "error"
+        ],
+    )
 
 
 def test_export_generate_profile_success(runner):
@@ -267,8 +307,17 @@ def test_export_flag_combinations_error(runner):
     assert result.exit_code == 1
 
     # Should fail with exit code 1 (conflicting flags)
-    # Note: Error messages are in stderr which pytest cannot capture separately
     assert result.exit_code == 1
+    # Validate error messages in output
+    output = result.stdout + result.stderr
+    assert _contains_any(
+        output,
+        [
+            "conflicting flags",
+            "validation error",
+            "error"
+        ],
+    )
 
 
 def test_export_help_includes_phase4_flags(runner):
@@ -302,8 +351,17 @@ def test_export_with_inbound_types_success(runner):
 
     # Should not error on valid inbound types (should fail on URL, not inbound validation)
     # Should fail with exit code 1 (invalid URL)
-    # Note: Error messages are in stderr which pytest cannot capture separately
     assert result.exit_code == 1
+    # Validate error messages in output
+    output = result.stdout + result.stderr
+    assert _contains_any(
+        output,
+        [
+            "invalid URL",
+            "failed to fetch",
+            "error"
+        ],
+    )
 
 
 def test_export_with_inbound_parameters_success(runner):
@@ -327,8 +385,17 @@ def test_export_with_inbound_parameters_success(runner):
 
     # Should not error on valid parameters (should fail on URL, not parameter validation)
     # Should fail with exit code 1 (invalid URL)
-    # Note: Error messages are in stderr which pytest cannot capture separately
     assert result.exit_code == 1
+    # Validate error messages in output
+    output = result.stdout + result.stderr
+    assert _contains_any(
+        output,
+        [
+            "invalid URL",
+            "failed to fetch",
+            "error"
+        ],
+    )
 
 
 def test_export_with_invalid_inbound_type_error(runner):
