@@ -10,7 +10,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 import typer
 
-from sboxmgr.constants import SUPPORTED_PROTOCOLS
 from sboxmgr.cli.commands.subscription.exclusions import (
     exclusions_list,
     exclusions_add,
@@ -26,17 +25,24 @@ from sboxmgr.cli.commands.subscription.exclusions import (
 )
 
 
+@pytest.fixture
+def supported_protocols():
+    """Fixture to provide supported protocols without direct import."""
+    from sboxmgr.constants import SUPPORTED_PROTOCOLS
+    return SUPPORTED_PROTOCOLS
+
+
 class TestExclusionsConstants:
     """Test constants and basic imports."""
 
-    def test_supported_protocols_constant(self):
+    def test_supported_protocols_constant(self, supported_protocols):
         """Test that SUPPORTED_PROTOCOLS is defined and accessible."""
-        assert isinstance(SUPPORTED_PROTOCOLS, tuple)
-        assert len(SUPPORTED_PROTOCOLS) > 0
-        assert "vless" in SUPPORTED_PROTOCOLS
-        assert "vmess" in SUPPORTED_PROTOCOLS
-        assert "shadowsocks" in SUPPORTED_PROTOCOLS
-        assert "trojan" in SUPPORTED_PROTOCOLS
+        assert isinstance(supported_protocols, tuple)
+        assert len(supported_protocols) > 0
+        assert "vless" in supported_protocols
+        assert "vmess" in supported_protocols
+        assert "shadowsocks" in supported_protocols
+        assert "trojan" in supported_protocols
 
 
 class TestExclusionsList:
@@ -198,12 +204,12 @@ class TestExclusionsAddLogic:
     """Test the internal exclusions add logic."""
 
     @pytest.fixture
-    def mock_manager(self):
+    def mock_manager(self, supported_protocols):
         """Mock ExclusionManager with server cache."""
         manager = MagicMock()
         manager._servers_cache = {
             "servers": [{"type": "vless", "tag": "test1"}, {"type": "vmess", "tag": "test2"}],
-            "supported_protocols": SUPPORTED_PROTOCOLS,
+            "supported_protocols": supported_protocols,
             "supported_servers": [{"type": "vless"}, {"type": "vmess"}],
         }
         manager.add_by_index.return_value = ["test-id-1"]
@@ -254,12 +260,12 @@ class TestExclusionsMain:
     """Test the main exclusions command."""
 
     @pytest.fixture
-    def mock_manager(self):
+    def mock_manager(self, supported_protocols):
         """Mock ExclusionManager for testing."""
         manager = MagicMock()
         manager._servers_cache = {
             "servers": [{"type": "vless", "tag": "test1"}],
-            "supported_protocols": SUPPORTED_PROTOCOLS,
+            "supported_protocols": supported_protocols,
             "supported_servers": [{"type": "vless"}],
         }
         manager.list_servers.return_value = [(0, {"type": "vless"}, False)]

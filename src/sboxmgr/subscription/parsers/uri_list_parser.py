@@ -200,6 +200,21 @@ class URIListParser(BaseParser):
             # Fallback for malformed URL encoding
             return text
 
+    def _handle_base64_padding(self, b64_string: str) -> str:
+        """Handle base64 padding issues by adding padding if needed.
+
+        Args:
+            b64_string: Base64 string that may need padding
+
+        Returns:
+            Properly padded base64 string
+
+        """
+        padding_needed = len(b64_string) % 4
+        if padding_needed:
+            return b64_string + "=" * (4 - padding_needed)
+        return b64_string
+
     def _extract_ss_components(self, uri: str, line: str) -> tuple[str, str]:
         """Extract method:password and host:port components from SS URI.
 
@@ -215,12 +230,8 @@ class URIListParser(BaseParser):
         if "@" in uri:
             b64, after = uri.split("@", 1)
             try:
-                # Handle padding issues - only add padding if needed
-                padding_needed = len(b64) % 4
-                if padding_needed:
-                    b64_padded = b64 + "=" * (4 - padding_needed)
-                else:
-                    b64_padded = b64
+                # Handle padding issues using helper method
+                b64_padded = self._handle_base64_padding(b64)
                 decoded = base64.urlsafe_b64decode(b64_padded).decode("utf-8")
             except (binascii.Error, UnicodeDecodeError):
                 # Fallback: treat as plain text
@@ -236,12 +247,8 @@ class URIListParser(BaseParser):
         else:
             # Whole string is base64 or plain
             try:
-                # Handle padding issues - only add padding if needed
-                padding_needed = len(uri) % 4
-                if padding_needed:
-                    uri_padded = uri + "=" * (4 - padding_needed)
-                else:
-                    uri_padded = uri
+                # Handle padding issues using helper method
+                uri_padded = self._handle_base64_padding(uri)
                 decoded = base64.urlsafe_b64decode(uri_padded).decode("utf-8")
             except (binascii.Error, UnicodeDecodeError):
                 decoded = uri  # fallback: not base64
@@ -444,12 +451,8 @@ class URIListParser(BaseParser):
         """Parse vmess URI with enhanced error handling."""
         try:
             b64 = line[8:]
-            # Handle padding issues - only add padding if needed
-            padding_needed = len(b64) % 4
-            if padding_needed:
-                b64_padded = b64 + "=" * (4 - padding_needed)
-            else:
-                b64_padded = b64
+            # Handle padding issues using helper method
+            b64_padded = self._handle_base64_padding(b64)
 
             # Try to decode base64
             try:

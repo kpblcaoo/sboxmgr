@@ -433,74 +433,8 @@ def exclusions_remove(
     json_data = _fetch_and_validate_subscription(url, json_output)
     _cache_server_data(manager, json_data, json_output)
 
-    # EXACT COPY from old _remove_exclusions function
-    items = [x.strip() for x in servers.split(",") if x.strip()]
-
-    indices = []
-    server_ids = []
-
-    # Separate indices from server IDs
-    for item in items:
-        if item.isdigit():
-            indices.append(int(item))
-        else:
-            server_ids.append(item)
-
-    removed_ids = []
-    errors = []
-
-    # Remove by indices
-    if indices:
-        # Use cached servers data instead of re-caching
-        if not manager._servers_cache:
-            error_msg = "Server cache not available"
-            if json_output:
-                print(json.dumps({"error": error_msg}))
-            else:
-                console.print(f"[red]❌ {error_msg}[/red]")
-            raise typer.Exit(1) from None
-
-        servers_data = manager._servers_cache["servers"]
-        protocols = manager._servers_cache["supported_protocols"]
-        supported_servers = manager._servers_cache["supported_servers"]
-
-        # Check for invalid indices before removing
-        for index in indices:
-            if index < 0 or index >= len(supported_servers):
-                errors.append(
-                    f"Invalid server index: {index} (max: {len(supported_servers) - 1})"
-                )
-
-        if errors:
-            if json_output:
-                print(json.dumps({"error": "; ".join(errors)}))
-            else:
-                for error in errors:
-                    console.print(f"[red]❌ {error}[/red]")
-            raise typer.Exit(1) from None
-
-        removed_by_index = manager.remove_by_index(servers_data, indices, protocols)
-        removed_ids.extend(removed_by_index)
-
-    # Remove by server IDs
-    for server_id in server_ids:
-        if manager.remove(server_id):
-            removed_ids.append(server_id)
-
-    if json_output:
-        print(
-            json.dumps(
-                {
-                    "action": "remove",
-                    "removed_count": len(removed_ids),
-                    "removed_ids": removed_ids,
-                }
-            )
-        )
-    elif removed_ids:
-        console.print(f"[green]✅ Removed {len(removed_ids)} exclusions.[/green]")
-    else:
-        console.print("[yellow]⚠️ No exclusions removed (not found).[/yellow]")
+    # Use the shared logic function
+    _exclusions_remove_logic(manager, servers, json_output, verbose)
 
 
 @app.command("clear")
