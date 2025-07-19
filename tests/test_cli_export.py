@@ -49,7 +49,7 @@ def test_export_dry_run_success(runner):
     assert result.exit_code == 1
 
     # Should contain dry-run related messages
-    output = result.stdout + result.stderr
+    output = result.stdout + result.stderr + result.stderr
     assert _contains_any(
         output, ["dry-run", "dry run", "ignored in --dry-run mode", "validation"]
     )
@@ -92,7 +92,7 @@ def test_export_validate_only_success(runner):
         result = runner.invoke(app, ["--validate-only", "--output", temp_path])
         # Should succeed for valid config
         assert result.exit_code in [0, 1]
-        output = result.stdout
+        output = result.stdout + result.stderr
         assert _contains_any(output, ["valid", "有效", "корректен", "validation"])
     finally:
         os.unlink(temp_path)
@@ -261,7 +261,7 @@ def test_export_generate_profile_success(runner):
         assert result.exit_code == 0
 
         # Should show success message
-        output = result.stdout
+        output = result.stdout + result.stderr
         assert _contains_any(
             output,
             ["profile generated", "профиль сгенерирован", "generated", "success"],
@@ -300,7 +300,7 @@ def test_export_help_includes_phase4_flags(runner):
     assert result.exit_code == 0
 
     # Should include Phase 4 flags
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert _contains_any(
         output, ["--postprocessors", "--middleware", "--generate-profile", "--config"]
     )
@@ -383,7 +383,7 @@ def test_export_help_includes_inbound_flags(runner):
     assert result.exit_code == 0
 
     # Should include inbound flags
-    output = result.stdout
+    output = result.stdout + result.stderr
     assert _contains_any(
         output, ["--inbound-types", "--socks-port", "--http-port", "--tun-address"]
     )

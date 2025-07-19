@@ -53,7 +53,7 @@ def test_list_servers_filters_service_outbounds(monkeypatch):
 
     # Используем фиктивный URL (никаких реальных подписок)
     result = runner.invoke(
-        app, ["list-servers", "-u", "http://example.com/fake-sub", "-d", "0"]
+        app, ["subscription", "list", "-u", "http://example.com/fake-sub", "-d", "0"]
     )
 
     # Проверяем результат

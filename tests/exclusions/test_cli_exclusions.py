@@ -39,7 +39,7 @@ def test_add_exclusion_and_idempotency(tmp_path, monkeypatch):
     monkeypatch.setenv("SBOXMGR_EXCLUSION_FILE", str(tmp_path / "exclusions.json"))
     url = "https://example.com/sub-link"
     # Добавляем exclusion по индексу 1
-    result1 = runner.invoke(app, ["exclusions", "-u", url, "--add", "1"])
+    result1 = runner.invoke(app, ["subscription", "exclusions", "add", "--servers", "1", "-u", url])
     assert result1.exit_code == 0
     exclusions_path = tmp_path / "exclusions.json"
     assert exclusions_path.exists()
@@ -47,7 +47,7 @@ def test_add_exclusion_and_idempotency(tmp_path, monkeypatch):
         data = json.load(f)
     assert len(data["exclusions"]) == 1
     # Повторное добавление не дублирует
-    result2 = runner.invoke(app, ["exclusions", "-u", url, "--add", "1"])
+    result2 = runner.invoke(app, ["subscription", "exclusions", "add", "--servers", "1", "-u", url])
     assert result2.exit_code == 0
     with open(exclusions_path) as f:
         data2 = json.load(f)
@@ -61,12 +61,12 @@ def test_clear_exclusions(tmp_path, monkeypatch):
     monkeypatch.setenv("SBOXMGR_EXCLUSION_FILE", str(tmp_path / "exclusions.json"))
     url = "https://example.com/sub-link"
     # Добавляем exclusion по индексу 0
-    result = runner.invoke(app, ["exclusions", "-u", url, "--add", "0"])
+    result = runner.invoke(app, ["subscription", "exclusions", "add", "--servers", "0", "-u", url])
     assert result.exit_code == 0
     exclusions_path = tmp_path / "exclusions.json"
     assert exclusions_path.exists()
     # Подтверждаем очистку exclusions через input='y\n'
-    result = runner.invoke(app, ["exclusions", "--clear"], input="y\n")
+    result = runner.invoke(app, ["subscription", "exclusions", "clear"], input="y\n")
     assert result.exit_code == 0
     with open(exclusions_path) as f:
         data = json.load(f)
@@ -83,7 +83,7 @@ def test_broken_exclusions_json_is_recovered(tmp_path, monkeypatch):
         f.write("{broken json")
     url = "https://example.com/sub-link"
     # Добавление exclusions должно восстановить файл
-    result = runner.invoke(app, ["exclusions", "-u", url, "--add", "0"])
+    result = runner.invoke(app, ["subscription", "exclusions", "add", "--servers", "0", "-u", url])
     assert result.exit_code == 0
     # Проверяем, что файл теперь валидный JSON
     with open(exclusions_path) as f:
@@ -100,7 +100,7 @@ def test_add_exclusion_invalid_index(tmp_path, monkeypatch):
     monkeypatch.setenv("SBOXMGR_EXCLUSION_FILE", str(tmp_path / "exclusions.json"))
     url = "https://example.com/sub-link"
     # Индекс 99 не существует
-    result = runner.invoke(app, ["exclusions", "-u", url, "--add", "99"])
+    result = runner.invoke(app, ["subscription", "exclusions", "add", "--servers", "99", "-u", url])
     assert result.exit_code != 0
     assert "Invalid server index" in (result.stdout or "")
 
@@ -110,8 +110,8 @@ def test_view_exclusions(tmp_path, monkeypatch):
     setup_legacy_cli_mock(monkeypatch, json_data=MOCK_JSON)
     monkeypatch.setenv("SBOXMGR_EXCLUSION_FILE", str(tmp_path / "exclusions.json"))
     url = "https://example.com/sub-link"
-    runner.invoke(app, ["exclusions", "-u", url, "--add", "1"])
-    result = runner.invoke(app, ["exclusions", "-u", url, "--view"])
+    runner.invoke(app, ["subscription", "exclusions", "add", "--servers", "1", "-u", url])
+    result = runner.invoke(app, ["subscription", "exclusions", "list"])
     assert result.exit_code == 0
-    assert "Current Exclusions" in (result.stdout or "")
+    assert "Exclusions" in (result.stdout or "")
     assert "vmess-reality2" in (result.stdout or "")
