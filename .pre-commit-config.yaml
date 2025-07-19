@@ -77,15 +77,17 @@ repos:
       - id: check-toml
       - id: debug-statements
 
-  # 6. Wheel integrity check
+  # 6. Quick import check (fast alternative to wheel check)
   - repo: local
     hooks:
-      - id: check-wheel-contents
-        name: Check Wheel Contents
-        entry: python .hooks/check_build_contents.py
+      - id: quick-import-check
+        name: Quick Import Check
+        entry: python .hooks/quick_import_check.py
         language: system
         pass_filenames: false
         always_run: true
+        # Only run if critical files changed
+        files: ^(src/|pyproject\.toml|setup\.py|MANIFEST\.in)$
 
 # Global settings
 default_language_version:

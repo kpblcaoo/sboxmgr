@@ -39,7 +39,9 @@ def test_base64_subscription(tmp_path):
     print(f"Result config length: {len(result.config)}")
     if result.config:
         print(f"First server: {result.config[0]}")
-    assert result.success or result.errors  # либо успех, либо ошибки
+    # Проверяем что результат корректен (либо успех, либо есть ошибки)
+    # Base64 может не парситься из-за проблем с парсером, но система не должна падать
+    assert result.success or result.errors
 
 
 # Пример edge-case подписок (минимальные заглушки)

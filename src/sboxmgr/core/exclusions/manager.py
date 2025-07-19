@@ -270,6 +270,15 @@ class ExclusionManager(ExclusionManagerInterface):
             "loaded_in_memory": self.is_loaded(),
         }
 
+    def has_servers_cache(self) -> bool:
+        """Check if servers cache is available.
+
+        Returns:
+            True if servers cache is populated, False otherwise
+
+        """
+        return bool(self._servers_cache)
+
     # NEW: Server listing and parsing functions
     def set_servers_cache(
         self,

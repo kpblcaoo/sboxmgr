@@ -1,7 +1,7 @@
-"""Tests for subscription exclusions functionality.
+"""Adapted tests for subscription exclusions functionality.
 
-These tests ensure that the subscription exclusions commands work correctly
-with the new modular CLI structure.
+These tests are adapted from the original test_exclusions.py to work with
+the new modular CLI structure while preserving all test coverage.
 """
 
 import json
@@ -203,11 +203,11 @@ class TestExclusionsClear:
 
 
 class TestExclusionsAddLogic:
-    """Test the internal exclusions add logic."""
+    """Test the internal exclusions add logic (adapted for new structure)."""
 
     @pytest.fixture
     def mock_manager(self, supported_protocols):
-        """Mock ExclusionManager for testing."""
+        """Mock ExclusionManager with server cache."""
         manager = MagicMock()
         manager._servers_cache = {
             "servers": [{"type": "vless", "tag": "test1"}, {"type": "vmess", "tag": "test2"}],
@@ -216,6 +216,7 @@ class TestExclusionsAddLogic:
         }
         manager.add_by_index.return_value = ["test-id-1"]
         manager.add_by_wildcard.return_value = ["test-id-2"]
+        manager.has_servers_cache.return_value = True
         return manager
 
     def test_exclusions_add_logic_by_index(self, mock_manager):
@@ -259,11 +260,11 @@ class TestExclusionsAddLogic:
 
 
 class TestExclusionsRemoveLogic:
-    """Test the internal exclusions remove logic."""
+    """Test the internal exclusions remove logic (adapted for new structure)."""
 
     @pytest.fixture
     def mock_manager(self, supported_protocols):
-        """Mock ExclusionManager for testing."""
+        """Mock ExclusionManager with server cache."""
         manager = MagicMock()
         manager._servers_cache = {
             "servers": [{"type": "vless", "tag": "test1"}, {"type": "vmess", "tag": "test2"}],
@@ -272,6 +273,7 @@ class TestExclusionsRemoveLogic:
         }
         manager.remove_by_index.return_value = ["test-id-1"]
         manager.remove.return_value = True
+        manager.has_servers_cache.return_value = True
         return manager
 
     def test_exclusions_remove_logic_by_index(self, mock_manager):
@@ -299,6 +301,74 @@ class TestExclusionsRemoveLogic:
                 "removed_ids": ["test-id-123"],
             }
             mock_print.assert_called_once_with(json.dumps(expected_output))
+
+
+class TestExclusionsListLogic:
+    """Test the internal exclusions list logic (adapted for new structure)."""
+
+    @pytest.fixture
+    def mock_manager(self):
+        """Mock ExclusionManager for testing."""
+        manager = MagicMock()
+        manager.list_all.return_value = []
+        return manager
+
+    def test_exclusions_list_logic_empty_json(self, mock_manager):
+        """Test exclusions list logic with empty exclusions in JSON format."""
+        with patch("builtins.print") as mock_print:
+            exclusions_list_logic(mock_manager, True)
+
+            expected_output = {"total": 0, "exclusions": []}
+            mock_print.assert_called_once_with(json.dumps(expected_output, indent=2))
+
+    def test_exclusions_list_logic_empty_table(self, mock_manager):
+        """Test exclusions list logic with empty exclusions in table format."""
+        with patch("sboxmgr.cli.commands.subscription.exclusions_logic.console.print") as mock_console:
+            exclusions_list_logic(mock_manager, False)
+
+            mock_console.assert_called_once_with("[dim]📝 No exclusions found.[/dim]")
+
+
+class TestExclusionsClearLogic:
+    """Test the internal exclusions clear logic (adapted for new structure)."""
+
+    @pytest.fixture
+    def mock_manager(self):
+        """Mock ExclusionManager for testing."""
+        manager = MagicMock()
+        manager.list_all.return_value = []
+        manager.clear.return_value = 0
+        return manager
+
+    def test_exclusions_clear_logic_confirmed(self, mock_manager):
+        """Test exclusions clear logic with confirmation."""
+        mock_manager.clear.return_value = 5
+        mock_manager.list_all.return_value = [{"id": "test1"}, {"id": "test2"}]
+
+        with (
+            patch("rich.prompt.Confirm.ask", return_value=True),
+            patch("builtins.print") as mock_print,
+        ):
+            exclusions_clear_logic(mock_manager, True, False)
+
+            mock_manager.clear.assert_called_once()
+            expected_output = {"action": "clear", "removed_count": 5}
+            mock_print.assert_called_once_with(json.dumps(expected_output))
+
+    def test_exclusions_clear_logic_cancelled(self, mock_manager):
+        """Test exclusions clear logic with cancellation."""
+        mock_manager.list_all.return_value = [{"id": "test1"}]
+
+        with (
+            patch("rich.prompt.Confirm.ask", return_value=False),
+            patch("sboxmgr.cli.commands.subscription.exclusions_logic.console.print") as mock_console,
+        ):
+            exclusions_clear_logic(mock_manager, False, False)
+
+            mock_manager.clear.assert_not_called()
+            mock_console.assert_called_once()
+            call_args = mock_console.call_args[0][0]
+            assert "[yellow]" in call_args
 
 
 class TestHelperFunctions:

@@ -19,12 +19,6 @@ from sboxmgr.cli.commands.subscription.exclusions import (
     _cache_server_data,
     _show_usage_help,
 )
-from sboxmgr.cli.commands.subscription.exclusions_logic import (
-    exclusions_add_logic,
-    exclusions_remove_logic,
-    exclusions_list_logic,
-    exclusions_clear_logic,
-)
 
 
 @pytest.fixture
@@ -78,7 +72,7 @@ class TestExclusionsList:
                 "sboxmgr.cli.commands.subscription.exclusions.ExclusionManager.default",
                 return_value=mock_manager,
             ),
-            patch("sboxmgr.cli.commands.subscription.exclusions_logic.console.print") as mock_console,
+            patch("sboxmgr.cli.commands.subscription.exclusions.console.print") as mock_console,
         ):
             exclusions_list(json_output=False)
 
@@ -125,7 +119,7 @@ class TestExclusionsList:
                 "sboxmgr.cli.commands.subscription.exclusions.ExclusionManager.default",
                 return_value=mock_manager,
             ),
-            patch("sboxmgr.cli.commands.subscription.exclusions_logic.console.print") as mock_console,
+            patch("sboxmgr.cli.commands.subscription.exclusions.console.print") as mock_console,
         ):
             exclusions_list(json_output=False)
 
@@ -153,7 +147,7 @@ class TestExclusionsClear:
                 "sboxmgr.cli.commands.subscription.exclusions.ExclusionManager.default",
                 return_value=mock_manager,
             ),
-            patch("rich.prompt.Confirm.ask", return_value=True),
+            patch("sboxmgr.cli.commands.subscription.exclusions.Confirm.ask", return_value=True),
             patch("builtins.print") as mock_print,
         ):
             exclusions_clear(json_output=True)
@@ -171,8 +165,8 @@ class TestExclusionsClear:
                 "sboxmgr.cli.commands.subscription.exclusions.ExclusionManager.default",
                 return_value=mock_manager,
             ),
-            patch("rich.prompt.Confirm.ask", return_value=False),
-            patch("sboxmgr.cli.commands.subscription.exclusions_logic.console.print") as mock_console,
+            patch("sboxmgr.cli.commands.subscription.exclusions.Confirm.ask", return_value=False),
+            patch("sboxmgr.cli.commands.subscription.exclusions.console.print") as mock_console,
         ):
             exclusions_clear(json_output=False)
 
@@ -198,105 +192,6 @@ class TestExclusionsClear:
                 "action": "clear",
                 "removed_count": 0,
                 "message": "No exclusions to clear",
-            }
-            mock_print.assert_called_once_with(json.dumps(expected_output))
-
-
-class TestExclusionsAddLogic:
-    """Test the internal exclusions add logic."""
-
-    @pytest.fixture
-    def mock_manager(self, supported_protocols):
-        """Mock ExclusionManager for testing."""
-        manager = MagicMock()
-        manager._servers_cache = {
-            "servers": [{"type": "vless", "tag": "test1"}, {"type": "vmess", "tag": "test2"}],
-            "supported_protocols": supported_protocols,
-            "supported_servers": [{"type": "vless"}, {"type": "vmess"}],
-        }
-        manager.add_by_index.return_value = ["test-id-1"]
-        manager.add_by_wildcard.return_value = ["test-id-2"]
-        return manager
-
-    def test_exclusions_add_logic_by_index(self, mock_manager):
-        """Test adding exclusions by index."""
-        with patch("builtins.print") as mock_print:
-            exclusions_add_logic(mock_manager, "0,1", "test reason", True, False)
-
-            mock_manager.add_by_index.assert_called_once()
-            expected_output = {
-                "action": "add",
-                "added_count": 1,
-                "added_ids": ["test-id-1"],
-                "reason": "test reason",
-            }
-            mock_print.assert_called_once_with(json.dumps(expected_output))
-
-    def test_exclusions_add_logic_by_wildcard(self, mock_manager):
-        """Test adding exclusions by wildcard pattern."""
-        with patch("builtins.print") as mock_print:
-            exclusions_add_logic(mock_manager, "test*", "test reason", True, False)
-
-            mock_manager.add_by_wildcard.assert_called_once()
-            expected_output = {
-                "action": "add",
-                "added_count": 1,
-                "added_ids": ["test-id-2"],
-                "reason": "test reason",
-            }
-            mock_print.assert_called_once_with(json.dumps(expected_output))
-
-    def test_exclusions_add_logic_invalid_index(self, mock_manager):
-        """Test adding exclusions with invalid index."""
-        with (
-            patch("builtins.print") as mock_print,
-            pytest.raises(typer.Exit),
-        ):
-            exclusions_add_logic(mock_manager, "999", "test reason", True, False)
-
-            expected_output = {"error": "Invalid server index: 999 (max: 1)"}
-            mock_print.assert_called_once_with(json.dumps(expected_output))
-
-
-class TestExclusionsRemoveLogic:
-    """Test the internal exclusions remove logic."""
-
-    @pytest.fixture
-    def mock_manager(self, supported_protocols):
-        """Mock ExclusionManager for testing."""
-        manager = MagicMock()
-        manager._servers_cache = {
-            "servers": [{"type": "vless", "tag": "test1"}, {"type": "vmess", "tag": "test2"}],
-            "supported_protocols": supported_protocols,
-            "supported_servers": [{"type": "vless"}, {"type": "vmess"}],
-        }
-        manager.remove_by_index.return_value = ["test-id-1"]
-        manager.remove.return_value = True
-        return manager
-
-    def test_exclusions_remove_logic_by_index(self, mock_manager):
-        """Test removing exclusions by index."""
-        with patch("builtins.print") as mock_print:
-            exclusions_remove_logic(mock_manager, "0,1", True, False)
-
-            mock_manager.remove_by_index.assert_called_once()
-            expected_output = {
-                "action": "remove",
-                "removed_count": 1,
-                "removed_ids": ["test-id-1"],
-            }
-            mock_print.assert_called_once_with(json.dumps(expected_output))
-
-    def test_exclusions_remove_logic_by_id(self, mock_manager):
-        """Test removing exclusions by server ID."""
-        with patch("builtins.print") as mock_print:
-            exclusions_remove_logic(mock_manager, "test-id-123", True, False)
-
-            mock_manager.remove.assert_called_once_with("test-id-123")
-            expected_output = {
-                "action": "remove",
-                "removed_count": 1,
-                "removed_ids": ["test-id-123"],
             }
             mock_print.assert_called_once_with(json.dumps(expected_output))
 

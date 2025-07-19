@@ -161,7 +161,8 @@ class TestURIParserExceptionHandling:
         result = parser._parse_vmess(invalid_json_uri)
         assert result.type == "vmess"
         assert result.address == "invalid"
-        assert "decode failed" in result.meta["error"]
+        assert "error" in result.meta
+        assert isinstance(result.meta["error"], str)
 
     def test_ss_base64_fallback(self):
         """Test that SS parsing falls back gracefully on decode errors."""

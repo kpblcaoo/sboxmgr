@@ -14,6 +14,12 @@ import re
 from typing import Optional
 from urllib.parse import parse_qs, unquote, urlparse
 
+from sboxmgr.utils.base64_utils import handle_base64_padding
+
+# The `handle_base64_padding` utility function ensures that base64-encoded strings
+# have the correct padding (i.e., '=' characters) before decoding. This avoids
+# duplicated logic for handling padding issues across the codebase, improving
+# maintainability and reducing potential errors.
 from sboxmgr.utils.env import get_debug_level
 
 from ..base_parser import BaseParser
@@ -215,12 +221,8 @@ class URIListParser(BaseParser):
         if "@" in uri:
             b64, after = uri.split("@", 1)
             try:
-                # Handle padding issues - only add padding if needed
-                padding_needed = len(b64) % 4
-                if padding_needed:
-                    b64_padded = b64 + "=" * (4 - padding_needed)
-                else:
-                    b64_padded = b64
+                # Handle padding issues using helper method
+                b64_padded = handle_base64_padding(b64)
                 decoded = base64.urlsafe_b64decode(b64_padded).decode("utf-8")
             except (binascii.Error, UnicodeDecodeError):
                 # Fallback: treat as plain text
@@ -236,12 +238,8 @@ class URIListParser(BaseParser):
         else:
             # Whole string is base64 or plain
             try:
-                # Handle padding issues - only add padding if needed
-                padding_needed = len(uri) % 4
-                if padding_needed:
-                    uri_padded = uri + "=" * (4 - padding_needed)
-                else:
-                    uri_padded = uri
+                # Handle padding issues using helper method
+                uri_padded = handle_base64_padding(uri)
                 decoded = base64.urlsafe_b64decode(uri_padded).decode("utf-8")
             except (binascii.Error, UnicodeDecodeError):
                 decoded = uri  # fallback: not base64
@@ -440,19 +438,99 @@ class URIListParser(BaseParser):
             logger.warning(f"Failed to parse vless URI: {str(e)}")
             return None
 
+    def _decode_vmess_base64(self, b64: str) -> tuple[bytes, str]:
+        """Decode base64 part of vmess URI.
+
+        Args:
+            b64: Base64 string from vmess URI
+
+        Returns:
+            Tuple of (decoded_bytes, error_message)
+
+        Examples:
+            >>> parser._decode_vmess_base64("eyJ2IjoiMiIsInBzIjoiVGVzdCIsImFkZCI6IjEyNy4wLjAuMSJ9")  # pragma: allowlist secret
+            (b'{"v":"2","ps":"Test","add":"127.0.0.1"}', '')
+
+            >>> parser._decode_vmess_base64("invalid_base64")
+            (b'', 'base64 decode failed: binascii.Error')
+
+        """
+        try:
+            b64_padded = handle_base64_padding(b64)
+            decoded_bytes = base64.urlsafe_b64decode(b64_padded)
+            return decoded_bytes, ""
+        except Exception as e:
+            return b"", f"base64 decode failed: {type(e).__name__}"
+
+    def _decode_vmess_utf8(self, decoded_bytes: bytes) -> tuple[str, str]:
+        """Decode vmess bytes as UTF-8.
+
+        Args:
+            decoded_bytes: Raw bytes from base64 decode
+
+        Returns:
+            Tuple of (decoded_string, error_message)
+
+        """
+        try:
+            decoded = decoded_bytes.decode("utf-8")
+            return decoded, ""
+        except UnicodeDecodeError as e:
+            return "", f"utf-8 decode failed: {str(e)}"
+
+    def _parse_vmess_json(self, decoded: str) -> tuple[dict, str]:
+        """Parse vmess JSON configuration.
+
+        Args:
+            decoded: UTF-8 decoded string from vmess URI
+
+        Returns:
+            Tuple of (parsed_data, error_message)
+
+        """
+        try:
+            data = json.loads(decoded)
+            return data, ""
+        except json.JSONDecodeError as e:
+            return {}, f"json parse failed: {str(e)}"
+
     def _parse_vmess(self, line: str) -> Optional[ParsedServer]:
         """Parse vmess URI with enhanced error handling."""
         try:
             b64 = line[8:]
-            # Handle padding issues - only add padding if needed
-            padding_needed = len(b64) % 4
-            if padding_needed:
-                b64_padded = b64 + "=" * (4 - padding_needed)
-            else:
-                b64_padded = b64
 
-            decoded = base64.urlsafe_b64decode(b64_padded).decode("utf-8")
-            data = json.loads(decoded)
+            # Step 1: Decode base64
+            decoded_bytes, base64_error = self._decode_vmess_base64(b64)
+            if base64_error:
+                logger.warning(f"Failed to decode base64 in vmess URI: {base64_error}")
+                return ParsedServer(
+                    type="vmess",
+                    address="invalid",
+                    port=0,
+                    meta={"error": base64_error},
+                )
+
+            # Step 2: Decode as UTF-8
+            decoded, utf8_error = self._decode_vmess_utf8(decoded_bytes)
+            if utf8_error:
+                logger.warning(f"Failed to decode vmess URI as UTF-8: {utf8_error}")
+                return ParsedServer(
+                    type="vmess",
+                    address="invalid",
+                    port=0,
+                    meta={"error": utf8_error},
+                )
+
+            # Step 3: Parse JSON
+            data, json_error = self._parse_vmess_json(decoded)
+            if json_error:
+                logger.warning(f"Failed to parse vmess URI JSON: {json_error}")
+                return ParsedServer(
+                    type="vmess",
+                    address="invalid",
+                    port=0,
+                    meta={"error": json_error},
+                )
 
             return ParsedServer(
                 type="vmess",
@@ -461,17 +539,11 @@ class URIListParser(BaseParser):
                 security=data.get("security"),
                 meta=data,
             )
-        except (
-            binascii.Error,
-            UnicodeDecodeError,
-            json.JSONDecodeError,
-            ValueError,
-            KeyError,
-        ) as e:
+        except Exception as e:
             logger.warning(f"Failed to parse vmess URI: {str(e)}")
             return ParsedServer(
                 type="vmess",
                 address="invalid",
                 port=0,
-                meta={"error": f"decode failed: {type(e).__name__}"},
+                meta={"error": f"vmess parse failed: {type(e).__name__} - {str(e)}"},
             )
