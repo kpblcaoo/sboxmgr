@@ -83,6 +83,19 @@ def _get_context_value(ctx: typer.Context, key: str, default=None):
     return ctx.obj.get(key, default) if ctx is not None and ctx.obj else default
 
 
+def _get_verbose_flag(ctx: typer.Context) -> bool:
+    """Extract verbose flag from context with safe fallback.
+
+    Args:
+        ctx: Typer context object
+
+    Returns:
+        Verbose flag value or False if not found
+
+    """
+    return _get_context_value(ctx, "verbose", False)
+
+
 def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
     """Fetch and validate subscription data from URL.
 
@@ -160,7 +173,7 @@ def exclusions_list(
     Shows all currently excluded servers with their details.
     """
     # Get global flags from context
-    verbose = _get_context_value(ctx, "verbose", False)
+    verbose = _get_verbose_flag(ctx)
 
     if verbose:
         typer.echo("📋 Listing exclusions...")

@@ -15,6 +15,11 @@ from typing import Optional
 from urllib.parse import parse_qs, unquote, urlparse
 
 from sboxmgr.utils.base64_utils import handle_base64_padding
+
+# The `handle_base64_padding` utility function ensures that base64-encoded strings
+# have the correct padding (i.e., '=' characters) before decoding. This avoids
+# duplicated logic for handling padding issues across the codebase, improving
+# maintainability and reducing potential errors.
 from sboxmgr.utils.env import get_debug_level
 
 from ..base_parser import BaseParser
@@ -448,9 +453,6 @@ class URIListParser(BaseParser):
 
             >>> parser._decode_vmess_base64("invalid_base64")
             (b'', 'base64 decode failed: binascii.Error')
-
-            >>> parser._decode_vmess_base64("eyJ2IjoiMiIsInBzIjoiVGVzdCIsImFkZCI6IjEyNy4wLjAuMSJ9")  # pragma: allowlist secret
-            (b'{"v":"2","ps":"Test","add":"127.0.0.1"}', '')
 
         """
         try:

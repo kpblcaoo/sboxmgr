@@ -75,6 +75,122 @@ def _format_policy_details(context: PipelineContext, server_tag: str) -> str:
     return " | ".join(details) if details else "✅ ALLOWED"
 
 
+def _format_json_output(
+    servers: list, context: PipelineContext, policy_details: bool
+) -> None:
+    """Format and print servers as JSON output.
+
+    Args:
+        servers: List of server configurations.
+        context: Pipeline context for policy details.
+        policy_details: Whether to include policy details.
+
+    """
+    server_data = []
+    for i, server in enumerate(servers):
+        server_info = {
+            "index": i,
+            "tag": server.get("tag", "N/A"),
+            "type": server.get("type", "N/A"),
+        }
+
+        # Add protocol-specific details
+        if server.get("type") == "shadowsocks":
+            server_info.update(
+                {
+                    "server": server.get("server", "N/A"),
+                    "server_port": server.get("server_port", "N/A"),
+                    "method": server.get("method", "N/A"),
+                }
+            )
+        elif server.get("type") == "vmess":
+            server_info.update(
+                {
+                    "server": server.get("server", "N/A"),
+                    "server_port": server.get("server_port", "N/A"),
+                    "uuid": server.get("uuid", "N/A"),
+                    "security": server.get("security", "N/A"),
+                }
+            )
+        elif server.get("type") == "vless":
+            server_info.update(
+                {
+                    "server": server.get("server", "N/A"),
+                    "server_port": server.get("server_port", "N/A"),
+                    "uuid": server.get("uuid", "N/A"),
+                    "encryption": server.get("encryption", "N/A"),
+                }
+            )
+        elif server.get("type") == "trojan":
+            server_info.update(
+                {
+                    "server": server.get("server", "N/A"),
+                    "server_port": server.get("server_port", "N/A"),
+                    "password": server.get("password", "N/A"),
+                }
+            )
+        else:
+            # Generic fallback
+            server_info.update(
+                {
+                    "server": server.get("server", "N/A"),
+                    "server_port": server.get("server_port", "N/A"),
+                }
+            )
+
+        # Add policy details if requested
+        if policy_details:
+            server_info["policy_status"] = _format_policy_details(
+                context, server.get("tag", "")
+            )
+
+        server_data.append(server_info)
+
+    import json
+
+    print(json.dumps({"servers": server_data, "total": len(server_data)}, indent=2))
+
+
+def _format_table_output(
+    servers: list, context: PipelineContext, policy_details: bool
+) -> None:
+    """Format and print servers as table output.
+
+    Args:
+        servers: List of server configurations.
+        context: Pipeline context for policy details.
+        policy_details: Whether to include policy details.
+
+    """
+    from rich.console import Console
+    from rich.table import Table
+
+    console = Console()
+    table = Table(title=f"📡 Available Servers ({len(servers)})")
+    table.add_column("Index", style="cyan", justify="right")
+    table.add_column("Tag", style="white")
+    table.add_column("Type", style="blue")
+    table.add_column("Server:Port", style="green")
+
+    if policy_details:
+        table.add_column("Policy Status", style="yellow")
+
+    for i, server in enumerate(servers):
+        server_tag = server.get("tag", "N/A")
+        server_type = server.get("type", "N/A")
+        server_addr = (
+            f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}"
+        )
+
+        if policy_details:
+            policy_status = _format_policy_details(context, server_tag)
+            table.add_row(str(i), server_tag, server_type, server_addr, policy_status)
+        else:
+            table.add_row(str(i), server_tag, server_type, server_addr)
+
+    console.print(table)
+
+
 def list_servers(
     url: str = typer.Option(
         ...,
@@ -218,106 +334,9 @@ def list_servers(
             return
 
         if output_format == "json":
-            # JSON output
-            server_data = []
-            for i, server in enumerate(servers):
-                server_info = {
-                    "index": i,
-                    "tag": server.get("tag", "N/A"),
-                    "type": server.get("type", "N/A"),
-                }
-
-                # Add protocol-specific details
-                if server.get("type") == "shadowsocks":
-                    server_info.update(
-                        {
-                            "server": server.get("server", "N/A"),
-                            "server_port": server.get("server_port", "N/A"),
-                            "method": server.get("method", "N/A"),
-                        }
-                    )
-                elif server.get("type") == "vmess":
-                    server_info.update(
-                        {
-                            "server": server.get("server", "N/A"),
-                            "server_port": server.get("server_port", "N/A"),
-                            "uuid": server.get("uuid", "N/A"),
-                            "security": server.get("security", "N/A"),
-                        }
-                    )
-                elif server.get("type") == "vless":
-                    server_info.update(
-                        {
-                            "server": server.get("server", "N/A"),
-                            "server_port": server.get("server_port", "N/A"),
-                            "uuid": server.get("uuid", "N/A"),
-                            "encryption": server.get("encryption", "N/A"),
-                        }
-                    )
-                elif server.get("type") == "trojan":
-                    server_info.update(
-                        {
-                            "server": server.get("server", "N/A"),
-                            "server_port": server.get("server_port", "N/A"),
-                            "password": server.get("password", "N/A"),
-                        }
-                    )
-                else:
-                    # Generic fallback
-                    server_info.update(
-                        {
-                            "server": server.get("server", "N/A"),
-                            "server_port": server.get("server_port", "N/A"),
-                        }
-                    )
-
-                # Add policy details if requested
-                if policy_details:
-                    server_info["policy_status"] = _format_policy_details(
-                        context, server.get("tag", "")
-                    )
-
-                server_data.append(server_info)
-
-            import json
-
-            print(
-                json.dumps(
-                    {"servers": server_data, "total": len(server_data)}, indent=2
-                )
-            )
+            _format_json_output(servers, context, policy_details)
         else:
-            # Table output
-            from rich.console import Console
-            from rich.table import Table
-
-            console = Console()
-
-            table = Table(title=f"📡 Available Servers ({len(servers)})")
-            table.add_column("Index", style="cyan", justify="right")
-            table.add_column("Tag", style="white")
-            table.add_column("Type", style="blue")
-            table.add_column("Server:Port", style="green")
-
-            if policy_details:
-                table.add_column("Policy Status", style="yellow")
-
-            for i, server in enumerate(servers):
-                server_tag = server.get("tag", "N/A")
-                server_type = server.get("type", "N/A")
-                server_addr = (
-                    f"{server.get('server', 'N/A')}:{server.get('server_port', 'N/A')}"
-                )
-
-                if policy_details:
-                    policy_status = _format_policy_details(context, server_tag)
-                    table.add_row(
-                        str(i), server_tag, server_type, server_addr, policy_status
-                    )
-                else:
-                    table.add_row(str(i), server_tag, server_type, server_addr)
-
-            console.print(table)
+            _format_table_output(servers, context, policy_details)
 
     except Exception as e:
         if verbose:
