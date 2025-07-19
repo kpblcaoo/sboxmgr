@@ -72,5 +72,6 @@ def test_list_servers_filters_service_outbounds(monkeypatch):
     assert "dns-out" not in output
 
     # Проверяем количество серверов (должно быть 2)
-    lines = [line for line in output.split("\n") if line.strip().startswith("[")]
+    # Новый формат использует таблицу, ищем строки с серверами
+    lines = [line for line in output.split("\n") if "ss-server" in line or "vmess-server" in line]
     assert len(lines) == 2, f"Ожидалось 2 сервера, найдено {len(lines)}"
