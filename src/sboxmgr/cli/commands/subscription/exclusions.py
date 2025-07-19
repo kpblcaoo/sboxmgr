@@ -145,7 +145,18 @@ def _exclusions_add_logic(
     json_output: bool,
     verbose: bool = False,
 ) -> None:
-    """Internal logic for adding exclusions."""
+    """Internal logic for adding exclusions.
+
+    Args:
+        manager (ExclusionManager): The exclusion manager instance to handle exclusions.
+        servers (str): A comma-separated string of server indices or patterns to exclude.
+        reason (str): The reason for excluding the servers.
+        json_output (bool): Whether to output errors in JSON format.
+        verbose (bool, optional): Whether to print verbose output. Defaults to False.
+
+    Raises:
+        typer.Exit: If an error occurs during the exclusion process.
+    """
     if verbose:
         typer.echo("➕ Adding exclusions...")
         typer.echo(f"   Servers: {servers}")
