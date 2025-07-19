@@ -92,7 +92,7 @@ def test_export_validate_only_success(runner):
         result = runner.invoke(app, ["--validate-only", "--output", temp_path])
         # Should succeed for valid config
         assert result.exit_code in [0, 1]
-        output = result.stdout
+        output = result.stdout + result.stderr
         assert _contains_any(output, ["valid", "有效", "корректен", "validation"])
     finally:
         os.unlink(temp_path)

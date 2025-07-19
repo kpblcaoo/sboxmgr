@@ -151,8 +151,7 @@ class TestURIParserExceptionHandling:
         result = parser._parse_vmess(invalid_b64)
         assert result.type == "vmess"
         assert result.address == "invalid"
-        assert "error" in result.meta
-        assert isinstance(result.meta["error"], str)
+        assert "decode failed" in result.meta["error"]
 
         # Test invalid JSON after base64 decode
         import base64
