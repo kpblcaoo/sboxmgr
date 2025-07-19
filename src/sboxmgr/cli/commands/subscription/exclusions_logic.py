@@ -269,7 +269,7 @@ def exclusions_clear_logic(
     """Internal logic for clearing exclusions."""
     from rich.prompt import Confirm
 
-    from sboxmgr.i18n import t
+    from sboxmgr.i18n.t import t
 
     # Check if we have any exclusions
     exclusions = manager.list_all()
