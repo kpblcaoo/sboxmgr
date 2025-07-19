@@ -18,3 +18,16 @@ def load_outbounds(json_data, supported_protocols):
             o for o in json_data["outbounds"] if o.get("type") in supported_protocols
         ]
     return [o for o in json_data if o.get("type") in supported_protocols]
+
+
+def get_verbose_flag(verbose: bool) -> bool:
+    """Get verbose flag value.
+
+    Args:
+        verbose: Verbose flag from command line
+
+    Returns:
+        Verbose flag value
+
+    """
+    return verbose

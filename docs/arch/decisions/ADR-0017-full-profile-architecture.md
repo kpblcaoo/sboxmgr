@@ -8,11 +8,13 @@
 
 ## TL;DR
 
-- **Full Profile** = единая конфигурационная сущность, охватывающая все настраиваемые компоненты
-- **profile.json** содержит: подписки, маршруты, фильтры, экспорт, настройки агента, UI
-- **CLI команды:** `sboxmgr apply --profile profiles/home.json`
+- **FullProfile** = единая конфигурационная сущность, охватывающая все настраиваемые компоненты (пользовательские данные)
+- **ClientConfig** = артефакт экспорта, который понимает backend (sing-box, Docker, мобильные клиенты)
+- **profile.toml/yaml** содержит: подписки, маршруты, фильтры, экспорт, настройки агента, UI
+- **CLI команды:** `sboxctl profile apply profiles/home.toml` и `sboxctl export generate --profile home`
 - **SaaS-ready:** профили легко сериализуются в БД/облако
 - **Решает конфликт UI/CLI:** профиль как единый источник истины
+- **Двухслойная архитектура:** FullProfile (пользовательские данные) → ClientConfig (артефакт экспорта)
 
 ## Контекст
 
@@ -69,24 +71,22 @@
 }
 ```
 
-### 2. CLI команды
+### 2. CLI команды (обновлено согласно ADR-0020)
 
 ```bash
-# Применение профиля
-sboxmgr apply --profile profiles/home.json
+# Управление профилями (FullProfile)
+sboxctl profile list                    # список профилей
+sboxctl profile show home              # показать профиль
+sboxctl profile new work               # создать новый профиль
+sboxctl profile edit home              # редактировать профиль
+sboxctl profile validate home          # валидировать профиль
+sboxctl profile set-active home        # установить активный профиль
 
-# Валидация профиля
-sboxmgr validate-profile profiles/home.json
-
-# Объяснение профиля
-sboxmgr explain --profile profiles/home.json
-
-# Сравнение профилей
-sboxmgr diff --profile home --profile work
-
-# Экспорт части профиля
-sboxmgr export --part routing
-sboxmgr export --part subscriptions
+# Экспорт артефактов (ClientConfig)
+sboxctl export generate --profile home --out config.json
+sboxctl export validate config.json
+sboxctl export dry-run --profile home
+sboxctl export profile --profile home --out optimized.yaml
 ```
 
 ### 3. Интеграция с существующими компонентами
@@ -99,13 +99,14 @@ sboxmgr export --part subscriptions
 #### Миграционный путь
 ```bash
 # Старый способ (продолжает работать)
-sboxmgr export -u https://sub.example.com
+sboxctl export -u https://sub.example.com
 
-# Новый способ
-sboxmgr apply --profile profiles/home.json
+# Новый способ (согласно ADR-0020)
+sboxctl profile apply profiles/home.toml
+sboxctl export generate --profile home
 
 # Гибридный способ
-sboxmgr apply --profile profiles/home.json --override-subscription https://new-sub.example.com
+sboxctl export generate --profile home --override-subscription https://new-sub.example.com
 ```
 
 ### 4. SaaS интеграция
@@ -192,3 +193,4 @@ sboxmgr apply --profile profiles/home.json --override-subscription https://new-s
 - ADR-0009: Configuration System Architecture
 - ADR-0015: Agent-Installer Separation & Installation Strategy
 - ADR-0016: Pydantic as Single Source of Truth for Validation and Schema Generation
+- **ADR-0020:** CLI Command Structure - Two-Layer Architecture (обновляет CLI команды)
