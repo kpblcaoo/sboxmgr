@@ -107,35 +107,7 @@ def exclusions_list(
         typer.echo("📋 Listing exclusions...")
 
     manager = ExclusionManager.default()
-    exclusions = manager.list_all()
-
-    if json_output:
-        data = {
-            "total": len(exclusions),
-            "exclusions": exclusions,
-        }
-        print(json.dumps(data, indent=2))
-        return
-
-    if not exclusions:
-        console.print("[dim]📝 No exclusions found.[/dim]")
-        return
-
-    table = Table(title=f"🚫 Current Exclusions ({len(exclusions)})")
-    table.add_column("ID", style="cyan", no_wrap=True)
-    table.add_column("Name", style="white")
-    table.add_column("Reason", style="yellow")
-    table.add_column("Added", style="dim")
-
-    for exc in exclusions:
-        table.add_row(
-            exc["id"][:12] + "...",
-            exc.get("name", "N/A"),
-            exc.get("reason", "N/A"),
-            exc.get("timestamp", "N/A")[:10],
-        )
-
-    console.print(table)
+    _exclusions_list_logic(manager, json_output)
 
 
 def _exclusions_add_logic(
@@ -245,6 +217,159 @@ def _exclusions_add_logic(
     else:
         console.print(
             "[yellow]⚠️ No new exclusions added (already excluded or not found).[/yellow]"
+        )
+
+
+def _exclusions_remove_logic(
+    manager: ExclusionManager,
+    servers: str,
+    json_output: bool,
+    verbose: bool = False,
+) -> None:
+    """Internal logic for removing exclusions."""
+    if verbose:
+        typer.echo("➖ Removing exclusions...")
+        typer.echo(f"   Servers: {servers}")
+
+    # EXACT COPY from old _remove_exclusions function
+    items = [x.strip() for x in servers.split(",") if x.strip()]
+
+    indices = []
+    server_ids = []
+
+    # Separate indices from server IDs
+    for item in items:
+        if item.isdigit():
+            indices.append(int(item))
+        else:
+            server_ids.append(item)
+
+    removed_ids = []
+    errors = []
+
+    # Remove by indices
+    if indices:
+        # Use cached servers data instead of re-caching
+        if not manager._servers_cache:
+            error_msg = "Server cache not available"
+            if json_output:
+                print(json.dumps({"error": error_msg}))
+            else:
+                console.print(f"[red]❌ {error_msg}[/red]")
+            raise typer.Exit(1) from None
+
+        servers_data = manager._servers_cache["servers"]
+        protocols = manager._servers_cache["supported_protocols"]
+        supported_servers = manager._servers_cache["supported_servers"]
+
+        # Check for invalid indices before removing
+        for index in indices:
+            if index < 0 or index >= len(supported_servers):
+                errors.append(
+                    f"Invalid server index: {index} (max: {len(supported_servers) - 1})"
+                )
+
+        if errors:
+            if json_output:
+                print(json.dumps({"error": "; ".join(errors)}))
+            else:
+                for error in errors:
+                    console.print(f"[red]❌ {error}[/red]")
+            raise typer.Exit(1) from None
+
+        removed_by_index = manager.remove_by_index(servers_data, indices, protocols)
+        removed_ids.extend(removed_by_index)
+
+    # Remove by server IDs
+    for server_id in server_ids:
+        if manager.remove(server_id):
+            removed_ids.append(server_id)
+
+    if json_output:
+        print(
+            json.dumps(
+                {
+                    "action": "remove",
+                    "removed_count": len(removed_ids),
+                    "removed_ids": removed_ids,
+                }
+            )
+        )
+    elif removed_ids:
+        console.print(f"[green]✅ Removed {len(removed_ids)} exclusions.[/green]")
+    else:
+        console.print("[yellow]⚠️ No exclusions removed (not found).[/yellow]")
+
+
+def _exclusions_list_logic(
+    manager: ExclusionManager,
+    json_output: bool,
+) -> None:
+    """Internal logic for listing exclusions."""
+    exclusions = manager.list_all()
+
+    if json_output:
+        data = {"total": len(exclusions), "exclusions": exclusions}
+        print(json.dumps(data, indent=2))
+    else:
+        if not exclusions:
+            console.print("[dim]📝 No exclusions found.[/dim]")
+            return
+
+        table = Table(title=f"📝 Exclusions ({len(exclusions)})")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="white")
+        table.add_column("Reason", style="blue")
+        table.add_column("Timestamp", style="green")
+
+        for exclusion in exclusions:
+            table.add_row(
+                exclusion.get("id", "N/A"),
+                exclusion.get("name", "N/A"),
+                exclusion.get("reason", "N/A"),
+                exclusion.get("timestamp", "N/A"),
+            )
+
+        console.print(table)
+
+
+def _exclusions_clear_logic(
+    manager: ExclusionManager,
+    json_output: bool,
+    global_yes: bool = False,
+) -> None:
+    """Internal logic for clearing exclusions."""
+    # Check if we have any exclusions
+    exclusions = manager.list_all()
+    if not exclusions:
+        if json_output:
+            print(
+                json.dumps(
+                    {
+                        "action": "clear",
+                        "removed_count": 0,
+                        "message": "No exclusions to clear",
+                    }
+                )
+            )
+        else:
+            console.print("[yellow]💡 No exclusions to clear[/yellow]")
+        return
+
+    # Confirmation
+    if not global_yes and not Confirm.ask(
+        f"[bold red]{t('cli.clear_exclusions.confirm')}[/bold red]"
+    ):
+        console.print(f"[yellow]{t('cli.operation_cancelled')}[/yellow]")
+        return
+
+    count = manager.clear()
+
+    if json_output:
+        print(json.dumps({"action": "clear", "removed_count": count}))
+    else:
+        console.print(
+            f"[green]✅ {t('cli.clear_exclusions.success').format(count=count)}[/green]"
         )
 
 
@@ -390,39 +515,7 @@ def exclusions_clear(
         typer.echo("🗑️ Clearing all exclusions...")
 
     manager = ExclusionManager.default()
-
-    # Check if we have any exclusions
-    exclusions = manager.list_all()
-    if not exclusions:
-        if json_output:
-            print(
-                json.dumps(
-                    {
-                        "action": "clear",
-                        "removed_count": 0,
-                        "message": "No exclusions to clear",
-                    }
-                )
-            )
-        else:
-            console.print("[yellow]💡 No exclusions to clear[/yellow]")
-        return
-
-    # Confirmation
-    if not global_yes and not Confirm.ask(
-        f"[bold red]{t('cli.clear_exclusions.confirm')}[/bold red]"
-    ):
-        console.print(f"[yellow]{t('cli.operation_cancelled')}[/yellow]")
-        return
-
-    count = manager.clear()
-
-    if json_output:
-        print(json.dumps({"action": "clear", "removed_count": count}))
-    else:
-        console.print(
-            f"[green]✅ {t('cli.clear_exclusions.success').format(count=count)}[/green]"
-        )
+    _exclusions_clear_logic(manager, json_output, global_yes)
 
 
 @app.command()
@@ -494,11 +587,11 @@ def exclusions_main(
 
     # Handle view-only operations first (no URL needed)
     if view:
-        exclusions_list(json_output=json_output, ctx=ctx)
+        _exclusions_list_logic(manager, json_output)
         return
 
     if clear:
-        exclusions_clear(json_output=json_output, ctx=ctx)
+        _exclusions_clear_logic(manager, json_output, final_yes)
         return
 
     # For operations requiring server data, fetch and cache it
@@ -572,7 +665,7 @@ def exclusions_main(
         _exclusions_add_logic(manager, add, reason, json_output, verbose)
 
     if remove:
-        exclusions_remove(servers=remove, url=url, json_output=json_output, ctx=ctx)
+        _exclusions_remove_logic(manager, remove, json_output, verbose)
 
     # Show help if no action specified
     if not any([add, remove, view, clear, list_servers, interactive]):
