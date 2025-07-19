@@ -451,8 +451,41 @@ class URIListParser(BaseParser):
             else:
                 b64_padded = b64
 
-            decoded = base64.urlsafe_b64decode(b64_padded).decode("utf-8")
-            data = json.loads(decoded)
+            # Try to decode base64
+            try:
+                decoded_bytes = base64.urlsafe_b64decode(b64_padded)
+            except Exception as e:
+                logger.warning(f"Failed to decode base64 in vmess URI: {str(e)}")
+                return ParsedServer(
+                    type="vmess",
+                    address="invalid",
+                    port=0,
+                    meta={"error": f"base64 decode failed: {type(e).__name__}"},
+                )
+
+            # Try to decode as UTF-8
+            try:
+                decoded = decoded_bytes.decode("utf-8")
+            except UnicodeDecodeError as e:
+                logger.warning(f"Failed to decode vmess URI as UTF-8: {str(e)}")
+                return ParsedServer(
+                    type="vmess",
+                    address="invalid",
+                    port=0,
+                    meta={"error": f"utf-8 decode failed: {str(e)}"},
+                )
+
+            # Try to parse JSON
+            try:
+                data = json.loads(decoded)
+            except json.JSONDecodeError as e:
+                logger.warning(f"Failed to parse vmess URI JSON: {str(e)}")
+                return ParsedServer(
+                    type="vmess",
+                    address="invalid",
+                    port=0,
+                    meta={"error": f"json parse failed: {str(e)}"},
+                )
 
             return ParsedServer(
                 type="vmess",
@@ -461,17 +494,11 @@ class URIListParser(BaseParser):
                 security=data.get("security"),
                 meta=data,
             )
-        except (
-            binascii.Error,
-            UnicodeDecodeError,
-            json.JSONDecodeError,
-            ValueError,
-            KeyError,
-        ) as e:
+        except Exception as e:
             logger.warning(f"Failed to parse vmess URI: {str(e)}")
             return ParsedServer(
                 type="vmess",
                 address="invalid",
                 port=0,
-                meta={"error": f"decode failed: {type(e).__name__}"},
+                meta={"error": f"parse failed: {type(e).__name__}"},
             )
