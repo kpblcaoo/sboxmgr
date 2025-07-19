@@ -18,7 +18,7 @@ from sboxmgr.cli.commands.config import app as new_config_app
 from sboxmgr.cli.commands.export import export
 from sboxmgr.cli.commands.policy import app as policy_app
 from sboxmgr.cli.commands.subscription import app as subscription_app
-from sboxmgr.cli.commands.subscription.exclusions import exclusions_main as exclusions
+from sboxmgr.cli.commands.subscription.exclusions import app as exclusions
 
 # Import commands for registration
 from sboxmgr.cli.commands.subscription.list import (
