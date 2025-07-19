@@ -67,6 +67,21 @@ def exclusions_callback(
         ctx.obj["exclusions_yes"] = yes
 
 
+def _get_context_value(ctx: typer.Context, key: str, default=None):
+    """Extract value from context object with safe fallback.
+
+    Args:
+        ctx: Typer context object
+        key: Key to extract from context
+        default: Default value if key not found
+
+    Returns:
+        Value from context or default
+
+    """
+    return ctx.obj.get(key, default) if ctx is not None and ctx.obj else default
+
+
 def _fetch_and_validate_subscription(url: str, json_output: bool) -> dict:
     """Fetch and validate subscription data from URL.
 
@@ -144,7 +159,7 @@ def exclusions_list(
     Shows all currently excluded servers with their details.
     """
     # Get global flags from context
-    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
+    verbose = _get_context_value(ctx, "verbose", False)
 
     if verbose:
         typer.echo("📋 Listing exclusions...")
@@ -175,8 +190,8 @@ def exclusions_add(
 
     """
     # Get common options from context
-    url = ctx.obj.get("exclusions_url") if ctx is not None and ctx.obj else None
-    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
+    url = _get_context_value(ctx, "exclusions_url")
+    verbose = _get_context_value(ctx, "verbose", False)
 
     # Validate URL
     if not url:
@@ -210,8 +225,8 @@ def exclusions_remove(
 
     """
     # Get common options from context
-    url = ctx.obj.get("exclusions_url") if ctx is not None and ctx.obj else None
-    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
+    url = _get_context_value(ctx, "exclusions_url")
+    verbose = _get_context_value(ctx, "verbose", False)
 
     # Validate URL
     if not url:
@@ -246,8 +261,8 @@ def exclusions_list_servers(
     Use --hide-excluded to show only available servers.
     """
     # Get common options from context
-    url = ctx.obj.get("exclusions_url") if ctx is not None and ctx.obj else None
-    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
+    url = _get_context_value(ctx, "exclusions_url")
+    verbose = _get_context_value(ctx, "verbose", False)
 
     # Validate URL
     if not url:
@@ -279,8 +294,8 @@ def exclusions_clear(
     Removes all server exclusions. Requires confirmation unless --yes is used.
     """
     # Get global flags from context
-    verbose = ctx.obj.get("verbose", False) if ctx is not None and ctx.obj else False
-    global_yes = ctx.obj.get("yes", False) if ctx is not None and ctx.obj else False
+    verbose = _get_context_value(ctx, "verbose", False)
+    global_yes = _get_context_value(ctx, "yes", False)
 
     if verbose:
         typer.echo("🗑️ Clearing all exclusions...")

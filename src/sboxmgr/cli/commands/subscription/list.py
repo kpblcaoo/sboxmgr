@@ -85,7 +85,7 @@ def list_servers(
     ),
     debug: int = typer.Option(0, "-d", "--debug", help=t("cli.debug.help")),
     user_agent: Optional[str] = typer.Option(
-        None,
+        DEFAULT_USER_AGENT,
         "--user-agent",
         help="Override User-Agent for subscription fetcher. If not provided, the default 'ClashMeta/1.0' will be used.",
     ),
@@ -145,7 +145,7 @@ def list_servers(
         if no_user_agent:
             ua = ""
         else:
-            ua = user_agent or DEFAULT_USER_AGENT  # Default User-Agent if None
+            ua = user_agent
 
         # Определяем source_type на основе формата
         if format == "base64":
