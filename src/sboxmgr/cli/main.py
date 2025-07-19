@@ -15,8 +15,9 @@ from dotenv import load_dotenv
 
 from sboxmgr.cli import plugin_template
 from sboxmgr.cli.commands.config import app as new_config_app
-from sboxmgr.cli.commands.export import export
+from sboxmgr.cli.commands.export_v2 import app as export_v2_app
 from sboxmgr.cli.commands.policy import app as policy_app
+from sboxmgr.cli.commands.profile import app as profile_app
 from sboxmgr.cli.commands.subscription import app as subscription_app
 
 # Import commands for registration
@@ -286,8 +287,11 @@ app.add_typer(new_config_app, name="config")
 # Регистрируем subscription команды
 app.add_typer(subscription_app, name="subscription")
 
-# Регистрируем команду экспорта
-app.command("export", help="Export configurations in standardized formats")(export)
+# Регистрируем profile команды (ADR-0020)
+app.add_typer(profile_app, name="profile")
+
+# Регистрируем новую группу команд экспорта (ADR-0020)
+app.add_typer(export_v2_app, name="export")
 
 
 # Регистрируем команды политик

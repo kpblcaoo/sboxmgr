@@ -1,13 +1,15 @@
-"""Pydantic models for Full Config Architecture (ADR-0017).
+"""Configuration models for sboxmgr (ADR-0020).
 
-This module defines the core models for config-based configuration,
-including subscriptions, filters, routing, export settings, agent config, and UI preferences.
+This module defines the two-layer data model:
+- FullProfile: User-friendly configuration model
+- ClientConfig: Machine-readable export model
 """
 
 from enum import Enum
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+from typing_extensions import TypeAlias
 
 
 class ExportFormat(str, Enum):
@@ -116,11 +118,15 @@ class UIConfig(BaseModel):
     show_debug_info: bool = Field(default=False, description="Show debug information")
 
 
-class UserConfig(BaseModel):
-    """Complete user configuration (ADR-0017)."""
+class FullProfile(BaseModel):
+    """Complete user configuration (ADR-0017, ADR-0020).
 
-    id: str = Field(..., description="Unique config identifier")
-    description: Optional[str] = Field(None, description="Config description")
+    FullProfile represents the user's complete configuration - the "source of truth"
+    for all user settings. This is what users edit and manage.
+    """
+
+    id: str = Field(..., description="Unique profile identifier")
+    description: Optional[str] = Field(None, description="Profile description")
 
     # Core components
     subscriptions: list[SubscriptionConfig] = Field(
@@ -153,20 +159,20 @@ class UserConfig(BaseModel):
     @field_validator("id")
     @classmethod
     def validate_id(cls, v):
-        """Validate config ID field.
+        """Validate profile ID field.
 
         Args:
-            v: Config ID value to validate.
+            v: Profile ID value to validate.
 
         Returns:
-            Validated and stripped config ID.
+            Validated and stripped profile ID.
 
         Raises:
-            ValueError: If config ID is empty or whitespace only.
+            ValueError: If profile ID is empty or whitespace only.
 
         """
         if not v or not v.strip():
-            raise ValueError("Config ID cannot be empty")
+            raise ValueError("Profile ID cannot be empty")
         return v.strip()
 
     model_config = ConfigDict(
@@ -175,7 +181,46 @@ class UserConfig(BaseModel):
     )
 
 
+class ClientConfig(BaseModel):
+    """Export artifact for backend consumption (ADR-0020).
+
+    ClientConfig represents the machine-readable configuration that is consumed
+    by backends like sing-box, Docker containers, or mobile clients.
+    """
+
+    # Structure depends on export format (sing-box, clash, etc.)
+    # This is a placeholder - actual structure will be defined by exporters
+    config: dict[str, Any] = Field(..., description="Backend-specific configuration")
+    format: ExportFormat = Field(..., description="Export format")
+    version: str = Field(default="1.0", description="Config version")
+    generated_at: Optional[str] = Field(None, description="Generation timestamp")
+
+    model_config = ConfigDict(
+        use_enum_values=True,
+        extra="forbid",
+    )
+
+
 # Convenience models for backward compatibility
+class ValidationResult(BaseModel):
+    """Result of profile validation.
+
+    Attributes:
+        valid: Whether the profile is valid
+        errors: List of validation errors
+        warnings: List of validation warnings
+
+    """
+
+    valid: bool = Field(..., description="Whether the profile is valid")
+    errors: list[str] = Field(
+        default_factory=list, description="List of validation errors"
+    )
+    warnings: list[str] = Field(
+        default_factory=list, description="List of validation warnings"
+    )
+
+
 class LegacyConfig(BaseModel):
     """Legacy config format for migration."""
 
@@ -191,12 +236,13 @@ class LegacyConfig(BaseModel):
 
 
 # Type aliases for convenience and backward compatibility
-Config = UserConfig
-FullProfile = UserConfig  # Backward compatibility
-SubscriptionProfile = SubscriptionConfig  # Backward compatibility
-FilterProfile = FilterConfig  # Backward compatibility
-RoutingProfile = RoutingConfig  # Backward compatibility
-ExportProfile = ExportConfig  # Backward compatibility
-AgentProfile = AgentConfig  # Backward compatibility
+# Backward compatibility aliases (TODO: remove after v1.0)
+UserConfig: TypeAlias = FullProfile  # TODO: remove after v1.0
+Config: TypeAlias = FullProfile  # TODO: remove after v1.0
+SubscriptionProfile: TypeAlias = SubscriptionConfig  # TODO: remove after v1.0
+FilterProfile: TypeAlias = FilterConfig  # TODO: remove after v1.0
+RoutingProfile: TypeAlias = RoutingConfig  # TODO: remove after v1.0
+ExportProfile: TypeAlias = ExportConfig  # TODO: remove after v1.0
+AgentProfile: TypeAlias = AgentConfig  # TODO: remove after v1.0
 UIProfile = UIConfig  # Backward compatibility
 LegacyProfile = LegacyConfig  # Backward compatibility

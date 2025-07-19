@@ -22,6 +22,46 @@ except RuntimeError:
     logger = None
 
 
+def load_toml(file_path: Union[str, Path]) -> dict[str, Any]:
+    """Load data from TOML file.
+
+    Args:
+        file_path: Path to TOML file
+
+    Returns:
+        dict[str, Any]: Loaded TOML data
+
+    Raises:
+        FileNotFoundError: If file doesn't exist
+        toml.TomlDecodeError: If TOML is invalid
+
+    """
+    path = Path(file_path).expanduser().resolve()
+
+    if not path.exists():
+        raise FileNotFoundError(f"TOML file not found: {file_path}")
+
+    if logger:
+        logger.debug(f"Loading data from TOML: {path}")
+
+    try:
+        with open(path, encoding="utf-8") as f:
+            toml_data = toml.load(f)
+
+        if logger:
+            logger.info(f"Successfully loaded data from TOML: {path}")
+        return toml_data
+
+    except toml.TomlDecodeError as e:
+        if logger:
+            logger.error(f"Invalid TOML syntax in {path}: {e}")
+        raise
+    except Exception as e:
+        if logger:
+            logger.error(f"Failed to load data from {path}: {e}")
+        raise
+
+
 def load_config_from_toml(file_path: Union[str, Path]) -> UserConfig:
     """Load configuration from TOML file.
 
@@ -62,6 +102,36 @@ def load_config_from_toml(file_path: Union[str, Path]) -> UserConfig:
     except Exception as e:
         if logger:
             logger.error(f"Failed to load config from {path}: {e}")
+        raise
+
+
+def save_toml(data: dict[str, Any], file_path: Union[str, Path]) -> None:
+    """Save data to TOML file.
+
+    Args:
+        data: Data to save
+        file_path: Path where to save the TOML file
+
+    """
+    path = Path(file_path).expanduser().resolve()
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    if logger:
+        logger.debug(f"Saving data to TOML: {path}")
+
+    try:
+        # Create TOML content with comments
+        toml_content = _create_toml_with_comments(data)
+
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(toml_content)
+
+        if logger:
+            logger.info(f"Successfully saved data to TOML: {path}")
+
+    except Exception as e:
+        if logger:
+            logger.error(f"Failed to save data to {path}: {e}")
         raise
 
 
